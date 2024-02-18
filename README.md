@@ -23,7 +23,7 @@
     </td>
     <td align = "center">
       <img src = "https://cdn.discordapp.com/attachments/1208780294308765726/1208780448738836540/20220620_211326.JPG?ex=65e48785&is=65d21285&hm=a375fb88095e5f68f09947ab61eb4a427633dc52a70ab6e7f565a7c213b3321e&" width = 80px>
-      <p align = "center"><a href = "https://github.com/bounswe/bounswe2024group9/wiki/Mehmet-Emin-%C4%B0pekdal" target = "_blank">Mehmet Emin</a></p>
+      <p align = "center"><a href = "https://github.com/bounswe/bounswe2024group9/wiki/Mehmet-Emin-%C4%B0pekdal" target = "_blank">Emin</a></p>
     </td>
     
   </tr>
