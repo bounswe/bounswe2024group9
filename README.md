@@ -25,6 +25,10 @@
       <img src = "https://cdn.discordapp.com/attachments/1208780294308765726/1208780448738836540/20220620_211326.JPG?ex=65e48785&is=65d21285&hm=a375fb88095e5f68f09947ab61eb4a427633dc52a70ab6e7f565a7c213b3321e&" width = 80px>
       <p align = "center"><a href = "https://github.com/bounswe/bounswe2024group9/wiki/Mehmet-Emin-%C4%B0pekdal" target = "_blank">Emin</a></p>
     </td>
+    <td align = "center">
+      <img src = "https://cdn.discordapp.com/attachments/1208867210878124123/1208867368810455080/WhatsApp_Image_2022-02-17_at_3.57.59_PM.jpeg?ex=65e4d878&is=65d26378&hm=6172d7d06e5cc75bd29dac338f254910a2e772be3971c541c42b9d77a3f1fa08&" width = 80px>
+      <p align = "center"><a href = "https://github.com/bounswe/bounswe2024group9/wiki/Eray-Ero%C4%9Flu" target = "_blank">Eray</a></p>
+    </td>
     
   </tr>
   
