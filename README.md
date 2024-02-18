@@ -29,6 +29,10 @@
       <img src = "https://cdn.discordapp.com/attachments/1208867210878124123/1208867368810455080/WhatsApp_Image_2022-02-17_at_3.57.59_PM.jpeg?ex=65e4d878&is=65d26378&hm=6172d7d06e5cc75bd29dac338f254910a2e772be3971c541c42b9d77a3f1fa08&" width = 80px>
       <p align = "center"><a href = "https://github.com/bounswe/bounswe2024group9/wiki/Eray-Ero%C4%9Flu" target = "_blank">Eray</a></p>
     </td>
+    <td align = "center">
+      <img src = "https://media.discordapp.net/attachments/1208897266044117102/1208897430217695303/profile.jpg?ex=65e4f477&is=65d27f77&hm=18884ed0512915d5e634447fabb8456144ffb8f35dd83d3b861861f2e8dece34&=&format=webp&width=516&height=676" width = 80px>
+      <p align = "center"><a href = "https://github.com/bounswe/bounswe2024group9/wiki/ozgur%E2%80%90ozerdem" target = "_blank">Özgür</a></p>
+    </td>
     
   </tr>
   
