@@ -33,6 +33,10 @@
       <img src = "https://media.discordapp.net/attachments/1208897266044117102/1208897430217695303/profile.jpg?ex=65e4f477&is=65d27f77&hm=18884ed0512915d5e634447fabb8456144ffb8f35dd83d3b861861f2e8dece34&=&format=webp&width=516&height=676" width = 80px>
       <p align = "center"><a href = "https://github.com/bounswe/bounswe2024group9/wiki/ozgur%E2%80%90ozerdem" target = "_blank">Özgür</a></p>
     </td>
+    <td align = "center">
+      <img src = "https://media.discordapp.net/attachments/1209063674422100030/1209073924567207976/WhatsApp_Gorsel_2024-02-19_saat_12.47.29_62c63005.jpg?ex=65e598d7&is=65d323d7&hm=c847f48ad6f3d3aad829f07e8e6c7ff654406542882cb430f2a479a213f7e1ed&=&format=webp&width=342&height=675" width = 80px>
+      <p align = "center"><a href = "https://github.com/bounswe/bounswe2024group9/wiki/Taha-Topalo%C4%9Flu" target = "_blank">Taha</a></p>
+    </td>
     
   </tr>
   
