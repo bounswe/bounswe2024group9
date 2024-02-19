@@ -35,7 +35,7 @@
     </td>
     
     
-    
+
   </tr>
   <tr>
     <td align = "center">
@@ -45,6 +45,10 @@
     <td align = "center">
       <img src = "https://github.com/berkaykeskino/REVERSE/blob/main/Photos/Yi%C4%9FitB.jpeg?raw=true" width = 80px>
       <p align = "center"><a href = "https://github.com/bounswe/bounswe2024group9/wiki/Yigit-Kagan-Poyrazoglu" target = "_blank">Yiğit Kağan</a></p>
+    </td>
+    <td align = "center">
+      <img src = "https://github.com/bounswe/bounswe2024group9/assets/73756179/d5d3450e-8782-45cf-bb0c-a52d7c93f42e" width = 80px>
+      <p align = "center"><a href = "https://github.com/bounswe/bounswe2024group9/wiki/Halil-Karabacak" target = "_blank">Halil</a></p>
     </td>
   </tr>
   
