@@ -33,8 +33,6 @@
       <img src = "https://media.discordapp.net/attachments/1208897266044117102/1208897430217695303/profile.jpg?ex=65e4f477&is=65d27f77&hm=18884ed0512915d5e634447fabb8456144ffb8f35dd83d3b861861f2e8dece34&=&format=webp&width=516&height=676" width = 80px>
       <p align = "center"><a href = "https://github.com/bounswe/bounswe2024group9/wiki/ozgur%E2%80%90ozerdem" target = "_blank">Özgür</a></p>
     </td>
-    
-    
 
   </tr>
   <tr>
@@ -49,6 +47,10 @@
     <td align = "center">
       <img src = "https://github.com/bounswe/bounswe2024group9/assets/73756179/d5d3450e-8782-45cf-bb0c-a52d7c93f42e" width = 80px>
       <p align = "center"><a href = "https://github.com/bounswe/bounswe2024group9/wiki/Halil-Karabacak" target = "_blank">Halil</a></p>
+    </td>
+    <td align = "center">
+      <img src = "https://th.bing.com/th/id/OIP.K0bqeBV-HC14rIqEiVH5RwAAAA?w=200&h=200&rs=1&pid=ImgDetMain" width = 80px>
+      <p align = "center"><a href = "https://github.com/bounswe/bounswe2024group9/wiki/Ahmet-Burak-%C3%87i%C3%A7ek" target = "_blank">Burak</a></p>
     </td>
   </tr>
   
