@@ -2,8 +2,8 @@
 name: Default Issue Template
 about: A generic template for issues
 title: "[Name] Issue Title"
-labels: ''
-assignees: ''
+labels: "priority: high"
+assignees: "assign-yourself"
 
 ---
 
