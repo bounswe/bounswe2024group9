@@ -31,7 +31,7 @@
     </td>
     <td align = "center">
       <img src = "https://media.discordapp.net/attachments/1208897266044117102/1208897430217695303/profile.jpg?ex=65e4f477&is=65d27f77&hm=18884ed0512915d5e634447fabb8456144ffb8f35dd83d3b861861f2e8dece34&=&format=webp&width=516&height=676" width = 80px>
-      <p align = "center"><a href = "https://github.com/bounswe/bounswe2024group9/wiki/ozgur%E2%80%90ozerdem" target = "_blank">Özgür</a></p>
+      <p align = "center"><a href = "https://github.com/bounswe/bounswe2024group9/wiki/%C3%96zg%C3%BCr-%C3%96zerdem" target = "_blank">Özgür</a></p>
     </td>
 
   </tr>
