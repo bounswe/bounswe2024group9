@@ -1,3 +1,5 @@
+<h1 align = "center"> <img src= "https://github.com/bounswe/bounswe2024group9/assets/110239708/cfe28590-0739-4c58-8740-45e27c0a443b" width= 300px height=auto> </h1>
+
 <h1 align = "center"> Welcome to CMPE352 Group 9's Project Repository </h1> 
 💭 Hi! This is Group9 of Cmpe352. We are passionate computer engineer students gathered to create a sustainable working environment for complete project design of our future products. You can visit <a href = "https://github.com/bounswe/bounswe2024group9/wiki" target = "_blank">our Wiki web page</a> to get to know us!
 <br>
