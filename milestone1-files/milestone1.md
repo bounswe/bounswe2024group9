@@ -1,0 +1,9 @@
+# Group 9 - Customer Milestone 1 - Group Deliverable
+
+## 1. Executive summary:
+### a) Summary of project and overall status:
+>  To summarize our overall work from the beginning of this semester, we shall mention that many hours of these five weeks were spent on writing, updating, and correcting our Wiki pages, paying attention to formats of our issues, designing the overal Github and Wiki environment we work in, and definitely discussing all of the mentioned topics in our regular meetings as a well functioning team. From our artifacts whose links will be provided throughout our report, we believe our working environment is more than ready to welcome our actual project. We decided to make a web page and a mobile app called BuRota which would allow users to search for information about touristic, historical, and cultural sites in Istanbul, as well as route recommendations and experiences. Users will also be able to create their own profiles and share their own experiences. Our current status may be descibed as the doorstep of the implementation, as we have thoroughly talked about the requirements of our project, the general design, user experience examples, and our own expectations of the project. With support from the teaching staff, we are more than ready and excited to plan the next steps and the realization of our idea.
+
+## 2. Project plan:
+> Our long-term project plan can be found by clicking [here](https://github.com/bounswe/bounswe2024group9/wiki/Long%E2%80%90term-planning-%F0%9F%93%85), which will redirect to the related Wiki page of our team. The plan was made in Project Libre, it has been updated with all of the past tasks and known milestones, and also contains the most important topics we expect to work on in the future. As many of those future topics and milestones are not detailed and assigned yet, the plan shall be updated occasionally with each new information.
+
