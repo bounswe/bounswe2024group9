@@ -75,4 +75,5 @@
 | 3.9 | Designed the first search mockup prototype. | [#63](https://github.com/bounswe/bounswe2024group9/issues/63),[result](https://github.com/bounswe/bounswe2024group9/wiki/Mockups#web-search-early-prototype)|
 | 3.10 | Added elicitation questions related to log in. | [#80](https://github.com/bounswe/bounswe2024group9/issues/80),[result](https://github.com/bounswe/bounswe2024group9/wiki/Elicitation-Questions)|
 | 3.11 | Added contributions to this table. | [#92](https://github.com/bounswe/bounswe2024group9/issues/92),[result](https://github.com/bounswe/bounswe2024group9/blob/milestone1-deliverable/milestone1-files/milestone1.md#3-muhammet-berkay-keskin)|
+| 3.12 | Added a scenario. | [#93](https://github.com/bounswe/bounswe2024group9/issues/93),[result](https://github.com/bounswe/bounswe2024group9/wiki/Scenarios#scenario-4)|
 
