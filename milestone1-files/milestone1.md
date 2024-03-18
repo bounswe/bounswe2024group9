@@ -43,3 +43,20 @@
 | 1.18| Add summary and long-term plan to the milestone1 report. | [#86](https://github.com/bounswe/bounswe2024group9/issues/86), please check the 1. a) section of this report for the results| 
 | 1.19 | Add contributions to the milestone1 report. | [#87](https://github.com/bounswe/bounswe2024group9/issues/87)|
 
+> ### [2. Halil Karabacak](https://github.com/bounswe/bounswe2024group9/wiki/Halil-Karabacak)
+
+| **ID** | **Title** | **Issues/Links/Results** |
+| -------- | -------------------------------- |  ---------------- | 
+| 1.1 | Created a personal wiki page to show my contributions to the project along with a brief introduction to me. | [#2](https://github.com/bounswe/bounswe2024group9/issues/2) , [#10](https://github.com/bounswe/bounswe2024group9/issues/10), [the personal page](https://github.com/bounswe/bounswe2024group9/wiki/Halil-Karabacak)|
+|1.2| Since [git](https://www.youtube.com/watch?v=HkdAHXoRtos) is an important part of this course I tried to get familiriaze myself with it. Also, [wiki pages ](https://docs.github.com/en/communities/documenting-your-project-with-wikis/about-wikis) have an important role, so I learned more about markdown language and how to use it affectively. | N/A |
+|1.3| Researched and updated my favorite open source projects: [Open3D](https://github.com/isl-org/Open3D/) which is compatible with issues, labels, and wiki pages taught in the course.| [#6](https://github.com/bounswe/bounswe2024group9/issues/6), [my comments on the repo]( https://github.com/bounswe/bounswe2024group9/wiki/Repository-Research#open3d-halil-karabacak)|
+|1.4| Added estimated time to the previosuly closed issues of our team | [#31](https://github.com/bounswe/bounswe2024group9/issues/31)|
+| 1.5| Learned more about Wikidata, SPARQL, Wikidata API. The links to the resources are mentioned in the research report. | [#47](https://github.com/bounswe/bounswe2024group9/issues/47), [research report](https://github.com/bounswe/bounswe2024group9/wiki/Wikidata,-Linked-Data,-SPARQL-semantic-queries,-and-Wikidata-API-Research#halil-karabacak) | 
+|1.6| Met with the initial subcommunicators - Mutti (Mustafa), Kristina, and Ceylin. Discussed the topics all of the subteams (mockup, elicitation, requirements) need to cover. As the subcommunicator for the requirements team, I distributed the things we need to cover inside the team and organized the proocess. | [#59](https://github.com/bounswe/bounswe2024group9/issues/59),[meeting notes](https://github.com/bounswe/bounswe2024group9/wiki/Meeting-Notes-%236), [#58](https://github.com/bounswe/bounswe2024group9/issues/58) |
+| 1.7| Created the requirements page.| [#60](https://github.com/bounswe/bounswe2024group9/issues/60)|
+| 1.8| Add feed related requirements to the general requirements Wiki page with Kristina. | [#70](https://github.com/bounswe/bounswe2024group9/issues/70), [requirements](https://github.com/bounswe/bounswe2024group9/wiki/Requirements)|
+| 1.9| Add feed related elicitation questions to the general elicitation questions Wiki page with Kristina. | [#72](https://github.com/bounswe/bounswe2024group9/issues/72), [our elicitation questions are under "Feed Design"](https://github.com/bounswe/bounswe2024group9/wiki/Elicitation-Questions)|
+| 1.10| Add feed related web and mobile mockups with Kristina. |[#71](https://github.com/bounswe/bounswe2024group9/issues/71), [my mobile feed mockup](https://github.com/bounswe/bounswe2024group9/wiki/Mockups#mobile-feed-design)|
+| 1.11| Add summary and long-term plan to the milestone1 report. | [#86](https://github.com/bounswe/bounswe2024group9/issues/86), please check the 1. a) section of this report for the results| 
+| 1.12 | Add contributions to the milestone1 report. | [#91](https://github.com/bounswe/bounswe2024group9/issues/91)|
+
