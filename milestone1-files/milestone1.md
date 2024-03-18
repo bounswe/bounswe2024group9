@@ -60,3 +60,19 @@
 | 1.11| Add summary and long-term plan to the milestone1 report. | [#86](https://github.com/bounswe/bounswe2024group9/issues/86), please check the 1. a) section of this report for the results| 
 | 1.12 | Add contributions to the milestone1 report. | [#91](https://github.com/bounswe/bounswe2024group9/issues/91)|
 
+> ### [3. Muhammet Berkay Keskin](https://github.com/bounswe/bounswe2024group9/wiki/Muhammet-Berkay-Keskin)
+
+| **ID** | **Title** | **Issues/Links/Results** |
+| -------- | -------------------------------- |  ---------------- | 
+| 3.1 | Created a personal wiki page. | [#2](https://github.com/bounswe/bounswe2024group9/issues/2),[result](https://github.com/bounswe/bounswe2024group9/wiki/Muhammet-Berkay-Keskin)|
+| 3.2 | Learned how to write markdown markup language to be able to write Readme. | [#3](https://github.com/bounswe/bounswe2024group9/issues/3)|
+| 3.3 | Created Readme for the repository using markdown. | [#3](https://github.com/bounswe/bounswe2024group9/issues/3),[result](https://github.com/bounswe/bounswe2024group9#-welcome-to-cmpe352-group-9s-project-repository-)|
+| 3.4 | Shared my favorite repository. | [#6](https://github.com/bounswe/bounswe2024group9/issues/6)|
+| 3.5 | Clearly explained why I chosed my favorite repository. | [#25](https://github.com/bounswe/bounswe2024group9/issues/25),[result](https://github.com/bounswe/bounswe2024group9/wiki/Repository-Research#stockfish-muhammet-berkay-keskin)|
+| 3.6 | Searched for RAM, domain analysis, requirements and elicitation. | [#41](https://github.com/bounswe/bounswe2024group9/issues/41)|
+| 3.7 | Searched for Wikidata, linked data and Wikidata API. Practiced SPARQL. | [#51](https://github.com/bounswe/bounswe2024group9/issues/51)|
+| 3.8 | Learned how to use HTML and CSS for mockup design. Created sign in and sign up mockups for web and mobile. | [#63](https://github.com/bounswe/bounswe2024group9/issues/63),[#65](https://github.com/bounswe/bounswe2024group9/issues/65),[result](https://github.com/bounswe/bounswe2024group9/wiki/Mockups#sign-up)|
+| 3.9 | Designed the first search mockup prototype. | [#63](https://github.com/bounswe/bounswe2024group9/issues/63),[result](https://github.com/bounswe/bounswe2024group9/wiki/Mockups#web-search-early-prototype)|
+| 3.10 | Added elicitation questions related to log in. | [#80](https://github.com/bounswe/bounswe2024group9/issues/80),[result](https://github.com/bounswe/bounswe2024group9/wiki/Elicitation-Questions)|
+| 3.11 | Added contributions to this table. | [#92](https://github.com/bounswe/bounswe2024group9/issues/92),[result](https://github.com/bounswe/bounswe2024group9/blob/milestone1-deliverable/milestone1-files/milestone1.md#3-muhammet-berkay-keskin)|
+
