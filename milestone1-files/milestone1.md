@@ -226,18 +226,18 @@ Using it, alongside whatsapp and official discord channel for this course, we be
 
 | **ID** | **Title** | **Issues/Links/Results** |
 | -------- | -------------------------------- |  ---------------- |
-| 9.1 | Created Personal Wiki Page | [#2](https://github.com/bounswe/bounswe2024group9/issues/2)|
-| 9.2 | Searched for interesting repositories| [#6](https://github.com/bounswe/bounswe2024group9/issues/6)|
-| 9.3 | Attended group meetings | N/A |
-| 9.4 | Done some research on Wikidata, SPARQL, Wikidata API etc. | [#54](https://github.com/bounswe/bounswe2024group9/issues/54)
-| 9.5 | Discussed requirements with "requirements subteam" members | [#58](https://github.com/bounswe/bounswe2024group9/issues/58)|
-| 9.6 | Taken notes in one of the meetings | [notes](https://github.com/bounswe/bounswe2024group9/wiki/Meeting-Notes-%237)|
-| 9.7 | Created requirements questions for the assigned group | [#58](https://github.com/bounswe/bounswe2024group9/issues/58)
-| 9.8 | Went over the requirements for Route creation | [#76](https://github.com/bounswe/bounswe2024group9/issues/76)
-| 9.9 | Added elicitation questions for Route Creation| [#68](https://github.com/bounswe/bounswe2024group9/issues/68) |
-| 9.10 | Helped preparing Mock Up for Route Creation| [#79](https://github.com/bounswe/bounswe2024group9/issues/79) |
-| 9.11 | Created a scenario for  Route Creation | [#89](https://github.com/bounswe/bounswe2024group9/issues/89)
-| 9.12 | Organized my contributions and addem them to Milestone 1 report | N/A | 
+| 10.1 | Created Personal Wiki Page | [#2](https://github.com/bounswe/bounswe2024group9/issues/2)|
+| 10.2 | Searched for interesting repositories| [#6](https://github.com/bounswe/bounswe2024group9/issues/6)|
+| 10.3 | Attended group meetings | N/A |
+| 10.4 | Done some research on Wikidata, SPARQL, Wikidata API etc. | [#54](https://github.com/bounswe/bounswe2024group9/issues/54)
+| 10.5 | Discussed requirements with "requirements subteam" members | [#58](https://github.com/bounswe/bounswe2024group9/issues/58)|
+| 10.6 | Taken notes in one of the meetings | [notes](https://github.com/bounswe/bounswe2024group9/wiki/Meeting-Notes-%237)|
+| 10.7 | Created requirements questions for the assigned group | [#58](https://github.com/bounswe/bounswe2024group9/issues/58)
+| 10.8 | Went over the requirements for Route creation | [#76](https://github.com/bounswe/bounswe2024group9/issues/76)
+| 10.9 | Added elicitation questions for Route Creation| [#68](https://github.com/bounswe/bounswe2024group9/issues/68) |
+| 10.10 | Helped preparing Mock Up for Route Creation| [#79](https://github.com/bounswe/bounswe2024group9/issues/79) |
+| 10.11 | Created a scenario for  Route Creation | [#89](https://github.com/bounswe/bounswe2024group9/issues/89)
+| 10.12 | Organized my contributions and addem them to Milestone 1 report | N/A | 
 
 
 > ### [11. Mehmet Emin İpekdal](https://github.com/bounswe/bounswe2024group9/wiki/Mehmet-Emin-İpekdal)
