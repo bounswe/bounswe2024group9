@@ -77,6 +77,25 @@
 | 3.11 | Added contributions to this table. | [#92](https://github.com/bounswe/bounswe2024group9/issues/92),[result](https://github.com/bounswe/bounswe2024group9/blob/milestone1-deliverable/milestone1-files/milestone1.md#3-muhammet-berkay-keskin)|
 | 3.12 | Added a scenario. | [#93](https://github.com/bounswe/bounswe2024group9/issues/93),[result](https://github.com/bounswe/bounswe2024group9/wiki/Scenarios#scenario-4)|
 
+> ### [4. Yiğit Kağan Poyrazoğlu](https://github.com/bounswe/bounswe2024group9/wiki/Yigit-Kagan-Poyrazoglu)
+
+| **ID** | **Title** | **Issues/Links/Results** |
+| -------- | ---------------- |  ---------------- | 
+| 4.1 | Created a personal wiki page | [#2](https://github.com/bounswe/bounswe2024group9/issues/2),  [aforementioned page](https://github.com/bounswe/bounswe2024group9/wiki/Yigit-Kagan-Poyrazoglu)|
+| 4.2 | Shared one of my favourite projects | [#6](https://github.com/bounswe/bounswe2024group9/issues/6), [revanced](https://github.com/revanced) |
+| 4.3 | Learned about requirements analysis | [#58](https://github.com/bounswe/bounswe2024group9/issues/58) |
+| 4.4 | Held a meeting with requirements subgroup and done initial requirements analysis | [#58](https://github.com/bounswe/bounswe2024group9/issues/58) |
+| 4.5 | Went over requirements analysis for Route Creation & Modification with Ozgur | [#68](https://github.com/bounswe/bounswe2024group9/issues/68), [#76](https://github.com/bounswe/bounswe2024group9/issues/76), [Sections 2.2-2.4](https://github.com/bounswe/bounswe2024group9/wiki/Requirements) |
+| 4.6 | Went over elicitation questions for Route Creation & Modification with Ozgur | [#68](https://github.com/bounswe/bounswe2024group9/issues/68), [#78](https://github.com/bounswe/bounswe2024group9/issues/78), [Sections 'Points of Interest' and 'Routes'](https://github.com/bounswe/bounswe2024group9/wiki/Elicitation-Questions) |
+| 4.7 | Created web & mobile mock-ups for Route Creation & Modification with Ozgur (first versions of the mock-ups) | [#68](https://github.com/bounswe/bounswe2024group9/issues/68), [#79](https://github.com/bounswe/bounswe2024group9/issues/79), under [First (Replaced) Mockups](https://github.com/bounswe/bounswe2024group9/wiki/Mockups) |
+| 4.7.1 | Learned how to use Figma | None
+| 4.8 | Changed the mock-ups to adhere to the design decisions | None, under [Route Creation & Modification](https://github.com/bounswe/bounswe2024group9/wiki/Mockups) |
+| 4.9 | Migrated requirements from local document to wiki page | [#68](https://github.com/bounswe/bounswe2024group9/issues/68), [#76](https://github.com/bounswe/bounswe2024group9/issues/76), see 4.5|
+| 4.10 | Added mock-ups related to Route Creation & Modification to corresponding wiki page | [#68](https://github.com/bounswe/bounswe2024group9/issues/68), [#79](https://github.com/bounswe/bounswe2024group9/issues/79), see 4.6 & 4.7 |
+| 4.11 | Written the 'Decisions and choices regarding deliverables' section of this report  | [#88](https://github.com/bounswe/bounswe2024group9/issues/88), check section 1.c|
+| 4.12 | Added contributions to milestone 1 report | [#94](https://github.com/bounswe/bounswe2024group9/issues/94) |
+
+
 > ### [5. Ceylin Gebes](https://github.com/bounswe/bounswe2024group9/wiki/Ceylin-Gebes)
 
 | **ID** | **Title** | **Issues/Links/Results** |
