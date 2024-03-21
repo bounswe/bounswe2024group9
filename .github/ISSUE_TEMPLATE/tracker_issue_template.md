@@ -1,8 +1,8 @@
 ---
 name: Tracker Issue
-description: Track the progress if a topic is opened for a large group
-title: "[Name] Keeping track of TOPIC_NAME"
-labels: [Tracker issue]
+about: Track the progress if a topic is opened for a large group
+title: "[Name] Keeping track of [TOPIC]"
+labels: [Tracking Issue]
 ---
 
 #### This is an issue created to track and organize the progress of assigned people.
