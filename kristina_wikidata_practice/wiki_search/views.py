@@ -1,30 +1,43 @@
 from django.http import JsonResponse
 from SPARQLWrapper import SPARQLWrapper, JSON
 
-def search(request, search_string):
+# Brakes the search string down to separate words, creates filters for all the words,
+# matches as many as possible in the query and sorts the outputs according to the matches
+def search(request, search_strings):
     # TODO: the search_string should not be hardcoded, but should be taken from user's input in the searchbar
     sparql = SPARQLWrapper("https://query.wikidata.org/sparql")
+    search_string = search_strings.split(" ")
 
-    # TODO: add more details to the query, now it returns the title, description, longitude, latitude
+    # Create filter conditions for each search string
+    filter_conditions = " || ".join([f"contains(lcase(?itemLabel), \"{s}\") || contains(lcase(?description), \"{s}\")" for s in search_string])
+
+    # Create subqueries to count matches for each search string
+    # We want to display the most matches first
+    subqueries = "\n".join([f"""
+        OPTIONAL {{
+            ?item schema:description ?description_{i}.
+            FILTER(contains(lcase(?description_{i}), "{s}"))
+        }}
+        BIND(if(BOUND(?description_{i}), 1, 0) AS ?match_{i})
+    """ for i, s in enumerate(search_string)])
+
+    # Create final query combining subqueries and calculating total number of matches
     query = f"""
-SELECT DISTINCT ?item ?itemLabel ?description WHERE {{
-  SERVICE wikibase:label {{ bd:serviceParam wikibase:language "en". }}
-  {{
-    SELECT DISTINCT ?item ?itemLabel WHERE {{
-      ?item p:P131 ?statement0.
-      ?statement0 (ps:P131/(wdt:P131*)) wd:Q406.
-      ?item rdfs:label ?itemLabel.
-      FILTER(LANG(?itemLabel) = "en")
+SELECT DISTINCT ?item ?itemLabel ?description ({" + ".join([f"?match_{i}" for i in range(len(search_string))])} AS ?totalMatches) WHERE {{
+    SERVICE wikibase:label {{ bd:serviceParam wikibase:language "en". }}
+    {{
+        SELECT DISTINCT ?item ?itemLabel WHERE {{
+            ?item p:P131 ?statement0.
+            ?statement0 (ps:P131/(wdt:P131*)) wd:Q406.
+            ?item rdfs:label ?itemLabel.
+            FILTER(LANG(?itemLabel) = "en")
+        }}
     }}
-  }}
-  OPTIONAL {{
-    ?item schema:description ?description.
-    FILTER(LANG(?description) = "en")
-  }}
-
-  FILTER(contains(lcase(?itemLabel), "{search_string}") || contains(lcase(?description), "{search_string}"))
+    {subqueries}
+    FILTER({filter_conditions})
 }}
-ORDER BY DESC(COALESCE(?description))
+ORDER BY DESC(?totalMatches)
+LIMIT 10
 """
 
     sparql.setQuery(query)
@@ -32,6 +45,7 @@ ORDER BY DESC(COALESCE(?description))
     results = sparql.query().convert()
     return JsonResponse(results)
 
+# Takes the item id as parameter and returns the items details, 5 nearby items, 5 items from same period
 def results(request, QID):
     sparql = SPARQLWrapper("https://query.wikidata.org/sparql")
 
@@ -82,7 +96,7 @@ def results(request, QID):
     final = {'results': results, 'nearby': nearby_entries, 'period': same_period_entries}
     return JsonResponse(final)
 
-
+# Returns 5 items with the least distance to given longitude and latitude
 def top_5_nearby(longitude, latitude):
     sparql = SPARQLWrapper("https://query.wikidata.org/sparql")
     query = f"""
@@ -107,9 +121,10 @@ SELECT DISTINCT ?item ?itemLabel ?description ?latitude ?longitude (STR(?distanc
     BIND(xsd:float(?longString) AS ?longitude)
     BIND(abs(((?longitude - {longitude})*(?longitude - {longitude}) + (?latitude - {latitude})*(?latitude - {latitude}))) AS ?distance)
   }}
-  FILTER(BOUND(?distance) && ?distance > 1e-10)
+  FILTER(BOUND(?distance))
 }}
 ORDER BY ?distance
+OFFSET 1
 LIMIT 5
 """
 
@@ -142,11 +157,10 @@ SELECT DISTINCT ?item ?itemLabel (YEAR(?inception) AS ?inceptionYear) WHERE {{
     OPTIONAL {{ ?item wdt:P571 ?inception. }}
     BIND(abs(xsd:integer(YEAR(?inception)) - {inception}) AS ?period)
   }}
-  FILTER(BOUND(?period))
+  FILTER(BOUND(?period) && ?period<150)
 }}
 ORDER BY ?period
 LIMIT 5
-OFFSET 1
 """
 
     sparql.setQuery(query)
