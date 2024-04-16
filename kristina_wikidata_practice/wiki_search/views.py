@@ -4,7 +4,6 @@ from SPARQLWrapper import SPARQLWrapper, JSON
 # Brakes the search string down to separate words, creates filters for all the words,
 # matches as many as possible in the query and sorts the outputs according to the matches
 def search(request, search_strings):
-    # TODO: the search_string should not be hardcoded, but should be taken from user's input in the searchbar
     sparql = SPARQLWrapper("https://query.wikidata.org/sparql")
     search_string = search_strings.split(" ")
 
@@ -23,22 +22,22 @@ def search(request, search_strings):
 
     # Create final query combining subqueries and calculating total number of matches
     query = f"""
-SELECT DISTINCT ?item ?itemLabel ?description ({" + ".join([f"?match_{i}" for i in range(len(search_string))])} AS ?totalMatches) WHERE {{
-    SERVICE wikibase:label {{ bd:serviceParam wikibase:language "en". }}
-    {{
-        SELECT DISTINCT ?item ?itemLabel WHERE {{
-            ?item p:P131 ?statement0.
-            ?statement0 (ps:P131/(wdt:P131*)) wd:Q406.
-            ?item rdfs:label ?itemLabel.
-            FILTER(LANG(?itemLabel) = "en")
-        }}
-    }}
-    {subqueries}
-    FILTER({filter_conditions})
-}}
-ORDER BY DESC(?totalMatches)
-LIMIT 10
-"""
+      SELECT DISTINCT ?item ?itemLabel ?description ({" + ".join([f"?match_{i}" for i in range(len(search_string))])} AS ?totalMatches) WHERE {{
+          SERVICE wikibase:label {{ bd:serviceParam wikibase:language "en". }}
+          {{
+              SELECT DISTINCT ?item ?itemLabel WHERE {{
+                  ?item p:P131 ?statement0.
+                  ?statement0 (ps:P131/(wdt:P131*)) wd:Q406.
+                  ?item rdfs:label ?itemLabel.
+                  FILTER(LANG(?itemLabel) = "en")
+              }}
+          }}
+          {subqueries}
+          FILTER({filter_conditions})
+      }}
+      ORDER BY DESC(?totalMatches)
+      LIMIT 10
+      """
 
     sparql.setQuery(query)
     sparql.setReturnFormat(JSON)
@@ -94,22 +93,24 @@ def results(request, QID):
 
     # Execute the query and parse the results
     results = sparql.query().convert()
-    # TODO not null checkers
-    longitude = float(results['results']['bindings'][0]['longitude']['value'])
-    latitude = float(results['results']['bindings'][0]['latitude']['value'])
-    inception = int(results['results']['bindings'][0]['inceptionYear']['value'])
-    style = results['results']['bindings'][0]['styleLabel']['value']
-    style_id = get_style_id(style)
-    same_style_entries = top_5_style(style_id)
 
-    nearby_entries = top_5_nearby(longitude, latitude)
-    same_period_entries = top_5_period(inception)
-    style_id = get_style_id(style)
-    same_style_entries = top_5_style(style_id)
-    final = {'results': results, 'nearby': nearby_entries, 'period': same_period_entries, 'style': same_style_entries}
+    if 'longitude' in results['results']['bindings'][0] and 'latitude' in results['results']['bindings'][0]:
+      longitude = float(results['results']['bindings'][0]['longitude']['value'])
+      latitude = float(results['results']['bindings'][0]['latitude']['value'])
+      nearby_entries = top_5_nearby(longitude, latitude)
+    else:
+      nearby_entries = {}
+
+    if 'inceptionYear' in results['results']['bindings'][0]:
+        inception = int(results['results']['bindings'][0]['inceptionYear']['value'])
+        same_period_entries = top_5_period(inception)
+    else:
+        same_period_entries = {}
+
+
+    final = {'results': results, 'nearby': nearby_entries, 'period': same_period_entries}
 
     return JsonResponse(final)
-
 
 def get_style_id(style_label):
     # Replace spaces with underscores for the Wikidata item title format
@@ -136,7 +137,6 @@ def get_style_id(style_label):
         return style_id
     except (IndexError, KeyError):
         return None  # Or handle the error as appropriate
-
 
 # Returns 5 items with the least distance to given longitude and latitude
 def top_5_nearby(longitude, latitude):
@@ -179,7 +179,6 @@ LIMIT 5
 
     return results
 
-
 def top_5_period(inception):
     sparql = SPARQLWrapper("https://query.wikidata.org/sparql")
     query = f"""
@@ -208,29 +207,6 @@ LIMIT 5
     sparql.setQuery(query)
     sparql.setReturnFormat(JSON)
 
-    results = sparql.query().convert()
-
-    return results
-
-def top_5_style(style_id):
-    sparql = SPARQLWrapper("https://query.wikidata.org/sparql")
-    query = f"""
-SELECT DISTINCT ?item ?itemLabel WHERE {{
-  SERVICE wikibase:label {{ bd:serviceParam wikibase:language "en". }}
-  ?item wdt:P31 wd:Q41176; # Building
-        wdt:P149 wd:{style_id}; # Same architectural style
-        wdt:P131 wd:Q406. # Located in Istanbul
-  
-  OPTIONAL {{
-    ?item rdfs:label ?itemLabel.
-    FILTER(LANG(?itemLabel) = "en")
-  }}
-}}
-LIMIT 5
-"""
-
-    sparql.setQuery(query)
-    sparql.setReturnFormat(JSON)
     results = sparql.query().convert()
 
     return results
