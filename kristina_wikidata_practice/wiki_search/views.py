@@ -104,7 +104,8 @@ def results(request, QID):
 
     nearby_entries = top_5_nearby(longitude, latitude)
     same_period_entries = top_5_period(inception)
-    same_style_entries = top_5_style(style)
+    style_id = get_style_id(style)
+    same_style_entries = top_5_style(style_id)
     final = {'results': results, 'nearby': nearby_entries, 'period': same_period_entries, 'style': same_style_entries}
 
     return JsonResponse(final)
