@@ -1,0 +1,2 @@
+Django==5.0.4
+SPARQLWrapper==2.0.0
