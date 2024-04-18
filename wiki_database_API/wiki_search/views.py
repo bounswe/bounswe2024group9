@@ -112,31 +112,6 @@ def results(request, QID):
 
     return JsonResponse(final)
 
-def get_style_id(style_label):
-    # Replace spaces with underscores for the Wikidata item title format
-    style_title = style_label.replace(' ', '_')
-
-    sparql = SPARQLWrapper("https://query.wikidata.org/sparql")
-    query = f"""
-    SELECT ?style WHERE {{
-        ?style wdt:P31 wd:Q32880. # Q32880 is 'architectural style'
-        ?style rdfs:label ?styleLabel.
-        FILTER(LANG(?styleLabel) = "en").
-        FILTER(STR(?styleLabel) = "{style_label}").
-    }}
-    LIMIT 1
-    """
-
-    sparql.setQuery(query)
-    sparql.setReturnFormat(JSON)
-    results = sparql.query().convert()
-
-    # Extracting the style ID from the query result
-    try:
-        style_id = results['results']['bindings'][0]['style']['value'].split('/')[-1]
-        return style_id
-    except (IndexError, KeyError):
-        return None  # Or handle the error as appropriate
 
 # Returns 5 items with the least distance to given longitude and latitude
 def top_5_nearby(longitude, latitude):
