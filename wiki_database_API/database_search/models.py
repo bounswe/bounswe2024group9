@@ -1,19 +1,6 @@
 from django.db import models
 # Django version bigger than 3.1 for JSONField
 
-class Route(models.Model):
-    route_id = models.AutoField(primary_key=True)
-    title = models.CharField(max_length=255)
-    description = models.TextField()
-    photos = models.JSONField(default=list, blank=True)  # Stores a list of photo URLs as JSON
-    rating = models.FloatField()
-    likes = models.PositiveIntegerField(default=0)
-    comments = models.JSONField(default=list, blank=True)  # Stores comments as JSON
-    saves = models.PositiveIntegerField(default=0)
-    nodes = models.JSONField(default=list, blank=True)  # Stores node IDs as JSON
-    duration = models.JSONField(default=list, blank=True)  # Stores durations as JSON
-    duration_between = models.JSONField(default=list, blank=True)  # Stores durations between nodes as JSON
-    mapView = models.URLField()
 
 class Node(models.Model):
     name = models.CharField(max_length=255)
@@ -22,3 +9,24 @@ class Node(models.Model):
 
     def __str__(self):
         return self.name
+
+class Route(models.Model):
+    route_id = models.AutoField(primary_key=True)
+    title = models.CharField(max_length=255)
+    description = models.TextField()
+    photos = models.JSONField(default=list, blank=True) 
+    rating = models.FloatField()
+    likes = models.PositiveIntegerField(default=0)
+    comments = models.JSONField(default=list, blank=True) 
+    saves = models.PositiveIntegerField(default=0)
+    nodes = models.ManyToManyField(Node, related_name='routes')
+    duration = models.JSONField(default=list, blank=True)  # Time spent in the location
+    duration_between = models.JSONField(default=list, blank=True)  #Time spent between locations like 15 min between node 1 and 2
+    mapView = models.URLField()
+
+
+# When a field is changed in the model, the database must be updated.
+# To do this, run the following commands:
+# python manage.py makemigrations
+# python manage.py migrate
+# These commands will update the database schema to match the model.
