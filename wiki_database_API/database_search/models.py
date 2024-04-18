@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.validators import MaxValueValidator, MinValueValidator
 # Django version bigger than 3.1 for JSONField
 
 
@@ -15,7 +16,7 @@ class Route(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField()
     photos = models.JSONField(default=list, blank=True) 
-    rating = models.FloatField()
+    rating = models.FloatField(validators=[MinValueValidator(0), MaxValueValidator(5)])
     likes = models.PositiveIntegerField(default=0)
     comments = models.JSONField(default=list, blank=True) 
     saves = models.PositiveIntegerField(default=0)
