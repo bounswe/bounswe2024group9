@@ -1,4 +1,6 @@
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.hashers import make_password
 from django.shortcuts import get_object_or_404
 from .models import Route, Node, User
 from django.core import serializers
@@ -36,3 +38,52 @@ def user_detail(request, pk):
     user_json = serializers.serialize('json', [user]) # User is put in array because serialize expects a list
     user_data = json.loads(user_json)[0]  # Deserialize the JSON and take the first element
     return JsonResponse(user_data, safe=False)
+
+import logging
+
+logger = logging.getLogger(__name__)
+
+@csrf_exempt
+def create_user(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        name = request.POST.get('name')
+        e_mail = request.POST.get('email')
+        password = request.POST.get('password')
+        is_superuser = request.POST.get('is_superuser', 'False') == 'on'
+
+        if not username or not password:
+            return JsonResponse({'error': 'Username and password are required.'}, status=400)
+
+        # Validation checks and additional logic goes here
+        if is_superuser:
+            # Create a superuser or staff user if the corresponding flags are set
+            user = User.objects.create_superuser(username, password, e_mail=e_mail, name=name, is_superuser=is_superuser)
+        else:
+            # Regular user creation
+            user = User.objects.create_user(username, password, e_mail=e_mail, name=name)
+
+        return JsonResponse({'status': 'success', 'user_id': user.pk, 'is_superuser': user.is_superuser, 'is_staff': user.is_staff})
+    else:
+        return HttpResponse(status=405)
+
+@csrf_exempt
+def create_node(request):
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        photo = request.POST.get('photo')
+        latitude = request.POST.get('latitude')
+        longitude = request.POST.get('longitude')
+
+        # Validation checks and additional logic goes here
+        node = Node.objects.create(
+            name=name, 
+            photo=photo, 
+            latitude=latitude, 
+            longitude=longitude
+        )
+
+        return JsonResponse({'status': 'success', 'node_id': node.pk})
+    else:
+        return HttpResponse(status=405)
+    

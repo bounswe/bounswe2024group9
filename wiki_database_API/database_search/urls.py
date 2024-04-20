@@ -8,4 +8,6 @@ urlpatterns = [
     path('nodes/<int:pk>/', views.node_detail, name='node_detail'),
     path('users/', views.user_list, name='user_list'),
     path('users/<int:pk>/', views.user_detail, name='user_detail'),
+    path('create_user/', views.create_user, name='create_user'),
+    path('create_node/', views.create_node, name='create_node'),
 ]

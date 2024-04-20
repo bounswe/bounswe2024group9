@@ -10,6 +10,8 @@ class Node(models.Model):
     name = models.CharField(max_length=255)
     node_id = models.AutoField(primary_key=True)
     photo = models.URLField()
+
+    # TODO: Resctrict the latitude and longitude values to be in the range of Istanbul
     latitude = models.DecimalField(max_digits=9, decimal_places=6, default=40.984396)     # max_digits=9 and decimal_places=6 means that your latitude and longitude values will have 6 digits after the decimal point and a total of 9 digits. 
     longitude = models.DecimalField(max_digits=9, decimal_places=6, default=29.025434)     # This is a common choice for storing coordinates because it allows for precision up to 0.000001 degrees, which is approximately up to 11.1 centimeters at the equator.
     # Default latitude and longitude is set to the center of Kadikoy/Istanbul
@@ -31,14 +33,17 @@ class Route(models.Model):
     duration_between = models.JSONField(default=list, blank=True)  #Time spent between locations like 15 min between node 1 and 2
     mapView = models.URLField()
 
+import logging
 
-# For now it is controllkling the username but if the email is controlled aalso it should be specified
+logger = logging.getLogger(__name__)
+
+# For now it is controlling the username but if the email is controlled aalso it should be specified
 class CustomUserManager(BaseUserManager): 
     """
     Custom user model manager where username is the unique identifiers
     for authentication instead of emails.
     """
-    def create_user(self, username, password, **extra_fields):
+    def create_user(self, username, password=None, **extra_fields):
         if not username:
             raise ValueError('The Username must be set')
         user = self.model(username=username, **extra_fields)
@@ -54,7 +59,6 @@ class CustomUserManager(BaseUserManager):
             raise ValueError('Superuser must have is_staff=True.')
         if extra_fields.get('is_superuser') is not True:
             raise ValueError('Superuser must have is_superuser=True.')
-
         return self.create_user(username, password, **extra_fields)
 
 class User(AbstractBaseUser, PermissionsMixin):
@@ -75,7 +79,8 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     is_active = models.BooleanField(default=True) # This field is required for Django's AbstractBaseUser. It is used to determine whether the user is active or not. It is like instead of deleting the user, it is better to deactivate it.
     is_staff = models.BooleanField(default=False) # This field is required for Django's AbstractBaseUser. It is used to determine whether the user is a staff member or not. It is used to determine whether the user is allowed to access the admin site or not.
-
+    is_superuser = models.BooleanField(default=False) # This field is required for Django's AbstractBaseUser. It is used to determine whether the user is a superuser or not. It is used to determine whether the user is allowed to access the admin site or not.
+    
     objects = CustomUserManager()
 
     USERNAME_FIELD = 'username' # This is the field that is used for authentication.

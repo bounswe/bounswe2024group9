@@ -9,6 +9,46 @@
             var input = document.getElementById(formId).elements.namedItem("q").value;
             window.location.href = action + encodeURIComponent(input);
         }
+
+        function submitUserForm(event) {
+            event.preventDefault();
+            var formData = new FormData(document.getElementById('createUserForm'));
+
+            fetch('/database_search/create_user/', {
+                method: 'POST',
+                body: formData
+            }).then(response => response.json())
+            .then(data => {
+                console.log('Success:', data);
+                alert('User created successfully! User ID: ' + data.user_id);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to create user.');
+            });
+
+            document.getElementById('createUserForm').reset();
+        }
+
+        function submitNodeForm(event) {
+            event.preventDefault();
+            var formData = new FormData(document.getElementById('createNodeForm'));
+
+            fetch('/database_search/create_node/', {
+                method: 'POST',
+                body: formData
+            }).then(response => response.json())
+            .then(data => {
+                console.log('Success:', data);
+                alert('Node created successfully! Node ID: ' + data.node_id);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to create node.');
+            });
+
+            document.getElementById('createNodeForm').reset();
+        }
     </script>
 </head>
 <body>
@@ -59,5 +99,23 @@
             </ul>
         </li>
     </ul>
+    <p>Create a new user:</p>
+    <form id="createUserForm" onsubmit="submitUserForm(event)">
+        <input type="text" name="username" placeholder="Username" required>
+        <input type="text" name="name" placeholder="Name" required>
+        <input type="email" name="email" placeholder="Email">
+        <input type="password" name="password" placeholder="Password">
+        <br>
+        <input type="checkbox" name="is_superuser" id="is_superuser"> <label for="is_superuser">Is Superuser?</label><br>
+        <input type="submit" value="Create User">
+    </form>
+    <p>Create a new node:</p>
+    <form id="createNodeForm" onsubmit="submitNodeForm(event)">
+        <input type="text" name="name" placeholder="Node Name" required>
+        <input type="text" name="photo" placeholder="Photo URL" required>
+        <input type="text" name="latitude" placeholder="Latitude" required>
+        <input type="text" name="longitude" placeholder="Longitude" required>
+        <input type="submit" value="Create Node">
+    </form>
 </body>
 </html>
