@@ -17,7 +17,6 @@ function SearchResults() {
   event.preventDefault();
   const response = await fetch(`http://127.0.0.1:8000/wiki_search/search/${searchValue}`);
   const data = await response.json();
-  console.log(data);
 };
 
   return (
