@@ -1,11 +1,25 @@
-import React, { useState, useEffect } from 'react';
-import { View, TextInput, Button, Text } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, TextInput, Button, Text, TouchableOpacity, Alert } from 'react-native';
+import { DisplayResults } from './SearchResults.tsx'
+
 
 const WikidataSearch = () => {
+
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState([]);
+  // timeout mechanism for search results
+  const prevSearchTerm = useRef('')
+
+  const changePage = () => {
+  // placeholder function
+    Alert.alert(
+    'Change page',
+    'Change page'
+    )
+  }
 
     const searchWikidata = async () => {
+    console.log("doing api call")
       try {
         const response = await fetch('http://10.0.2.2:8000/wiki_search/search/' + searchTerm, {
           method: 'GET',
@@ -29,7 +43,7 @@ const WikidataSearch = () => {
           totalMatches: parseInt(result.totalMatches.value)
         }));
 
-        setSearchResults(results);
+        if (searchTerm.trim() !== '') setSearchResults(results);
       } catch (error) {
         console.error('Error searching Wikidata:', error);
       }
@@ -38,9 +52,11 @@ const WikidataSearch = () => {
 
   // Call searchWikidata when searchTerm changes or when you want to trigger a search
   useEffect(() => {
-    if (searchTerm.trim() !== '') {
-      searchWikidata();
-    }
+    if (searchTerm.trim() !== '' && prevSearchTerm.current.trim() !== '') {
+          searchWikidata();
+          prevSearchTerm.current = searchTerm
+        }
+    else setSearchResults([]);
   }, [searchTerm]);
 
   return (
@@ -51,14 +67,14 @@ const WikidataSearch = () => {
         value={searchTerm}
         onChangeText={setSearchTerm}
       />
-      <Button title="Search" onPress={searchWikidata} />
-
-      {/* Display search results */}
-      {searchResults.map((result, index) => (
+      <Button title='Clear' onPress={() => {setSearchResults([])}} />
+{searchResults.map((result, index) => (
         <View key={index} style={{ marginTop: 20 }}>
+        <TouchableOpacity onPress={changePage}>
           <Text style={{ fontWeight: 'bold' }}>{result.itemLabel}</Text>
           <Text>{result.description}</Text>
           <Text>Total Matches: {result.totalMatches}</Text>
+          </TouchableOpacity>
         </View>
       ))}
     </View>
