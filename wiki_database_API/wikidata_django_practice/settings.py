@@ -31,7 +31,9 @@ DEBUG = True
 AUTH_USER_MODEL = 'database_search.User'
 
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    config('HEROKU_APP')
+]
 
 
 # Application definition
@@ -80,6 +82,17 @@ WSGI_APPLICATION = 'wikidata_django_practice.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
+
+# DATABASES = {
+#    'default': {
+#       'ENGINE': 'django.db.backends.mysql',
+#       'NAME': config('DB_NAME'),
+#       'USER': config('DB_USER'),
+#       'PASSWORD': config('DB_PASSWORD'),
+#       'HOST': config('DB_HOST'),
+#       'PORT': config('DB_PORT'),
+#    }
+# }
 
 DATABASES = {
    'default': {
