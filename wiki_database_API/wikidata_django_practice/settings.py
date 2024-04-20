@@ -32,7 +32,8 @@ AUTH_USER_MODEL = 'database_search.User'
 
 
 ALLOWED_HOSTS = [
-    config('HEROKU_APP')
+    config('HEROKU_APP'),
+    '127.0.0.1'
 ]
 
 
