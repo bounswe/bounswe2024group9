@@ -1,68 +1,68 @@
-import React, { useState } from 'react';
-import { SafeAreaView, ScrollView, StatusBar, StyleSheet, Text, TextInput, View, Button } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, TextInput, Button, Text } from 'react-native';
 
-// Function to generate random initial values (for demonstration)
-const getRandomEmail = () => `user${Math.floor(Math.random() * 1000)}@example.com`;
-const getRandomUsername = () => `user${Math.floor(Math.random() * 1000)}`;
-const getRandomPassword = () => `password${Math.floor(Math.random() * 1000)}`;
+const WikidataSearch = () => {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
 
-function App() {
-  const [email, setEmail] = useState(getRandomEmail());
-  const [username, setUsername] = useState(getRandomUsername());
-  const [password, setPassword] = useState(getRandomPassword());
-
-    const handleSubmit = async () => {
-      const userInfo = { email, username, password };
+    const searchWikidata = async () => {
       try {
-        const response = await fetch('http://10.0.2.2:8000/users', {
-          method: 'POST',
+        const response = await fetch('http://10.0.2.2:8000/wiki_search/search/' + searchTerm, {
+          method: 'GET',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify(userInfo),
         });
-        const json = await response.json();
-        console.log('Success:', json);
-        alert('User saved successfully!');
+
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+
+        const data = await response.json();
+        if (!data.results || !data.results.bindings) {
+          throw new Error('Malformed response data');
+        }
+
+        const results = data.results.bindings.map(result => ({
+          itemLabel: result.itemLabel.value,
+          description: result.description ? result.description.value : 'No description available',
+          totalMatches: parseInt(result.totalMatches.value)
+        }));
+
+        setSearchResults(results);
       } catch (error) {
-        console.error('Error:', error);
-        alert('Failed to save user.');
+        console.error('Error searching Wikidata:', error);
       }
     };
 
+
+  // Call searchWikidata when searchTerm changes or when you want to trigger a search
+  useEffect(() => {
+    if (searchTerm.trim() !== '') {
+      searchWikidata();
+    }
+  }, [searchTerm]);
+
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" />
-      <ScrollView contentInsetAdjustmentBehavior="automatic" style={styles.scrollView}>
-        <TextInput style={styles.input} value={email} onChangeText={setEmail} placeholder="Enter your email" />
-        <TextInput style={styles.input} value={username} onChangeText={setUsername} placeholder="Enter your username" />
-        <TextInput
-          style={styles.input}
-          value={password}
-          onChangeText={setPassword}
-          placeholder="Enter your password"
-          secureTextEntry={true}
-        />
-        <Button title="Submit" onPress={handleSubmit} />
-      </ScrollView>
-    </SafeAreaView>
+    <View style={{ flex: 1, padding: 20 }}>
+      <TextInput
+        style={{ marginBottom: 10, padding: 10, borderWidth: 1, borderColor: '#ccc', borderRadius: 5 }}
+        placeholder="Search Wikidata"
+        value={searchTerm}
+        onChangeText={setSearchTerm}
+      />
+      <Button title="Search" onPress={searchWikidata} />
+
+      {/* Display search results */}
+      {searchResults.map((result, index) => (
+        <View key={index} style={{ marginTop: 20 }}>
+          <Text style={{ fontWeight: 'bold' }}>{result.itemLabel}</Text>
+          <Text>{result.description}</Text>
+          <Text>Total Matches: {result.totalMatches}</Text>
+        </View>
+      ))}
+    </View>
   );
-}
+};
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  scrollView: {
-    marginHorizontal: 20,
-  },
-  input: {
-    height: 40,
-    borderColor: 'gray',
-    borderWidth: 1,
-    paddingHorizontal: 10,
-    marginBottom: 10,
-  },
-});
-
-export default App;
+export default WikidataSearch;

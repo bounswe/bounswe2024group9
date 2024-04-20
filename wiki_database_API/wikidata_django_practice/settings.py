@@ -37,8 +37,21 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'wiki_search',
+    'rest_framework',
+    'corsheaders',
+    'django_extensions',
+    'wiki_search'
 ]
+
+CORS_ALLOW_ALL_ORIGINS = True
+
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:3030',
+    'http://10.0.2.2',
+]
+
+ALLOWED_HOSTS = ['*']
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
