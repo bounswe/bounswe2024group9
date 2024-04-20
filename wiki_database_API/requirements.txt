@@ -2,3 +2,4 @@ Django==5.0.4
 SPARQLWrapper==2.0.0
 python-decouple==3.8
 mysqlclient==2.1.1
+gunicorn==22.0.0
