@@ -26,6 +26,10 @@ SECRET_KEY = 'django-insecure-o#q#%fv)0j(&o139+(#krls8f^_8jtn!=h5(mmkux7eqy!($d=
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+
+AUTH_USER_MODEL = 'database_search.User'
+
+
 ALLOWED_HOSTS = []
 
 

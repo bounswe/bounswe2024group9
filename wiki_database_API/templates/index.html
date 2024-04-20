@@ -40,6 +40,7 @@
             <ul>
                 <li><a href="/database_search/routes/">List all routes</a></li>
                 <li><a href="/database_search/nodes/">List all nodes</a></li>
+                <li><a href="/database_search/users/">List all users</a></li> 
                 <p>To get details about a specific route:</p>
                 <form id="routeDetailForm" onsubmit="submitForm(event, 'routeDetailForm', '/database_search/routes/')">
                     <input type="text" name="q" placeholder="Ex: 1">
@@ -47,6 +48,11 @@
                 </form>
                 <p>To get details about a specific node:</p>
                 <form id="nodeDetailForm" onsubmit="submitForm(event, 'nodeDetailForm', '/database_search/nodes/')">
+                    <input type="text" name="q" placeholder="Ex: 1">
+                    <input type="submit" value="Get Details">
+                </form>
+                <p>To get details about a specific user:</p>
+                <form id="userDetailForm" onsubmit="submitForm(event, 'userDetailForm', '/database_search/users/')">
                     <input type="text" name="q" placeholder="Ex: 1">
                     <input type="submit" value="Get Details">
                 </form>

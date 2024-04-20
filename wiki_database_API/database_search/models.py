@@ -1,5 +1,8 @@
 from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+
+# from django.utils.translation import ugettext_lazy as _ For global interface it is mentioned but for now it is not necessary
 # Django version bigger than 3.1 for JSONField
 
 
@@ -27,6 +30,60 @@ class Route(models.Model):
     duration = models.JSONField(default=list, blank=True)  # Time spent in the location. Type: minutes
     duration_between = models.JSONField(default=list, blank=True)  #Time spent between locations like 15 min between node 1 and 2
     mapView = models.URLField()
+
+
+# For now it is controllkling the username but if the email is controlled aalso it should be specified
+class CustomUserManager(BaseUserManager): 
+    """
+    Custom user model manager where username is the unique identifiers
+    for authentication instead of emails.
+    """
+    def create_user(self, username, password, **extra_fields):
+        if not username:
+            raise ValueError('The Username must be set')
+        user = self.model(username=username, **extra_fields)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(self, username, password, **extra_fields):
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_superuser', True)
+
+        if extra_fields.get('is_staff') is not True:
+            raise ValueError('Superuser must have is_staff=True.')
+        if extra_fields.get('is_superuser') is not True:
+            raise ValueError('Superuser must have is_superuser=True.')
+
+        return self.create_user(username, password, **extra_fields)
+
+class User(AbstractBaseUser, PermissionsMixin):
+    user_id = models.AutoField(primary_key=True)
+    username = models.CharField(max_length=255, unique=True) # Length should be changed
+    name = models.CharField(max_length=255) # Length should be changed
+    password = models.CharField(max_length=128, verbose_name='password')
+    e_mail = models.EmailField(max_length=255, unique=True) # Length should be changed
+    profile_picture = models.ImageField(upload_to='profile_pics', null=True, blank=True)
+
+    # Reverse relationship from Route to User needs to be implemented in the future
+    # routes = models.ManyToManyField('Route', related_name='users', blank=True)
+
+    # For followers and following, you would typically use a many-to-many field. However, this requires a through table or self-referential M2M field
+    # It needs to be implemented in the future
+    # followers = models.ManyToManyField('self', symmetrical=False, related_name='followed_by', blank=True)
+    # following = models.ManyToManyField('self', symmetrical=False, related_name='following', blank=True)
+
+    is_active = models.BooleanField(default=True) # This field is required for Django's AbstractBaseUser. It is used to determine whether the user is active or not. It is like instead of deleting the user, it is better to deactivate it.
+    is_staff = models.BooleanField(default=False) # This field is required for Django's AbstractBaseUser. It is used to determine whether the user is a staff member or not. It is used to determine whether the user is allowed to access the admin site or not.
+
+    objects = CustomUserManager()
+
+    USERNAME_FIELD = 'username' # This is the field that is used for authentication.
+    REQUIRED_FIELDS = [] # This is golding the field which is required to register the user. Since username and user_id are required fields, we don't need to specify any other fields.
+
+    def __str__(self):
+        return self.username
+
 
 
 # When a field is changed in the model, the database must be updated.
