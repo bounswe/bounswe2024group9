@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { View, TextInput, Button, Text } from 'react-native';
+import { View, TextInput, Button, Text, CheckBox } from 'react-native';
 
 const Login = ({ navigation }) => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+    const [rememberMe, setRememberMe] = useState(false);
 
     const handleLogin = async () => {
         try {
@@ -21,7 +22,7 @@ const Login = ({ navigation }) => {
             });
 
             if (!response.ok) {
-                //username and password dismatch
+                //username and password mismatch
                 throw new Error('Invalid username or password');
             }
             //assuming django server returns user data with successful login
@@ -47,6 +48,10 @@ const Login = ({ navigation }) => {
                 onChangeText={setPassword}
                 secureTextEntry={true}
             />
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
+                    <CheckBox value={rememberMe} onValueChange={setRememberMe} />
+                    <Text>Remember Me</Text>
+            </View>
             {error ? <Text style={{ color: 'red', marginBottom: 10 }}>{error}</Text> : null}
             <Button title="Login" onPress={handleLogin} />
         </View>
