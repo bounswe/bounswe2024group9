@@ -27,7 +27,7 @@ const Login = ({ navigation }) => {
             }
             //assuming django server returns user data with successful login
             const userData = await response.json();
-            navigation.navigate('Home', { userData }); //navigate to Home page after login ()home endpoint can change)
+            navigation.navigate('Home', { userData }); //navigate to Home page after login (home endpoint can change)
         }
 
         catch (error) {
@@ -39,6 +39,12 @@ const Login = ({ navigation }) => {
     const handleSignUp = () => {
         //navigate to sign up page
         navigation.navigate('SignUp');
+    };
+
+    const handleLoginWithGoogle = () => {
+        // NOT IMPLEMENTED YET
+        //navigate to Home page after login (endpoint can change)
+        navigation.navigate('Home');
     };
 
     return (
@@ -70,6 +76,8 @@ const Login = ({ navigation }) => {
             <TouchableOpacity onPress={handleSignUp}>
                 <Text style={{ marginTop: 10, color: 'blue' }}>Sign Up</Text>
             </TouchableOpacity>
+
+            <Button title="Login with Google" onPress={handleLoginWithGoogle} />
         </View>
     );
 };
