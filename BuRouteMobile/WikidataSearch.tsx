@@ -7,8 +7,12 @@ const WikidataSearch = () => {
   const [searchResults, setSearchResults] = useState([]);
   const [selectedQValue, setSelectedQValue] = useState(null);
   const navigation = useNavigation();
+  const [isConsistent, setConsistency] = useState(true);
+
+  let callTimeout
 
   const searchWikidata = async () => {
+  console.log('making api call with ' + searchTerm)
     try {
       const response = await fetch('http://10.0.2.2:8000/wiki_search/search/' + searchTerm);
       const data = await response.json();
@@ -18,15 +22,21 @@ const WikidataSearch = () => {
         totalMatches: parseInt(result.totalMatches.value),
         Q: result.item.value,
       }));
-      setSearchResults(results);
+      if (isConsistent) setSearchResults(results);
     } catch (error) {
       console.error('Error searching Wikidata:', error);
     }
   };
 
   useEffect(() => {
-    if (searchTerm.trim() !== '') {
-      searchWikidata();
+    callTimeout = setTimeout(() => {
+        if (searchTerm.trim() !== '') searchWikidata();
+        else setSearchResults([]);
+        setConsistency(false);
+    }, 200);
+    return ()=>{
+        clearTimeout(callTimeout);
+        setConsistency(true);
     }
   }, [searchTerm]);
 
