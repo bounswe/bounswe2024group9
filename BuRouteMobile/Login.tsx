@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, TextInput, Button, Text, CheckBox, TouchableOpacity } from 'react-native';
+import { View, TextInput, Button, Text, TouchableOpacity } from 'react-native';
+import CheckBox from '@react-native-community/checkbox';
 
 const Login = ({ navigation }) => {
     const [username, setUsername] = useState('');
@@ -49,35 +50,35 @@ const Login = ({ navigation }) => {
 
     return (
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+            <TouchableOpacity onPress={handleSignUp}>
+                <Text style={{ marginBottom: 20, color: 'blue' }}>Sign Up</Text>
+            </TouchableOpacity>
+
             <TextInput
-                style={{ marginBottom: 10, padding: 10, borderWidth: 1, borderColor: '#ccc', borderRadius: 5 }}
+                style={{ marginBottom: 20, padding: 10, borderWidth: 1, borderColor: '#ccc', borderRadius: 5 }}
                 placeholder="Username"
                 value={username}
                 onChangeText={setUsername}
             />
 
             <TextInput
-                style={{ marginBottom: 10, padding: 10, borderWidth: 1, borderColor: '#ccc', borderRadius: 5 }}
+                style={{ marginBottom: 20, padding: 10, borderWidth: 1, borderColor: '#ccc', borderRadius: 5 }}
                 placeholder="Password"
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry={true}
             />
 
-            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20 }}>
                     <CheckBox value={rememberMe} onValueChange={setRememberMe} />
                     <Text>Remember Me</Text>
             </View>
 
-            {error ? <Text style={{ color: 'red', marginBottom: 10 }}>{error}</Text> : null}
+            {error ? <Text style={{ color: 'red', marginBottom: 20 }}>{error}</Text> : null}
 
-            <Button title="Login" onPress={handleLogin} />
+            <Button title="Login" onPress={handleLogin} style={{marginTop: 20, marginBottom: 20}}/>
 
-            <TouchableOpacity onPress={handleSignUp}>
-                <Text style={{ marginTop: 10, color: 'blue' }}>Sign Up</Text>
-            </TouchableOpacity>
-
-            <Button title="Login with Google" onPress={handleLoginWithGoogle} />
+            <Button title="Login with Google" onPress={handleLoginWithGoogle} style={{marginTop: 20, marginBottom: 20}}/>
         </View>
     );
 };
