@@ -5,17 +5,17 @@ function SearchResults() {
   const [searchValue, setSearchValue] = useState("");
   const [searchResults, setSearchResults] = useState([]);
 
-  const handleKeyPress = (event) => {
-    if (event.key === "Enter") {
-      setSearchValue(event.target.value.toLowerCase());
-      event.target.value = ""; // clear the search bar
-    }
-  };
-
-  const handleSubmit = async (event) => {
-    event.preventDefault();
+  const fetchSearchResults = async (searchString) => {
     try {
-      const response = await fetch(`http://127.0.0.1:8000/wiki_search/search/${searchValue}`);
+      console.log("Search string:", searchString); // Log the search string
+      
+      // Clear search results if the search string is empty
+      if (searchString === "") {
+        setSearchResults([]);
+        return;
+      }
+  
+      const response = await fetch(`http://127.0.0.1:8000/wiki_search/search/${searchString}`);
       const data = await response.json();
       console.log(data.results.bindings);
       setSearchResults(data.results.bindings); // Set the search results in state
@@ -24,21 +24,23 @@ function SearchResults() {
     }
   };
 
+  const handleInputChange = (event) => {
+    const searchString = event.target.value.toLowerCase();
+    setSearchValue(searchString);
+    fetchSearchResults(searchString);
+  };
+
   return (
     <>
       <header>
         <div className="search-bar">
-          <form onSubmit={handleSubmit}>
-            <input
-              id="search"
-              type="search"
-              placeholder="&#x1F50D; Start typing to search..."
-              value={searchValue}
-              onChange={(e) => setSearchValue(e.target.value)}
-              onKeyPress={handleKeyPress}
-            />
-            <input type="submit" style={{ display: 'none' }} />
-          </form>
+          <input
+            id="search"
+            type="search"
+            placeholder="&#x1F50D; Start typing to search..."
+            value={searchValue}
+            onChange={handleInputChange}
+          />
         </div>
       </header>
       <main className="container">
