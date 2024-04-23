@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom"; // Import Link from react-router-dom
-import "./style.css";
+
+import "./search_style.css";
 
 function SearchResults() {
   const [searchValue, setSearchValue] = useState("");
@@ -43,6 +44,7 @@ function SearchResults() {
 
   const handleKeyPress = (event) => {
     if (event.key === "Enter") {
+      console.log("Enter key pressed"); // Log when Enter key is pressed
       fetchSearchResults(searchValue);
     }
   };
@@ -57,7 +59,7 @@ function SearchResults() {
             placeholder="&#x1F50D; Start typing to search..."
             value={searchValue}
             onChange={(e) => setSearchValue(e.target.value)}
-            onKeyPress={handleKeyPress} // Call handleKeyPress function on key press
+            onKeyDown={handleKeyPress} // Call handleKeyPress function on key press
           />
         </div>
       </header>
@@ -65,12 +67,15 @@ function SearchResults() {
         <div className="search-display">
           {/* Display search results here */}
           {searchResults.map((result, index) => (
-            <div key={index}>
-              {/* Render individual search result */}
-              {/* Make the label clickable */}
+            <div key={index} className="search-result">
+            {/* Wrap the content in a Link component */}
+            <Link to={`/result/${extractQID(result.item.value)}`}>
+              <button className="result-button">
                 <h3>{result.itemLabel.value}</h3>
-              <p>{extractQID(result.item.value)}</p>
-            </div>
+                <p>{extractQID(result.item.value)}</p>
+              </button>
+            </Link>
+          </div>
           ))}
         </div>
         <div className="posts-container"></div>
