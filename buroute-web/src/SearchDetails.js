@@ -29,52 +29,72 @@ function SearchDetails() {
 
   const { results, nearby, period } = itemDetails;
 
+
+  const result = results.results.bindings[0];
+  console.log("Result:", result);
+
+  // Function to safely access nested properties
+  const getSafeValue = (obj, defaultValue = 'Not Available') => {
+      if (obj && obj.value !== undefined) {
+          return obj.value;
+      }
+      return defaultValue;
+  };
+
   return (
     <div>
       <div className="page-container">
         <div className="card">
-            <img src={results.results.bindings[0].image.value} alt={results.results.bindings[0].itemLabel.value}  />
+            <img src={result.image.value} alt={result.itemLabel.value}  />
         </div>
         <div className="card-content">
-            <h2 className="card-title">{results.results.bindings[0].itemLabel.value}</h2>
-            <p className="card-text">{results.results.bindings[0].description.value}</p>
+            <h2 className="card-title">{getSafeValue(result.itemLabel)}</h2>
+            <p className="card-text">{getSafeValue(result.description)}</p>
             <div className="info-row">
                 <div className="info-block">
-                <p>Latitude: {results.results.bindings[0].latitude.value}</p>
+                <p>Latitude: {getSafeValue(result.latitude)}</p>
                 </div>
                 <div className="info-block">
-                <p>Longitude: {results.results.bindings[0].longitude.value}</p>
+                <p>Longitude: {getSafeValue(result.longitude)}</p>
                 </div>
             </div>
             
             <div className="info-row">
                 <div className="info-block">
-                <p>Style: {results.results.bindings[0].styleLabel.value}</p>
+                <p>Style: {getSafeValue(result.styleLabel)}</p>
                 </div>
                 <div className="info-block">
-                <p>Inception: {results.results.bindings[0].inceptionYear.value}</p>
+                <p>Inception: {getSafeValue(result.inceptionYear)}</p>
                 </div>
             </div>
-            <a href={results.results.bindings[0].article.value} className="card-link">Read more on Wikipedia</a>
+            <a href={getSafeValue(result.article, '#')} className="card-link">Read more on Wikipedia</a>
             <div className="dropdowns-container">
             <div className="dropdown">
               <label htmlFor="nearby-locations">Nearby Locations</label>
               <select id="nearby-locations">
-                {nearby.results.bindings.map((location, index) => (
-                  <option key={index} value={location.item.value}>
-                    {location.itemLabel.value}
-                  </option>
-                ))}
+                {nearby.results.bindings.length > 0 ? (
+                  nearby.results.bindings.map((location, index) => (
+                    <option key={index} value={location.item.value}>
+                      {location.itemLabel.value}
+                    </option>
+                  ))
+                ) : (
+                  <option>No nearby locations available</option>
+                )}
               </select>
             </div>
             <div className="dropdown">
               <label htmlFor="similar-period-locations">Similar Period Locations</label>
               <select id="similar-period-locations">
-                {period.results.bindings.map((location, index) => (
-                  <option key={index} value={location.item.value}>
-                    {location.itemLabel.value} - {location.inceptionYear.value}
-                  </option>
-                ))}
+                {period.results && period.results.bindings.length > 0 ? (
+                  period.results.bindings.map((location, index) => (
+                    <option key={index} value={location.item.value}>
+                      {location.itemLabel.value} - {location.inceptionYear.value}
+                    </option>
+                  ))
+                ) : (
+                  <option>No similar period locations available</option>
+                )}
               </select>
             </div>
           </div>          
