@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom"; // Import Link from react-router-dom
 import "./style.css";
 
 function SearchResults() {
@@ -14,7 +15,7 @@ function SearchResults() {
         setSearchResults([]);
         return;
       }
-  
+
       const response = await fetch(`http://127.0.0.1:8000/wiki_search/search/${searchString}`);
       const data = await response.json();
       console.log(data.results.bindings);
@@ -24,10 +25,26 @@ function SearchResults() {
     }
   };
 
-  const handleInputChange = (event) => {
-    const searchString = event.target.value.toLowerCase();
-    setSearchValue(searchString);
-    fetchSearchResults(searchString);
+  const fetchWikidataResults = async (QID) => {
+    try {
+      const response = await fetch(`https://127.0.0.1:8000/wiki_search/results/${QID}`);
+      const data = await response.json();
+      return data; 
+    } catch (error) {
+      console.error("Error fetching search results:", error);
+      return null; 
+    }
+  };
+  
+  // Function to extract QID from URL
+  const extractQID = (url) => {
+    return url.split("/").pop(); // Split the URL by "/" and get the last part
+  };
+
+  const handleKeyPress = (event) => {
+    if (event.key === "Enter") {
+      fetchSearchResults(searchValue);
+    }
   };
 
   return (
@@ -39,7 +56,8 @@ function SearchResults() {
             type="search"
             placeholder="&#x1F50D; Start typing to search..."
             value={searchValue}
-            onChange={handleInputChange}
+            onChange={(e) => setSearchValue(e.target.value)}
+            onKeyPress={handleKeyPress} // Call handleKeyPress function on key press
           />
         </div>
       </header>
@@ -49,10 +67,9 @@ function SearchResults() {
           {searchResults.map((result, index) => (
             <div key={index}>
               {/* Render individual search result */}
-              {/* After connecting these items to their own wikidata pages, parts that will be rendered can chang*/}
-              {/* Now, i will just show label and item for the simplicity */}
-              <h3>{result.itemLabel.value}</h3>
-              <p>{result.item.value}</p>
+              {/* Make the label clickable */}
+                <h3>{result.itemLabel.value}</h3>
+              <p>{extractQID(result.item.value)}</p>
             </div>
           ))}
         </div>
