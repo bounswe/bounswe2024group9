@@ -1,11 +1,28 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { fetchSearchResults } from './SearchResults';
+import { Link } from "react-router-dom"; // Import Link from react-router-dom
 
 import "./detail_style.css";
 
 function SearchDetails() {
+
   const { qid } = useParams();
   const [itemDetails, setItemDetails] = useState(null);
+  const [searchValue, setSearchValue] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+
+  const extractQID = (url) => {
+    return url.split("/").pop(); // Split the URL by "/" and get the last part
+  };
+
+  const handleKeyPress = async (event) => {
+    if (event.key === "Enter") {
+      console.log("Enter key pressed"); // Log when Enter key is pressed
+      const results = await fetchSearchResults(searchValue.toLowerCase());
+      setSearchResults(results);
+    }
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -40,9 +57,55 @@ function SearchDetails() {
       }
       return defaultValue;
   };
-
+  if (searchResults.length > 0) {
+    return (
+      <>
+        <header>
+          <div className="search-bar">
+            <input
+              id="search"
+              type="search"
+              placeholder="&#x1F50D; Start typing to search..."
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
+              onKeyDown={handleKeyPress} // Call handleKeyPress function on key press
+            />
+          </div>
+        </header>
+        <main className="container">
+          <div className="search-display">
+            {/* Display search results here */}
+            {searchResults.map((result, index) => (
+              <div key={index} className="search-result">
+              {/* Wrap the content in a Link component */}
+              <Link to={`/result/${extractQID(result.item.value)}`}>
+                <button className="result-button">
+                  <h3>{result.itemLabel.value}</h3>
+                  <p>{extractQID(result.item.value)}</p>
+                </button>
+              </Link>
+            </div>
+            ))}
+          </div>
+          <div className="posts-container"></div>
+        </main>
+      </>
+    );
+  }
   return (
     <div>
+      <header>
+        <div className="search-bar">
+          <input
+            id="search"
+            type="search"
+            placeholder="&#x1F50D; Start typing to search..."
+            value={searchValue}
+            onChange={(e) => setSearchValue(e.target.value)}
+            onKeyDown={handleKeyPress} // Call handleKeyPress function on key press
+          />
+        </div>
+      </header>
       <div className="page-container">
         <div className="card">
             <img src={result.image.value} alt={result.itemLabel.value}  />
