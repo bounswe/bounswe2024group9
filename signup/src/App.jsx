@@ -2,17 +2,14 @@ import React, { useState } from "react";
 import "./style.css"; // Import your CSS file
 
 const App = () => {
-  // State variables for username, password, and remember me checkbox
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [comfirmpassword, setComfirmpassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
 
-  // Function to handle form submission
   const handleSubmit = (event) => {
     event.preventDefault();
-    // You can add your login logic here
     console.log("Username:", username);
     console.log("Email:", email);
     console.log("Password:", password);
