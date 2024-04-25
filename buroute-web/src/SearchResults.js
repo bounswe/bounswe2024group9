@@ -43,7 +43,6 @@ function SearchResults() {
             <Link to={`/result/${extractQID(result.item.value)}`}>
               <button className="result-button">
                 <h3>{result.itemLabel.value}</h3>
-                <p>{extractQID(result.item.value)}</p>
               </button>
             </Link>
           </div>
