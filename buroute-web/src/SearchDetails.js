@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { fetchSearchResults } from './SearchResults';
-import { Link } from "react-router-dom"; // Import Link from react-router-dom
 
 import "./detail_style.css";
 
@@ -75,7 +74,7 @@ function SearchDetails() {
           <div className="search-display">
             {searchResults.map((result, index) => (
               <div key={index} className="search-result">
-                <Link to={`/result/${extractQID(result.item.value)}`}>
+                <Link to={`/result/${extractQID(result.item.value)}`} onClick={() => setTimeout(() => window.location.reload(), 100)}>
                   <button className="result-button">
                     <h3>{result.itemLabel.value}</h3>
                   </button>
