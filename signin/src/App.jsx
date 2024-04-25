@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import "./style.css"; // Import your CSS file
 
 export const App = () => {
-  // State variables for username, password, and remember me checkbox
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
