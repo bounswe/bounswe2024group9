@@ -6,10 +6,8 @@ export const App = () => {
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
 
-  // Function to handle form submission
   const handleSubmit = (event) => {
     event.preventDefault();
-    // You can add your login logic here
     console.log("Username:", username);
     console.log("Password:", password);
     console.log("Remember Me:", rememberMe);
