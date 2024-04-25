@@ -81,7 +81,6 @@ function SearchDetails() {
               <Link to={`/result/${extractQID(result.item.value)}`}>
                 <button className="result-button">
                   <h3>{result.itemLabel.value}</h3>
-                  <p>{extractQID(result.item.value)}</p>
                 </button>
               </Link>
             </div>
@@ -133,34 +132,37 @@ function SearchDetails() {
             <a href={getSafeValue(result.article, '#')} className="card-link">Read more on Wikipedia</a>
             <div className="dropdowns-container">
             <div className="dropdown">
-              <label htmlFor="nearby-locations">Nearby Locations</label>
-              <select id="nearby-locations">
+              <select id="nearby-locations" style={{ backgroundColor: '#e0eaff', width: '100%' }}>
                 {nearby.results.bindings.length > 0 ? (
-                  nearby.results.bindings.map((location, index) => (
-                    <option key={index} value={location.item.value}>
-                      {location.itemLabel.value}
-                    </option>
-                  ))
+                  <>
+                    <option disabled selected style={{ backgroundColor: 'white' }}>-- Nearby Locations --</option>
+                    {nearby.results.bindings.map((location, index) => (
+                      <option key={index} value={location.item.value} style={{ backgroundColor: 'white' }}>
+                                      <Link to={`/result/${extractQID(location.item.value)}`}>
+                        {location.itemLabel.value}</Link>
+                      </option>
+                    ))}
+                  </>
                 ) : (
-                  <option>No nearby locations available</option>
+                  <option style={{ backgroundColor: 'white' }}>No nearby locations available</option>
                 )}
               </select>
             </div>
             <div className="dropdown">
-              <label htmlFor="similar-period-locations">Similar Period Locations</label>
-              <select id="similar-period-locations">
+              <select id="similar-period-locations" onChange={(e) => e.target.options[0].disabled = true} style={{ backgroundColor: '#e0eaff', width: '100%' }}>
+                <option disabled selected>-- Similar Period Locations --</option>
                 {period.results && period.results.bindings.length > 0 ? (
                   period.results.bindings.map((location, index) => (
-                    <option key={index} value={location.item.value}>
+                    <option key={index} value={location.item.value} style={{ backgroundColor: 'white'}}>
                       {location.itemLabel.value} - {location.inceptionYear.value}
                     </option>
                   ))
                 ) : (
-                  <option>No similar period locations available</option>
+                  <option style={{ backgroundColor: 'white'}}>No similar period locations available</option>
                 )}
               </select>
             </div>
-          </div>          
+          </div>       
         </div>
         </div>
     </div>
