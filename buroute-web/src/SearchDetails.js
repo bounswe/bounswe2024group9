@@ -10,6 +10,8 @@ function SearchDetails() {
   const [itemDetails, setItemDetails] = useState(null);
   const [searchValue, setSearchValue] = useState("");
   const [searchResults, setSearchResults] = useState([]);
+  const [showNearby, setShowNearby] = useState(false); // State to track visibility of nearby dropdown
+  const [showSimilar, setShowSimilar] = useState(false); // State to track visibility of similar period dropdown
 
   const extractQID = (url) => {
     return url.split("/").pop(); // Split the URL by "/" and get the last part
@@ -109,36 +111,40 @@ function SearchDetails() {
               <a href={getSafeValue(result?.article, '#')} className="card-link">Read more on Wikipedia</a>
               <div className="dropdowns-container">
                 <div className="dropdown">
-                  <select id="nearby-locations" style={{ backgroundColor: '#e0eaff', width: '100%' }}>
-                    {nearby?.results?.bindings?.length > 0 ? (
-                      <>
-                        <option disabled selected style={{ backgroundColor: 'white' }}>-- Nearby Locations --</option>
-                        {nearby.results.bindings.map((location, index) => (
-                          <option key={index} value={location.item.value} style={{ backgroundColor: 'white' }}>
-                            <Link to={`/result/${extractQID(location.item.value)}`}>
-                              {location.itemLabel.value}
-                            </Link>
-                          </option>
-                        ))}
-                      </>
-                    ) : (
-                      <option style={{ backgroundColor: 'white' }}>No nearby locations available</option>
-                    )}
-                  </select>
+                  <div className="dropdown-button" onClick={() => setShowNearby(!showNearby)}>
+                    <button className="dropdown-toggle">Nearby Locations</button>
+                  </div>
+                  {showNearby && (
+                    <div className="dropdown-content">
+                      {nearby?.results?.bindings?.length > 0 ? (
+                        nearby.results.bindings.map((location, index) => (
+                          <Link key={index} to={`/result/${extractQID(location.item.value)}`} onClick={() => setTimeout(() => window.location.reload(), 100)}>
+                            <div className="dropdown-item">{location.itemLabel.value}</div>
+                          </Link>
+                        ))
+                      ) : (
+                        <div className="dropdown-item">No nearby locations available</div>
+                      )}
+                    </div>
+                  )}
                 </div>
                 <div className="dropdown">
-                  <select id="similar-period-locations" onChange={(e) => e.target.options[0].disabled = true} style={{ backgroundColor: '#e0eaff', width: '100%' }}>
-                    <option disabled selected>-- Similar Period Locations --</option>
-                    {period?.results?.bindings?.length > 0 ? (
-                      period.results.bindings.map((location, index) => (
-                        <option key={index} value={location.item.value} style={{ backgroundColor: 'white' }}>
-                          {location.itemLabel.value} - {location.inceptionYear.value}
-                        </option>
-                      ))
-                    ) : (
-                      <option style={{ backgroundColor: 'white' }}>No similar period locations available</option>
-                    )}
-                  </select>
+                  <div className="dropdown-button" onClick={() => setShowSimilar(!showSimilar)}>
+                    <button className="dropdown-toggle">Similar Period Locations</button>
+                  </div>
+                  {showSimilar && (
+                    <div className="dropdown-content">
+                      {period?.results?.bindings?.length > 0 ? (
+                        period.results.bindings.map((location, index) => (
+                          <Link key={index} to={`/result/${extractQID(location.item.value)}`} onClick={() => setTimeout(() => window.location.reload(), 100)}>
+                            <div className="dropdown-item">{location.itemLabel.value} - {location.inceptionYear.value}</div>
+                          </Link>
+                        ))
+                      ) : (
+                        <div className="dropdown-item">No similar period locations available</div>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
