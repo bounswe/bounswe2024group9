@@ -46,53 +46,18 @@ function SearchDetails() {
 
   const { results, nearby, period } = itemDetails;
 
-
-  const result = results.results.bindings[0];
-  console.log("Result:", result);
-
   // Function to safely access nested properties
   const getSafeValue = (obj, defaultValue = 'Not Available') => {
-      if (obj && obj.value !== undefined) {
-          return obj.value;
-      }
-      return defaultValue;
+    if (obj && obj.value !== undefined) {
+      return obj.value;
+    }
+    return defaultValue;
   };
-  if (searchResults.length > 0) {
-    return (
-      <>
-        <header>
-          <div className="search-bar">
-            <input
-              id="search"
-              type="search"
-              placeholder="&#x1F50D; Start typing to search..."
-              value={searchValue}
-              onChange={(e) => setSearchValue(e.target.value)}
-              onKeyDown={handleKeyPress} // Call handleKeyPress function on key press
-            />
-          </div>
-        </header>
-        <main className="container">
-          <div className="search-display">
-            {/* Display search results here */}
-            {searchResults.map((result, index) => (
-              <div key={index} className="search-result">
-              {/* Wrap the content in a Link component */}
-              <Link to={`/result/${extractQID(result.item.value)}`}>
-                <button className="result-button">
-                  <h3>{result.itemLabel.value}</h3>
-                </button>
-              </Link>
-            </div>
-            ))}
-          </div>
-          <div className="posts-container"></div>
-        </main>
-      </>
-    );
-  }
+
+  const result = results?.results?.bindings?.[0]; // Safe access to results
+
   return (
-    <div>
+    <>
       <header>
         <div className="search-bar">
           <input
@@ -105,68 +70,83 @@ function SearchDetails() {
           />
         </div>
       </header>
-      <div className="page-container">
-        <div className="card">
-            <img src={result.image.value} alt={result.itemLabel.value}  />
-        </div>
-        <div className="card-content">
-            <h2 className="card-title">{getSafeValue(result.itemLabel)}</h2>
-            <p className="card-text">{getSafeValue(result.description)}</p>
-            <div className="info-row">
+      <main className="container">
+        {searchResults.length > 0 ? (
+          <div className="search-display">
+            {searchResults.map((result, index) => (
+              <div key={index} className="search-result">
+                <Link to={`/result/${extractQID(result.item.value)}`}>
+                  <button className="result-button">
+                    <h3>{result.itemLabel.value}</h3>
+                  </button>
+                </Link>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="page-container">
+            <div className="card">
+              <img src={result?.image?.value} alt={result?.itemLabel?.value} />
+            </div>
+            <div className="card-content">
+              <h2 className="card-title">{getSafeValue(result?.itemLabel)}</h2>
+              <p className="card-text">{getSafeValue(result?.description)}</p>
+              <div className="info-row">
                 <div className="info-block">
-                <p>Latitude: {getSafeValue(result.latitude)}</p>
+                  <p>Latitude: {getSafeValue(result?.latitude)}</p>
                 </div>
                 <div className="info-block">
-                <p>Longitude: {getSafeValue(result.longitude)}</p>
+                  <p>Longitude: {getSafeValue(result?.longitude)}</p>
                 </div>
-            </div>
-            
-            <div className="info-row">
+              </div>
+              <div className="info-row">
                 <div className="info-block">
-                <p>Style: {getSafeValue(result.styleLabel)}</p>
+                  <p>Style: {getSafeValue(result?.styleLabel)}</p>
                 </div>
                 <div className="info-block">
-                <p>Inception: {getSafeValue(result.inceptionYear)}</p>
+                  <p>Inception: {getSafeValue(result?.inceptionYear)}</p>
                 </div>
+              </div>
+              <a href={getSafeValue(result?.article, '#')} className="card-link">Read more on Wikipedia</a>
+              <div className="dropdowns-container">
+                <div className="dropdown">
+                  <select id="nearby-locations" style={{ backgroundColor: '#e0eaff', width: '100%' }}>
+                    {nearby?.results?.bindings?.length > 0 ? (
+                      <>
+                        <option disabled selected style={{ backgroundColor: 'white' }}>-- Nearby Locations --</option>
+                        {nearby.results.bindings.map((location, index) => (
+                          <option key={index} value={location.item.value} style={{ backgroundColor: 'white' }}>
+                            <Link to={`/result/${extractQID(location.item.value)}`}>
+                              {location.itemLabel.value}
+                            </Link>
+                          </option>
+                        ))}
+                      </>
+                    ) : (
+                      <option style={{ backgroundColor: 'white' }}>No nearby locations available</option>
+                    )}
+                  </select>
+                </div>
+                <div className="dropdown">
+                  <select id="similar-period-locations" onChange={(e) => e.target.options[0].disabled = true} style={{ backgroundColor: '#e0eaff', width: '100%' }}>
+                    <option disabled selected>-- Similar Period Locations --</option>
+                    {period?.results?.bindings?.length > 0 ? (
+                      period.results.bindings.map((location, index) => (
+                        <option key={index} value={location.item.value} style={{ backgroundColor: 'white' }}>
+                          {location.itemLabel.value} - {location.inceptionYear.value}
+                        </option>
+                      ))
+                    ) : (
+                      <option style={{ backgroundColor: 'white' }}>No similar period locations available</option>
+                    )}
+                  </select>
+                </div>
+              </div>
             </div>
-            <a href={getSafeValue(result.article, '#')} className="card-link">Read more on Wikipedia</a>
-            <div className="dropdowns-container">
-            <div className="dropdown">
-              <select id="nearby-locations" style={{ backgroundColor: '#e0eaff', width: '100%' }}>
-                {nearby.results.bindings.length > 0 ? (
-                  <>
-                    <option disabled selected style={{ backgroundColor: 'white' }}>-- Nearby Locations --</option>
-                    {nearby.results.bindings.map((location, index) => (
-                      <option key={index} value={location.item.value} style={{ backgroundColor: 'white' }}>
-                                      <Link to={`/result/${extractQID(location.item.value)}`}>
-                        {location.itemLabel.value}</Link>
-                      </option>
-                    ))}
-                  </>
-                ) : (
-                  <option style={{ backgroundColor: 'white' }}>No nearby locations available</option>
-                )}
-              </select>
-            </div>
-            <div className="dropdown">
-              <select id="similar-period-locations" onChange={(e) => e.target.options[0].disabled = true} style={{ backgroundColor: '#e0eaff', width: '100%' }}>
-                <option disabled selected>-- Similar Period Locations --</option>
-                {period.results && period.results.bindings.length > 0 ? (
-                  period.results.bindings.map((location, index) => (
-                    <option key={index} value={location.item.value} style={{ backgroundColor: 'white'}}>
-                      {location.itemLabel.value} - {location.inceptionYear.value}
-                    </option>
-                  ))
-                ) : (
-                  <option style={{ backgroundColor: 'white'}}>No similar period locations available</option>
-                )}
-              </select>
-            </div>
-          </div>       
-        </div>
-        </div>
-    </div>
-    
+          </div>
+        )}
+      </main>
+    </>
   );
 }
 
