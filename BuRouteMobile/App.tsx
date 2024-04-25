@@ -3,6 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import WikidataSearch from './WikidataSearch';
 import SearchResultDetail from './SearchResultDetail';
+import NodeCreationPage from './NodeCreationPage'
 
 const Stack = createStackNavigator();
 
@@ -19,6 +20,11 @@ const App = () => {
           name="SearchResultDetail"
           component={SearchResultDetail}
           options={{ title: 'Search Result Detail' }}
+        />
+        <Stack.Screen
+          name="NodeCreationPage"
+          component={NodeCreationPage}
+          options={{ title: 'Node Creation Page' }} // Optional: You can set a title for this screen
         />
       </Stack.Navigator>
     </NavigationContainer>

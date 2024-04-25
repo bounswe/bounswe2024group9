@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { View, TextInput, Text, TouchableOpacity } from 'react-native';
+import { View, TextInput, Text, TouchableOpacity, Modal, Button } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import NodeCreationPage from './NodeCreationPage';
 
 const WikidataSearch = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -8,11 +9,12 @@ const WikidataSearch = () => {
   const [selectedQValue, setSelectedQValue] = useState(null);
   const navigation = useNavigation();
   const [isConsistent, setConsistency] = useState(true);
+  const [showModal, setShowModal] = useState(false);
 
   let callTimeout
 
   const searchWikidata = async () => {
-  console.log('making api call with ' + searchTerm)
+    console.log('making api call with ' + searchTerm)
     try {
       const response = await fetch('http://10.0.2.2:8000/wiki_search/search/' + searchTerm);
       const data = await response.json();
@@ -30,13 +32,13 @@ const WikidataSearch = () => {
 
   useEffect(() => {
     callTimeout = setTimeout(() => {
-        if (searchTerm.trim() !== '') searchWikidata();
-        else setSearchResults([]);
-        setConsistency(false);
+      if (searchTerm.trim() !== '') searchWikidata();
+      else setSearchResults([]);
+      setConsistency(false);
     }, 200);
-    return ()=>{
-        clearTimeout(callTimeout);
-        setConsistency(true);
+    return () => {
+      clearTimeout(callTimeout);
+      setConsistency(true);
     }
   }, [searchTerm]);
 
@@ -56,6 +58,20 @@ const WikidataSearch = () => {
 
   const getLastItem = (thePath) => thePath.substring(thePath.lastIndexOf('/') + 1);
 
+  const handleCreatePage = () => {
+    setShowModal(true);
+  };
+
+  const handleConfirmCreate = () => {
+    navigation.navigate('NodeCreationPage');
+    console.log('Creating new information page...');
+    setShowModal(false);
+  };
+
+  const handleCancelCreate = () => {
+    setShowModal(false);
+  };
+
   return (
     <View style={{ flex: 1, padding: 20 }}>
       <TextInput
@@ -64,21 +80,39 @@ const WikidataSearch = () => {
         value={searchTerm}
         onChangeText={setSearchTerm}
       />
-      {searchResults.map((result, index) => (
-        <TouchableOpacity key={index} onPress={() => handleResultClick(index)}>
-          <View style={{ marginTop: 20 }}>
-            <Text style={{ fontWeight: 'bold' }}>{result.itemLabel}</Text>
-            <Text>{result.description}</Text>
-            <Text>Total Matches: {result.totalMatches}</Text>
-          </View>
-        </TouchableOpacity>
-      ))}
-      {selectedQValue && (
-        <View style={{ marginTop: 20 }}>
-          <Text style={{ fontWeight: 'bold' }}>Selected Q Value:</Text>
-          <Text>{selectedQValue}</Text>
-        </View>
+      {searchResults.length > 0 ? (
+        searchResults.map((result, index) => (
+          <TouchableOpacity key={index} onPress={() => handleResultClick(index)}>
+            <View style={{ marginTop: 20 }}>
+              <Text style={{ fontWeight: 'bold' }}>{result.itemLabel}</Text>
+              <Text>{result.description}</Text>
+              <Text>Total Matches: {result.totalMatches}</Text>
+            </View>
+          </TouchableOpacity>
+        ))
+      ) : (
+        <Button
+          title="Feeling bold?"
+          onPress={handleCreatePage}
+        />
       )}
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={showModal}
+        onRequestClose={() => setShowModal(false)}
+      >
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
+          <View style={{ backgroundColor: 'white', padding: 20, borderRadius: 10 }}>
+            <Text style={{ marginBottom: 10 }}>Would you like to create a new node?</Text>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+              <Button title="Cancel" onPress={handleCancelCreate} />
+              <Button title="Create" onPress={handleConfirmCreate} />
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
