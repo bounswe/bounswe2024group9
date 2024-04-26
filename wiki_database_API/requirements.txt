@@ -4,3 +4,4 @@ python-decouple==3.8
 mysqlclient==2.1.1
 gunicorn==22.0.0
 Pillow==10.2.0
+django-cors-headers==4.3.1
