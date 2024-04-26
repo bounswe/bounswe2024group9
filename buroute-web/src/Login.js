@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import "./style.css"; // Import your CSS file
+import "./login_signup_style.css"; // Import your CSS file
 
-export const Signin = () => {
+export const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
@@ -14,18 +14,18 @@ export const Signin = () => {
   };
 
   return (
-    <div className="App">
-      <a href="../signin/App.jsx" className="top-link" id="link1">
+    <div className="wrapper_entrance">
+      <a href="/login" className="top-link" id="link1">
         Sign In
       </a>
-      <a href="../signup/App.jsx" className="top-link" id="link2">
+      <a href="/signup" className="top-link" id="link2">
         Sign Up
       </a>
 
-      <div className="container">
+      <div className="container_center">
         <h2>Sign In
         <img
-            src="https://private-user-images.githubusercontent.com/68972243/313346109-38df63a1-f4b4-4499-9ba7-e2b89e40ef78.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3MTM0NDg2NjYsIm5iZiI6MTcxMzQ0ODM2NiwicGF0aCI6Ii82ODk3MjI0My8zMTMzNDYxMDktMzhkZjYzYTEtZjRiNC00NDk5LTliYTctZTJiODllNDBlZjc4LnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNDA0MTglMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjQwNDE4VDEzNTI0NlomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPTMzOThhMDAxMmI1MmRmMTY2MjE5MjA2NzgyYmJkNDVhN2NkNmRjOWFlNTJkMTBkN2Y3OGE4NDI0MGQ1MzUyZjYmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0JmFjdG9yX2lkPTAma2V5X2lkPTAmcmVwb19pZD0wIn0.J1gXmkyW027jU5UyRz8I07VbgElZbfU-mXyppaliH-o"
+            src="https://github-production-user-asset-6210df.s3.amazonaws.com/110239708/313003831-cfe28590-0739-4c58-8740-45e27c0a443b.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAVCODYLSA53PQK4ZA%2F20240426%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20240426T123041Z&X-Amz-Expires=300&X-Amz-Signature=517974e24142cccb1dbec1a67a4794ff0c9ccc909d0b8ac02621911a7fa34786&X-Amz-SignedHeaders=host&actor_id=75087023&key_id=0&repo_id=756524338"
             alt="logo"
             className="logo"
           />
@@ -74,4 +74,4 @@ export const Signin = () => {
   );
 };
 
-export default Signin;
+export default Login;

@@ -1,0 +1,149 @@
+.wrapper_entrance {
+  color: black;
+  font-family: Arial, sans-serif;
+  background-image: url("./background.jpg");
+  background-size: 100% 100%;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.container_center {
+  background-color: #fff;
+  padding: 15px;
+  border-radius: 5px;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+  width: 105%; 
+  max-width: 320px; 
+} 
+
+.wrapper_entrance h2 {
+  margin-bottom: 15px;
+  text-align: center;
+  font-size: 1.5rem;
+}
+
+.wrapper_entrance .form-group {
+  margin-bottom: 15px;
+  margin-right: 5%;
+}
+
+.wrapper_entrance label {
+  display: block;
+  font-weight: normal;
+  font-size: 0.8rem;
+}
+
+input[type="text"],
+input[type="password"] {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 0.9rem;
+
+}
+
+.wrapper_entrance button {
+  width: 100%;
+  padding: 10px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.wrapper_entrance button:hover {
+  background-color: #0056b3;
+}
+
+.wrapper_entrance .news-container {
+  display: flex;
+  align-items: center;
+}
+
+.wrapper_entrance .remember-forget-container {
+  display: flex;
+  align-items: center;
+}
+
+.wrapper_entrance .forgot-password {
+  color: black;
+}
+
+
+.wrapper_entrance .remember-forget-container label {
+  margin-right: 10px; 
+  font-size: 0.8rem;
+}
+
+.wrapper_entrance .remember-forget-container .forgot-password {
+  margin-left: auto;
+  font-size: 0.8rem;
+}
+
+.wrapper_entrance #login-button {
+  margin-top: 3%;
+  background-color: rgb(0,128,153);
+  font-size: 1rem;
+}
+
+.wrapper_entrance .news-container label {
+  margin-right: 10px; 
+  font-size: 0.8rem;
+}
+
+.wrapper_entrance .news-container .forgot-password {
+  margin-left: auto;
+  font-size: 0.8rem;
+}
+
+.wrapper_entrance #signup-button {
+  margin-top: 3%;
+  background-color: rgb(0,128,153);
+  font-size: 1rem;
+}
+
+.wrapper_entrance #link1 {
+  position: absolute;
+  top: 10px;
+  right: 25px; 
+  text-decoration: none;
+  color: black;
+  font-weight: bold;
+  font-size: 0.9rem;
+  margin-right: 3%;
+  margin-top: 1%;
+}
+
+.wrapper_entrance #link2 {
+  position: absolute;
+  top: 10px;
+  right: 115px; 
+  text-decoration: none;
+  color: black;
+  font-weight: bold;
+  font-size: 0.9rem;
+  margin-right: 5%;
+  margin-top: 1%;
+}
+
+.wrapper_entrance .logo {
+  width: 50px; 
+  margin-left: 10px; 
+  vertical-align: middle;
+
+} 
+
+@media (max-width: 600px) {
+  .container_center {
+    width: 90%;
+    padding: 10px;
+    
+  }
+}
