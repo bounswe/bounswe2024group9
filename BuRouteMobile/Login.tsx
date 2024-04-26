@@ -10,7 +10,7 @@ const Login = ({ navigation }) => {
 
     const handleLogin = async () => {
         try {
-            const response = await fetch('http://backend-server-placeholder/login/', {
+            const response = await fetch('http://127.0.0.1:8000/login/', {
                 //send post request to backend server
                 method: 'POST',
                 headers: {
