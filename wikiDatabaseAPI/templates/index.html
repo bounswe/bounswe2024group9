@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Main Page</title>
+    <script>
+        function submitForm(event, formId, action) {
+            event.preventDefault();  // Prevent the form from submitting normally
+            var input = document.getElementById(formId).elements.namedItem("q").value;
+            window.location.href = action + encodeURIComponent(input);
+        }
+
+        function submitUserForm(event) {
+            event.preventDefault();
+            var formData = new FormData(document.getElementById('createUserForm'));
+
+            fetch('/database_search/create_user/', {
+                method: 'POST',
+                body: formData
+            }).then(response => response.json())
+            .then(data => {
+                console.log('Success:', data);
+                alert('User created successfully! User ID: ' + data.user_id);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to create user.');
+            });
+
+            document.getElementById('createUserForm').reset();
+        }
+
+        function submitNodeForm(event) {
+            event.preventDefault();
+            var formData = new FormData(document.getElementById('createNodeForm'));
+
+            fetch('/database_search/create_node/', {
+                method: 'POST',
+                body: formData
+            }).then(response => response.json())
+            .then(data => {
+                console.log('Success:', data);
+                alert('Node created successfully! Node ID: ' + data.node_id);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to create node.');
+            });
+
+            document.getElementById('createNodeForm').reset();
+        }
+    </script>
+</head>
+<body>
+    
+    <h1>Welcome to BuRouteAPI Homepage!</h1>
+    <p>This is a backend so you can do the following actions</p>
+    <ul>
+        <li>To Go Admin Panel: <a href="/admin/">Admin</a></li>
+        <li>
+            <p>To Make Wiki Search we are using /wiki_search/ URL. You can use the following ways to search for a specific page:</p>
+            <ul>
+                <p>To search for locations with keyword:</p>
+                <form id="searchForm" onsubmit="submitForm(event, 'searchForm', '/wiki_search/search/')">
+                    <input type="text" name="q" placeholder="Ex: Hagia">
+                    <input type="submit" value="Search">
+                </form>
+            </ul>
+            <ul>
+                <p>To get details about location:</p>
+                <form id="resultsForm" onsubmit="submitForm(event, 'resultsForm', '/wiki_search/results/')">
+                    <input type="text" name="q" placeholder="Ex:Q2656937">
+                    <input type="submit" value="Get Details">
+                </form>
+            </ul>
+        </li>
+
+        <li>
+            <p>To interact with the database, we are using /database_search/ URL. You can use the following ways:</p>
+            <ul>
+                <li><a href="/database_search/routes/">List all routes</a></li>
+                <li><a href="/database_search/nodes/">List all nodes</a></li>
+                <li><a href="/database_search/users/">List all users</a></li> 
+                <p>To get details about a specific route:</p>
+                <form id="routeDetailForm" onsubmit="submitForm(event, 'routeDetailForm', '/database_search/routes/')">
+                    <input type="text" name="q" placeholder="Ex: 1">
+                    <input type="submit" value="Get Details">
+                </form>
+                <p>To get details about a specific node:</p>
+                <form id="nodeDetailForm" onsubmit="submitForm(event, 'nodeDetailForm', '/database_search/nodes/')">
+                    <input type="text" name="q" placeholder="Ex: 1">
+                    <input type="submit" value="Get Details">
+                </form>
+                <p>To get details about a specific user:</p>
+                <form id="userDetailForm" onsubmit="submitForm(event, 'userDetailForm', '/database_search/users/')">
+                    <input type="text" name="q" placeholder="Ex: 1">
+                    <input type="submit" value="Get Details">
+                </form>
+            </ul>
+        </li>
+    </ul>
+    <p>Create a new user:</p>
+    <form id="createUserForm" onsubmit="submitUserForm(event)">
+        <input type="text" name="username" placeholder="Username" required>
+        <input type="text" name="name" placeholder="Name" required>
+        <input type="email" name="email" placeholder="Email">
+        <input type="password" name="password" placeholder="Password">
+        <br>
+        <input type="checkbox" name="is_superuser" id="is_superuser"> <label for="is_superuser">Is Superuser?</label><br>
+        <input type="submit" value="Create User">
+    </form>
+    <p>Create a new node:</p>
+    <form id="createNodeForm" onsubmit="submitNodeForm(event)">
+        <input type="text" name="name" placeholder="Node Name" required>
+        <input type="text" name="photo" placeholder="Photo URL" required>
+        <input type="text" name="latitude" placeholder="Latitude" required>
+        <input type="text" name="longitude" placeholder="Longitude" required>
+        <input type="submit" value="Create Node">
+    </form>
+</body>
+</html>

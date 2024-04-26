@@ -1,0 +1,84 @@
+header {
+  position: sticky;
+  top: -54px; /* value to scroll past the logo so just the search bar is sticky */
+  z-index: 2;
+}
+.search-bar {
+  display: flex;
+  justify-content: center;
+  padding: 24px;
+  background-color: #FFF5EA; /* Assuming you want a white background for the search bar */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* subtle shadow for elevation */
+}
+.search-bar input {
+  width: 600px;
+  max-width: 90%; /* Ensuring the bar is not exceeding the width of the screen */
+  padding: 12px 24px;
+  border-radius: 24px;
+  font-size: 16px;
+  border: 1px solid #ddd; /* A light border for the input */
+  box-shadow: none; 
+  outline: none;
+  transition: border-color 0.2s; /* Smooth transition for focus */
+}
+
+.search-bar [list]::-webkit-list-button,
+.search-bar [list]::-webkit-calendar-picker-indicator {
+  display: none !important;
+}
+
+.search-bar input:focus {
+  border-color: #333; /* Darken border on focus */
+}
+
+.container {
+  display: flex;
+  justify-content: center; /* Center container contents */
+}
+
+.search-display {
+  width: 100%;
+  max-width: 600px; /* Same as input width to align items */
+  margin: auto; /* Center the search display block */
+  padding: 16px;
+  box-sizing: border-box; /* Include padding in the element's total width */
+}
+
+.search-result {
+  background-color: #faf3eb; /* Light background for each item */
+  margin-bottom: 8px; /* Space between items */
+  border-radius: 8px; /* Rounded corners for polish */
+  overflow: hidden; /* Ensures nothing spills out of the border radius */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow for each item */
+  transition: transform 0.2s, box-shadow 0.2s; /* Smooth transition for hover effect */
+}
+
+.search-result:hover {
+  transform: translateY(-2px); /* Slightly lift the item on hover */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); /* Enhance shadow on hover */
+}
+
+.result-button {
+  cursor: pointer; /* Change cursor on hover */
+  width: 100%; /* Extend button to full width of its parent */
+  padding: 16px; /* Padding inside the button */
+  border: none; /* Remove default button border */
+  background-color: transparent; /* No background to blend with the item */
+  text-align: left; /* Align text to the left */
+  display: block; /* Make the button block level */
+  transition: background-color 0.2s; /* Smooth transition for hover effect */
+}
+
+.result-button:hover {
+  background-color: #ececec; /* Slight background color change on hover */
+}
+
+.result-button h3 {
+  margin: 0; /* Remove default margins */
+  color: #333; /* Dark text color for contrast */
+}
+
+.result-button p {
+  margin: 0;
+  color: #666; /* Lighter text color for the ID */
+}
