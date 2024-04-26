@@ -2,3 +2,5 @@
 /BuRouteMobile/android
 *.pyc
 __pycache__/
+.env
+
