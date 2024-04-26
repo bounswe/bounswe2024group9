@@ -1,4 +1,4 @@
-FROM python:3.11-slim
+FROM python:3.11
 ENV PYTHONBUFFERED 1
 
 RUN apt-get update \
@@ -6,7 +6,6 @@ RUN apt-get update \
 	git \
 	pkg-config \
 	default-libmysqlclient-dev \
-	gcc \
 	&& rm -rf /var/lib/apt/lists/*
 
 
