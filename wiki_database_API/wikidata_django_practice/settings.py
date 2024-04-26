@@ -11,49 +11,49 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
 from pathlib import Path
+from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-o#q#%fv)0j(&o139+(#krls8f^_8jtn!=h5(mmkux7eqy!($d='
+SECRET_KEY = config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+
+AUTH_USER_MODEL = 'database_search.User'
+
+CORS_ALLOW_ALL_ORIGINS = True
+
+ALLOWED_HOSTS = [
+    config('HEROKU_APP'),
+    '127.0.0.1'
+]
 
 
 # Application definition
 
 INSTALLED_APPS = [
+    'corsheaders',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'rest_framework',
-    'corsheaders',
-    'django_extensions',
-    'wiki_search'
+    'wiki_search',
+    'database_search',
 ]
-
-CORS_ALLOW_ALL_ORIGINS = True
-
-CORS_ALLOWED_ORIGINS = [
-    'http://localhost:3030',
-    'http://10.0.2.2',
-]
-
-ALLOWED_HOSTS = ['*']
-
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -68,7 +68,7 @@ ROOT_URLCONF = 'wikidata_django_practice.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -87,14 +87,27 @@ WSGI_APPLICATION = 'wikidata_django_practice.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
+# DATABASES = {
+#    'default': {
+#       'ENGINE': 'django.db.backends.mysql',
+#       'NAME': config('DB_NAME'),
+#       'USER': config('DB_USER'),
+#       'PASSWORD': config('DB_PASSWORD'),
+#       'HOST': config('DB_HOST'),
+#       'PORT': config('DB_PORT'),
+#    }
+# }
+
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+   'default': {
+      'ENGINE': 'django.db.backends.mysql',
+      'NAME': config('DB_NAME'),
+      'USER': config('DB_USER'),
+      'PASSWORD': config('DB_PASSWORD'),
+      'HOST': config('DB_HOST'),
+      'PORT': config('DB_PORT'),
+   }
 }
-
-
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
 
