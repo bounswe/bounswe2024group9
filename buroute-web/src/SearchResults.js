@@ -23,6 +23,21 @@ function SearchResults() {
   return (
     <>
       <header>
+        <div className="header-bar">
+        <img id="bar_logo" 
+          src="/logo.jpg"
+          style={{ width: '75px', height: 'auto' }} 
+          alt="bar_logo"
+          onClick={() => window.location.href = '/search'}
+          >
+          </img>
+          <button 
+            id="logout-button"
+            onClick={logoutUser}
+          >
+            Log Out
+          </button>
+        </div>
         <div className="search-bar">
           <input
             id="search"
@@ -71,4 +86,10 @@ export const fetchSearchResults = async (searchString) => {
   } catch (error) {
     console.error("Error fetching search results:", error);
   }
+};
+
+export const logoutUser = () => {
+  console.log('User logged out.');
+  // Redirect to login page
+  window.location.href = '/login';
 };

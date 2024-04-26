@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { fetchSearchResults } from './SearchResults';
+import { fetchSearchResults, logoutUser } from './SearchResults';
 
 import "./detail_style.css";
 
@@ -59,7 +59,23 @@ function SearchDetails() {
 
   return (
     <>
-      <header>
+        <header>
+        <div className="header-bar"
+        style={{height: 'auto'}} >
+          <img id="bar_logo" 
+          src="/logo.jpg"
+          alt="bar_logo"
+          style={{ width: '75px', height: 'auto' }} 
+          onClick={() => window.location.href = '/search'}
+          >
+          </img>
+          <button 
+            id="logout-button"
+            onClick={logoutUser}
+          >
+            Log Out
+          </button>
+        </div>
         <div className="search-bar">
           <input
             id="search"

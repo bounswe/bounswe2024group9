@@ -57,6 +57,7 @@ body {
       rgb(var(--background-end-rgb))
     )
     rgb(var(--background-start-rgb));
+    background: whitesmoke;
 }
 
 @layer utilities {
