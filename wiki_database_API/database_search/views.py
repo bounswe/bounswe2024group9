@@ -89,7 +89,7 @@ def create_node(request):
         return HttpResponse(status=405)
     
 @csrf_exempt
-def login(request):
+def login_user(request):
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
