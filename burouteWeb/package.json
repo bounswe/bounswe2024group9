@@ -8,7 +8,6 @@
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
     "class-variance-authority": "^0.7.0",
-    "concurrently": "^8.2.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.23.0",
@@ -18,9 +17,8 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "concurrently \"npm run start-react\" \"npm run start-django\"",
-    "start-react": "react-scripts start",
-    "start-django": "cd ..\\wiki_database_API && python manage.py runserver"
+    "start": "npm run start-react",
+    "start-react": "react-scripts start"
   },
   "eslintConfig": {
     "extends": [

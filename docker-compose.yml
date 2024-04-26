@@ -1,0 +1,12 @@
+version: '3'
+services:
+  db:
+    build: ./wikiDatabaseAPI
+    command: python manage.py runserver 0.0.0.0:8000
+    ports:
+      - "8000:8000"
+  web:
+    build: ./burouteWeb
+    restart: on-failure
+    ports:
+      - "3000:3000" 
