@@ -94,17 +94,17 @@ def results(request, QID):
     # Execute the query and parse the results
     results = sparql.query().convert()
 
-    if 'longitude' in results['results']['bindings'][0] and 'latitude' in results['results']['bindings'][0]:
+    try:
       longitude = float(results['results']['bindings'][0]['longitude']['value'])
       latitude = float(results['results']['bindings'][0]['latitude']['value'])
       nearby_entries = top_5_nearby(longitude, latitude)
-    else:
+    except:
       nearby_entries = {}
 
-    if 'inceptionYear' in results['results']['bindings'][0]:
+    try:
         inception = int(results['results']['bindings'][0]['inceptionYear']['value'])
         same_period_entries = top_5_period(inception)
-    else:
+    except:
         same_period_entries = {}
 
 
