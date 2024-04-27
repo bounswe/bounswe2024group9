@@ -3,8 +3,8 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import WikidataSearch from './WikidataSearch';
 import SearchResultDetail from './SearchResultDetail';
-import NodeCreationPage from './NodeCreationPage'
-import NodeDetails from './SearchResultDetailCustomNode'
+import NodeCreationPage from './NodeCreationPage';
+import NodeDetails from './SearchResultDetailCustomNode';
 import Login from './Login';
 
 const Stack = createStackNavigator();
@@ -12,15 +12,15 @@ const Stack = createStackNavigator();
 const App = () => {
   return (
     <NavigationContainer>
-       <Stack.Navigator initialRouteName="Login">
-        <Stack.Screen name="Login" component={Login} />
-        <Stack.Screen name="WikidataSearch" component={WikidataSearch} 
-      />
-      <Stack.Navigator initialRouteName="WikidataSearch">
+      <Stack.Navigator initialRouteName="BuRouteMobile">
         <Stack.Screen
           name="WikidataSearch"
           component={WikidataSearch}
           options={{ title: 'Wikidata Search' }}
+        />
+        <Stack.Screen
+            name="Login"
+            component={Login}
         />
         <Stack.Screen
           name="SearchResultDetail"
