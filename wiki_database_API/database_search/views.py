@@ -60,10 +60,9 @@ def create_user(request):
             return JsonResponse({'error': 'E-mail already exists.'}, status=400)
 
         # Depending on your CustomUserManager, adjust the creation logic here
-        user = User.objects.create_user(username=username, password=password, e_mail=e_mail, name=name)
+        user = User.objects.create_user(username=username, password=password, e_mail=e_mail)
         
         # Set additional fields if needed
-        user.name = name
         user.is_active = True
         user.save()
 
