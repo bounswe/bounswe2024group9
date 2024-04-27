@@ -1,68 +1,20 @@
-import React, { useState, useEffect } from 'react';
-import { View, TextInput, Button, Text } from 'react-native';
+import React from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
+import Login from './Login'; // Adjust the import path as needed
+import WikidataSearch from './WikidataSearch'; // Adjust the import path as needed
 
-const WikidataSearch = () => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [searchResults, setSearchResults] = useState([]);
+const Stack = createStackNavigator();
 
-    const searchWikidata = async () => {
-      try {
-        const response = await fetch('http://10.0.2.2:8000/wiki_search/search/' + searchTerm, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-
-        const data = await response.json();
-        if (!data.results || !data.results.bindings) {
-          throw new Error('Malformed response data');
-        }
-
-        const results = data.results.bindings.map(result => ({
-          itemLabel: result.itemLabel.value,
-          description: result.description ? result.description.value : 'No description available',
-          totalMatches: parseInt(result.totalMatches.value)
-        }));
-
-        setSearchResults(results);
-      } catch (error) {
-        console.error('Error searching Wikidata:', error);
-      }
-    };
-
-
-  // Call searchWikidata when searchTerm changes or when you want to trigger a search
-  useEffect(() => {
-    if (searchTerm.trim() !== '') {
-      searchWikidata();
-    }
-  }, [searchTerm]);
-
+const App = () => {
   return (
-    <View style={{ flex: 1, padding: 20 }}>
-      <TextInput
-        style={{ marginBottom: 10, padding: 10, borderWidth: 1, borderColor: '#ccc', borderRadius: 5 }}
-        placeholder="Search Wikidata"
-        value={searchTerm}
-        onChangeText={setSearchTerm}
-      />
-      <Button title="Search" onPress={searchWikidata} />
-
-      {/* Display search results */}
-      {searchResults.map((result, index) => (
-        <View key={index} style={{ marginTop: 20 }}>
-          <Text style={{ fontWeight: 'bold' }}>{result.itemLabel}</Text>
-          <Text>{result.description}</Text>
-          <Text>Total Matches: {result.totalMatches}</Text>
-        </View>
-      ))}
-    </View>
+    <NavigationContainer>
+      <Stack.Navigator initialRouteName="Login">
+        <Stack.Screen name="Login" component={Login} />
+        <Stack.Screen name="WikidataSearch" component={WikidataSearch} />
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 };
 
-export default WikidataSearch;
+export default App;

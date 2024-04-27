@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { View, TextInput, Button, Text, TouchableOpacity } from 'react-native';
-import CheckBox from '@react-native-community/checkbox';
+//import CheckBox from '@react-native-community/checkbox';
+import { useNavigation } from '@react-navigation/native';
 
 const Login = ({ navigation }) => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [rememberMe, setRememberMe] = useState(false);
+    //const navigation = useNavigation();
 
     const handleLogin = async () => {
         try {
@@ -28,7 +30,7 @@ const Login = ({ navigation }) => {
             }
             //assuming django server returns user data with successful login
             const userData = await response.json();
-            navigation.navigate('Home', { userData }); //navigate to Home page after login (home endpoint can change)
+            navigation.navigate('WikidataSearch', { userData }); //navigate to Home page after login (home endpoint can change)
         }
 
         catch (error) {
@@ -45,7 +47,7 @@ const Login = ({ navigation }) => {
     const handleLoginWithGoogle = () => {
         // NOT IMPLEMENTED YET
         //navigate to Home page after login (endpoint can change)
-        navigation.navigate('Home');
+        navigation.navigate('WikidataSearch');
     };
 
     return (
@@ -68,11 +70,6 @@ const Login = ({ navigation }) => {
                 onChangeText={setPassword}
                 secureTextEntry={true}
             />
-
-            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20 }}>
-                    <CheckBox value={rememberMe} onValueChange={setRememberMe} />
-                    <Text>Remember Me</Text>
-            </View>
 
             {error ? <Text style={{ color: 'red', marginBottom: 20 }}>{error}</Text> : null}
 
