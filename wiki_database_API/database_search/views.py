@@ -1,6 +1,7 @@
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.hashers import make_password
+from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import get_object_or_404
 from .models import Route, Node, User
 from django.core import serializers
@@ -87,3 +88,19 @@ def create_node(request):
     else:
         return HttpResponse(status=405)
     
+@csrf_exempt
+def login_user(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+
+        user = authenticate(username=username, password=password)
+        if user is not None:
+            # Authentication successful
+            login(request, user)
+            return JsonResponse({'status': 'success', 'user_id': user.pk})
+        else:
+            # Authentication failed
+            return JsonResponse({'error': 'Invalid username or password'}, status=400)
+    else:
+        return HttpResponse(status=405)
