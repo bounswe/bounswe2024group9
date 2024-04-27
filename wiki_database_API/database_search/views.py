@@ -6,6 +6,9 @@ from django.shortcuts import get_object_or_404
 from .models import Route, Node, User
 from django.core import serializers
 import json
+import logging
+
+logger = logging.getLogger(__name__)
 
 def route_list(request):
     routes = Route.objects.all()
@@ -91,8 +94,12 @@ def create_node(request):
 @csrf_exempt
 def login_user(request):
     if request.method == 'POST':
-        username = request.POST.get('username')
-        password = request.POST.get('password')
+        try:
+            data = json.loads(request.body)
+            username = data.get('username')
+            password = data.get('password')
+        except (KeyError, json.JSONDecodeError) as e:
+            return JsonResponse({'error': 'Malformed data, error: ' + str(e)}, status=400)
 
         user = authenticate(username=username, password=password)
         if user is not None:
@@ -101,6 +108,7 @@ def login_user(request):
             return JsonResponse({'status': 'success', 'user_id': user.pk})
         else:
             # Authentication failed
+            print("Failed login attempt for username:", username)
             return JsonResponse({'error': 'Invalid username or password'}, status=400)
     else:
         return HttpResponse(status=405)
