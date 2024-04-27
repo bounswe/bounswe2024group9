@@ -67,19 +67,8 @@ input[type="password"] {
   align-items: center;
 }
 
-.wrapper_entrance .remember-forget-container {
-  display: flex;
-  align-items: center;
-}
-
 .wrapper_entrance .forgot-password {
   color: black;
-}
-
-
-.wrapper_entrance .remember-forget-container label {
-  margin-right: 10px; 
-  font-size: 0.8rem;
 }
 
 .wrapper_entrance .remember-forget-container .forgot-password {
@@ -145,12 +134,53 @@ input[type="password"] {
   background-color: rgba(244, 67, 54, 0.8);  
   border-radius: 4px; 
   padding: 4px; 
-  margin-top: 10px; 
+  margin: 10px 0; 
   text-align: center;  
 }
 
 .error-message:empty {
   display: none; 
+}
+
+.signup-redirect {
+  text-align: center;
+  margin-top: 20px; 
+}
+
+.signup-redirect a {
+  color: #007bff; 
+  text-decoration: none;
+}
+
+.signup-redirect a:hover {
+  text-decoration: underline;
+}
+
+.wrapper_entrance .remember-forget-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: nowrap; 
+}
+
+.wrapper_entrance .remember-forget-container div,
+.wrapper_entrance .remember-forget-container a.forgot-password {
+  flex-basis: 50%;
+  display: flex;
+  align-items: center; 
+  margin: 7px 0;
+}
+
+.wrapper_entrance .remember-forget-container div {
+  justify-content: flex-start; 
+}
+
+.wrapper_entrance .remember-forget-container a.forgot-password {
+  justify-content: flex-end; 
+}
+
+.wrapper_entrance .remember-forget-container input[type="checkbox"] {
+  margin-right: 5px; 
 }
 
 @media (max-width: 600px) {
