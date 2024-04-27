@@ -46,7 +46,6 @@ def create_user(request):
     if request.method == 'POST':
         data = json.loads(request.body)
         username = data.get('username')
-        name = data.get('name')
         e_mail = data.get('email')
         password = data.get('password')
         # is_superuser = data.get('is_superuser', False) # Everybody will be regular user
@@ -72,7 +71,6 @@ def create_user(request):
             'status': 'success', 
             'user_id': user.user_id,
             'username': user.username,
-            'name': user.name,
             'e_mail': user.e_mail,
             'is_active': user.is_active,
             'is_superuser': user.is_superuser,
