@@ -19,7 +19,9 @@
   "scripts": {
     "start": "concurrently \"npm run start-react\" \"npm run start-django\"",
     "start-react": "react-scripts start",
-    "start-django": "cd ..\\wiki_database_API && python manage.py runserver"
+    "start-django": "cd ..\\wiki_database_API && python manage.py runserver",
+    "start-linux": "concurrently \"npm run start-react\" \"npm run start-django-linux\"",
+    "start-django-linux": "cd ../wiki_database_API && python3 manage.py runserver"
   },
   "eslintConfig": {
     "extends": [

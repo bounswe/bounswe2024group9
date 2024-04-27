@@ -88,8 +88,48 @@ export const fetchSearchResults = async (searchString) => {
   }
 };
 
-export const logoutUser = () => {
+function getCookie(name) {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+    const cookies = document.cookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      // Does this cookie string begin with the name we want?
+      if (cookie.substring(0, name.length + 1) === (name + '=')) {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
+
+export const logoutUser = async () => {
   console.log('User logged out.');
-  // Redirect to login page
-  window.location.href = '/login';
+
+  // Retrieve CSRF token from cookies
+  // Assuming you have a function getCookie like the one you used in login
+  const csrfToken = getCookie('csrftoken');
+
+  try {
+    const response = await fetch('http://127.0.0.1:8000/database_search/logout/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        // Include the CSRF token in the request header
+        'X-CSRFToken': csrfToken,
+      },
+    });
+
+    if (response.ok) {
+      // Redirect to login page
+      window.location.href = '/login';
+    } else {
+      // Handle any errors that occur during logout
+      const data = await response.json();
+      console.error('Logout failed:', data.error);
+    }
+  } catch (error) {
+    console.error('Error:', error);
+  }
 };

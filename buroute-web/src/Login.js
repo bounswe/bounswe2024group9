@@ -7,25 +7,11 @@ export const Login = () => {
   const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState(null); // State for storing error messages
 
-  function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-      const cookies = document.cookie.split(';');
-      for (let i = 0; i < cookies.length; i++) {
-        const cookie = cookies[i].trim();
-        // Does this cookie string begin with the name we want?
-        if (cookie.substring(0, name.length + 1) === (name + '=')) {
-          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-          break;
-        }
-      }
-    }
-    return cookieValue;
-  }
+
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    
+
     try {
       const response = await fetch('http://127.0.0.1:8000/database_search/login/', {
         method: 'POST',
@@ -33,15 +19,17 @@ export const Login = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          username: username,
-          password: password,
+          username,
+          password,
         }),
       });
 
       const data = await response.json();
       if (response.ok) {
         // Redirect to the search page if login is successful
+        setError(null);
         window.location.href = '/search';
+
       } else {
         // Display error message if login failed
         setError(data.error);
