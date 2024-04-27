@@ -50,6 +50,9 @@ export const Login = () => {
           className="logo"
         />
       </h2>
+      <div className="error-message">
+        {error && <p>{error}</p>}
+      </div>
       <form onSubmit={handleSubmit}>
         <div className="form-group">
           <label htmlFor="username">Username:</label>
@@ -82,10 +85,7 @@ export const Login = () => {
             />
             <label htmlFor="remember-me">Remember me</label>
           </div>
-          <a href="#" className="forgot-password">Forgot password?</a>
-        </div>
-        <div className="error-message">
-          {error && <p>{error}</p>}
+          <a href="/forgot" className="forgot-password">Forgot password?</a>
         </div>
         <button type="submit" className="login-button">Login</button>
       </form>

@@ -1,12 +1,11 @@
 import React, { useState } from "react";
-import "./style.css"; 
+import "./login_signup_style.css"; 
 
 const Signup = () => {
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState(null);
 
   const handleSubmit = async (event) => {
@@ -25,17 +24,19 @@ const Signup = () => {
         },
         body: JSON.stringify({
           username: username,
-          name: username, // Assuming username is also the name
           email: email,
           password: password,
         }),
       });
 
-      const data = await response.json();
       if (response.ok) {
-       
-        console.log("User created successfully:", data);
+        const data = await response.json();
+        console.log(data);
+
+        // Redirect to login page
+        window.location.href = '/login';
       } else {
+        const data = await response.json();
         setError(data.error || "An error occurred");
       }
     } catch (error) {
@@ -45,21 +46,16 @@ const Signup = () => {
   };
 
   return (
-    <div className="App">
-        <a href="../signin/App.jsx" className="top-link" id="link1">
-          Sign In
-        </a>
-        <a href="../signup/App.jsx" className="top-link" id="link2">
-          Sign Up
-        </a>
-      <div className="container">
+    <div className="wrapper_entrance">
+      <div className="container_center">
         <h2>Sign Up
           <img
-            src="https://private-user-images.githubusercontent.com/68972243/313346109-38df63a1-f4b4-4499-9ba7-e2b89e40ef78.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3MTM0NDg2NjYsIm5iZiI6MTcxMzQ0ODM2NiwicGF0aCI6Ii82ODk3MjI0My8zMTMzNDYxMDktMzhkZjYzYTEtZjRiNC00NDk5LTliYTctZTJiODllNDBlZjc4LnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNDA0MTglMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjQwNDE4VDEzNTI0NlomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPTMzOThhMDAxMmI1MmRmMTY2MjE5MjA2NzgyYmJkNDVhN2NkNmRjOWFlNTJkMTBkN2Y3OGE4NDI0MGQ1MzUyZjYmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0JmFjdG9yX2lkPTAma2V5X2lkPTAmcmVwb19pZD0wIn0.J1gXmkyW027jU5UyRz8I07VbgElZbfU-mXyppaliH-o"
+            src="/logo.jpg" // Replace with your logo URL
             alt="logo"
             className="logo"
           />
         </h2>
+        {error && <div className="error-message">{error}</div>}
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label htmlFor="username">Username:</label>
@@ -101,23 +97,13 @@ const Signup = () => {
               onChange={(e) => setConfirmPassword(e.target.value)}
             />
           </div>
-          <div className="news-container">
-            <input
-              type="checkbox"
-              id="rememberMe"
-              name="rememberMe"
-              checked={rememberMe}
-              onChange={(e) => setRememberMe(e.target.checked)}
-            />
-            <label htmlFor="rememberMe">Subscribe to our newsletter</label>
-          </div>
-          <div className="error-message">
-            {error && <p>{error}</p>}
-          </div>
           <button type="submit" id="signup-button">
             Sign Up
           </button>
         </form>
+        <div className="signin-redirect">
+          Already have an account? <a href="/login">Sign in now</a>
+        </div>
       </div>
     </div>
   );

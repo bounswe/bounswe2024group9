@@ -142,17 +142,17 @@ input[type="password"] {
   display: none; 
 }
 
-.signup-redirect {
+.signup-redirect, .signin-redirect {
   text-align: center;
   margin-top: 20px; 
 }
 
-.signup-redirect a {
+.signup-redirect a , .signin-redirect a{
   color: #007bff; 
   text-decoration: none;
 }
 
-.signup-redirect a:hover {
+.signup-redirect a:hover, .signin-redirect a:hover {
   text-decoration: underline;
 }
 
