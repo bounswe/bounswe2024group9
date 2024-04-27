@@ -1,5 +1,8 @@
-__pycache__/
-*.pyc
-.env
 /BuRouteMobile/node_modules
 /BuRouteMobile/android
+*.pyc
+__pycache__/
+.env
+myenv
+.DS_Store
+.idea

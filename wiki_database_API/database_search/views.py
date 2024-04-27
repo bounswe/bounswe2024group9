@@ -1,10 +1,14 @@
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.hashers import make_password
+from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import get_object_or_404
 from .models import Route, Node, User
 from django.core import serializers
 import json
+import logging
+
+logger = logging.getLogger(__name__)
 
 def route_list(request):
     routes = Route.objects.all()
@@ -39,10 +43,6 @@ def user_detail(request, pk):
     user_json = serializers.serialize('json', [user]) # User is put in array because serialize expects a list
     user_data = json.loads(user_json)[0]  # Deserialize the JSON and take the first element
     return JsonResponse(user_data, safe=False)
-
-import logging
-
-logger = logging.getLogger(__name__)
 
 @csrf_exempt
 def create_user(request):
@@ -88,3 +88,24 @@ def create_node(request):
     else:
         return HttpResponse(status=405)
     
+@csrf_exempt
+def login_user(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            username = data.get('username')
+            password = data.get('password')
+        except (KeyError, json.JSONDecodeError) as e:
+            return JsonResponse({'error': 'Malformed data, error: ' + str(e)}, status=400)
+
+        user = authenticate(username=username, password=password)
+        if user is not None:
+            # Authentication successful
+            login(request, user)
+            return JsonResponse({'status': 'success', 'user_id': user.pk})
+        else:
+            # Authentication failed
+            print("Failed login attempt for username:", username)
+            return JsonResponse({'error': 'Invalid username or password'}, status=400)
+    else:
+        return HttpResponse(status=405)
