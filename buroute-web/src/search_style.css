@@ -6,8 +6,16 @@ header {
 
 .header-bar {
   display: flex;
+  align-items: center;
   padding: 24px;
   background-color: #FFF5EA; /* Assuming you want a white background for the search bar */
+  margin: 0;
+  padding-left: 10px;
+  padding-right: 10px;
+  padding-top: 0;
+  padding-bottom: 0;
+  ;
+
 }
 
 .search-bar {
@@ -93,6 +101,8 @@ header {
 #logout-button {
   padding: 12px 24px;
   font-size: 16px;
+  height: 50px;
+  width: 150px;
   background-color: #00aeff; /* Red color for log out to indicate action */
   color: white;
   border: none;
