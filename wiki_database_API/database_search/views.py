@@ -71,15 +71,15 @@ def create_user(request):
 def create_node(request):
     if request.method == 'POST':
         name = request.POST.get('name')
-        photo = request.POST.get('photo')
         latitude = request.POST.get('latitude')
         longitude = request.POST.get('longitude')
+        photo = request.FILES.get('photo')
 
         # Validation checks and additional logic goes here
         node = Node.objects.create(
-            name=name, 
-            photo=photo, 
-            latitude=latitude, 
+            name=name,
+            photo=photo,
+            latitude=latitude,
             longitude=longitude
         )
 
