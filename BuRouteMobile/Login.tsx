@@ -7,12 +7,13 @@ const Login = ({ navigation }) => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
-    const [rememberMe, setRememberMe] = useState(false);
+    const [success, setSuccess] = useState(''); 
+    //const [rememberMe, setRememberMe] = useState(false);
     //const navigation = useNavigation();
 
     const handleLogin = async () => {
         try {
-            const response = await fetch('http://127.0.0.1:8000/login/', {
+            const response = await fetch('http://10.0.2.2:8000/database_search/login/', {
                 //send post request to backend server
                 method: 'POST',
                 headers: {
@@ -23,19 +24,27 @@ const Login = ({ navigation }) => {
                     password
                 }),
             });
-
+            //console.log("Request data:", JSON.stringify({ username, password }));
             if (!response.ok) {
-                //username and password mismatch
-                throw new Error('Invalid username or password');
+                const errorResponse = await response.text();  // Get text response to understand the backend error
+                console.log("Login failed with response:", errorResponse);
+                setError("Invalid username or password");
+                setTimeout(() => setError(''), 2000); // Clear the error message after 5 seconds
+                return;
             }
             //assuming django server returns user data with successful login
             const userData = await response.json();
-            navigation.navigate('WikidataSearch', { userData }); //navigate to Home page after login (home endpoint can change)
+            setSuccess('Login successful! Logging you in...');
+            setTimeout(() => {
+                navigation.navigate('WikidataSearch', { userData }); // Navigate after showing success message
+                }, 2000); //navigate to Home page after login (home endpoint can change)
         }
 
         catch (error) {
             //any unexpected error
             setError(error.message);
+            console.log(error.message);
+            setTimeout(() => setError(''), 5000);
         }
     };
 
@@ -72,6 +81,7 @@ const Login = ({ navigation }) => {
             />
 
             {error ? <Text style={{ color: 'red', marginBottom: 20 }}>{error}</Text> : null}
+            {success ? <Text style={{ color: 'green', marginBottom: 20 }}>{success}</Text> : null}
 
             <Button title="Login" onPress={handleLogin} style={{marginTop: 20, marginBottom: 20}}/>
 
