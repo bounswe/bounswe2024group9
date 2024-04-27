@@ -44,7 +44,6 @@ const handleCreateNode = async () => {
     formData.append('latitude', latitude);
     formData.append('longitude', longitude);
 
-    // Assuming selectedImage.uri is the local file URI
     const photo = {
       uri: selectedImage.uri,
       type: 'image/jpeg',

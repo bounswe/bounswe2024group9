@@ -4,6 +4,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import WikidataSearch from './WikidataSearch';
 import SearchResultDetail from './SearchResultDetail';
 import NodeCreationPage from './NodeCreationPage'
+import NodeDetails from './SearchResultDetailCustomNode'
 
 const Stack = createStackNavigator();
 
@@ -24,7 +25,12 @@ const App = () => {
         <Stack.Screen
           name="NodeCreationPage"
           component={NodeCreationPage}
-          options={{ title: 'Node Creation Page' }} // Optional: You can set a title for this screen
+          options={{ title: 'Node Creation Page' }}
+        />
+        <Stack.Screen
+            name="NodeDetails"
+            component={NodeDetails}
+            options={{ title: 'Custom node view page' }}
         />
       </Stack.Navigator>
     </NavigationContainer>

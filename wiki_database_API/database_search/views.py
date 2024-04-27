@@ -20,7 +20,8 @@ def route_detail(request, pk):
 def node_list(request):
     nodes = Node.objects.all()
     nodes_list = serializers.serialize('json', nodes)
-    return JsonResponse(nodes_list, safe=False)
+    nodes_list_json = json.loads(nodes_list)
+    return JsonResponse(nodes_list_json, safe=False)
 
 def node_detail(request, pk):
     node = get_object_or_404(Node, pk=pk)

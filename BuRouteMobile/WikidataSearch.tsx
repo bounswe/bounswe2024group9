@@ -1,30 +1,65 @@
 import React, { useState, useEffect } from 'react';
-import { View, TextInput, Text, TouchableOpacity, Modal, Button } from 'react-native';
+import { View, TextInput, Text, TouchableOpacity, Modal, Button, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import NodeCreationPage from './NodeCreationPage';
 
 const WikidataSearch = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState([]);
+  const [nodes, setNodes] = useState([]);
   const [selectedQValue, setSelectedQValue] = useState(null);
-  const navigation = useNavigation();
   const [isConsistent, setConsistency] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const navigation = useNavigation();
 
-  let callTimeout
+  let callTimeout;
+
+  const fetchNodes = async () => {
+    try {
+      const response = await fetch('http://10.0.2.2:8000/database_search/nodes/');
+      const jsonData = await response.json();
+      console.log("JSON Data:", jsonData);
+
+      if (!Array.isArray(jsonData)) {
+        console.error('Expected an array but received:', jsonData);
+        return;
+      }
+
+      const transformedNodes = jsonData.map(item => ({
+        id: item.pk,
+        name: item.fields.name,
+        photo: item.fields.photo,
+        latitude: parseFloat(item.fields.latitude),
+        longitude: parseFloat(item.fields.longitude)
+      }));
+
+      console.log("Transformed Nodes:", transformedNodes); // Debugging: Log the transformed nodes
+      setNodes(transformedNodes);
+    } catch (error) {
+      console.error('Failed to fetch nodes:', error);
+    }
+  };
 
   const searchWikidata = async () => {
-    console.log('making api call with ' + searchTerm)
+    console.log('making api call with ' + searchTerm);
+    if (searchTerm.trim() === '') {
+      setSearchResults([]);
+      return;
+    }
     try {
       const response = await fetch('http://10.0.2.2:8000/wiki_search/search/' + searchTerm);
       const data = await response.json();
-      const results = data.results.bindings.map(result => ({
-        itemLabel: result.itemLabel.value,
-        description: result.description ? result.description.value : 'No description available',
-        totalMatches: parseInt(result.totalMatches.value),
-        Q: result.item.value,
-      }));
-      if (isConsistent) setSearchResults(results);
+      if (data.results.bindings.length === 0) {
+        fetchNodes();
+      } else {
+        const results = data.results.bindings.map(result => ({
+          itemLabel: result.itemLabel.value,
+          description: result.description ? result.description.value : 'No description available',
+          totalMatches: parseInt(result.totalMatches.value),
+          Q: result.item.value,
+        }));
+        setSearchResults(results);
+      }
     } catch (error) {
       console.error('Error searching Wikidata:', error);
     }
@@ -32,21 +67,20 @@ const WikidataSearch = () => {
 
   useEffect(() => {
     callTimeout = setTimeout(() => {
-      if (searchTerm.trim() !== '') searchWikidata();
-      else setSearchResults([]);
-      setConsistency(false);
-    }, 200);
+      searchWikidata();
+    }, 500);
+
     return () => {
       clearTimeout(callTimeout);
-      setConsistency(true);
     }
   }, [searchTerm]);
+  const getLastItem = (thePath) => thePath.substring(thePath.lastIndexOf('/') + 1);
 
   const handleResultClick = async (index) => {
     const selectedItem = searchResults[index];
     const qValue = getLastItem(selectedItem.Q);
     setSelectedQValue(qValue);
-
+    console.log(qValue);
     try {
       const response = await fetch('http://10.0.2.2:8000/wiki_search/results/' + qValue);
       const data = await response.json();
@@ -56,10 +90,8 @@ const WikidataSearch = () => {
     }
   };
 
-  const getLastItem = (thePath) => thePath.substring(thePath.lastIndexOf('/') + 1);
-
-  const handleCreatePage = () => {
-    setShowModal(true);
+  const handleCustomNodeClick = (node) => {
+    navigation.navigate('NodeDetails', { result: node });
   };
 
   const handleConfirmCreate = () => {
@@ -72,49 +104,64 @@ const WikidataSearch = () => {
     setShowModal(false);
   };
 
-  return (
-    <View style={{ flex: 1, padding: 20 }}>
-      <TextInput
-        style={{ marginBottom: 10, padding: 10, borderWidth: 1, borderColor: '#ccc', borderRadius: 5 }}
-        placeholder="Search Wikidata"
-        value={searchTerm}
-        onChangeText={setSearchTerm}
-      />
-      {searchResults.length > 0 ? (
-        searchResults.map((result, index) => (
-          <TouchableOpacity key={index} onPress={() => handleResultClick(index)}>
-            <View style={{ marginTop: 20 }}>
-              <Text style={{ fontWeight: 'bold' }}>{result.itemLabel}</Text>
-              <Text>{result.description}</Text>
-              <Text>Total Matches: {result.totalMatches}</Text>
-            </View>
-          </TouchableOpacity>
-        ))
-      ) : (
-        <Button
-          title="Feeling bold?"
-          onPress={handleCreatePage}
-        />
-      )}
+  const handleCreatePage = () => {
+    setShowModal(true);
+  };
 
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={showModal}
-        onRequestClose={() => setShowModal(false)}
-      >
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
-          <View style={{ backgroundColor: 'white', padding: 20, borderRadius: 10 }}>
-            <Text style={{ marginBottom: 10 }}>Would you like to create a new node?</Text>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-              <Button title="Cancel" onPress={handleCancelCreate} />
-              <Button title="Create" onPress={handleConfirmCreate} />
-            </View>
+return (
+  <ScrollView style={{ flex: 1, padding: 20 }}>
+    <TextInput
+      style={{ marginBottom: 10, padding: 10, borderWidth: 1, borderColor: '#ccc', borderRadius: 5 }}
+      placeholder="Search Wikidata"
+      value={searchTerm}
+      onChangeText={setSearchTerm}
+    />
+    {searchResults.length > 0 ? (
+      searchResults.map((result, index) => (
+        <TouchableOpacity key={index} onPress={() => handleResultClick(index)}>
+          <View style={{ marginTop: 20 }}>
+            <Text style={{ fontWeight: 'bold' }}>{result.itemLabel}</Text>
+            <Text>{result.description}</Text>
+            <Text>Total Matches: {result.totalMatches}</Text>
+          </View>
+        </TouchableOpacity>
+      ))
+    ) : (
+      nodes.map((node, index) => (
+        <TouchableOpacity key={index} onPress={() => handleCustomNodeClick(node)}>
+          <View style={{ marginTop: 20, padding: 10, borderWidth: 1, borderColor: '#ccc', borderRadius: 5 }}>
+            <Text style={{ fontWeight: 'bold' }}>Node Name: {node.name}</Text>
+            <Text>Photo: {node.photo}</Text>
+            <Text>Latitude: {node.latitude}</Text>
+            <Text>Longitude: {node.longitude}</Text>
+          </View>
+        </TouchableOpacity>
+      ))
+    )}
+    {searchResults.length === 0 && (
+      <Button
+        title="Feeling bold?"
+        onPress={handleCreatePage}
+      />
+    )}
+    <Modal
+      animationType="slide"
+      transparent={true}
+      visible={showModal}
+      onRequestClose={() => setShowModal(false)}
+    >
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
+        <View style={{ backgroundColor: 'white', padding: 20, borderRadius: 10 }}>
+          <Text style={{ marginBottom: 10 }}>Would you like to create a new node?</Text>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+            <Button title="Cancel" onPress={handleCancelCreate} />
+            <Button title="Create" onPress={handleConfirmCreate} />
           </View>
         </View>
-      </Modal>
-    </View>
-  );
+      </View>
+    </Modal>
+  </ScrollView>
+);
 };
 
 export default WikidataSearch;
