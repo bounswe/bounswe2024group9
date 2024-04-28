@@ -13,18 +13,23 @@ function SearchDetails() {
   const [searchResults, setSearchResults] = useState([]);
   const [showNearby, setShowNearby] = useState(false);
   const [showSimilar, setShowSimilar] = useState(false);
+  const [searched, setSearched] = useState(false); // State variable for search button press status
+  const [isLoading, setIsLoading] = useState(false); // State variable for loading status
   const isMounted = useRef(true); 
 
   const extractQID = (url) => {
     return url.split("/").pop();
   };
 
-  const handleKeyPress = async (event) => {
-    if (event.key === "Enter") {
-      console.log("Enter key pressed");
-      const results = await fetchSearchResults(searchValue.toLowerCase());
-      setSearchResults(results);
+  const handleSearch = async () => {
+    if (!searchValue) {
+      return;
     }
+    setIsLoading(true); 
+    setSearched(true); 
+    const results = await fetchSearchResults(searchValue.toLowerCase());
+    setSearchResults(results);
+    setIsLoading(false); 
   };
 
   useEffect(() => {
@@ -52,7 +57,7 @@ function SearchDetails() {
   }, [qid]);
 
   if (!itemDetails) {
-    return <div>Loading...</div>;
+    return <div className="centered">Searching...</div>;
   }
 
   const { results, nearby, period } = itemDetails;
@@ -68,7 +73,7 @@ function SearchDetails() {
 
   return (
     <>
-        <header>
+      <header>
         <div className="header-bar"
         style={{height: 'auto'}} >
           <img id="bar_logo" 
@@ -91,15 +96,24 @@ function SearchDetails() {
           <input
             id="search"
             type="search"
-            placeholder="&#x1F50D; Start typing to search..."
+            placeholder="Start typing to search..."
             value={searchValue}
             onChange={(e) => setSearchValue(e.target.value)}
-            onKeyDown={handleKeyPress}
-          />
-        </div>
+            onKeyDown={(event) => {
+              if (event.key === 'Enter') {
+                handleSearch();
+              }
+            }}          
+            />
+            <button onClick={handleSearch} className="search_button">&#x1F50D;</button>
+          </div>
       </header>
       <main className="container">
-        {searchResults.length > 0 ? (
+        {isLoading ? (
+          <p className="centered-search">Searching...</p> // Display this while the search is in progress
+        ) : searched && searchResults.length === 0 ? (
+          <p className="centered-search">We couldn't find anything.</p> // Display this when the search button has been pressed and no results are found
+        ) : searchResults.length > 0 ? (
           <div className="search-display">
             {searchResults.map((result, index) => (
               <div key={index} className="search-result">
@@ -114,7 +128,10 @@ function SearchDetails() {
         ) : (
           <div className="page-container">
             <div className="card">
-              <img src={result?.image?.value} alt={result?.itemLabel?.value} />
+              <img 
+                src={result?.image?.value} 
+                alt={result?.itemLabel?.value} 
+              />
             </div>
             <div className="card-content">
               <h2 className="card-title">{getSafeValue(result?.itemLabel)}</h2>

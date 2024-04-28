@@ -12,6 +12,7 @@ const Signup = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     setLoading(true); 
+    setError(null)
 
     if (password !== confirmPassword) {
       setError("Password and confirm password do not match");
@@ -42,8 +43,7 @@ const Signup = () => {
     }
 
     // valid email format
-    if (email.match(/^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/)
-       === null){
+    if (email.match(/^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/)       === null){
       setError("Please enter a valid email.");
       setLoading(false);
       return
@@ -51,7 +51,7 @@ const Signup = () => {
 
     // username requirements
     if (!username.match(/^[0-9a-zA-Z]+$/)){
-      setError("Username must consist of alphanumerical characters.");
+      setError("Username must only consist of alphanumerical characters.");
       setLoading(false);
       return
     };

@@ -8,14 +8,20 @@ header {
   display: flex;
   align-items: center;
   padding: 24px;
-  background-color: #FFF5EA; /* Assuming you want a white background for the search bar */
+  background-color: #e0eaff; /* Assuming you want a white background for the search bar */
   margin: 0;
   padding-left: 10px;
   padding-right: 10px;
   padding-top: 0;
   padding-bottom: 0;
-  ;
+}
 
+.centered-search {
+  display: flex;
+  align-items: center;
+  height: 100vh;
+  font-size: 1.5em;
+  flex-direction: column;
 }
 
 .search-bar {
@@ -60,7 +66,7 @@ header {
 }
 
 .search-result {
-  background-color: #faf3eb; /* Light background for each item */
+  background-color: rgb(192, 212, 255);
   margin-bottom: 8px; /* Space between items */
   border-radius: 8px; /* Rounded corners for polish */
   overflow: hidden; /* Ensures nothing spills out of the border radius */
@@ -85,7 +91,7 @@ header {
 }
 
 .result-button:hover {
-  background-color: #ececec; /* Slight background color change on hover */
+  background-color: rgb(133, 171, 252); /* Slight background color change on hover */
 }
 
 .result-button h3 {
@@ -99,11 +105,10 @@ header {
 }
 
 #logout-button {
-  padding: 12px 24px;
-  font-size: 16px;
+  font-size: 14px;
   height: 50px;
-  width: 150px;
-  background-color: #00aeff; /* Red color for log out to indicate action */
+  width: 120px;
+  background-color: rgb(161, 189, 250); 
   color: white;
   border: none;
   border-radius: 24px;
@@ -113,7 +118,7 @@ header {
 
 /* Add some hover effect for button */
 #logout-button:hover {
-  background-color: #007bff; /* Slightly darker red on hover */
+  background-color: rgb(128, 168, 253); /* Slightly darker blue  on hover */
 }
 
 #bar_logo {

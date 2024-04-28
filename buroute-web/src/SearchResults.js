@@ -8,18 +8,24 @@ function SearchResults() {
   const auth = useAuth(); 
   const [searchValue, setSearchValue] = useState("");
   const [searchResults, setSearchResults] = useState([]);
-  
+  const [isLoading, setIsLoading] = useState(false); // State variable for loading status
+  const [searched, setSearched] = useState(false); // State variable for search button press status
+
   // Function to extract QID from URL
   const extractQID = (url) => {
     return url.split("/").pop(); // Split the URL by "/" and get the last part
   };
 
-  const handleKeyPress = async (event) => {
-    if (event.key === "Enter") {
-      console.log("Enter key pressed");
-      const results = await fetchSearchResults(searchValue.toLowerCase());
-      setSearchResults(results);
+  const handleSearch = async () => {
+    if (!searchValue) {
+      return;
     }
+    
+    setIsLoading(true); 
+    setSearched(true); 
+    const results = await fetchSearchResults(searchValue.toLowerCase());
+    setSearchResults(results);
+    setIsLoading(false); 
   };
 
   return (
@@ -45,24 +51,35 @@ function SearchResults() {
           <input
             id="search"
             type="search"
-            placeholder="&#x1F50D; Start typing to search..."
+            placeholder=" Start typing to search..."
             value={searchValue}
             onChange={(e) => setSearchValue(e.target.value)}
-            onKeyDown={handleKeyPress}
-          />
-        </div>
+            onKeyDown={(event) => {
+              if (event.key === 'Enter') {
+                handleSearch();
+              }
+            }}         
+            />
+            <button onClick={handleSearch} className="search_button">&#x1F50D;</button>
+          </div>
       </header>
       <main className="container">
         <div className="search-display">
-          {searchResults.map((result, index) => (
-            <div key={index} className="search-result">
-              <Link to={`/result/${extractQID(result.item.value)}`}>
-                <button className="result-button">
-                  <h3>{result.itemLabel.value}</h3>
-                </button>
-              </Link>
-            </div>
-          ))}
+          {isLoading ? (
+            <p className="centered-search">Searching...</p> // Display this while the search is in progress
+          ) : searched && searchResults.length === 0 ? (
+            <p className="centered-search">We couldn't find anything.</p> // Display this when the search button has been pressed and no results are found
+          ) : (
+            searchResults.map((result, index) => ( // Display the resuylts
+              <div key={index} className="search-result">
+                <Link to={`/result/${extractQID(result.item.value)}`}>
+                  <button className="result-button">
+                    <h3>{result.itemLabel.value}</h3>
+                  </button>
+                </Link>
+              </div>
+            ))
+          )}
         </div>
         <div className="posts-container"></div>
       </main>
