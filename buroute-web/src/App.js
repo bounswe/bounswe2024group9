@@ -1,21 +1,44 @@
-import './App.css';
 import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from './hooks/AuthProvider';
 import SearchResults from './SearchResults';
 import SearchDetails from './SearchDetails';
 import Signup from './Signup';
 import Login from './Login';
-import { BrowserRouter as Router, Route, Routes, Navigate   } from 'react-router-dom';
 
-export default function App() {
+const App = () => {
   return (
     <Router>
-      <Routes>
-        <Route path="/search" element={<SearchResults />} />
-        <Route path="/result/:qid" element={<SearchDetails />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/" element={<Navigate replace to="/login" />} />
-      </Routes>
+      <AuthProvider> {/* Move AuthProvider here */}
+        <AppRoutes />
+      </AuthProvider>
     </Router>
   );
-}
+};
+
+const AppRoutes = () => {
+  const { user, loading } = useAuth();
+  console.log("User state:", user);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  return (
+    <Routes>
+      <Route path="/signup" element={<Signup />} />
+      <Route path="/login" element={<Login />} />
+      {user ? (
+        <>
+          <Route path="/search" element={<SearchResults />} />
+          <Route path="/result/:qid" element={<SearchDetails />} />
+        </>
+      ) : (
+        <Route path="/" element={<Navigate replace to="/login" />} />
+      )}
+      <Route path="*" element={<Navigate replace to="/login" />} />
+    </Routes>
+  );
+};
+
+export default App;

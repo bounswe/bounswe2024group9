@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import "./login_signup_style.css"; // Import your CSS file
+import "./login_signup_style.css"; 
+import {useAuth} from "./hooks/AuthProvider"
 
 export const Login = () => {
   const [username, setUsername] = useState("");
@@ -7,11 +8,11 @@ export const Login = () => {
   const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState(null); // State for storing error messages
 
-
+  const auth = useAuth();
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-
+  
     try {
       const response = await fetch('http://127.0.0.1:8000/database_search/login/', {
         method: 'POST',
@@ -26,11 +27,11 @@ export const Login = () => {
 
       const data = await response.json();
       if (response.ok) {
-        // Redirect to the search page if login is successful
         setError(null);
+        auth.login(data); 
         window.location.href = '/search';
-
-      } else {
+      }
+      else {
         // Display error message if login failed
         setError(data.error);
       }
@@ -39,6 +40,7 @@ export const Login = () => {
       setError('An error occurred. Please try again later.');
     }
   };
+  
 
   return (
     <div className="wrapper_entrance">
