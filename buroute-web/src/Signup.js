@@ -6,10 +6,12 @@ const Signup = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [loading, setLoading] = useState(false); // State for controlling the loading indicator
   const [error, setError] = useState(null);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    setLoading(true); // Show loading indicator
 
     if (password !== confirmPassword) {
       setError("Password and confirm password do not match");
@@ -42,6 +44,8 @@ const Signup = () => {
     } catch (error) {
       console.error('Error:', error);
       setError('An error occurred. Please try again later.');
+    } finally {
+      setLoading(false); // Hide loading indicator regardless of success or failure
     }
   };
 
@@ -97,9 +101,11 @@ const Signup = () => {
               onChange={(e) => setConfirmPassword(e.target.value)}
             />
           </div>
-          <button type="submit" id="signup-button">
-            Sign Up
-          </button>
+          {loading ? (
+            <button type="submit" className="login-button loading" disabled>Loading...</button>
+            ) : (
+            <button type="submit" id="signup-button">Sign Up</button>
+            )}
         </form>
         <div className="signin-redirect">
           Already have an account? <a href="/login">Sign in now</a>

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./login_signup_style.css"; 
 import { useAuth } from "./hooks/AuthProvider";
 import { useLocation } from 'react-router-dom';
@@ -8,7 +8,7 @@ export const Login = () => {
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState(null); // State for storing error messages
-  const [showLoginMessage, setShowLoginMessage] = useState(true); // State for controlling the visibility of the login message
+  const [showLoginMessage, setShowLoginMessage] = useState(false); // State for controlling the visibility of the login message
   const [loading, setLoading] = useState(false); // State for controlling the loading indicator
 
   const auth = useAuth();
@@ -48,6 +48,14 @@ export const Login = () => {
       setLoading(false); // Hide loading indicator regardless of success or failure
     }
   };
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowLoginMessage(true); // Show the message after 3 seconds
+    }, 250);
+
+    return () => clearTimeout(timer); // Clear the timer if the component is unmounted
+  }, []);
 
   return (
     <div className="wrapper_entrance">

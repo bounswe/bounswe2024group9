@@ -34,6 +34,7 @@ CORS_ALLOW_ALL_ORIGINS = True
 
 ALLOWED_HOSTS = [
     config('HEROKU_APP'),
+    'localhost',
     '127.0.0.1',
     '10.0.2.2'
 ]
