@@ -1,29 +1,42 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { fetchSearchResults, logoutUser } from './SearchResults';
+import { fetchSearchResults } from './SearchResults';
+import { useAuth } from "./hooks/AuthProvider"
 
 import "./detail_style.css";
 
 function SearchDetails() {
-
+  const auth = useAuth(); 
   const { qid } = useParams();
   const [itemDetails, setItemDetails] = useState(null);
   const [searchValue, setSearchValue] = useState("");
   const [searchResults, setSearchResults] = useState([]);
-  const [showNearby, setShowNearby] = useState(false); // State to track visibility of nearby dropdown
-  const [showSimilar, setShowSimilar] = useState(false); // State to track visibility of similar period dropdown
+  const [showNearby, setShowNearby] = useState(false);
+  const [showSimilar, setShowSimilar] = useState(false);
+  const [searched, setSearched] = useState(false); // State variable for search button press status
+  const [isLoading, setIsLoading] = useState(false); // State variable for loading status
+  const isMounted = useRef(true); 
 
   const extractQID = (url) => {
-    return url.split("/").pop(); // Split the URL by "/" and get the last part
+    return url.split("/").pop();
   };
 
-  const handleKeyPress = async (event) => {
-    if (event.key === "Enter") {
-      console.log("Enter key pressed"); // Log when Enter key is pressed
-      const results = await fetchSearchResults(searchValue.toLowerCase());
-      setSearchResults(results);
+  const handleSearch = async () => {
+    if (!searchValue) {
+      return;
     }
+    setIsLoading(true); 
+    setSearched(true); 
+    const results = await fetchSearchResults(searchValue.toLowerCase());
+    setSearchResults(results);
+    setIsLoading(false); 
   };
+
+  useEffect(() => {
+    return () => {
+      isMounted.current = false; 
+    };
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -32,7 +45,9 @@ function SearchDetails() {
         const response = await fetch(`http://127.0.0.1:8000/wiki_search/results/${qid}`);
         console.log("Response:", response);
         const data = await response.json();
-        setItemDetails(data);
+        if (isMounted.current) {
+          setItemDetails(data);
+        }
       } catch (error) {
         console.error("Error fetching item details:", error);
       }
@@ -42,12 +57,11 @@ function SearchDetails() {
   }, [qid]);
 
   if (!itemDetails) {
-    return <div>Loading...</div>;
+    return <div className="centered">Searching...</div>;
   }
 
   const { results, nearby, period } = itemDetails;
 
-  // Function to safely access nested properties
   const getSafeValue = (obj, defaultValue = 'Not Available') => {
     if (obj && obj.value !== undefined) {
       return obj.value;
@@ -55,11 +69,11 @@ function SearchDetails() {
     return defaultValue;
   };
 
-  const result = results?.results?.bindings?.[0]; // Safe access to results
+  const result = results?.results?.bindings?.[0];
 
   return (
     <>
-        <header>
+      <header>
         <div className="header-bar"
         style={{height: 'auto'}} >
           <img id="bar_logo" 
@@ -67,11 +81,13 @@ function SearchDetails() {
           alt="bar_logo"
           style={{ width: '75px', height: 'auto' }} 
           onClick={() => window.location.href = '/search'}
-          >
-          </img>
+          />
           <button 
             id="logout-button"
-            onClick={logoutUser}
+            onClick={() => {
+              auth.logout();
+              window.location.href = '/login';
+            }}
           >
             Log Out
           </button>
@@ -80,15 +96,24 @@ function SearchDetails() {
           <input
             id="search"
             type="search"
-            placeholder="&#x1F50D; Start typing to search..."
+            placeholder="Start typing to search..."
             value={searchValue}
             onChange={(e) => setSearchValue(e.target.value)}
-            onKeyDown={handleKeyPress} // Call handleKeyPress function on key press
-          />
-        </div>
+            onKeyDown={(event) => {
+              if (event.key === 'Enter') {
+                handleSearch();
+              }
+            }}          
+            />
+            <button onClick={handleSearch} className="search_button">&#x1F50D;</button>
+          </div>
       </header>
       <main className="container">
-        {searchResults.length > 0 ? (
+        {isLoading ? (
+          <p className="centered-search">Searching...</p> // Display this while the search is in progress
+        ) : searched && searchResults.length === 0 ? (
+          <p className="centered-search">We couldn't find anything.</p> // Display this when the search button has been pressed and no results are found
+        ) : searchResults.length > 0 ? (
           <div className="search-display">
             {searchResults.map((result, index) => (
               <div key={index} className="search-result">
@@ -103,7 +128,10 @@ function SearchDetails() {
         ) : (
           <div className="page-container">
             <div className="card">
-              <img src={result?.image?.value} alt={result?.itemLabel?.value} />
+              <img 
+                src={result?.image?.value} 
+                alt={result?.itemLabel?.value} 
+              />
             </div>
             <div className="card-content">
               <h2 className="card-title">{getSafeValue(result?.itemLabel)}</h2>
