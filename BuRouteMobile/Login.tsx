@@ -14,7 +14,6 @@ const Login = ({ navigation }) => {
     const handleLogin = async () => {
         try {
             const response = await fetch('http://10.0.2.2:8000/database_search/login/', {
-                //send post request to backend server
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -50,7 +49,7 @@ const Login = ({ navigation }) => {
 
     const handleSignUp = () => {
         //navigate to sign up page
-        navigation.navigate('SignUp');
+        navigation.navigate('Signup');
     };
 
     const handleLoginWithGoogle = () => {

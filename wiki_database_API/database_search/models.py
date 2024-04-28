@@ -64,7 +64,7 @@ class CustomUserManager(BaseUserManager):
 class User(AbstractBaseUser, PermissionsMixin):
     user_id = models.AutoField(primary_key=True)
     username = models.CharField(max_length=255, unique=True) # Length should be changed
-    name = models.CharField(max_length=255) # Length should be changed
+    # name = models.CharField(max_length=255) # Length should be changed
     password = models.CharField(max_length=128, verbose_name='password')
     e_mail = models.EmailField(max_length=255, unique=True) # Length should be changed
     profile_picture = models.ImageField(upload_to='profile_pics', null=True, blank=True)

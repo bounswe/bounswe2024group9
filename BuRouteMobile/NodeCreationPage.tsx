@@ -56,12 +56,12 @@ const handleCreateNode = async () => {
 
     try {
         const response = await fetch('http://10.0.2.2:8000/database_search/create_node/', {
-                                        method: 'POST',
-                                        body: formData,
-                                        headers: {
-                                             'Content-Type': 'multipart/form-data',
-                                        },
-        });
+          method: 'POST',
+          body: formData,
+          headers: {
+          'Content-Type': 'multipart/form-data',
+      },
+  });
 
         const responseJson = await response.json();
         if (response.status === 200) {

@@ -47,11 +47,11 @@ def user_detail(request, pk):
 @csrf_exempt
 def create_user(request):
     if request.method == 'POST':
-        username = request.POST.get('username')
-        name = request.POST.get('name')
-        e_mail = request.POST.get('email')
-        password = request.POST.get('password')
-        is_superuser = request.POST.get('is_superuser', 'False') == 'on'
+        data = json.loads(request.body)
+        username = data.get('username')
+        email = data.get('email')
+        password = data.get('password')
+        is_superuser = data.get('is_superuser', False)  # Adjust based on actual input and needs
 
         if not username or not password:
             return JsonResponse({'error': 'Username and password are required.'}, status=400)
@@ -59,10 +59,10 @@ def create_user(request):
         # Validation checks and additional logic goes here
         if is_superuser:
             # Create a superuser or staff user if the corresponding flags are set
-            user = User.objects.create_superuser(username, password, e_mail=e_mail, name=name, is_superuser=is_superuser)
+            user = User.objects.create_superuser(username, password, e_mail=email, is_superuser=is_superuser)
         else:
             # Regular user creation
-            user = User.objects.create_user(username, password, e_mail=e_mail, name=name)
+            user = User.objects.create_user(username, password, e_mail=email)
 
         return JsonResponse({'status': 'success', 'user_id': user.pk, 'is_superuser': user.is_superuser, 'is_staff': user.is_staff})
     else:
