@@ -6,14 +6,14 @@ import { useAuth } from "./hooks/AuthProvider"
 import "./detail_style.css";
 
 function SearchDetails() {
-  const auth = useAuth(); // Get authentication context
+  const auth = useAuth(); 
   const { qid } = useParams();
   const [itemDetails, setItemDetails] = useState(null);
   const [searchValue, setSearchValue] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [showNearby, setShowNearby] = useState(false);
   const [showSimilar, setShowSimilar] = useState(false);
-  const isMounted = useRef(true); // Ref to track component mount state
+  const isMounted = useRef(true); 
 
   const extractQID = (url) => {
     return url.split("/").pop();
@@ -29,7 +29,7 @@ function SearchDetails() {
 
   useEffect(() => {
     return () => {
-      isMounted.current = false; // Set mounted state to false on component unmount
+      isMounted.current = false; 
     };
   }, []);
 

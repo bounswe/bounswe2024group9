@@ -16,7 +16,7 @@ function SearchResults() {
 
   const handleKeyPress = async (event) => {
     if (event.key === "Enter") {
-      console.log("Enter key pressed"); // Log when Enter key is pressed
+      console.log("Enter key pressed");
       const results = await fetchSearchResults(searchValue.toLowerCase());
       setSearchResults(results);
     }

@@ -9,7 +9,7 @@ import Login from './Login';
 const App = () => {
   return (
     <Router>
-      <AuthProvider> {/* Move AuthProvider here */}
+      <AuthProvider> 
         <AppRoutes />
       </AuthProvider>
     </Router>
