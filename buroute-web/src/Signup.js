@@ -6,17 +6,62 @@ const Signup = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [loading, setLoading] = useState(false); // State for controlling the loading indicator
+  const [loading, setLoading] = useState(false); 
   const [error, setError] = useState(null);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    setLoading(true); // Show loading indicator
+    setLoading(true); 
 
     if (password !== confirmPassword) {
       setError("Password and confirm password do not match");
+      setLoading(false);
       return;
     }
+
+    // Block of meeting password requirements
+    if (password.match(/\d+/) === null) {
+      setError("Password must contain at least one number.");
+      setLoading(false);
+      return
+    }
+    if (password.match(/[A-Z]/) === null) {
+      setError("Password must contain at least one upper case letter.");
+      setLoading(false);
+      return
+    }
+    if (password.match(/[a-z]/) === null) {
+      setError("Password must contain at least one lower case letter.");
+      setLoading(false);
+      return
+    }
+    if (password.length<8 || password.length>16) {
+      setError("Password must be 8 to 16 characters long.");
+      setLoading(false);
+      return
+    }
+
+    // valid email format
+    if (email.match(/^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/)
+       === null){
+      setError("Please enter a valid email.");
+      setLoading(false);
+      return
+    };
+
+    // username requirements
+    if (!username.match(/^[0-9a-zA-Z]+$/)){
+      setError("Username must consist of alphanumerical characters.");
+      setLoading(false);
+      return
+    };
+
+    if (username.length<5 || username.length>16){
+      setError("Username must be 5 to 16 characters long.");
+      setLoading(false);
+      return
+    };
+
 
     try {
       const response = await fetch('http://127.0.0.1:8000/database_search/create_user/', {
@@ -45,7 +90,7 @@ const Signup = () => {
       console.error('Error:', error);
       setError('An error occurred. Please try again later.');
     } finally {
-      setLoading(false); // Hide loading indicator regardless of success or failure
+      setLoading(false);
     }
   };
 
