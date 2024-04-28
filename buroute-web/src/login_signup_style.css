@@ -47,6 +47,13 @@ input[type="password"] {
 
 }
 
+.login-button.loading {
+  background-color: #f0f0f0; /* Lighter background color */
+  color: #999; /* Lighter text color */
+  pointer-events: none; /* Disable pointer events */
+  opacity: 0.8; /* Reduced opacity */
+}
+
 .wrapper_entrance button {
   width: 100%;
   padding: 10px;
