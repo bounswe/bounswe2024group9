@@ -1,18 +1,24 @@
 import React, { useState } from "react";
 import "./login_signup_style.css"; 
 import {useAuth} from "./hooks/AuthProvider"
+import { useLocation } from 'react-router-dom';
 
 export const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState(null); // State for storing error messages
+  const [showLoginMessage, setShowLoginMessage] = useState(true); // State for controlling the visibility of the login message
 
   const auth = useAuth();
+  const location = useLocation();
+  const fromPrivate = location.state?.from === 'private';
 
   const handleSubmit = async (event) => {
+
     event.preventDefault();
-  
+    setShowLoginMessage(false); // Hide the login message when the form is submitted
+
     try {
       const response = await fetch('http://127.0.0.1:8000/database_search/login/', {
         method: 'POST',
@@ -52,6 +58,9 @@ export const Login = () => {
           className="logo"
         />
       </h2>
+      <div className="error-message" id="not_logged_in">
+        {fromPrivate && showLoginMessage && <p>Please log in to continue.</p>}
+      </div>
       <div className="error-message">
         {error && <p>{error}</p>}
       </div>

@@ -34,9 +34,9 @@ const AppRoutes = () => {
           <Route path="/result/:qid" element={<SearchDetails />} />
         </>
       ) : (
-        <Route path="/" element={<Navigate replace to="/login" />} />
+        <Route path="/" element={<Navigate replace to="/login" state={{ from: 'private' }} />} />
       )}
-      <Route path="*" element={<Navigate replace to="/login" />} />
+      <Route path="*" element={<Navigate replace to="/login" state={{ from: 'private' }} />} />
     </Routes>
   );
 };
