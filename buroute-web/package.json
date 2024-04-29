@@ -18,7 +18,8 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "concurrently \"npm run start-react\" \"npm run start-django\"",
+    "start": "npm run start-react",
+    "start-concurrently": "concurrently \"npm run start-react\" \"npm run start-django\"",
     "start-react": "react-scripts start",
     "start-django": "cd ..\\wiki_database_API && python manage.py runserver",
     "start-linux": "concurrently \"npm run start-react\" \"npm run start-django-linux\"",
