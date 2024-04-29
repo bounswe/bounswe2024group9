@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, TextInput, Button, Text, TouchableOpacity, TouchableHighlight, StyleSheet, StatusBar, ScrollView } from 'react-native';
+import { View, TextInput, Button, Text, TouchableOpacity, TouchableHighlight, StyleSheet, StatusBar, ScrollView, ActivityIndicator } from 'react-native';
 //import CheckBox from '@react-native-community/checkbox';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 
@@ -8,6 +8,7 @@ const Login = ({ navigation }) => {
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [success, setSuccess] = useState(''); 
+    const [loading, setLoading] = useState(false);
     //const [rememberMe, setRememberMe] = useState(false);
     //const navigation = useNavigation();
 
@@ -17,11 +18,18 @@ const Login = ({ navigation }) => {
             setPassword('');
             setError('');
             setSuccess('');
+            setLoading(false);
         }, [])
     );
 
     const handleLogin = async () => {
         try {
+            if (!username || !password) {
+                setError('Please fill in all fields!');
+                setTimeout(() => setError(''), 2000);
+                return;
+            }
+            setLoading(true);
             const response = await fetch('http://10.0.2.2:8000/database_search/login/', {
                 method: 'POST',
                 headers: {
@@ -47,12 +55,14 @@ const Login = ({ navigation }) => {
                 navigation.navigate('WikidataSearch', { userData }); // Navigate after showing success message
                 }, 2000); //navigate to WikidataSearch page after login (endpoint can change)
         }
-
         catch (error) {
             //any unexpected error
             setError(error.message);
             console.log(error.message);
             setTimeout(() => setError(''), 2000);
+        }
+        finally {
+            setLoading(false);
         }
     };
 
@@ -86,7 +96,7 @@ const Login = ({ navigation }) => {
                 color: 'black',
                 marginBottom: 20,
                 }}>
-                Don't have an account? 
+                Don't have an account?  
                 <TouchableOpacity onPress={handleSignUp}>
                     <Text style={styles.signupButton}> Sign Up</Text>
                 </TouchableOpacity>
@@ -118,9 +128,16 @@ const Login = ({ navigation }) => {
             </View>
     
             <View style={styles.messageContainer}>
-                {error ? <Text style={[styles.message, styles.error]}>{error}</Text> : null}
-                {success ? <Text style={[styles.message, styles.success]}>{success}</Text> : null}
+                {loading ? (
+                    <ActivityIndicator size="large" color="black" />
+                ) : (
+                    <>
+                        {error ? <Text style={[styles.message, styles.error]}>{error}</Text> : null}
+                        {success ? <Text style={[styles.message, styles.success]}>{success}</Text> : null}
+                    </>
+                )}
             </View>
+
 
             <View style={styles.buttonContainer}>
                 <TouchableHighlight
@@ -193,6 +210,7 @@ const styles = StyleSheet.create({
     signupButton: {
       color: 'blue',
       textDecorationLine: 'underline',
+      marginBottom: -3
     },
     messageContainer: {
       alignItems: 'center',
