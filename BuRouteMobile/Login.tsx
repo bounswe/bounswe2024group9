@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, TextInput, Button, Text, TouchableOpacity } from 'react-native';
 //import CheckBox from '@react-native-community/checkbox';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 
 const Login = ({ navigation }) => {
     const [username, setUsername] = useState('');
@@ -10,6 +10,15 @@ const Login = ({ navigation }) => {
     const [success, setSuccess] = useState(''); 
     //const [rememberMe, setRememberMe] = useState(false);
     //const navigation = useNavigation();
+
+    useFocusEffect(
+        React.useCallback(() => {
+            setUsername('');
+            setPassword('');
+            setError('');
+            setSuccess('');
+        }, [])
+    );
 
     const handleLogin = async () => {
         try {
