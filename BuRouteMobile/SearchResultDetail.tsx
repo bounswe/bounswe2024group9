@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, Image, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, Image, ScrollView, TouchableOpacity, StyleSheet, Linking } from 'react-native';
 import Config from 'react-native-config';
 
 
@@ -17,6 +17,10 @@ const SearchResultDetail = ({ route, navigation }) => {
     console.error("Error retrieving image URL:", error);
   }
 
+  const latitude = mainResult['latitude'].value;
+  const longitude = mainResult['longitude'].value;
+  const wikipediaLink = mainResult['article'].value;
+
   const handleAddToNode = () => {
     console.log('Added to Node');
   };
@@ -25,6 +29,14 @@ const SearchResultDetail = ({ route, navigation }) => {
     const response = await fetch(Config.REACT_APP_API_URL+'/wiki_search/results/' + getLastItem(newContent['item'].value));
         const data = await response.json();
     navigation.push('SearchResultDetail', { result: data });
+  };
+
+  const openWikipediaPage = () => {
+    if (wikipediaLink) {
+      Linking.openURL(wikipediaLink);
+    } else {
+      console.log('Wikipedia link not found');
+    }
   };
 
   const renderRecommendations = (sectionData) => {
@@ -42,6 +54,10 @@ const SearchResultDetail = ({ route, navigation }) => {
 
   return (
     <View style={styles.container}>
+      <Text style={styles.title}>Location:</Text>
+      <Text>Latitude: {latitude}</Text>
+      <Text>Longitude: {longitude}</Text>
+
       <View style={styles.contentContainer}>
         <View style={styles.imageContainer}>
           {imageUrl && (
@@ -49,6 +65,11 @@ const SearchResultDetail = ({ route, navigation }) => {
               source={{ uri: imageUrl }}
               style={styles.image}
             />
+          )}
+          {wikipediaLink && (
+            <TouchableOpacity onPress={openWikipediaPage} style={styles.wikipediaButton}>
+              <Text style={styles.wikipediaButtonText}>Wikipedia Page</Text>
+            </TouchableOpacity>
           )}
         </View>
         <View style={styles.descriptionContainer}>
@@ -84,6 +105,7 @@ const styles = StyleSheet.create({
   },
   imageContainer: {
     marginRight: 20,
+    position: 'relative',
   },
   image: {
     width: 200,
@@ -110,6 +132,18 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   addButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+  },
+  wikipediaButton: {
+    position: 'absolute',
+    bottom: 10,
+    backgroundColor: 'blue',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 5,
+  },
+  wikipediaButtonText: {
     color: 'white',
     fontWeight: 'bold',
   },
