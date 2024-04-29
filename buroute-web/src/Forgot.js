@@ -35,7 +35,7 @@ const ForgotPassword = () => {
       }
     } catch (error) {
       console.error('Error:', error);
-      setError('Sending reset link didnt implemented. Please try again later.');
+      setError('Sending reset links is not implemented yet. Please try again later.');
     }
   };
 
