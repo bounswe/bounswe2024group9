@@ -10,6 +10,7 @@
     "class-variance-authority": "^0.7.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-icons": "^5.1.0",
     "react-router-dom": "^6.23.0",
     "react-scripts": "5.0.1",
     "tailwind-merge": "^2.3.0",
@@ -19,7 +20,9 @@
   "scripts": {
     "start": "concurrently \"npm run start-react\" \"npm run start-django\"",
     "start-react": "react-scripts start",
-    "start-django": "cd ..\\wiki_database_API && python manage.py runserver"
+    "start-django": "cd ..\\wiki_database_API && python manage.py runserver",
+    "start-linux": "concurrently \"npm run start-react\" \"npm run start-django-linux\"",
+    "start-django-linux": "cd ../wiki_database_API && python3 manage.py runserver"
   },
   "eslintConfig": {
     "extends": [

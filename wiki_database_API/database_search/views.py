@@ -43,28 +43,41 @@ def user_detail(request, pk):
     user_json = serializers.serialize('json', [user]) # User is put in array because serialize expects a list
     user_data = json.loads(user_json)[0]  # Deserialize the JSON and take the first element
     return JsonResponse(user_data, safe=False)
-
+  
 @csrf_exempt
 def create_user(request):
     if request.method == 'POST':
         data = json.loads(request.body)
         username = data.get('username')
-        email = data.get('email')
+        e_mail = data.get('email')
         password = data.get('password')
-        is_superuser = data.get('is_superuser', False)  # Adjust based on actual input and needs
+        # is_superuser = data.get('is_superuser', False) # Everybody will be regular user
 
-        if not username or not password:
-            return JsonResponse({'error': 'Username and password are required.'}, status=400)
+        if not username or not password or not e_mail:
+            return JsonResponse({'error': 'Username, e-mail, and password are required.'}, status=400)
 
-        # Validation checks and additional logic goes here
-        if is_superuser:
-            # Create a superuser or staff user if the corresponding flags are set
-            user = User.objects.create_superuser(username, password, e_mail=email, is_superuser=is_superuser)
-        else:
-            # Regular user creation
-            user = User.objects.create_user(username, password, e_mail=email)
+        # Check if user already exists
+        if User.objects.filter(username=username).exists():
+            return JsonResponse({'error': 'Username already exists.'}, status=400)
+        if User.objects.filter(e_mail=e_mail).exists():
+            return JsonResponse({'error': 'E-mail already exists.'}, status=400)
 
-        return JsonResponse({'status': 'success', 'user_id': user.pk, 'is_superuser': user.is_superuser, 'is_staff': user.is_staff})
+        # Depending on your CustomUserManager, adjust the creation logic here
+        user = User.objects.create_user(username=username, password=password, e_mail=e_mail)
+        
+        # Set additional fields if needed
+        user.is_active = True
+        user.save()
+
+        return JsonResponse({
+            'status': 'success', 
+            'user_id': user.user_id,
+            'username': user.username,
+            'e_mail': user.e_mail,
+            'is_active': user.is_active,
+            'is_superuser': user.is_superuser,
+            'is_staff': user.is_staff
+        })
     else:
         return HttpResponse(status=405)
 
@@ -107,5 +120,13 @@ def login_user(request):
             # Authentication failed
             print("Failed login attempt for username:", username)
             return JsonResponse({'error': 'Invalid username or password'}, status=400)
+    else:
+        return HttpResponse(status=405)
+    
+@csrf_exempt
+def logout_user(request):
+    if request.method == 'POST':
+        logout(request)
+        return JsonResponse({'status': 'success'})
     else:
         return HttpResponse(status=405)

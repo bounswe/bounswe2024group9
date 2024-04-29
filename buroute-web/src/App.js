@@ -1,18 +1,44 @@
-import './App.css';
 import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from './hooks/AuthProvider';
 import SearchResults from './SearchResults';
 import SearchDetails from './SearchDetails';
-import Home from './Home';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import Signup from './Signup';
+import Login from './Login';
 
-export default function App() {
+const App = () => {
   return (
     <Router>
-      <Routes>
-        <Route path="/search" element={<SearchResults />} />
-        <Route path="/result/:qid" element={<SearchDetails />} />
-        <Route path="/" element={<Home />} />
-      </Routes>
+      <AuthProvider> 
+        <AppRoutes />
+      </AuthProvider>
     </Router>
   );
-}
+};
+
+const AppRoutes = () => {
+  const { user, loading } = useAuth();
+  console.log("User state:", user);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  return (
+    <Routes>
+      <Route path="/signup" element={<Signup />} />
+      <Route path="/login" element={<Login />} />
+      {user ? (
+        <>
+          <Route path="/search" element={<SearchResults />} />
+          <Route path="/result/:qid" element={<SearchDetails />} />
+        </>
+      ) : (
+        <Route path="/" element={<Navigate replace to="/login"/>} />
+      )}
+      <Route path="*" element={<Navigate replace to="/login" state={{ from: 'private' }} />} />
+    </Routes>
+  );
+};
+
+export default App;

@@ -3,11 +3,32 @@ header {
   top: -54px; /* value to scroll past the logo so just the search bar is sticky */
   z-index: 2;
 }
+
+.header-bar {
+  display: flex;
+  align-items: center;
+  padding: 24px;
+  background-color: #e0eaff; /* Assuming you want a white background for the search bar */
+  margin: 0;
+  padding-left: 10px;
+  padding-right: 10px;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.centered-search {
+  display: flex;
+  align-items: center;
+  height: 100vh;
+  font-size: 1.5em;
+  flex-direction: column;
+}
+
 .search-bar {
   display: flex;
   justify-content: center;
   padding: 24px;
-  background-color: #FFF5EA; /* Assuming you want a white background for the search bar */
+  /* background-color: #FFF5EA; Assuming you want a white background for the search bar */
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* subtle shadow for elevation */
 }
 .search-bar input {
@@ -45,7 +66,7 @@ header {
 }
 
 .search-result {
-  background-color: #faf3eb; /* Light background for each item */
+  background-color: rgb(192, 212, 255);
   margin-bottom: 8px; /* Space between items */
   border-radius: 8px; /* Rounded corners for polish */
   overflow: hidden; /* Ensures nothing spills out of the border radius */
@@ -70,7 +91,7 @@ header {
 }
 
 .result-button:hover {
-  background-color: #ececec; /* Slight background color change on hover */
+  background-color: rgb(133, 171, 252); /* Slight background color change on hover */
 }
 
 .result-button h3 {
@@ -81,4 +102,28 @@ header {
 .result-button p {
   margin: 0;
   color: #666; /* Lighter text color for the ID */
+}
+
+#logout-button {
+  font-size: 14px;
+  height: 50px;
+  width: 120px;
+  background-color: rgb(161, 189, 250); 
+  color: white;
+  border: none;
+  border-radius: 24px;
+  cursor: pointer; /* Changes cursor to indicate button is clickable */
+  margin-left: auto;
+}
+
+/* Add some hover effect for button */
+#logout-button:hover {
+  background-color: rgb(128, 168, 253); /* Slightly darker blue  on hover */
+}
+
+#bar_logo {
+  width: 50px;
+  height: 50px;
+  margin-right: auto;
+  display: block;
 }

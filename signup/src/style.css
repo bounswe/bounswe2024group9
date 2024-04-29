@@ -1,0 +1,125 @@
+body {
+  font-family: Arial, sans-serif;
+  background-image: url("https://th.bing.com/th/id/R.02226c7a97ffb6163f1d5427e6713ae5?rik=d2F9UpKCes9VZw&riu=http%3a%2f%2fwww.gurkankucukler.com%2fwp-content%2fuploads%2f2011%2f04%2fkiz-kulesi-kapak.jpg&ehk=lTIAUqDzta898hHmVL0VkdEmkBHbpNH1R%2b2dITkuvGY%3d&risl=&pid=ImgRaw&r=0");
+  background-size: 100% 100%;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.container {
+  background-color: #fff;
+  padding: 15px;
+  border-radius: 5px;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+  width: 105%; /* Increase the width slightly */
+  max-width: 320px; /* Adjusted maximum width */
+  
+}
+
+@media (max-width: 600px) {
+  .container {
+    width: 90%;
+    padding: 10px;
+   
+  }
+}
+
+h2 {
+  margin-bottom: 15px;
+  text-align: center;
+  font-size: 1.5rem;
+}
+
+.form-group {
+  margin-bottom: 15px;
+  margin-right: 5%;
+}
+
+label {
+  display: block;
+  font-weight: normal;
+  font-size: 0.8rem;
+}
+
+input[type="text"],
+input[type="password"] {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 0.9rem;
+ 
+}
+
+button {
+  width: 100%;
+  padding: 10px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+.news-container {
+  display: flex;
+  align-items: center;
+}
+
+
+
+
+.news-container label {
+  margin-right: 10px; /* Adjusted margin */
+  font-size: 0.8rem; /* Adjusted font size */
+}
+
+.news-container .forgot-password {
+  margin-left: auto;
+  font-size: 0.8rem; /* Adjusted font size */
+}
+
+#signup-button {
+  margin-top: 3%;
+  background-color: rgb(0,128,153);
+  font-size: 1rem;
+}
+
+#link1 {
+  position: absolute;
+  top: 10px;
+  right: 25px; /* Adjusted right position */
+  text-decoration: none;
+  color: white;
+  font-weight: bold;
+  font-size: 0.9rem;
+  margin-right: 3%;
+  margin-top: 1%;
+}
+
+#link2 {
+  position: absolute;
+  top: 10px;
+  right: 115px; /* Adjusted right position */
+  text-decoration: none;
+  color: white;
+  font-weight: bold;
+  font-size: 0.9rem;
+  margin-right: 5%;
+  margin-top: 1%;
+}
+.logo {
+  width: 50px; /* Adjust the width as needed */
+  margin-left: 10px; /* Adjust the margin as needed */
+  vertical-align: middle;
+  
+}
