@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, TextInput, Button, Text, TouchableOpacity } from 'react-native';
+import { View, TextInput, Button, Text, TouchableOpacity, StyleSheet } from 'react-native';
 //import CheckBox from '@react-native-community/checkbox';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 
@@ -97,5 +97,26 @@ const Login = ({ navigation }) => {
         </View>
     );
 };
+const styles = StyleSheet.create({
+    
+    buttonContainer: {
+      alignItems: 'center',
+      marginTop: 20,
+    },
+    button: {
+      flexDirection: 'row',
+      justifyContent: 'center',
+      alignItems: 'center',
+      width: 300,
+      height: 58,
+      borderRadius: 17,
+      borderWidth: 2,
+      backgroundColor: '#e0eaFF',
+    },
+    buttonText: {
+      color: 'black',
+    },
+});
+
 
 export default Login;
