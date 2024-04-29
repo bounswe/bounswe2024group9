@@ -89,15 +89,16 @@ const Login = ({ navigation }) => {
                 Don't have an account? 
                     <Text onPress={handleSignUp} style={styles.signupButton}>Sign Up</Text>
             </Text>
-            
+
             <ScrollView
                 contentInsetAdjustmentBehavior="automatic"
-                style={styles.scrollView}></ScrollView>
+                style={styles.scrollView}>
     
             <View style={styles.inputContainer}>
+                <Text style={styles.label}>USERNAME</Text>
                 <TextInput
                     style={styles.input}
-                    placeholder="Username"
+                    placeholder="Enter your username"
                     value={username}
                     onChangeText={setUsername}
                 />
