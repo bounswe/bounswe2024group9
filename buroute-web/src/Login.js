@@ -52,7 +52,7 @@ export const Login = () => {
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowLoginMessage(true); // Show the message after 0.5 seconds
-    }, 500);
+    }, 800);
 
     return () => clearTimeout(timer); // Clear the timer if the component is unmounted
   }, []);

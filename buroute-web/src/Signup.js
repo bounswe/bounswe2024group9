@@ -9,6 +9,7 @@ const Signup = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false); 
   const [error, setError] = useState(null);
+  const [kvkk, setKvkk] = useState(false);
   const auth = useAuth();
 
   const handleSubmit = async (event) => {
@@ -101,7 +102,7 @@ const Signup = () => {
       <div className="container_center">
         <h2>Sign Up
           <img
-            src="/logo.jpg" // Replace with your logo URL
+            src="/logo.jpg"
             alt="logo"
             className="logo"
           />
@@ -148,10 +149,20 @@ const Signup = () => {
               onChange={(e) => setConfirmPassword(e.target.value)}
             />
           </div>
-          {loading ? (
-            <button type="submit" className="login-button loading" disabled>Loading...</button>
+          <div className="form-group kvkk-container">
+            <input
+              type="checkbox"
+              id="kvkk"
+              name="kvkk"
+              value={kvkk}
+              onChange={(e) => setKvkk(e.target.checked)}
+            />
+            <label htmlFor="kvkk">I agree to the KVKK terms</label>
+          </div>
+            {loading ? (
+              <button type="submit" className="login-button loading" disabled>Loading...</button>
             ) : (
-            <button type="submit" id="signup-button">Sign Up</button>
+              <button type="submit" id="signup-button" disabled={!kvkk}>Sign Up</button>
             )}
         </form>
         <div className="signin-redirect">
