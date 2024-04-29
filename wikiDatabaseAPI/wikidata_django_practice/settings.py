@@ -33,7 +33,7 @@ AUTH_USER_MODEL = 'database_search.User'
 CORS_ALLOW_ALL_ORIGINS = True
 
 ALLOWED_HOSTS = [
-    *
+    '*'
 ]
 
 
