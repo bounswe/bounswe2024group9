@@ -36,7 +36,8 @@ ALLOWED_HOSTS = [
     config('HEROKU_APP'),
     'localhost',
     '127.0.0.1',
-    '10.0.2.2'
+    '10.0.2.2',
+    config("API_URL"),
 ]
 
 # Application definition
