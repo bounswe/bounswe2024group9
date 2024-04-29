@@ -42,7 +42,7 @@ function SearchDetails() {
     const fetchData = async () => {
       try {
         console.log("Fetching data for QID:", qid);
-        const response = await fetch(`http://127.0.0.1:8000/wiki_search/results/${qid}`);
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/wiki_search/results/${qid}`);
         console.log("Response:", response);
         const data = await response.json();
         if (isMounted.current) {

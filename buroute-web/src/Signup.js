@@ -64,7 +64,7 @@ const Signup = () => {
 
 
     try {
-      const response = await fetch('http://127.0.0.1:8000/database_search/create_user/', {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/database_search/create_user/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
