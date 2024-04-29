@@ -91,12 +91,16 @@ export default SearchResults;
 
 export const fetchSearchResults = async (searchString) => {
   try {
-    console.log("Search string:", searchString);
-  
+    console.log("Original search string:", searchString);
+
+    searchString = searchString.replace(/[^a-z0-9]/gi, '');
+    
+    console.log("Alphanumeric search string:", searchString);
+    
     if (searchString === "") {
       return [];
     }
-  
+    
     const response = await fetch(`${process.env.REACT_APP_API_URL}/wiki_search/search/${searchString}`);
     const data = await response.json();
     console.log(data.results.bindings);
