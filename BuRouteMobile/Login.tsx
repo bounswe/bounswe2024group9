@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, TextInput, Button, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, TextInput, Button, Text, TouchableOpacity, TouchableHighlight, StyleSheet, StatusBar, ScrollView } from 'react-native';
 //import CheckBox from '@react-native-community/checkbox';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 
