@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import "./login_signup_style.css"; 
+import { useAuth } from "./hooks/AuthProvider";
 
 const Signup = () => {
   const [email, setEmail] = useState("");
@@ -8,6 +9,7 @@ const Signup = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false); 
   const [error, setError] = useState(null);
+  const auth = useAuth();
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -76,14 +78,14 @@ const Signup = () => {
         }),
       });
 
+      const data = await response.json();
       if (response.ok) {
-        const data = await response.json();
         console.log(data);
+        auth.login(data);
 
-        // Redirect to login page
-        window.location.href = '/login';
+        window.location.href = '/search'; 
+
       } else {
-        const data = await response.json();
         setError(data.error || "An error occurred");
       }
     } catch (error) {

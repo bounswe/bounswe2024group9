@@ -80,7 +80,7 @@ function SearchDetails() {
           <img id="bar_logo" 
           src="/logo.jpg"
           alt="bar_logo"
-          style={{ width: '75px', height: 'auto' }} 
+          style={{ width: '75px', height: 'auto' , padding: "5px"}} 
           onClick={() => window.location.href = '/search'}
           />
           <button 

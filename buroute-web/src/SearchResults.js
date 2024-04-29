@@ -35,7 +35,7 @@ function SearchResults() {
           <img
             id="bar_logo"
             src="/logo.jpg"
-            style={{ width: "75px", height: "auto" }}
+            style={{ width: "75px", height: "auto" , padding: "5px"}}
             alt="bar_logo"
             onClick={() => (window.location.href = "/search")}
           />
