@@ -37,7 +37,7 @@ const Login = ({ navigation }) => {
                 const errorResponse = await response.text();  // Get text response to understand the backend error
                 console.log("Login failed with response:", errorResponse);
                 setError("Invalid username or password");
-                setTimeout(() => setError(''), 2000); // Clear the error message after 5 seconds
+                setTimeout(() => setError(''), 2000); // Clear the error message after 2 seconds
                 return;
             }
             //assuming django server returns user data with successful login
@@ -45,14 +45,14 @@ const Login = ({ navigation }) => {
             setSuccess('Login successful! Logging you in...');
             setTimeout(() => {
                 navigation.navigate('WikidataSearch', { userData }); // Navigate after showing success message
-                }, 2000); //navigate to Home page after login (home endpoint can change)
+                }, 2000); //navigate to WikidataSearch page after login (endpoint can change)
         }
 
         catch (error) {
             //any unexpected error
             setError(error.message);
             console.log(error.message);
-            setTimeout(() => setError(''), 5000);
+            setTimeout(() => setError(''), 2000);
         }
     };
 
@@ -63,7 +63,7 @@ const Login = ({ navigation }) => {
 
     const handleLoginWithGoogle = () => {
         // NOT IMPLEMENTED YET
-        //navigate to Home page after login (endpoint can change)
+        //navigate to WikidataSearch page after login (endpoint can change)
         navigation.navigate('WikidataSearch');
     };
 
