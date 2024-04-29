@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { fetchSearchResults } from './SearchResults';
 import { useAuth } from "./hooks/AuthProvider"
+import StaticRoute from './components/StaticRoute/staticRoute';
 
 import "./detail_style.css";
 
@@ -42,7 +43,7 @@ function SearchDetails() {
     const fetchData = async () => {
       try {
         console.log("Fetching data for QID:", qid);
-        const response = await fetch(`http://127.0.0.1:8000/wiki_search/results/${qid}`);
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/wiki_search/results/${qid}`);
         console.log("Response:", response);
         const data = await response.json();
         if (isMounted.current) {
@@ -114,19 +115,22 @@ function SearchDetails() {
         ) : searched && searchResults.length === 0 ? (
           <p className="centered-search">We couldn't find anything.</p> // Display this when the search button has been pressed and no results are found
         ) : searchResults.length > 0 ? (
-          <div className="search-display">
-            {searchResults.map((result, index) => (
-              <div key={index} className="search-result">
-                <Link to={`/result/${extractQID(result.item.value)}`} onClick={() => setTimeout(() => window.location.reload(), 100)}>
-                  <button className="result-button">
-                    <h3>{result.itemLabel.value}</h3>
-                  </button>
-                </Link>
-              </div>
-            ))}
-          </div>
+          
+            <div className="search-display">
+              {searchResults.map((result, index) => (
+                <div key={index} className="search-result">
+                  <Link to={`/result/${extractQID(result.item.value)}`} onClick={() => setTimeout(() => window.location.reload(), 100)}>
+                    <button className="result-button">
+                      <h3>{result.itemLabel.value}</h3>
+                    </button>
+                  </Link>
+                </div>
+              ))}
+            </div>
         ) : (
-          <div className="page-container">
+          <>
+            <div className="item-details">
+            <div className="page-container">
             <div className="card">
               <img 
                 src={result?.image?.value} 
@@ -193,6 +197,10 @@ function SearchDetails() {
               </div>
             </div>
           </div>
+          {!isLoading && <StaticRoute />}
+          {!isLoading && <StaticRoute />}
+            </div>
+          </>
         )}
       </main>
     </>

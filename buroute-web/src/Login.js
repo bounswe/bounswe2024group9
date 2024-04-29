@@ -21,7 +21,7 @@ export const Login = () => {
     setLoading(true); // Show loading indicator
 
     try {
-      const response = await fetch('http://127.0.0.1:8000/database_search/login/', {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/database_search/login/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -51,8 +51,8 @@ export const Login = () => {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      setShowLoginMessage(true); // Show the message after 3 seconds
-    }, 250);
+      setShowLoginMessage(true); // Show the message after 0.5 seconds
+    }, 500);
 
     return () => clearTimeout(timer); // Clear the timer if the component is unmounted
   }, []);
