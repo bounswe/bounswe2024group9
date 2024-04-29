@@ -98,7 +98,34 @@ const Login = ({ navigation }) => {
     );
 };
 const styles = StyleSheet.create({
-    
+    container: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    inputContainer: {
+      width: '80%',
+      marginBottom: 10,
+      alignSelf: 'center', // Center the input container horizontally
+    },
+    label: {
+      marginBottom: 2,
+      color: 'black',
+      textAlign: 'left',
+    },
+    scrollView: {
+      width: '100%',
+    },
+    input: {
+      textAlign: 'left',
+      height: 50,
+      borderColor: 'gray',
+      borderRadius: 17,
+      borderWidth: 1,
+      paddingHorizontal: 10,
+      backgroundColor: '#e0eaFF',
+      width: '100%',
+    },
     buttonContainer: {
       alignItems: 'center',
       marginTop: 20,
