@@ -105,9 +105,10 @@ const Login = ({ navigation }) => {
             </View>
     
             <View style={styles.inputContainer}>
+                <Text style={styles.label}>PASSWORD</Text>
                 <TextInput
                     style={styles.input}
-                    placeholder="Password"
+                    placeholder="Enter your password"
                     value={password}
                     onChangeText={setPassword}
                     secureTextEntry={true}
@@ -116,10 +117,26 @@ const Login = ({ navigation }) => {
     
             {error ? <Text style={styles.error}>{error}</Text> : null}
             {success ? <Text style={styles.success}>{success}</Text> : null}
-    
-            <Button title="Login" onPress={handleLogin} style={styles.loginButton} />
-    
-            <Button title="Login with Google" onPress={handleLoginWithGoogle} style={styles.loginButton} />
+
+            <View style={styles.buttonContainer}>
+                <TouchableHighlight
+                    onPress={handleLogin}
+                    activeOpacity={0.6}
+                    underlayColor="#DDDDDD">
+                    <View style={styles.loginButton}>
+                        <Text style={styles.buttonText}>Login</Text>
+                    </View>
+                </TouchableHighlight>
+                <TouchableHighlight
+                    onPress={handleLoginWithGoogle}
+                    activeOpacity={0.6}
+                    underlayColor="#DDDDDD">
+                    <View style={styles.loginButton}>
+                        <Text style={styles.buttonText}>Login with Google</Text>
+                    </View>
+                </TouchableHighlight>
+            </View>
+        </ScrollView>
         </View>
     );
 
@@ -172,6 +189,5 @@ const styles = StyleSheet.create({
       color: 'black',
     },
 });
-
 
 export default Login;
