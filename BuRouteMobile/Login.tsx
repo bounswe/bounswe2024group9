@@ -36,7 +36,7 @@ const Login = ({ navigation }) => {
             if (!response.ok) {
                 const errorResponse = await response.text();  // Get text response to understand the backend error
                 console.log("Login failed with response:", errorResponse);
-                setError("Invalid username or password");
+                setError("Invalid username or password! Please try again.");
                 setTimeout(() => setError(''), 2000); // Clear the error message after 2 seconds
                 return;
             }
@@ -87,7 +87,9 @@ const Login = ({ navigation }) => {
                 marginBottom: 20,
                 }}>
                 Don't have an account? 
-                    <Text onPress={handleSignUp} style={styles.signupButton}>Sign Up</Text>
+                <TouchableOpacity onPress={handleSignUp}>
+                    <Text style={styles.signupButton}> Sign Up</Text>
+                </TouchableOpacity>
             </Text>
 
             <ScrollView
@@ -115,25 +117,25 @@ const Login = ({ navigation }) => {
                 />
             </View>
     
-            {error ? <Text style={styles.error}>{error}</Text> : null}
-            {success ? <Text style={styles.success}>{success}</Text> : null}
+            <View style={styles.messageContainer}>
+                {error ? <Text style={[styles.message, styles.error]}>{error}</Text> : null}
+                {success ? <Text style={[styles.message, styles.success]}>{success}</Text> : null}
+            </View>
 
             <View style={styles.buttonContainer}>
                 <TouchableHighlight
                     onPress={handleLogin}
                     activeOpacity={0.6}
-                    underlayColor="#DDDDDD">
-                    <View style={styles.loginButton}>
-                        <Text style={styles.buttonText}>Login</Text>
-                    </View>
+                    underlayColor="#DDDDDD"
+                    style={styles.button}>
+                    <Text style={styles.buttonText}>Login</Text>
                 </TouchableHighlight>
                 <TouchableHighlight
                     onPress={handleLoginWithGoogle}
                     activeOpacity={0.6}
-                    underlayColor="#DDDDDD">
-                    <View style={styles.loginButton}>
-                        <Text style={styles.buttonText}>Login with Google</Text>
-                    </View>
+                    underlayColor="#DDDDDD"
+                    style={styles.button}>
+                    <Text style={styles.buttonText}>Login with Google</Text>
                 </TouchableHighlight>
             </View>
         </ScrollView>
@@ -176,17 +178,36 @@ const styles = StyleSheet.create({
       marginTop: 20,
     },
     button: {
-      flexDirection: 'row',
-      justifyContent: 'center',
-      alignItems: 'center',
       width: 300,
       height: 58,
       borderRadius: 17,
       borderWidth: 2,
       backgroundColor: '#e0eaFF',
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginBottom: 10,
     },
     buttonText: {
       color: 'black',
+    },
+    signupButton: {
+      color: 'blue',
+      textDecorationLine: 'underline',
+    },
+    messageContainer: {
+      alignItems: 'center',
+      marginTop: 10,
+    },
+    message: {
+      fontSize: 14,
+      textAlign: 'center',
+      width: '80%',
+    },
+    error: {
+      color: 'red',
+    },
+    success: {
+      color: 'green',
     },
 });
 
