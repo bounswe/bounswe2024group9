@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { View, TextInput, Button, Text, TouchableOpacity, TouchableHighlight, StyleSheet, StatusBar, ScrollView, ActivityIndicator } from 'react-native';
-//import CheckBox from '@react-native-community/checkbox';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import Config from 'react-native-config';
+
 
 const Login = ({ navigation }) => {
     const [username, setUsername] = useState('');
@@ -9,8 +10,6 @@ const Login = ({ navigation }) => {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState(''); 
     const [loading, setLoading] = useState(false);
-    //const [rememberMe, setRememberMe] = useState(false);
-    //const navigation = useNavigation();
 
     useFocusEffect(
         React.useCallback(() => {
@@ -30,7 +29,7 @@ const Login = ({ navigation }) => {
                 return;
             }
             setLoading(true);
-            const response = await fetch('http://10.0.2.2:8000/database_search/login/', {
+            const response = await fetch(Config.REACT_APP_API_URL+'/database_search/login/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

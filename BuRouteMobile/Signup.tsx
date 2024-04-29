@@ -11,6 +11,7 @@ import {
   Text,
 } from 'react-native';
 import {NavigationProp} from '@react-navigation/native'; // Import NavigationProp type
+import Config from 'react-native-config';
 
 type Props = {
   navigation: NavigationProp<any>; // Define the type of the navigation prop
@@ -27,8 +28,9 @@ const Signup = ({navigation}: Props) => {
       console.log(username);
       console.log(email);
       console.log(password);
+      console.log(Config.REACT_APP_API_URL);
       
-      const response = await fetch('http://10.0.2.2:8000/database_search/create_user/', {
+      const response = await fetch(Config.REACT_APP_API_URL+'/database_search/create_user/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

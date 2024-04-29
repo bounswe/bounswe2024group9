@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, TextInput, Button, Image } from 'react-native';
 import { launchImageLibrary } from 'react-native-image-picker';
+import Config from 'react-native-config';
 
 const NodeCreationPage = ({ navigation }) => {
   const [nodeName, setNodeName] = useState('');
@@ -55,7 +56,7 @@ const handleCreateNode = async () => {
     console.log('Sending data...');
 
     try {
-        const response = await fetch('http://10.0.2.2:8000/database_search/create_node/', {
+        const response = await fetch(Config.REACT_APP_API_URL+'/database_search/create_node/', {
           method: 'POST',
           body: formData,
           headers: {

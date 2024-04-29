@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, TextInput, Text, TouchableOpacity, Modal, Button, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import NodeCreationPage from './NodeCreationPage';
+import Config from 'react-native-config';
 
 const WikidataSearch = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -16,7 +17,7 @@ const WikidataSearch = () => {
 
   const fetchNodes = async () => {
     try {
-      const response = await fetch('http://10.0.2.2:8000/database_search/nodes/');
+      const response = await fetch(Config.REACT_APP_API_URL+'/database_search/nodes/');
       const jsonData = await response.json();
       console.log("JSON Data:", jsonData);
 
@@ -47,7 +48,7 @@ const WikidataSearch = () => {
       return;
     }
     try {
-      const response = await fetch('http://10.0.2.2:8000/wiki_search/search/' + searchTerm);
+      const response = await fetch(Config.REACT_APP_API_URL+'/wiki_search/search/' + searchTerm);
       const data = await response.json();
       if (data.results.bindings.length === 0) {
         fetchNodes();
@@ -82,7 +83,7 @@ const WikidataSearch = () => {
     setSelectedQValue(qValue);
     console.log(qValue);
     try {
-      const response = await fetch('http://10.0.2.2:8000/wiki_search/results/' + qValue);
+      const response = await fetch(Config.REACT_APP_API_URL+'/wiki_search/results/' + qValue);
       const data = await response.json();
       navigation.navigate('SearchResultDetail', { result: data });
     } catch (error) {

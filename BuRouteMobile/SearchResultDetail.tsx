@@ -1,5 +1,7 @@
 import React from 'react';
 import { View, Text, Image, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
+import Config from 'react-native-config';
+
 
 const SearchResultDetail = ({ route, navigation }) => {
   const { results, nearby, period } = route.params.result;
@@ -20,7 +22,7 @@ const SearchResultDetail = ({ route, navigation }) => {
   };
 
   const handleItemClick = async (newContent) => {
-    const response = await fetch('http://10.0.2.2:8000/wiki_search/results/' + getLastItem(newContent['item'].value));
+    const response = await fetch(Config.REACT_APP_API_URL+'/wiki_search/results/' + getLastItem(newContent['item'].value));
         const data = await response.json();
     navigation.push('SearchResultDetail', { result: data });
   };
