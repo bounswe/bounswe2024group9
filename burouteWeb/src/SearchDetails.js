@@ -29,7 +29,7 @@ function SearchDetails() {
     const fetchData = async () => {
       try {
         console.log("Fetching data for QID:", qid);
-        const response = await fetch(`http://database:8000/wiki_search/results/${qid}`);
+        const response = await fetch(`http://db:8000/wiki_search/results/${qid}`);
         console.log("Response:", response);
         const data = await response.json();
         setItemDetails(data);

@@ -64,7 +64,7 @@ export const fetchSearchResults = async (searchString) => {
       return [];
     }
 
-    const response = await fetch(`http://database:8000/wiki_search/search/${searchString}`);
+    const response = await fetch(`http://db:8000/wiki_search/search/${searchString}`);
     const data = await response.json();
     console.log(data.results.bindings);
     return data.results.bindings;
