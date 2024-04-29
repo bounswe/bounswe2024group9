@@ -69,9 +69,30 @@ const Login = ({ navigation }) => {
 
     return (
         <View style={styles.container}>
-            <TouchableOpacity onPress={handleSignUp}>
-                <Text style={styles.signupButton}>Sign Up</Text>
-            </TouchableOpacity>
+            <StatusBar barStyle="dark-content" />
+            <Text
+                style={{
+                color: 'black',
+                fontSize: 60,
+                textAlign: 'center',
+                marginTop: 60,
+                fontWeight: 'bold',
+                }}>
+                Login
+            </Text>
+
+            <Text
+                style={{
+                color: 'black',
+                marginBottom: 20,
+                }}>
+                Don't have an account? 
+                    <Text onPress={handleSignUp} style={styles.signupButton}>Sign Up</Text>
+            </Text>
+            
+            <ScrollView
+                contentInsetAdjustmentBehavior="automatic"
+                style={styles.scrollView}></ScrollView>
     
             <View style={styles.inputContainer}>
                 <TextInput
