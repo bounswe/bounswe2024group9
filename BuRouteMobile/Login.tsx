@@ -68,35 +68,41 @@ const Login = ({ navigation }) => {
     };
 
     return (
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <View style={styles.container}>
             <TouchableOpacity onPress={handleSignUp}>
-                <Text style={{ marginBottom: 20, color: 'blue' }}>Sign Up</Text>
+                <Text style={styles.signupButton}>Sign Up</Text>
             </TouchableOpacity>
-
-            <TextInput
-                style={{ marginBottom: 20, padding: 10, borderWidth: 1, borderColor: '#ccc', borderRadius: 5 }}
-                placeholder="Username"
-                value={username}
-                onChangeText={setUsername}
-            />
-
-            <TextInput
-                style={{ marginBottom: 20, padding: 10, borderWidth: 1, borderColor: '#ccc', borderRadius: 5 }}
-                placeholder="Password"
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry={true}
-            />
-
-            {error ? <Text style={{ color: 'red', marginBottom: 20 }}>{error}</Text> : null}
-            {success ? <Text style={{ color: 'green', marginBottom: 20 }}>{success}</Text> : null}
-
-            <Button title="Login" onPress={handleLogin} style={{marginTop: 20, marginBottom: 20}}/>
-
-            <Button title="Login with Google" onPress={handleLoginWithGoogle} style={{marginTop: 20, marginBottom: 20}}/>
+    
+            <View style={styles.inputContainer}>
+                <TextInput
+                    style={styles.input}
+                    placeholder="Username"
+                    value={username}
+                    onChangeText={setUsername}
+                />
+            </View>
+    
+            <View style={styles.inputContainer}>
+                <TextInput
+                    style={styles.input}
+                    placeholder="Password"
+                    value={password}
+                    onChangeText={setPassword}
+                    secureTextEntry={true}
+                />
+            </View>
+    
+            {error ? <Text style={styles.error}>{error}</Text> : null}
+            {success ? <Text style={styles.success}>{success}</Text> : null}
+    
+            <Button title="Login" onPress={handleLogin} style={styles.loginButton} />
+    
+            <Button title="Login with Google" onPress={handleLoginWithGoogle} style={styles.loginButton} />
         </View>
     );
+
 };
+
 const styles = StyleSheet.create({
     container: {
       flex: 1,
