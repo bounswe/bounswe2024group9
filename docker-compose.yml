@@ -10,7 +10,7 @@ services:
     build: ./buroute-web
     image: poyrazogluyigit/buroute-web:latest
     environment:
-      - REACT_APP_API_URL=https://165.22.125.216:8000
+      - REACT_APP_API_URL=http://165.22.125.216:8000
     restart: on-failure
     ports:
       - "3000:3000" 
