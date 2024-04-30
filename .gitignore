@@ -1,3 +1,9 @@
+/BuRouteMobile/node_modules
+/BuRouteMobile/android
+*.pyc
 __pycache__/
 .env
 myenv
+.DS_Store
+.idea
+keygen-apk/

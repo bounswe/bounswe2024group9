@@ -6,6 +6,9 @@ from django.shortcuts import get_object_or_404
 from .models import Route, Node, User
 from django.core import serializers
 import json
+import logging
+
+logger = logging.getLogger(__name__)
 
 def route_list(request):
     routes = Route.objects.all()
@@ -21,7 +24,8 @@ def route_detail(request, pk):
 def node_list(request):
     nodes = Node.objects.all()
     nodes_list = serializers.serialize('json', nodes)
-    return JsonResponse(nodes_list, safe=False)
+    nodes_list_json = json.loads(nodes_list)
+    return JsonResponse(nodes_list_json, safe=False)
 
 def node_detail(request, pk):
     node = get_object_or_404(Node, pk=pk)
@@ -39,8 +43,7 @@ def user_detail(request, pk):
     user_json = serializers.serialize('json', [user]) # User is put in array because serialize expects a list
     user_data = json.loads(user_json)[0]  # Deserialize the JSON and take the first element
     return JsonResponse(user_data, safe=False)
-
-
+  
 @csrf_exempt
 def create_user(request):
     if request.method == 'POST':
@@ -82,15 +85,15 @@ def create_user(request):
 def create_node(request):
     if request.method == 'POST':
         name = request.POST.get('name')
-        photo = request.POST.get('photo')
         latitude = request.POST.get('latitude')
         longitude = request.POST.get('longitude')
+        photo = request.FILES.get('photo')
 
         # Validation checks and additional logic goes here
         node = Node.objects.create(
-            name=name, 
-            photo=photo, 
-            latitude=latitude, 
+            name=name,
+            photo=photo,
+            latitude=latitude,
             longitude=longitude
         )
 
