@@ -80,7 +80,7 @@ function SearchDetails() {
           <img id="bar_logo" 
           src="/logo.jpg"
           alt="bar_logo"
-          style={{ width: '75px', height: 'auto' }} 
+          style={{ width: '75px', height: 'auto' , padding: "5px"}} 
           onClick={() => window.location.href = '/search'}
           />
           <button 
@@ -132,10 +132,13 @@ function SearchDetails() {
             <div className="item-details">
             <div className="page-container">
             <div className="card">
-              <img 
+              {result?.image?.value? (<img 
                 src={result?.image?.value} 
                 alt={result?.itemLabel?.value} 
-              />
+              />):(<img 
+                src="/no_image.png"
+                alt="No Wikidata Pic Found"
+                />)}
             </div>
             <div className="card-content">
               <h2 className="card-title">{getSafeValue(result?.itemLabel)}</h2>

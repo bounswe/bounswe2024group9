@@ -5,6 +5,7 @@ import SearchResults from './SearchResults';
 import SearchDetails from './SearchDetails';
 import Signup from './Signup';
 import Login from './Login';
+import ForgotPassword from './Forgot';
 
 const App = () => {
   return (
@@ -28,6 +29,7 @@ const AppRoutes = () => {
     <Routes>
       <Route path="/signup" element={<Signup />} />
       <Route path="/login" element={<Login />} />
+      <Route path="/forgot" element={<ForgotPassword />} />
       {user ? (
         <>
           <Route path="/search" element={<SearchResults />} />

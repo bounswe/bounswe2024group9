@@ -105,6 +105,15 @@ input[type="password"] {
   font-size: 1rem;
 }
 
+.wrapper_entrance #signup-button:disabled {
+  margin-top: 3%;
+  background-color: rgb(0,128,153);
+  font-size: 1rem;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+
 .wrapper_entrance #link1 {
   position: absolute;
   top: 10px;
@@ -188,6 +197,22 @@ input[type="password"] {
 
 .wrapper_entrance .remember-forget-container input[type="checkbox"] {
   margin-right: 5px; 
+}
+
+.kvkk-container {
+  display: flex;
+  align-items: center;
+}
+
+.mail-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mail-box label {
+  margin-right: 10px;
+  font-size: 0.9rem;
 }
 
 @media (max-width: 600px) {
