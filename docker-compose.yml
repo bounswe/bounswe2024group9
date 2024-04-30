@@ -1,0 +1,15 @@
+version: '3'
+services:
+  db:
+    build: ./wiki_database_API
+    command: python manage.py runserver 0.0.0.0:8000
+    ports:
+      - "8000:8000"
+  web:
+    build: ./buroute-web
+    environment:
+      - REACT_APP_API_URL=https://dolphin-app-zduum.ondigitalocean.app
+    restart: on-failure
+    ports:
+      - "3000:3000" 
+
