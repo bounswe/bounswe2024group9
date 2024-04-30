@@ -68,6 +68,10 @@ You must have
 
 installed on your host (explained below). If not, you can download from [the official docker website.](https://www.docker.com/products/docker-desktop/) For ease of use, we suggest installing Docker Desktop; Docker Compose is included therein. 
 
+## Accessing the Web Page
+
+You can access the webpage [from here](http://165.22.125.216:3000).
+
 ## Deploying the server
 
 #### Security Notice
