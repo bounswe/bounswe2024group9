@@ -39,6 +39,16 @@ ALLOWED_HOSTS = [
     '165.22.125.216'
 ]
 
+SWAGGER_SETTINGS = {
+    'SECURITY_DEFINITIONS': {
+        'Basic': {
+            'type': 'basic'
+        }
+    },
+}
+
+
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -51,6 +61,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'wiki_search',
     'database_search',
+    'drf_yasg',
 ]
 
 MIDDLEWARE = [
