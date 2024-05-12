@@ -4,23 +4,25 @@ from rest_framework.decorators import api_view
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 
-@api_view(['GET'])
 @swagger_auto_schema(
+    method='get',
     operation_summary="Search items",
     operation_description="Search locations in Istanbul by given search strings.",
-    request_body=[
+    manual_parameters=[
         openapi.Parameter(
             name='search_strings',
             in_=openapi.IN_PATH,
             type=openapi.TYPE_STRING,
-        ),
+            description="The search strings used to query locations in Istanbul.",
+            required=True
+        )
     ],
-    responses={200: "CU"}
-
+    responses={
+        200: 'Successful Response',
+        400: 'Bad Request',
+    }
 )
-
-# Breaks the search string down to separate words, creates filters for all the words,
-# matches as many as possible in the query and sorts the outputs according to the matches
+@api_view(['GET'])
 def search(request, search_strings):
     sparql = SPARQLWrapper("https://query.wikidata.org/sparql")
     search_string = search_strings.split(" ")
