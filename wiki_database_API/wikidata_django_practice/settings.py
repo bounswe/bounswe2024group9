@@ -40,6 +40,16 @@ ALLOWED_HOSTS = [
     'localhost'
 ]
 
+SWAGGER_SETTINGS = {
+    'SECURITY_DEFINITIONS': {
+        'Basic': {
+            'type': 'basic'
+        }
+    },
+}
+
+
+
 # Application definition
 
 INSTALLED_APPS = [
