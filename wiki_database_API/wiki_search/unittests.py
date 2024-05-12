@@ -5,10 +5,11 @@ from django.http import JsonResponse
 from views import search, results, top_5_nearby, top_5_period
 import os
 from django.conf import settings
+import django
 import json
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'settings')
-settings.configure()
+django.setup()
 
 class TestSearchView(unittest.TestCase):
     def setUp(self):
