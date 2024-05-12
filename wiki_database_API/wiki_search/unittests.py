@@ -2,7 +2,7 @@ import unittest
 from unittest.mock import patch
 from django.test import RequestFactory
 from django.http import JsonResponse
-from views import search, results
+from views import search, results, top_5_nearby, top_5_period
 import os
 from django.conf import settings
 import json
@@ -88,6 +88,32 @@ class TestResultsView(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(data['results']['bindings'][0]['itemLabel']['value'], 'Ortaköy Jewish cemetery')
         self.assertNotIn('inception', data['results']['bindings'][0], "Expected 'inception' not to be in the results")
+
+class TestTop5Nearby(unittest.TestCase):
+    # Test with coordinates of a location where known nearby items are expected
+    def test_top_5_nearby(self):
+        longitude = 41.008333333
+        latitude = 28.98
+        nearby_items = top_5_nearby(longitude, latitude)
+        self.assertTrue(nearby_items['results']['bindings'][0], "No nearby items found")
+        sogukcesme_found = any('Soğukçeşme Sokağı' in result['itemLabel']['value'] for result in nearby_items['results']['bindings'])
+        self.assertTrue(sogukcesme_found, "'Soğukçeşme Sokağı' not found in nearby items")
+
+
+class TestTop5Period(unittest.TestCase):
+    # Test with a valid known inception year
+    def test_top_5_period(self):
+        inception = 1500
+        period_items = top_5_period(inception)
+        self.assertTrue(period_items['results']['bindings'], "No items found for the given inception year")
+        stgeorge_found = any('Church of St. George' in result['itemLabel']['value'] for result in period_items['results']['bindings'])
+        self.assertTrue(stgeorge_found, "'Church of St. George' not found in nearby items")
+
+    # Test with an inception year where no items are expected
+    def test_top_5_period_empty(self):
+        inception = 5000
+        period_items = top_5_period(inception)
+        self.assertFalse(period_items['results']['bindings'], "Unexpected items found for the given inception year")
 
 if __name__ == '__main__':
     unittest.main()
