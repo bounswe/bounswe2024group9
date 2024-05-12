@@ -1,5 +1,23 @@
 from django.http import JsonResponse
 from SPARQLWrapper import SPARQLWrapper, JSON
+from rest_framework.decorators import api_view
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
+
+@api_view(['GET'])
+@swagger_auto_schema(
+    operation_summary="Search items",
+    operation_description="Search locations in Istanbul by given search strings.",
+    request_body=[
+        openapi.Parameter(
+            name='search_strings',
+            in_=openapi.IN_PATH,
+            type=openapi.TYPE_STRING,
+        ),
+    ],
+    responses={200: "CU"}
+
+)
 
 # Breaks the search string down to separate words, creates filters for all the words,
 # matches as many as possible in the query and sorts the outputs according to the matches
@@ -44,25 +62,20 @@ def search(request, search_strings):
     results = sparql.query().convert()
     return JsonResponse(results)
 
+@api_view(['GET'])
 @swagger_auto_schema(
-    method='get',
     operation_summary="Get item details",
-    operation_description="Get details of an item by its QID. Get the item's title, link to wikipedia, description, image, longitude, latitude, inception, 5 nearby places, 5 places from the same period, etc.",
+    operation_description="Get details of an item by its QID.",
     manual_parameters=[
         openapi.Parameter(
             name='QID',
             in_=openapi.IN_PATH,
             type=openapi.TYPE_STRING,
-            description='The Wikidata item ID of the item for which we want to see the description, image, geolocation, nearby items, etc.',
-            required=True
-        )
+            description='The Wikidata item ID of the item.'
+        ),
     ],
-    responses={
-        200: 'Successful Response',
-        400: 'Bad Request',
-    }
+    responses={200: openapi.Response('Successful retrieval.', JsonResponse)}
 )
-@api_view(['GET'])
 # Takes the item id as parameter and returns the items details, 5 nearby items, 5 items from same period
 def results(request, QID):
     sparql = SPARQLWrapper("https://query.wikidata.org/sparql")
