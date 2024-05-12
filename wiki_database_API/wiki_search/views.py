@@ -1,7 +1,7 @@
 from django.http import JsonResponse
 from SPARQLWrapper import SPARQLWrapper, JSON
 
-# Brakes the search string down to separate words, creates filters for all the words,
+# Breaks the search string down to separate words, creates filters for all the words,
 # matches as many as possible in the query and sorts the outputs according to the matches
 def search(request, search_strings):
     sparql = SPARQLWrapper("https://query.wikidata.org/sparql")
@@ -107,8 +107,10 @@ def results(request, QID):
     except:
         same_period_entries = {}
 
-
-    final = {'results': results, 'nearby': nearby_entries, 'period': same_period_entries}
+    final = results
+    final['nearby'] = nearby_entries
+    final['period'] = same_period_entries
+    # final = {'results': results, 'nearby': nearby_entries, 'period': same_period_entries}
 
     return JsonResponse(final)
 
