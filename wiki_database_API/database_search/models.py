@@ -28,7 +28,7 @@ class Route(models.Model):
     likes = models.PositiveIntegerField(default=0)
     comments = models.JSONField(default=list, blank=True) 
     saves = models.PositiveIntegerField(default=0)
-    node_ids = models.TextField()
+    node_ids = models.TextField() # IMPORTANT! This field is string but keeping an array of integers. EX: "1, 2, 3". IT MUST BE CONVERTED TO AN ARRAY BEFORE USING IT.
     duration = models.JSONField(default=list, blank=True)  # Time spent in the location. Type: minutes
     duration_between = models.JSONField(default=list, blank=True)  #Time spent between locations like 15 min between node 1 and 2
     mapView = models.URLField()
