@@ -133,7 +133,8 @@ def create_route(request):
                     likes=likes,
                     comments=comments,
                     saves=saves,
-                    mapView=mapView
+                    mapView=mapView,
+                    node_ids=node_ids
                 )
 
                 # Adding nodes to the route
