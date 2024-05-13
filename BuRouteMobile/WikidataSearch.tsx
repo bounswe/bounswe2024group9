@@ -48,7 +48,8 @@ const WikidataSearch = () => {
       return;
     }
     try {
-      const response = await fetch(Config.REACT_APP_API_URL+'/wiki_search/search/' + searchTerm);
+      const lowercaseTerm = searchTerm.toLowerCase(); 
+      const response = await fetch(Config.REACT_APP_API_URL+'/wiki_search/search/' + lowercaseTerm);
       const data = await response.json();
       if (data.results.bindings.length === 0) {
         fetchNodes();
