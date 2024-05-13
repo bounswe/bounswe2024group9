@@ -7,3 +7,5 @@ myenv
 .DS_Store
 .idea
 keygen-apk/
+wiki_database_API/env
+buroute-web/web_env
