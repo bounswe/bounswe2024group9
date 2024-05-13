@@ -22,6 +22,7 @@ const Signup = ({navigation}: Props) => {
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [subscribe, setSubscribe] = useState(false);
 
   const handleSubmit = async () => {
     const userInfo = {username, name: '', email, password, is_superuser: false};
@@ -30,28 +31,33 @@ const Signup = ({navigation}: Props) => {
       console.log(email);
       console.log(password);
       console.log(Config.REACT_APP_API_URL);
+      console.log(subscribe);
       
-      const response = await fetch(Config.REACT_APP_API_URL+'/database_search/create_user/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          username: username,
-          name: "",
-          email: email,
-          password: password,
-        }),
-      });
+      if (!subscribe){
+        Alert.alert('You must agree to KVKK to continue!');
+      }else{
+        const response = await fetch(Config.REACT_APP_API_URL+'/database_search/create_user/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            username: username,
+            name: "",
+            email: email,
+            password: password,
+          }),
+        });
 
-      const json = await response.json();
-      console.log(json);
-      if (response.ok) {
+        const json = await response.json();
+        console.log(json);
+        if (response.ok) {
 
-        Alert.alert('User saved successfully!');
-        setTimeout(() => {
-            navigation.navigate('WikidataSearch', {json});
-        }, 2000);
+          Alert.alert('User saved successfully!');
+          setTimeout(() => {
+              navigation.navigate('WikidataSearch', {json});
+          }, 2000);
+        }
     }
     } catch (error) {
       console.error('Error:', error);
@@ -118,6 +124,19 @@ const Signup = ({navigation}: Props) => {
             secureTextEntry={true}
           />
         </View>
+        <View style={styles.inputContainer}>
+          <TouchableOpacity
+            onPress={() => setSubscribe(!subscribe)} // Toggle subscribe state
+            style={{flexDirection: 'row', alignItems: 'center'}}>
+            <View
+              style={[
+                styles.checkbox,
+                {backgroundColor: subscribe ? 'blue' : 'transparent'}, // Change color based on state
+              ]}
+            />
+            <Text style={{marginLeft: 8}}>I agree to the KVKK terms</Text>
+          </TouchableOpacity>
+        </View>
         <View style={styles.buttonContainer}>
           <TouchableHighlight
             onPress={handleSubmit}
@@ -183,6 +202,13 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: 'black',
+  },
+  checkbox: {
+    width: 20,
+    height: 20,
+    borderRadius: 5,
+    borderWidth: 2,
+    borderColor: 'blue',
   },
 });
 
