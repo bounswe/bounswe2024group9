@@ -105,46 +105,47 @@ def create_node(request):
 def create_route(request):
     if request.method == 'POST':
         try:
-            data = json.loads(request.body)
+            if request.POST:
+                data = request.POST
+                
+                # Extracting data from the request
+                title = data.get('title')
+                description = data.get('description')
+                photos = data.get('photos', [])
+                rating = data.get('rating')
+                likes = data.get('likes', 0)
+                comments = data.get('comments', [])
+                saves = data.get('saves', 0)
+                duration = data.get('duration', [])
+                duration_between = data.get('duration_between', [])
+                mapView = data.get('mapView')
+                node_ids = data.get('node_ids', [])  # List of node IDs
 
-            # Extracting data from the request
-            title = data.get('title')
-            description = data.get('description')
-            photos = data.get('photos', [])
-            rating = data.get('rating')
-            likes = data.get('likes', 0)
-            comments = data.get('comments', [])
-            saves = data.get('saves', 0)
-            duration = data.get('duration', [])
-            duration_between = data.get('duration_between', [])
-            mapView = data.get('mapView')
-            node_ids = data.get('node_ids', [])  # List of node IDs
+                # Fetch nodes from database
+                # nodes = Node.objects.filter(node_id__in=node_ids)
 
-            # Fetch nodes from database
-            # nodes = Node.objects.filter(node_id__in=node_ids)
+                # Creating the Route instance
+                route = Route.objects.create(
+                    title=title,
+                    description=description,
+                    photos=photos,
+                    rating=rating,
+                    likes=likes,
+                    comments=comments,
+                    saves=saves,
+                    mapView=mapView
+                )
 
-            # Creating the Route instance
-            route = Route.objects.create(
-                title=title,
-                description=description,
-                photos=photos,
-                rating=rating,
-                likes=likes,
-                comments=comments,
-                saves=saves,
-                mapView=mapView
-            )
+                # Adding nodes to the route
+                route.duration = duration
+                route.duration_between = duration_between
+                route.save()
 
-            # Adding nodes to the route
-            route.duration = duration
-            route.duration_between = duration_between
-            route.save()
-
-            return JsonResponse({'status': 'success', 'route_id': route.pk})
-
+                return JsonResponse({'status': 'success', 'route_id': route.pk})
         except Exception as e:
-            # You can log the error here if needed
-            return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+            return JsonResponse({'error': str(e)}, status=400)
+
+
     else:
         return HttpResponse(status=405)
     
