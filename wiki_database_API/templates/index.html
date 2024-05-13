@@ -52,7 +52,7 @@
         
         function submitRouteForm(event) {
             event.preventDefault();
-            var formData = new FormData(document.getElementById('createNodeForm'));
+            var formData = new FormData(document.getElementById('createRouteForm'));
 
             fetch('/database_search/create_route/', {
                 method: 'POST',
@@ -137,7 +137,7 @@
         <input type="submit" value="Create Node">
     </form>
     <h1>Create Route </h1>
-    <form action="/submit_route_post" onsubmit="submitRouteForm(event)">
+    <form id="createRouteForm" onsubmit="submitRouteForm(event)" enctype="multipart/form-data">
         <label for="title">Title:</label><br>
         <input type="text" id="title" name="title" required><br><br>
         <label for="description">Description:</label><br>
