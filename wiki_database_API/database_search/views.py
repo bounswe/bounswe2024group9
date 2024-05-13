@@ -146,60 +146,47 @@ def create_node(request):
 def create_route(request):
     if request.method == 'POST':
         try:
-            if request.POST: # Checking if the request contains form data
+            if request.POST:
                 data = request.POST
-            else: # If not, it should contain JSON data
-                data = json.loads(request.body.decode('utf-8')) 
+                
+                # Extracting data from the request
+                title = data.get('title')
+                description = data.get('description')
+                photos = data.get('photos', [])
+                rating = data.get('rating')
+                likes = data.get('likes', 0)
+                comments = data.get('comments', [])
+                saves = data.get('saves', 0)
+                duration = data.get('duration', [])
+                duration_between = data.get('duration_between', [])
+                mapView = data.get('mapView')
+                node_ids = data.get('node_ids', [])  # List of node IDs
 
-            title = data.get('title')
-            description = data.get('description')
-            photos = data.get('photos', [])
-            rating = data.get('rating', 0)
-            likes = data.get('likes', 0)
-            comments = data.get('comments', [])
-            saves = data.get('saves', 0)
-            duration = data.get('duration', [])
-            duration_between = data.get('duration_between', [])
-            mapView = data.get('mapView')
-            node_ids = data.get('node_ids', '')  # List of node IDs as string
-            node_names = data.get('node_names', '')  # List of node names as string
-            user_id = data.get('user', None)
-            
+                # Fetch nodes from database
+                # nodes = Node.objects.filter(node_id__in=node_ids)
 
-            route = Route.objects.create(
-                title=title,
-                description=description,
-                photos=photos,
-                rating=rating,
-                likes=likes,
-                comments=comments,
-                saves=saves,
-                node_ids=node_ids,  # Stored as a comma-separated string
-                node_names=node_names,  # Stored as a comma-separated string
-                # duration=duration, # Commented because it is not used and if it will be sued it must be an array dont send string
-                # duration_between=duration_between,
-                mapView=mapView,
-                user=user_id
-            )
+                # Creating the Route instance
+                route = Route.objects.create(
+                    title=title,
+                    description=description,
+                    photos=photos,
+                    rating=rating,
+                    likes=likes,
+                    comments=comments,
+                    saves=saves,
+                    mapView=mapView
+                )
 
-            return JsonResponse({'status': 'success', 'route_id': route.pk})
+                # Adding nodes to the route
+                route.duration = duration
+                route.duration_between = duration_between
+                route.save()
+
+                return JsonResponse({'status': 'success', 'route_id': route.pk})
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=400)
 
 
-    else:
-        return HttpResponse(status=405)
-    
-@csrf_exempt
-def delete_route(request):
-    if request.method == 'POST':
-        try:
-            route_id = request.POST.get('routeId')
-            route = get_object_or_404(Route, pk=route_id)
-            route.delete()
-            return JsonResponse({'status': 'success', 'message': 'Route deleted successfully'})
-        except Exception as e:
-            return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
     else:
         return HttpResponse(status=405)
 
