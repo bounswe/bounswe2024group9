@@ -9,6 +9,7 @@ import {
   Alert,
   View,
   Text,
+  TouchableOpacity,
 } from 'react-native';
 import {NavigationProp} from '@react-navigation/native'; // Import NavigationProp type
 import Config from 'react-native-config';
@@ -58,6 +59,11 @@ const Signup = ({navigation}: Props) => {
     }
   };
 
+  const handleLogin = () => {
+    //navigate to sign up page
+    navigation.navigate('Login');
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" />
@@ -76,7 +82,10 @@ const Signup = ({navigation}: Props) => {
           color: 'black',
           marginBottom: 20,
         }}>
-        Already registered? Log in here.
+        Already registered?
+        <TouchableOpacity onPress={handleLogin}>
+          <Text style={styles.signupButton}> Log in here.</Text>
+        </TouchableOpacity>
       </Text>
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"
@@ -142,6 +151,11 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     width: '100%',
+  },
+  signupButton: {
+    color: 'blue',
+    textDecorationLine: 'underline',
+    marginBottom: -3,
   },
   input: {
     textAlign: 'left',
