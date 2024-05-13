@@ -28,7 +28,7 @@ class Route(models.Model):
     likes = models.PositiveIntegerField(default=0)
     comments = models.JSONField(default=list, blank=True) 
     saves = models.PositiveIntegerField(default=0)
-    nodes = models.ManyToManyField(Node, related_name='routes')
+    node_ids = models.ManyToManyField(Node, related_name='routes')
     duration = models.JSONField(default=list, blank=True)  # Time spent in the location. Type: minutes
     duration_between = models.JSONField(default=list, blank=True)  #Time spent between locations like 15 min between node 1 and 2
     mapView = models.URLField()
