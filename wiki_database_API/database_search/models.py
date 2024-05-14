@@ -75,7 +75,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     # For followers and following, you would typically use a many-to-many field. However, this requires a through table or self-referential M2M field
     # It needs to be implemented in the future
     # followers = models.ManyToManyField('self', symmetrical=False, related_name='followed_by', blank=True)
-    # following = models.ManyToManyField('self', symmetrical=False, related_name='following', blank=True)
+    following = models.ManyToManyField('self', symmetrical=False, related_name='following_users', blank=True)
 
     is_active = models.BooleanField(default=True) # This field is required for Django's AbstractBaseUser. It is used to determine whether the user is active or not. It is like instead of deleting the user, it is better to deactivate it.
     is_staff = models.BooleanField(default=False) # This field is required for Django's AbstractBaseUser. It is used to determine whether the user is a staff member or not. It is used to determine whether the user is allowed to access the admin site or not.
@@ -89,7 +89,10 @@ class User(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
         return self.username
 
-
+    def get_following_routes(self):
+        following_users = self.following.all()
+        routes = Route.objects.filter(user__in=following_users)
+        return routes
 
 # When a field is changed in the model, the database must be updated.
 # To do this, run the following commands:
