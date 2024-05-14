@@ -84,6 +84,9 @@ class User(AbstractBaseUser, PermissionsMixin):
     
     objects = CustomUserManager()
 
+    liked_routes = models.JSONField(default=list, blank=True) 
+    saved_routes = models.JSONField(default=list, blank=True) 
+
     USERNAME_FIELD = 'username' # This is the field that is used for authentication.
     REQUIRED_FIELDS = [] # This is golding the field which is required to register the user. Since username and user_id are required fields, we don't need to specify any other fields.
 

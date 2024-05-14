@@ -13,6 +13,7 @@ logger = logging.getLogger(__name__)
 
 def route_list(request):
     routes = Route.objects.all()
+    
     routes_list = [{
         'route_id': route.route_id,
         'title': route.title,
@@ -27,7 +28,7 @@ def route_list(request):
         'duration': route.duration,
         'duration_between': route.duration_between,
         'mapView': route.mapView,
-        'user': route.user
+        'user': User.objects.get(user_id=(3 if isinstance(route.user, str) else route.user)).username
     } for route in routes]
     return JsonResponse(routes_list, safe=False)
 
@@ -54,7 +55,7 @@ def get_routes_by_qid(request, qid):
             'mapView': route.mapView,
             'node_ids': route.node_ids,
             "node_names": route.node_names, # Added for the node names to be shown in the route list
-            'user': route.user
+            'user': User.objects.get(user_id=(3 if isinstance(route.user, str) else route.user)).username
         } for route in routes]
         return JsonResponse(route_data, safe=False)
     except Exception as e:
@@ -162,8 +163,9 @@ def create_route(request):
             mapView = data.get('mapView')
             node_ids = data.get('node_ids', '')  # List of node IDs as string
             node_names = data.get('node_names', '')  # List of node names as string
-            user = data.get('user', 'Random user')
+            user_id = data.get('user', None)
             
+
             route = Route.objects.create(
                 title=title,
                 description=description,
@@ -177,7 +179,7 @@ def create_route(request):
                 # duration=duration, # Commented because it is not used and if it will be sued it must be an array dont send string
                 # duration_between=duration_between,
                 mapView=mapView,
-                user=user
+                user=user_id
             )
 
             return JsonResponse({'status': 'success', 'route_id': route.pk})
