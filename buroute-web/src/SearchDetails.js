@@ -3,8 +3,10 @@ import { useParams, Link } from 'react-router-dom';
 import { fetchSearchResults } from './SearchResults';
 import { useAuth } from "./hooks/AuthProvider"
 import StaticRoute from './components/StaticRoute/staticRoute';
+import RouteCard from "./RouteCard"; 
 
 import "./detail_style.css";
+import './card.css';
 
 function SearchDetails() {
   const auth = useAuth(); 
@@ -17,6 +19,7 @@ function SearchDetails() {
   const [searched, setSearched] = useState(false); // State variable for search button press status
   const [isLoading, setIsLoading] = useState(false); // State variable for loading status
   const isMounted = useRef(true); 
+  const [routes, setRoutes] = useState([]); // State for routes
 
   const extractQID = (url) => {
     return url.split("/").pop();
@@ -56,6 +59,23 @@ function SearchDetails() {
 
     fetchData();
   }, [qid]);
+
+  useEffect(() => {
+      const fetchRoutes = async () => {
+          try {
+              const response = await fetch(`http://localhost:8000/database_search/routes/`);
+              const data = await response.json();
+              console.log(data);
+
+              setRoutes(data); // Directly setting the array of route objects
+          } catch (error) {
+              console.error("Error fetching routes:", error);
+          }
+      };
+
+      fetchRoutes();
+  }, []);
+
 
   if (!itemDetails) {
     return <div className="centered">Searching...</div>;
@@ -200,8 +220,11 @@ function SearchDetails() {
               </div>
             </div>
           </div>
-          {!isLoading && <StaticRoute />}
-          {!isLoading && <StaticRoute />}
+          <div className="routes-container"> 
+            {routes.map((route, index) => (
+              <RouteCard key={index} route={route} />
+            ))}
+          </div> 
             </div>
           </>
         )}
