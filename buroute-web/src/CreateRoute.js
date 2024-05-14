@@ -37,6 +37,7 @@ function RouteCreation() {
 
     const handleRemoveButtonClick = () => {
         setChain(chain.slice(0, -1));
+        setNodeNames(nodeNames.slice(0, -1));
     };
 
     const handleSearch = async () => {
