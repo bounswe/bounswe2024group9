@@ -33,7 +33,7 @@ class Route(models.Model):
     duration = models.JSONField(default=list, blank=True)  # Time spent in the location. Type: minutes
     duration_between = models.JSONField(default=list, blank=True)  #Time spent between locations like 15 min between node 1 and 2
     mapView = models.URLField()
-    user = models.CharField(max_length=255, default = None)
+    user = models.CharField(max_length=255, default = None) # It is keeping the userid
 
 import logging
 

@@ -31,7 +31,7 @@ const RouteCard = ({ route }) => {
       <div className="route-info">
 
         <div className='left'>
-          <h3>{route.user}</h3>
+          <h3 id={route.user_id}>{route.username}</h3>
           <img src={photo} alt="Route" />
         </div>
 
