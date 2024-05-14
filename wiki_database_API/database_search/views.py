@@ -12,7 +12,20 @@ logger = logging.getLogger(__name__)
 
 def route_list(request):
     routes = Route.objects.all()
-    routes_list = serializers.serialize('json', routes)
+    routes_list = [{
+        'route_id': route.route_id,
+        'title': route.title,
+        'description': route.description,
+        'photos': route.photos,
+        'rating': route.rating,
+        'likes': route.likes,
+        'comments': route.comments,
+        'saves': route.saves,
+        'node_ids': route.node_ids,
+        'duration': route.duration,
+        'duration_between': route.duration_between,
+        'mapView': route.mapView,
+    } for route in routes]
     return JsonResponse(routes_list, safe=False)
 
 def route_detail(request, pk):
