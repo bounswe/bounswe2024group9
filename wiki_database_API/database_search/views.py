@@ -28,7 +28,8 @@ def route_list(request):
         'duration': route.duration,
         'duration_between': route.duration_between,
         'mapView': route.mapView,
-        'user': User.objects.get(user_id=(3 if isinstance(route.user, str) else route.user)).username
+        'username': User.objects.get(user_id=route.user).username,
+        "user_id" : route.user
     } for route in routes]
     return JsonResponse(routes_list, safe=False)
 
@@ -41,6 +42,7 @@ def route_detail(request, pk):
 def get_routes_by_qid(request, qid):
     try:
         routes = Route.objects.filter(node_ids__contains=qid)
+
         route_data = [{
             'route_id': route.route_id,
             'title': route.title,
@@ -55,7 +57,8 @@ def get_routes_by_qid(request, qid):
             'mapView': route.mapView,
             'node_ids': route.node_ids,
             "node_names": route.node_names, # Added for the node names to be shown in the route list
-            'user': User.objects.get(user_id=(3 if isinstance(route.user, str) else route.user)).username
+            'username': User.objects.get(user_id=route.user).username,
+            "user_id" : route.user
         } for route in routes]
         return JsonResponse(route_data, safe=False)
     except Exception as e:
