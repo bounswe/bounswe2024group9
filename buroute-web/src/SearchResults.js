@@ -130,7 +130,7 @@ function SearchResults() {
             )}
           </div>
         )}
-        <div className="posts-container">
+        <div className="routes-container">
           {routes.map((route, index) => (
             <RouteCard key={index} route={route} />
           ))}

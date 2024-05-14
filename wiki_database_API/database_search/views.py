@@ -35,6 +35,30 @@ def route_detail(request, pk):
     route_data = json.loads(route_json)[0]  # Deserialize the JSON and take the first element
     return JsonResponse(route_data, safe=False)
 
+def get_routes_by_qid(request, qid):
+    try:
+        routes = Route.objects.filter(node_ids__contains=qid)
+        route_data = [{
+            'route_id': route.route_id,
+            'title': route.title,
+            'description': route.description,
+            'photos': route.photos,
+            'rating': route.rating,
+            'likes': route.likes,
+            'comments': route.comments,
+            'saves': route.saves,
+            'duration': route.duration,
+            'duration_between': route.duration_between,
+            'mapView': route.mapView,
+            'node_ids': route.node_ids,
+            'user': route.user
+        } for route in routes]
+        print(route_data)
+        return JsonResponse({'routes': route_data})
+    except Exception as e:
+        logger.error(f"Error retrieving routes by qid: {e}")
+        return JsonResponse({'error': 'An error occurred while retrieving routes'}, status=500)
+
 def node_list(request):
     nodes = Node.objects.all()
     nodes_list = serializers.serialize('json', nodes)

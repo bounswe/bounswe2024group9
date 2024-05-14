@@ -166,6 +166,12 @@
         <input type="submit" value="Submit">
     </form>
 
+    <form id="getRoutesByQidForm" onsubmit="submitForm(event, 'getRoutesByQidForm', '/database_search/routes/by_qid/')">
+        <label for="qid">Enter QID:</label><br>
+        <input type="text" id="qid" name="q" placeholder="Ex: 1"><br><br>
+        <input type="submit" value="Get Routes by QID">
+    </form>
+
     <form action="{% url 'delete_route' %}" method="POST" id="deleteRouteForm">
         {% csrf_token %}
         <label for="routeId">Route ID:</label>
