@@ -8,6 +8,7 @@ const RouteCard = ({ route }) => {
   const duration = Array.isArray(route.duration) ? route.duration : [];
   const durationBetween = Array.isArray(route.duration_between) ? route.duration_between : [];
   const node_ids = route.node_ids.split(',');
+  const node_names = route.node_names.split(',');
   console.log("Node IDS are ", node_ids);
   const photo = route.photos.length > 0 ? route.photos[0] : '/no_image.png';
   const [isLiked, setIsLiked] = useState(false);
@@ -47,7 +48,7 @@ const RouteCard = ({ route }) => {
             <h4>Route nodes: </h4>
             {node_ids.map((node_id, index) => (
               <span key={node_id}>
-                <a href={`http://localhost:3000/result/${node_id}`}>{node_id}</a>
+                <a href={`http://localhost:3000/result/${node_id.trim()}`}>{node_names[index]}</a>
                 {index < node_ids.length - 1 && ' -> '}
               </span>
             ))}

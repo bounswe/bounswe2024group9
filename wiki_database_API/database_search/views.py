@@ -23,6 +23,7 @@ def route_list(request):
         'comments': route.comments,
         'saves': route.saves,
         'node_ids': route.node_ids,
+        "node_names": route.node_names, # Added for the node names to be shown in the route list
         'duration': route.duration,
         'duration_between': route.duration_between,
         'mapView': route.mapView,
@@ -52,6 +53,7 @@ def get_routes_by_qid(request, qid):
             'duration_between': route.duration_between,
             'mapView': route.mapView,
             'node_ids': route.node_ids,
+            "node_names": route.node_names, # Added for the node names to be shown in the route list
             'user': route.user
         } for route in routes]
         return JsonResponse(route_data, safe=False)
@@ -159,6 +161,7 @@ def create_route(request):
             duration_between = data.get('duration_between', [])
             mapView = data.get('mapView')
             node_ids = data.get('node_ids', '')  # List of node IDs as string
+            node_names = data.get('node_names', '')  # List of node names as string
             user = data.get('user', 'Random user')
             
             route = Route.objects.create(
@@ -170,6 +173,7 @@ def create_route(request):
                 comments=comments,
                 saves=saves,
                 node_ids=node_ids,  # Stored as a comma-separated string
+                node_names=node_names,  # Stored as a comma-separated string
                 # duration=duration, # Commented because it is not used and if it will be sued it must be an array dont send string
                 # duration_between=duration_between,
                 mapView=mapView,
