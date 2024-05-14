@@ -136,7 +136,7 @@ def create_route(request):
             mapView = data.get('mapView')
             node_ids = data.get('node_ids', '')  # List of node IDs as string
             user = data.get('user', 'Random user')
-
+            
             route = Route.objects.create(
                 title=title,
                 description=description,
@@ -146,8 +146,8 @@ def create_route(request):
                 comments=comments,
                 saves=saves,
                 node_ids=node_ids,  # Stored as a comma-separated string
-                duration=duration,
-                duration_between=duration_between,
+                # duration=duration, # Commented because it is not used and if it will be sued it must be an array dont send string
+                # duration_between=duration_between,
                 mapView=mapView,
                 user=user
             )

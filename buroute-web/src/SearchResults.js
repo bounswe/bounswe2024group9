@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "./hooks/AuthProvider"
+import RouteCard from "./RouteCard"; 
 
 import "./search_style.css";
 
@@ -10,6 +11,7 @@ function SearchResults() {
   const [searchResults, setSearchResults] = useState([]);
   const [isLoading, setIsLoading] = useState(false); // State variable for loading status
   const [searched, setSearched] = useState(false); // State variable for search button press status
+  const [routes, setRoutes] = useState([]); // State for routes
 
   // Function to extract QID from URL
   const extractQID = (url) => {
@@ -27,6 +29,24 @@ function SearchResults() {
     setSearchResults(results);
     setIsLoading(false); 
   };
+
+  useEffect(() => {
+    const fetchRoutes = async () => {
+        try {
+            const response = await fetch(`http://localhost:8000/database_search/routes/`);
+            const data = await response.json();
+            console.log(data);
+
+            setRoutes(data); 
+        } catch (error) {
+            console.error("Error fetching routes:", error);
+        }
+    };
+
+    fetchRoutes();
+}, []);
+
+
 
   return (
     <>
@@ -70,24 +90,30 @@ function SearchResults() {
           </div>
       </header>
       <main className="container">
-        <div className="search-display">
-          {isLoading ? (
-            <p className="centered-search">Searching...</p> // Display this while the search is in progress
-          ) : searched && searchResults.length === 0 ? (
-            <p className="centered-search">We couldn't find anything.</p> // Display this when the search button has been pressed and no results are found
-          ) : (
-            searchResults.map((result, index) => ( // Display the resuylts
-              <div key={index} className="search-result">
-                <Link to={`/result/${extractQID(result.item.value)}`}>
-                  <button className="result-button">
-                    <h3>{result.itemLabel.value}</h3>
-                  </button>
-                </Link>
-              </div>
-            ))
-          )}
+        {searched && (
+          <div className="search-display">
+            {isLoading ? (
+              <p className="centered-search">Searching...</p>
+            ) : searchResults.length === 0 ? (
+              <p className="centered-search">We couldn't find anything.</p>
+            ) : (
+              searchResults.map((result, index) => (
+                <div key={index} className="search-result">
+                  <Link to={`/result/${extractQID(result.item.value)}`}>
+                    <button className="result-button">
+                      <h3>{result.itemLabel.value}</h3>
+                    </button>
+                  </Link>
+                </div>
+              ))
+            )}
+          </div>
+        )}
+        <div className="posts-container">
+          {routes.map((route, index) => (
+            <RouteCard key={index} route={route} />
+          ))}
         </div>
-        <div className="posts-container"></div>
       </main>
     </>
   );
