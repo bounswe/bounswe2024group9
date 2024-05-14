@@ -165,5 +165,12 @@
         <input type="submit" value="Submit">
     </form>
 
+    <form action="{% url 'delete_route' %}" method="POST" id="deleteRouteForm">
+        {% csrf_token %}
+        <label for="routeId">Route ID:</label>
+        <input type="text" id="routeId" name="routeId">
+        <input type="submit" value="Delete Route">
+    </form>
+
 </body>
 </html>
