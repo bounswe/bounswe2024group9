@@ -7,6 +7,7 @@ import "./CreateRoute.css"
 
 function RouteCreation() {
     const auth = useAuth();
+    const { user } = auth; 
     const [searchValue, setSearchValue] = useState('');
     const [searchResults, setSearchResults] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -67,6 +68,7 @@ function RouteCreation() {
             duration: [],
             duration_between: [],
             mapView: 'Your Map View URL',
+            user: user.user_id
         };
     
         console.log('Data to be sent:', postData);
@@ -86,8 +88,8 @@ function RouteCreation() {
         console.log('Response:', response);
         const data = await response.json();
         console.log('Route posted:', data);
-        // Optionally, reset state after posting route
         setChain([]);
+        setNodeNames([]);
         } catch (error) {
         console.error('Error posting route:', error);
         }
