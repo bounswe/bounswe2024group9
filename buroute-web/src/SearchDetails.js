@@ -82,7 +82,7 @@ function SearchDetails() {
   useEffect(() => {
       const fetchRoutes = async () => {
           try {
-              const response = await fetch(`http://localhost:8000/database_search/routes/by_id/${qid}/`);
+              const response = await fetch(`http://localhost:8000/database_search/routes/by_qid/${qid}/.`);
               const data = await response.json();
               console.log(data);
 
