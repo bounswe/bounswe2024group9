@@ -15,5 +15,8 @@ urlpatterns = [
     path('logout/', views.logout_user, name='logout_user'),
     path('load_feed/', views.feed_view, name='feed_view'),
     path('delete_route/', views.delete_route, name = 'delete_route'),
-    path('routes/by_qid/<str:qid>/', views.get_routes_by_qid, name='get_routes_by_qid')
+    path('routes/by_qid/<str:qid>/', views.get_routes_by_qid, name='get_routes_by_qid'),
+    path('follow_user/', views.follow_user, name='follow_user'),
+    path('unfollow_user/', views.unfollow_user, name='unfollow_user'),
+    path('check_following/<int:user_id>/', views.check_following, name='check_following'),
 ]

@@ -1,10 +1,14 @@
 import React from 'react';
 import './card.css';
 import map from "./route.png"
-import  { useState } from 'react';
+import  { useState, useEffect } from 'react';
+import { useAuth } from "./hooks/AuthProvider";
 
 const RouteCard = ({ route }) => {
   console.log("ROUTE IS ", route);
+  const auth = useAuth();
+  const { user } = auth; 
+  console.log("USER IS ", user);
   const duration = Array.isArray(route.duration) ? route.duration : [];
   const durationBetween = Array.isArray(route.duration_between) ? route.duration_between : [];
   const node_ids = route.node_ids.split(',');
@@ -13,6 +17,7 @@ const RouteCard = ({ route }) => {
   const photo = route.photos.length > 0 ? route.photos[0] : '/no_image.png';
   const [isLiked, setIsLiked] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false);
+  const [isFollowing, setIsFollowing] = useState(false);
 
   const handleBookmark = () => {
     setIsBookmarked(!isBookmarked);
@@ -24,14 +29,85 @@ const RouteCard = ({ route }) => {
     route.likes = isLiked ? route.likes - 1 : route.likes + 1;
   };
 
-  
 
+  useEffect(() => {
+    const checkFollowingStatus = async () => {
+      try {
+        const response = await fetch(`http://localhost:8000/database_search/check_following/${route.user_id}/`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ user_id: user.user_id }),
+        });
+
+        const data = await response.json();
+        setIsFollowing(data.isFollowing);
+      } catch (error) {
+        console.error('Error checking following status:', error);
+      }
+    };
+
+    checkFollowingStatus();
+  }, [route.user_id, user.user_id]);
+
+  const handleFollow = async () => {
+    try {
+      console.log("USER ID IS ", user.user_id);
+      const response = await fetch(`http://localhost:8000/database_search/follow_user/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ user_id: user.user_id, follow_user_id: route.user_id }),
+      });
+
+      if (response.ok) {
+        setIsFollowing(true);
+      } else {
+        const error = await response.json();
+        console.error('Error following user:', error.message);
+      }
+    } catch (error) {
+      console.error('Error following user:', error);
+    }
+  };
+
+  const handleUnfollow = async () => {
+    try {
+      const response = await fetch(`http://localhost:8000/database_search/unfollow_user/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ user_id: user.user_id, unfollow_user_id: route.user_id }),
+      });
+
+      if (response.ok) {
+        setIsFollowing(false);
+      } else {
+        const error = await response.json();
+        console.error('Error unfollowing user:', error.message);
+      }
+    } catch (error) {
+      console.error('Error unfollowing user:', error);
+    }
+  };
+  
   return (
     <div className="route-card">
       <div className="route-info">
 
         <div className='left'>
           <h3 id={route.user_id}>{route.username}</h3>
+
+          {Number(route.user_id) !== Number(user.user_id) && (
+            isFollowing ? (
+              <button onClick={handleUnfollow} className="follow-button">Unfollow</button>
+            ) : (
+              <button onClick={handleFollow} className="follow-button">Follow</button>
+            )
+          )}
           <img src={photo} alt="Route" />
         </div>
 
