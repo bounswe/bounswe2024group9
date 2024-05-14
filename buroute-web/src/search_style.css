@@ -127,3 +127,20 @@ header {
   margin-right: auto;
   display: block;
 }
+
+.create-route-button {
+  font-size: 14px;
+  height: 50px;
+  width: 120px;
+  background-color: rgb(161, 189, 250); 
+  color: white;
+  border: none;
+  border-radius: 24px;
+  cursor: pointer; /* Changes cursor to indicate button is clickable */
+  margin-left: 10px; /* Adjust margin to match the spacing */
+}
+
+/* Add hover effect for button */
+.create-route-button:hover {
+  background-color: rgb(128, 168, 253); /* Slightly darker blue on hover */
+}
