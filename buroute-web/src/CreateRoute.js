@@ -60,6 +60,11 @@ const CreateRoute = () => {
         },
         body: JSON.stringify(postData),
       });
+      if (!response.ok) {
+        const error = await response.text();
+        throw new Error(error);
+      }
+      
       console.log('Response:', response);
       const data = await response.json();
       console.log('Route posted:', data);

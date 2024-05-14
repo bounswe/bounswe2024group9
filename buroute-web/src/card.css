@@ -7,6 +7,7 @@
     margin: 20px 0;
     justify-content: space-between;
     max-width: 1200px;
+    width: 1200px;
   }
   
   .route-info {
@@ -90,3 +91,10 @@
   #stars{
     margin: 20px 0;
   }
+
+  
+@media (max-width: 1199px) {
+  .route-card {
+      width: auto;
+  }
+}

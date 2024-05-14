@@ -4,18 +4,23 @@ import map from "./route.png"
 import  { useState } from 'react';
 
 const RouteCard = ({ route }) => {
-  const duration = route.duration ? route.duration.split(',') : [];
-  const durationBetween = route.duration_between ? route.duration_between.split(',') : [];
+  console.log("ROUTE IS ", route);
+  const duration = Array.isArray(route.duration) ? route.duration : [];
+  const durationBetween = Array.isArray(route.duration_between) ? route.duration_between : [];
+  const node_ids = route.node_ids.split(',');
+  console.log("Node IDS are ", node_ids);
   const photo = route.photos.length > 0 ? route.photos[0] : '/no_image.png';
   const [isLiked, setIsLiked] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false);
 
   const handleBookmark = () => {
     setIsBookmarked(!isBookmarked);
+    
   };
 
   const handleLike = () => {
     setIsLiked(!isLiked);
+    route.likes = isLiked ? route.likes - 1 : route.likes + 1;
   };
 
   
@@ -25,7 +30,7 @@ const RouteCard = ({ route }) => {
       <div className="route-info">
 
         <div className='left'>
-          <h3>Creator Name</h3>
+          <h3>{route.user}</h3>
           <img src={photo} alt="Route" />
         </div>
 
@@ -33,17 +38,25 @@ const RouteCard = ({ route }) => {
           <h2>{route.title}</h2>
           <p>{route.description}</p>
           <div id='stars'>
-            {[...Array(route.rating)].map((_, i) => <span key={i}>⭐</span>)}
-          </div>        
+            Rating: 
+            {[...Array(5)].map((_, i) => (
+              <span key={i}>{i < route.rating ? '★' : '☆'}</span>
+            ))}
+          </div>
+          <div id='route'>
+            <h4>Route nodes: </h4>
+            {node_ids.map((node_id, index) => (
+              <span key={node_id}>
+                <a href={`http://localhost:3000/result/${node_id}`}>{node_id}</a>
+                {index < node_ids.length - 1 && ' -> '}
+              </span>
+            ))}
+          </div>   
         </div>
 
 
         <div className='right'>
-          {route.mapView ? (
-            <iframe className="route-map" src={route.mapView} frameBorder="0"></iframe>
-          ) : (
-            <img src={map} alt="No Map Available" className="route-map" />
-          )}
+          <img src={map} alt="No Map Available" className="route-map" />
           <div className="actions">
             <div>Liked by {route.likes} others</div>
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
