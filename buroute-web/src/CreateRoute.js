@@ -63,6 +63,7 @@ function RouteCreation() {
             comments: [],
             saves: 0,
             node_ids: chain.join(', '),
+            node_names: nodeNames.join(', '),
             duration: [],
             duration_between: [],
             mapView: 'Your Map View URL',
