@@ -123,8 +123,6 @@ return (
         <TouchableOpacity key={index} onPress={() => handleResultClick(index)}>
           <View style={{ marginTop: 20 }}>
             <Text style={{ fontWeight: 'bold' }}>{result.itemLabel}</Text>
-            <Text>{result.description}</Text>
-            <Text>Total Matches: {result.totalMatches}</Text>
           </View>
         </TouchableOpacity>
       ))
