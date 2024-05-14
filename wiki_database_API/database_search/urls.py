@@ -13,5 +13,6 @@ urlpatterns = [
     path('create_route/', views.create_route, name = 'create_route'),
     path('login/', views.login_user, name='login_user'),
     path('logout/', views.logout_user, name='logout_user'),
-    path('delete_route/', views.delete_route, name = 'delete_route')
+    path('delete_route/', views.delete_route, name = 'delete_route'),
+    path('routes/by_qid/<str:qid>/', views.get_routes_by_qid, name='get_routes_by_qid')
 ]
