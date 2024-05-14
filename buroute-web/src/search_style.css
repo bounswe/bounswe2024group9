@@ -19,7 +19,6 @@ header {
 .centered-search {
   display: flex;
   align-items: center;
-  height: 100vh;
   font-size: 1.5em;
   flex-direction: column;
 }

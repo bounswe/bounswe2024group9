@@ -1,17 +1,18 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import { useAuth } from "./hooks/AuthProvider"
-import RouteCard from "./RouteCard"; 
+import { useAuth } from "./hooks/AuthProvider";
+import RouteCard from "./RouteCard";
 
 import "./search_style.css";
 
 function SearchResults() {
-  const auth = useAuth(); 
+  const auth = useAuth();
   const [searchValue, setSearchValue] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [isLoading, setIsLoading] = useState(false); // State variable for loading status
   const [searched, setSearched] = useState(false); // State variable for search button press status
   const [routes, setRoutes] = useState([]); // State for routes
+  const searchDisplayRef = useRef(null);
 
   // Function to extract QID from URL
   const extractQID = (url) => {
@@ -22,31 +23,47 @@ function SearchResults() {
     if (!searchValue) {
       return;
     }
-    
-    setIsLoading(true); 
-    setSearched(true); 
+
+    setIsLoading(true);
+    setSearched(true);
     const results = await fetchSearchResults(searchValue.toLowerCase());
     setSearchResults(results);
-    setIsLoading(false); 
+    setIsLoading(false);
   };
 
   useEffect(() => {
     const fetchRoutes = async () => {
-        try {
-            const response = await fetch(`http://localhost:8000/database_search/routes/`);
-            const data = await response.json();
-            console.log(data);
+      try {
+        const response = await fetch(`http://localhost:8000/database_search/routes/`);
+        const data = await response.json();
+        console.log(data);
 
-            setRoutes(data); 
-        } catch (error) {
-            console.error("Error fetching routes:", error);
-        }
+        setRoutes(data);
+      } catch (error) {
+        console.error("Error fetching routes:", error);
+      }
     };
 
     fetchRoutes();
-}, []);
+  }, []);
 
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (searchDisplayRef.current && !searchDisplayRef.current.contains(event.target)) {
+        setSearched(false);
+      }
+    };
 
+    if (searched) {
+      document.addEventListener("mousedown", handleClickOutside);
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [searched]);
 
   return (
     <>
@@ -55,21 +72,25 @@ function SearchResults() {
           <img
             id="bar_logo"
             src="/logo.jpg"
-            style={{ width: "75px", height: "auto" , padding: "5px"}}
+            style={{ width: "75px", height: "auto", padding: "5px" }}
             alt="bar_logo"
             onClick={() => (window.location.href = "/search")}
           />
-          <button className="create-route-button"
+          <button
+            className="create-route-button"
             onClick={() => {
               window.location.href = '/create_route';
-            }}>
+            }}
+          >
             Create Route
           </button>
-          <button id="logout-button"
+          <button
+            id="logout-button"
             onClick={() => {
               auth.logout();
               window.location.href = '/login';
-            }}>
+            }}
+          >
             Log Out
           </button>
         </div>
@@ -77,21 +98,21 @@ function SearchResults() {
           <input
             id="search"
             type="search"
-            placeholder=" Start typing to search..."
+            placeholder="Start typing to search..."
             value={searchValue}
             onChange={(e) => setSearchValue(e.target.value)}
             onKeyDown={(event) => {
               if (event.key === 'Enter') {
                 handleSearch();
               }
-            }}         
-            />
-            <button onClick={handleSearch} className="search_button">&#x1F50D;</button>
-          </div>
+            }}
+          />
+          <button onClick={handleSearch} className="search_button">&#x1F50D;</button>
+        </div>
       </header>
       <main className="container">
         {searched && (
-          <div className="search-display">
+          <div className="search-display" ref={searchDisplayRef}>
             {isLoading ? (
               <p className="centered-search">Searching...</p>
             ) : searchResults.length === 0 ? (
