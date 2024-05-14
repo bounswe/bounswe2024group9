@@ -151,6 +151,19 @@ def create_route(request):
         return HttpResponse(status=405)
     
 @csrf_exempt
+def delete_route(request):
+    if request.method == 'POST':
+        try:
+            route_id = request.POST.get('routeId')
+            route = get_object_or_404(Route, pk=route_id)
+            route.delete()
+            return JsonResponse({'status': 'success', 'message': 'Route deleted successfully'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+    else:
+        return HttpResponse(status=405)
+
+@csrf_exempt
 def login_user(request):
     if request.method == 'POST':
         try:
