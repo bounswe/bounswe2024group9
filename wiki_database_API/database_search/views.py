@@ -3,6 +3,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import get_object_or_404
+from rest_framework.decorators import api_view
 from .models import Route, Node, User
 from django.core import serializers
 import json
@@ -225,3 +226,21 @@ def logout_user(request):
         return JsonResponse({'status': 'success'})
     else:
         return HttpResponse(status=405)
+    
+
+@csrf_exempt
+@api_view(['GET'])
+def feed_view(request):
+    username = request.GET.get('username')
+    if username is None:
+        return JsonResponse({'error': 'username parameter is required'}, status=400)
+
+    try:
+        user = User.objects.get(username=username)
+    except User.DoesNotExist:
+        return JsonResponse({'error': 'User not found'}, status=404)
+
+    following_routes = user.get_following_routes().order_by('-likes')[:10]
+    following_route_json = serializers.serialize('json', following_routes)
+    following_route_list = json.loads(following_route_json)
+    return JsonResponse(following_route_list, safe=False)
