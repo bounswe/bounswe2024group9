@@ -53,8 +53,7 @@ def get_routes_by_qid(request, qid):
             'node_ids': route.node_ids,
             'user': route.user
         } for route in routes]
-        print(route_data)
-        return JsonResponse({'routes': route_data})
+        return JsonResponse(route_data, safe=False)
     except Exception as e:
         logger.error(f"Error retrieving routes by qid: {e}")
         return JsonResponse({'error': 'An error occurred while retrieving routes'}, status=500)
