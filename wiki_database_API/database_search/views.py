@@ -4,6 +4,8 @@ from django.contrib.auth.hashers import make_password
 from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import get_object_or_404
 from rest_framework.decorators import api_view
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
 from .models import Route, Node, User
 from django.core import serializers
 import json
@@ -253,3 +255,48 @@ def feed_view(request):
     following_route_json = serializers.serialize('json', following_routes)
     following_route_list = json.loads(following_route_json)
     return JsonResponse(following_route_list, safe=False)
+
+@csrf_exempt
+@require_POST
+def follow_user(request):
+    try:
+        data = json.loads(request.body)
+        user_to_follow_id = data.get('follow_user_id') 
+        current_user_id = data.get('user_id')  
+
+        user_to_follow = User.objects.get(user_id=user_to_follow_id)
+        current_user = User.objects.get(user_id=current_user_id)  # Get the current user object
+
+        current_user.following.add(user_to_follow)
+        return JsonResponse({'status': 'success'})
+    except User.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'User not found'}, status=404)
+
+@csrf_exempt
+@require_POST
+def unfollow_user(request):
+    try:
+        data = json.loads(request.body)
+        user_to_unfollow_id = data.get('unfollow_user_id') 
+        current_user_id = data.get('user_id')  
+
+        user_to_unfollow = User.objects.get(user_id=user_to_unfollow_id)
+        current_user = User.objects.get(user_id=current_user_id)  # Get the current user object
+
+        current_user.following.remove(user_to_unfollow)
+        return JsonResponse({'status': 'success'})
+
+    except User.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'User not found'}, status=404)
+    
+@csrf_exempt
+def check_following(request, user_id):
+    try:
+        data = json.loads(request.body)
+        current_user_id = data.get('user_id')
+        user_to_check = User.objects.get(user_id=user_id)
+        current_user = User.objects.get(user_id=current_user_id)
+        is_following = current_user.following.filter(user_id=user_to_check.user_id).exists()
+        return JsonResponse({'isFollowing': is_following})
+    except User.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'User not found'}, status=404)
