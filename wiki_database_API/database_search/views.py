@@ -120,6 +120,7 @@ def create_route(request):
                 duration_between = data.get('duration_between', [])
                 mapView = data.get('mapView')
                 node_ids = data.get('node_ids', [])  # List of node IDs
+                user = data.get('user')
 
                 # Fetch nodes from database
                 # nodes = Node.objects.filter(node_id__in=node_ids)
@@ -134,7 +135,8 @@ def create_route(request):
                     comments=comments,
                     saves=saves,
                     mapView=mapView,
-                    node_ids=node_ids
+                    node_ids=node_ids, 
+                    user = user
                 )
 
                 # Adding nodes to the route
