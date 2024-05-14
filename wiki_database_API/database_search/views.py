@@ -25,6 +25,7 @@ def route_list(request):
         'duration': route.duration,
         'duration_between': route.duration_between,
         'mapView': route.mapView,
+        'user': route.user
     } for route in routes]
     return JsonResponse(routes_list, safe=False)
 
@@ -118,46 +119,40 @@ def create_node(request):
 def create_route(request):
     if request.method == 'POST':
         try:
-            if request.POST:
+            if request.POST: # Checking if the request contains form data
                 data = request.POST
-                
-                # Extracting data from the request
-                title = data.get('title')
-                description = data.get('description')
-                photos = data.get('photos', [])
-                rating = data.get('rating')
-                likes = data.get('likes', 0)
-                comments = data.get('comments', [])
-                saves = data.get('saves', 0)
-                duration = data.get('duration', [])
-                duration_between = data.get('duration_between', [])
-                mapView = data.get('mapView')
-                node_ids = data.get('node_ids', [])  # List of node IDs
-                user = data.get('user')
+            else: # If not, it should contain JSON data
+                data = json.loads(request.body.decode('utf-8')) 
 
-                # Fetch nodes from database
-                # nodes = Node.objects.filter(node_id__in=node_ids)
+            title = data.get('title')
+            description = data.get('description')
+            photos = data.get('photos', [])
+            rating = data.get('rating', 0)
+            likes = data.get('likes', 0)
+            comments = data.get('comments', [])
+            saves = data.get('saves', 0)
+            duration = data.get('duration', [])
+            duration_between = data.get('duration_between', [])
+            mapView = data.get('mapView')
+            node_ids = data.get('node_ids', '')  # List of node IDs as string
+            user = data.get('user', 'Random user')
 
-                # Creating the Route instance
-                route = Route.objects.create(
-                    title=title,
-                    description=description,
-                    photos=photos,
-                    rating=rating,
-                    likes=likes,
-                    comments=comments,
-                    saves=saves,
-                    mapView=mapView,
-                    node_ids=node_ids, 
-                    user = user
-                )
+            route = Route.objects.create(
+                title=title,
+                description=description,
+                photos=photos,
+                rating=rating,
+                likes=likes,
+                comments=comments,
+                saves=saves,
+                node_ids=node_ids,  # Stored as a comma-separated string
+                duration=duration,
+                duration_between=duration_between,
+                mapView=mapView,
+                user=user
+            )
 
-                # Adding nodes to the route
-                route.duration = duration
-                route.duration_between = duration_between
-                route.save()
-
-                return JsonResponse({'status': 'success', 'route_id': route.pk})
+            return JsonResponse({'status': 'success', 'route_id': route.pk})
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=400)
 
