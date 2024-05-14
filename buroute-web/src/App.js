@@ -6,6 +6,7 @@ import SearchDetails from './SearchDetails';
 import Signup from './Signup';
 import Login from './Login';
 import ForgotPassword from './Forgot';
+import CreateRoute from './CreateRoute';
 
 const App = () => {
   return (
@@ -34,6 +35,7 @@ const AppRoutes = () => {
         <>
           <Route path="/search" element={<SearchResults />} />
           <Route path="/result/:qid" element={<SearchDetails />} />
+          <Route path="/create_route" element={<CreateRoute />} /> {/* Add route for CreateRoute */}
         </>
       ) : (
         <Route path="/" element={<Navigate replace to="/login"/>} />

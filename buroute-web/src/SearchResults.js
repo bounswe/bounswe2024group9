@@ -39,6 +39,12 @@ function SearchResults() {
             alt="bar_logo"
             onClick={() => (window.location.href = "/search")}
           />
+          <button className="create-route-button"
+            onClick={() => {
+              window.location.href = '/create_route';
+            }}>
+            Create Route
+          </button>
           <button id="logout-button"
             onClick={() => {
               auth.logout();
