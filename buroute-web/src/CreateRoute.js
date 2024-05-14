@@ -143,7 +143,7 @@ function RouteCreation() {
                             <NodeBox key={index} text={nodeId} /> 
                         ))}
                     </div>
-                    <div className="remove-button" style={{ backgroundColor: 'red', height: '10%', marginLeft: '3%', width: '80%', cursor: 'pointer', textAlign: 'center', display: 'flex', justifyContent: 'center', alignItems: 'center' }} onClick={handleRemoveButtonClick}>
+                    <div className="remove-button" style={{ backgroundColor: '#ff5f5f', height: '10%', marginLeft: '3%', width: '80%', cursor: 'pointer', textAlign: 'center', display: 'flex', justifyContent: 'center', alignItems: 'center' }} onClick={handleRemoveButtonClick}>
                         Remove
                     </div>
                 </div>
