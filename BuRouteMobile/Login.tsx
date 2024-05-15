@@ -73,7 +73,7 @@ const Login = ({ navigation }) => {
     const handleLoginWithGoogle = () => {
         // NOT IMPLEMENTED YET
         //navigate to WikidataSearch page after login (endpoint can change)
-        navigation.navigate('WikidataSearch');
+        navigation.navigate('CreateRoute');
     };
 
     return (

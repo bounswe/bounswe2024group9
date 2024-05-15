@@ -26,7 +26,7 @@ const SearchResultDetail = ({ route, navigation }) => {
   };
 
   const handleItemClick = async (newContent) => {
-    const response = await fetch(Config.REACT_APP_API_URL+'/wiki_search/results/' + getLastItem(newContent['item'].value));
+    const response = await fetch(Config.REACT_APP_API_URL +'/wiki_search/results/' + getLastItem(newContent['item'].value));
         const data = await response.json();
     navigation.push('SearchResultDetail', { result: data });
   };

@@ -5,6 +5,7 @@ import WikidataSearch from './WikidataSearch';
 import SearchResultDetail from './SearchResultDetail';
 import NodeCreationPage from './NodeCreationPage';
 import NodeDetails from './SearchResultDetailCustomNode';
+import CreateRoute from './RouteCreation';
 import Login from './Login';
 import Signup from './Signup.tsx';
 
@@ -37,6 +38,11 @@ const App = () => {
             name="NodeDetails"
             component={NodeDetails}
             options={{ title: 'Custom node view page' }}
+        />
+        <Stack.Screen
+            name="CreateRoute"
+            component={CreateRoute}
+            options={{ title: 'Route creation page' }}
         />
         <Stack.Screen
             name="Signup" 
