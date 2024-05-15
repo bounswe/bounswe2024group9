@@ -2,20 +2,29 @@ import React, {useState} from "react";
 import { StyleSheet, Text, View, Button, Modal, TextInput, SafeAreaView } from "react-native";
 import MapView, { PROVIDER_GOOGLE, Callout, Marker } from "react-native-maps";
 import RNPickerSelect from "react-native-picker-select";
+import Config from "react-native-config";
 
 const CreateRoute = ({navigation}) => {
 
-    const [currentPoi, setCurrentPoi] = useState(null);
-    const [route, setRoute] = useState([]);
-    const [showModal, setShowModal] = useState(false);
+//    const [currentPoi, setCurrentPoi] = useState(null);
+//    const [route, setRoute] = useState([]);
+//    const [showModal, setShowModal] = useState(false);
     const [routeTitle, setRouteTitle] = useState('');
-    const [routeDescription, setRouteDescription] = useState('')
+    const [routeDescription, setRouteDescription] = useState('');
+    const [searchTerm, setSearchTerm] = useState('');
+    const [searchResults, setSearchResults] = useState([])
+
+    const [nodeNames, setNodeNames] = useState([]);
+    const [nodeIDs, setNodeIDs] = useState([]);
 
 
-    const addPOI = () => {
-        const newRoute = route.concat(currentPoi);
-        setRoute(newRoute);
-        console.log(route);
+    const addPOI = (result) => {
+        const newNodeNames = nodeNames.concat(result.itemLabel);
+        const newNodeIDs = nodeIDs.concat(result.Q);
+        setNodeNames(newNodeNames);
+        console.log(nodeNames);
+        setNodeIDs(newNodeIDs);
+        console.log(newNodeIDs);
     }
 
     const removePOI = (elt) => {
@@ -46,15 +55,46 @@ const CreateRoute = ({navigation}) => {
         });
     }
 
+    const routeSearchWikidata = async () => {
+        try {
+        console.log(Config)
+            console.log(searchTerm);
+            console.log(Config.REACT_APP_API_URL + '/wiki_search/search/' + searchTerm);
+            const response = await fetch(Config.REACT_APP_API_URL + '/wiki_search/search/' + searchTerm);
+            const jsonData = await response.json();
+            if (jsonData.results.bindings.length == 0){
+                console.log("No results");
+            }
+            else{
+                console.log("Route creation JSON:", jsonData);
+                const results = jsonData.results.bindings.map(result => ({
+                    itemLabel: result.itemLabel.value,
+                    Q: result.item.value,
+                }));
+                setSearchResults(results);
+            }
+        } catch (error) {
+            console.log("Error searching Wikidata: ", error);
+        }
+    };
+
 return (
     <SafeAreaView style={styles.container}>
       {/* First Box */}
       <View style={styles.box}>
-        <TextInput style={styles.textInput} placeholder="Title"/>
-        <TextInput style={styles.textInput} placeholder="Description" multiline={true}/>
-        <TextInput style={styles.textInput} placeholder="Search"/>
+        <TextInput style={styles.textInput} placeholder="Title" onChangeText={setRouteTitle}/>
+        <TextInput style={styles.textInput} placeholder="Description" onChangeText={setRouteDescription}
+        multiline={true}/>
+        <TextInput style={styles.textInput} placeholder="Search" onChangeText={setSearchTerm}/>
+        {searchResults != 0 && searchResults.map((result, index) => (
+           <TouchableOpacity key={index} onPress={(result) => {addPOI(result)}}>
+             <View style={{ marginTop: 20 }}>
+               <Text style={{ fontWeight: 'bold' }}>{result.itemLabel}</Text>
+             </View>
+           </TouchableOpacity>))}
+
         <View style={styles.buttonsContainer}>
-          <Button title="Search" onPress={() => {}} />
+          <Button title="Search" onPress={routeSearchWikidata} />
           <Button title="Save" onPress={() => {}} />
         </View>
       </View>
@@ -65,6 +105,11 @@ return (
       />
       {/* Second Box */}
       <View style={styles.box}>
+      {nodeNames.map((name, index) => (
+      <View key={index} style={styles.routeName}>
+      <Text>{name}</Text>
+      </View>
+      ))}
       </View>
     </SafeAreaView>
   );
@@ -75,6 +120,12 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'flex-start',
     padding: 16,
+  },
+  routeName: {
+  justifyContent: 'flex-start',
+  padding: 16,
+  borderRadius: 8,
+  backgroundColor: '#ccc',
   },
   separator: {
     borderBottomColor: 'black',
