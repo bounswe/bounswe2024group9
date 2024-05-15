@@ -54,11 +54,8 @@ return (
         <TextInput style={styles.textInput} placeholder="Description" multiline={true}/>
         <TextInput style={styles.textInput} placeholder="Search"/>
         <View style={styles.buttonsContainer}>
-          <Button title="Button 1" onPress={() => {}} />
-          <Button title="Button 2" onPress={() => {}} />
-          <Button title="Button 3" onPress={() => {}} />
-          <Button title="Button 4" onPress={() => {}} />
-          <Button title="Button 5" onPress={() => {}} />
+          <Button title="Search" onPress={() => {}} />
+          <Button title="Save" onPress={() => {}} />
         </View>
       </View>
 
