@@ -122,6 +122,7 @@ function Bookmarks() {
         </div>
       </header>
       <main className="container">
+      <h1>Bookmarks</h1>
         {searched && (
           <div className="search-display" ref={searchDisplayRef}>
             {isLoading ? (

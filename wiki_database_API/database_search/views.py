@@ -441,6 +441,38 @@ def load_bookmarks(request):
     except User.DoesNotExist:
         return JsonResponse({'status': 'error', 'message': 'User not found'}, status=404)
     
+@csrf_exempt
+@api_view(['GET'])
+def my_routes(request):
+    try:
+        user_id = request.GET.get('user_id')
+        own_routes = Route.objects.filter(user=user_id)
+        print(own_routes)
+
+        own_routes_list = [{
+            'route_id': route.route_id,
+            'title': route.title,
+            'description': route.description,
+            'photos': route.photos,
+            'rating': route.rating,
+            'likes': route.likes,
+            'comments': route.comments,
+            'saves': route.saves,
+            'node_ids': route.node_ids,
+            'node_names': route.node_names,
+            'duration': route.duration,
+            'duration_between': route.duration_between,
+            'mapView': route.mapView,
+            'username': User.objects.get(user_id=route.user).username,  
+            'user_id': route.user
+        } for route in own_routes]
+
+
+        return JsonResponse(own_routes_list, safe=False)
+    except User.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'User not found'}, status=404)
+    
+
 
 @csrf_exempt
 @api_view(['POST'])

@@ -91,7 +91,7 @@ function RouteCreation() {
         console.log('Route posted:', data);
         setChain([]);
         setNodeNames([]);
-        window.location.href = '/feed';
+        window.location.href = '/my_routes';
         } catch (error) {
         console.error('Error posting route:', error);
         }

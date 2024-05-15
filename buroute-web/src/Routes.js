@@ -130,6 +130,7 @@ function AllRoutes() {
         </div>
       </header>
       <main className="container">
+      <h1>Top Routes</h1>
         {searched && (
           <div className="search-display" ref={searchDisplayRef}>
             {isLoading ? (
