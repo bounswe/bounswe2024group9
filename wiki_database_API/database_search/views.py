@@ -243,6 +243,7 @@ def logout_user(request):
 @api_view(['GET'])
 def feed_view(request):
     username = request.GET.get('username')
+    print(username)
     if username is None:
         return JsonResponse({'error': 'username parameter is required'}, status=400)
 
@@ -255,6 +256,42 @@ def feed_view(request):
     following_route_json = serializers.serialize('json', following_routes)
     following_route_list = json.loads(following_route_json)
     return JsonResponse(following_route_list, safe=False)
+
+@csrf_exempt
+@api_view(['GET'])
+def feed_view_via_id_web(request):
+    print(request.GET)
+    user_id = request.GET.get('user_id')
+    print(user_id)
+    try:
+        user = User.objects.get(user_id=user_id)
+    except User.DoesNotExist:
+        return JsonResponse({'error': 'User not found'}, status=404)
+    print(user.get_following_routes())
+    following_routes = user.get_following_routes().order_by('-likes')
+
+    routes_list = [{
+        'route_id': route.route_id,
+        'title': route.title,
+        'description': route.description,
+        'photos': route.photos,
+        'rating': route.rating,
+        'likes': route.likes,
+        'comments': route.comments,
+        'saves': route.saves,
+        'node_ids': route.node_ids,
+        'node_names': route.node_names,
+        'duration': route.duration,
+        'duration_between': route.duration_between,
+        'mapView': route.mapView,
+        'username': User.objects.get(user_id=route.user).username,  
+        'user_id': route.user
+    } for route in following_routes]
+
+    print(routes_list)
+    return JsonResponse(routes_list, safe=False)
+
+
 
 @csrf_exempt
 @require_POST
@@ -370,3 +407,4 @@ def check_bookmark(request):
         return JsonResponse({'isBookmarked': is_bookmarked})
     except User.DoesNotExist:
         return JsonResponse({'status': 'error', 'message': 'User not found'}, status=404)
+    

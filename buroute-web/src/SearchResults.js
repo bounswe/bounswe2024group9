@@ -7,6 +7,7 @@ import "./search_style.css";
 
 function SearchResults() {
   const auth = useAuth();
+  const { user } = auth;
   const [searchValue, setSearchValue] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [isLoading, setIsLoading] = useState(false); // State variable for loading status
@@ -34,18 +35,20 @@ function SearchResults() {
   useEffect(() => {
     const fetchRoutes = async () => {
       try {
-        const response = await fetch(`http://localhost:8000/database_search/routes/`);
+        console.log("User ID:", user.user_id);
+        const response = await fetch(`http://localhost:8000/database_search/load_feed_via_id/?user_id=${user.user_id}`);
         const data = await response.json();
         console.log(data);
-
         setRoutes(data);
       } catch (error) {
         console.error("Error fetching routes:", error);
       }
     };
 
-    fetchRoutes();
-  }, []);
+    if (user && user.user_id) {
+      fetchRoutes();
+    }
+  }, [user]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
