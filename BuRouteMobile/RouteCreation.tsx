@@ -1,12 +1,15 @@
 import React, {useState} from "react";
-import { StyleSheet, Text, View, Button, Modal } from "react-native";
+import { StyleSheet, Text, View, Button, Modal, TextInput } from "react-native";
 import MapView, { PROVIDER_GOOGLE, Callout, Marker } from "react-native-maps";
 
 const CreateRoute = ({navigation}) => {
 
     const [currentPoi, setCurrentPoi] = useState(null);
     const [route, setRoute] = useState([]);
-    const [showModal, setShowModal] = useState(false)
+    const [showModal, setShowModal] = useState(false);
+    const [routeTitle, setRouteTitle] = useState('');
+    const [routeDescription, setRouteDescription] = useState('')
+
 
     const addPOI = () => {
         const newRoute = route.concat(currentPoi);
@@ -27,6 +30,19 @@ const CreateRoute = ({navigation}) => {
 return (
 <View
     style={styles.map}>
+    <TextInput
+                placeholder="Enter Title"
+                style={styles.titleField}
+                value={routeTitle}
+                onChangeText={setRouteTitle}
+                />
+    <TextInput
+                    placeholder="Enter Description"
+                    style={styles.descriptionField}
+                    value={routeDescription}
+                    onChangeText={setRouteDescription}
+                    multiline={true}
+                    />
     <MapView
       provider={PROVIDER_GOOGLE} // Specify Google Maps as the provider
       style={styles.map}
@@ -88,6 +104,18 @@ const styles = StyleSheet.create({
   map: {
     flex: 1
   },
+  titleField: {
+    backgroundColor: '#fcffc9',
+    borderColor: 'gray',
+    borderRadius: 10,
+    padding: 10
+  },
+  descriptionField: {
+      backgroundColor: '#9fffef',
+      borderColor: 'gray',
+      borderRadius: 10,
+      padding: 10
+    },
 });
 
 export default CreateRoute;
