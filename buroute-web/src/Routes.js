@@ -103,6 +103,14 @@ function AllRoutes() {
         >
           Bookmarks
         </button>
+        <button
+          className="create-route-button"
+          onClick={() => {
+            window.location.href = '/my_routes';
+          }}
+        >
+          My Routes
+        </button>
           <button
             id="logout-button"
             onClick={() => {

@@ -128,13 +128,29 @@ function RouteCreation() {
                     Feed
                 </button>
                 <button
-                className="create-route-button"
-                onClick={() => {
-                  window.location.href = '/bookmarks';
-                }}
-              >
-                Bookmarks
-              </button>
+                    className="create-route-button"
+                    onClick={() => {
+                        window.location.href = '/bookmarks';
+                    }}
+                >
+                    Bookmarks
+                </button>
+                <button
+                    className="create-route-button"
+                    onClick={() => {
+                        window.location.href = '/my_routes';
+                    }}
+                >
+                    My Routes
+                </button>
+                <button
+                    className="create-route-button"
+                    onClick={() => {
+                        window.location.href = '/routes';
+                    }}
+                >
+                    Discover Top Routes
+                </button>
                 <button
                     id="logout-button"
                     onClick={() => {
