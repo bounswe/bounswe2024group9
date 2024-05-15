@@ -5,7 +5,9 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, Permis
 # from django.utils.translation import ugettext_lazy as _ For global interface it is mentioned but for now it is not necessary
 # Django version bigger than 3.1 for JSONField
 
+import logging
 
+logger = logging.getLogger(__name__)
 class Node(models.Model):
     name = models.CharField(max_length=255)
     node_id = models.AutoField(primary_key=True)
@@ -34,10 +36,6 @@ class Route(models.Model):
     duration_between = models.JSONField(default=list, blank=True)  #Time spent between locations like 15 min between node 1 and 2
     mapView = models.URLField()
     user = models.CharField(max_length=255, default = None) # It is keeping the userid
-
-import logging
-
-logger = logging.getLogger(__name__)
 
 # For now it is controlling the username but if the email is controlled aalso it should be specified
 class CustomUserManager(BaseUserManager): 
