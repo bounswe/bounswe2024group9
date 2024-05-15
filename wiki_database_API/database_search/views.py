@@ -440,3 +440,26 @@ def load_bookmarks(request):
         return JsonResponse(bookmarked_routes_list, safe=False)
     except User.DoesNotExist:
         return JsonResponse({'status': 'error', 'message': 'User not found'}, status=404)
+    
+
+@csrf_exempt
+@api_view(['POST'])
+def add_comment(request):
+    try:
+        data = json.loads(request.body)
+        user_id = data.get('user_id')
+        route_id = data.get('route_id')
+        comment_text = data.get('comment')
+
+        user = User.objects.get(user_id=user_id)
+        route = Route.objects.get(route_id=route_id)
+
+        comment = f"{user.username}: {comment_text}"
+        route.comments.append(comment)
+        route.save()
+
+        return JsonResponse({'status': 'success', 'comments': route.comments})
+    except User.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'User not found'}, status=404)
+    except Route.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'Route not found'}, status=404)

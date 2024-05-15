@@ -84,7 +84,7 @@ const Signup = () => {
         console.log(data);
         auth.login(data);
 
-        window.location.href = '/search'; 
+        window.location.href = '/feed'; 
 
       } else {
         setError(data.error || "An error occurred");

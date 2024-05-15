@@ -1,5 +1,5 @@
 header {
-  position: sticky;
+  /* position: sticky; */
   top: -54px; /* value to scroll past the logo so just the search bar is sticky */
   z-index: 2;
 }
