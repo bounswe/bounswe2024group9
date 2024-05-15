@@ -65,7 +65,7 @@ function SearchDetails() {
     const fetchData = async () => {
       try {
         console.log("Fetching data for QID:", qid);
-        const response = await fetch(`http://localhost:8000/wiki_search/results/${qid}`);
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/wiki_search/results/${qid}`);
         console.log("Response:", response);
         const data = await response.json();
         if (isMounted.current) {
@@ -82,7 +82,7 @@ function SearchDetails() {
   useEffect(() => {
       const fetchRoutes = async () => {
           try {
-              const response = await fetch(`http://localhost:8000/database_search/routes/by_qid/${qid}/.`);
+              const response = await fetch(`${process.env.REACT_APP_API_URL}/database_search/routes/by_qid/${qid}/.`);
               const data = await response.json();
               console.log(data);
 
@@ -120,8 +120,40 @@ function SearchDetails() {
             src="/logo.jpg"
             alt="bar_logo"
             style={{ width: '75px', height: 'auto', padding: "5px" }}
-            onClick={() => window.location.href = '/search'}
+            onClick={() => window.location.href = '/feed'}
           />
+          <button
+          className="create-route-button"
+          onClick={() => {
+              window.location.href = '/feed';
+          }}
+          >
+          Feed
+        </button>
+          <button
+            className="create-route-button"
+            onClick={() => {
+              window.location.href = '/create_route';
+            }}
+          >
+            Create Route
+          </button>
+            <button
+            className="create-route-button"
+            onClick={() => {
+              window.location.href = '/bookmarks';
+            }}
+          >
+            Bookmarks
+          </button>
+          <button
+            className="create-route-button"
+            onClick={() => {
+              window.location.href = '/my_routes';
+            }}
+          >
+            My Routes
+          </button>
           <button
             id="logout-button"
             onClick={() => {

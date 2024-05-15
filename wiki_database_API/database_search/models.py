@@ -5,7 +5,9 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, Permis
 # from django.utils.translation import ugettext_lazy as _ For global interface it is mentioned but for now it is not necessary
 # Django version bigger than 3.1 for JSONField
 
+import logging
 
+logger = logging.getLogger(__name__)
 class Node(models.Model):
     name = models.CharField(max_length=255)
     node_id = models.AutoField(primary_key=True)
@@ -32,11 +34,7 @@ class Route(models.Model):
     duration = models.JSONField(default=list, blank=True)  # Time spent in the location. Type: minutes
     duration_between = models.JSONField(default=list, blank=True)  #Time spent between locations like 15 min between node 1 and 2
     mapView = models.URLField()
-    user = models.CharField(max_length=255, default = None)
-
-import logging
-
-logger = logging.getLogger(__name__)
+    user = models.CharField(max_length=255, default = None) # It is keeping the userid
 
 # For now it is controlling the username but if the email is controlled aalso it should be specified
 class CustomUserManager(BaseUserManager): 
@@ -90,7 +88,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     REQUIRED_FIELDS = [] # This is golding the field which is required to register the user. Since username and user_id are required fields, we don't need to specify any other fields.
 
     def __str__(self):
-        return self.username
+        return f"{self.username} , {self.e_mail} , {self.liked_routes}, {self.saved_routes}"
+
 
     def get_following_routes(self):
         following_users = self.following.all()

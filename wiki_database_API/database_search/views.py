@@ -4,6 +4,8 @@ from django.contrib.auth.hashers import make_password
 from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import get_object_or_404
 from rest_framework.decorators import api_view
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
 from .models import Route, Node, User
 from django.core import serializers
 import json
@@ -12,7 +14,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 def route_list(request):
-    routes = Route.objects.all()
+    routes = Route.objects.all().order_by('-likes')[:20]
     
     routes_list = [{
         'route_id': route.route_id,
@@ -28,7 +30,8 @@ def route_list(request):
         'duration': route.duration,
         'duration_between': route.duration_between,
         'mapView': route.mapView,
-        'user': User.objects.get(user_id=(3 if isinstance(route.user, str) else route.user)).username
+        'username': User.objects.get(user_id=route.user).username,
+        "user_id" : route.user
     } for route in routes]
     return JsonResponse(routes_list, safe=False)
 
@@ -41,6 +44,7 @@ def route_detail(request, pk):
 def get_routes_by_qid(request, qid):
     try:
         routes = Route.objects.filter(node_ids__contains=qid)
+
         route_data = [{
             'route_id': route.route_id,
             'title': route.title,
@@ -55,7 +59,8 @@ def get_routes_by_qid(request, qid):
             'mapView': route.mapView,
             'node_ids': route.node_ids,
             "node_names": route.node_names, # Added for the node names to be shown in the route list
-            'user': User.objects.get(user_id=(3 if isinstance(route.user, str) else route.user)).username
+            'username': User.objects.get(user_id=route.user).username,
+            "user_id" : route.user
         } for route in routes]
         return JsonResponse(route_data, safe=False)
     except Exception as e:
@@ -225,6 +230,7 @@ def logout_user(request):
 @api_view(['GET'])
 def feed_view(request):
     username = request.GET.get('username')
+    print(username)
     if username is None:
         return JsonResponse({'error': 'username parameter is required'}, status=400)
 
@@ -237,3 +243,242 @@ def feed_view(request):
     following_route_json = serializers.serialize('json', following_routes)
     following_route_list = json.loads(following_route_json)
     return JsonResponse(following_route_list, safe=False)
+
+@csrf_exempt
+@api_view(['GET'])
+def feed_view_via_id_web(request):
+    print(request.GET)
+    user_id = request.GET.get('user_id')
+    print(user_id)
+    try:
+        user = User.objects.get(user_id=user_id)
+    except User.DoesNotExist:
+        return JsonResponse({'error': 'User not found'}, status=404)
+    print(user.get_following_routes())
+    following_routes = user.get_following_routes().order_by('-likes')
+
+    routes_list = [{
+        'route_id': route.route_id,
+        'title': route.title,
+        'description': route.description,
+        'photos': route.photos,
+        'rating': route.rating,
+        'likes': route.likes,
+        'comments': route.comments,
+        'saves': route.saves,
+        'node_ids': route.node_ids,
+        'node_names': route.node_names,
+        'duration': route.duration,
+        'duration_between': route.duration_between,
+        'mapView': route.mapView,
+        'username': User.objects.get(user_id=route.user).username,  
+        'user_id': route.user
+    } for route in following_routes]
+
+    print(routes_list)
+    return JsonResponse(routes_list, safe=False)
+
+
+
+@csrf_exempt
+@require_POST
+def follow_user(request):
+    try:
+        data = json.loads(request.body)
+        user_to_follow_id = data.get('follow_user_id') 
+        current_user_id = data.get('user_id')  
+
+        user_to_follow = User.objects.get(user_id=user_to_follow_id)
+        current_user = User.objects.get(user_id=current_user_id)  # Get the current user object
+
+        current_user.following.add(user_to_follow)
+        return JsonResponse({'status': 'success'})
+    except User.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'User not found'}, status=404)
+
+@csrf_exempt
+@require_POST
+def unfollow_user(request):
+    try:
+        data = json.loads(request.body)
+        user_to_unfollow_id = data.get('unfollow_user_id') 
+        current_user_id = data.get('user_id')  
+
+        user_to_unfollow = User.objects.get(user_id=user_to_unfollow_id)
+        current_user = User.objects.get(user_id=current_user_id)  # Get the current user object
+
+        current_user.following.remove(user_to_unfollow)
+        return JsonResponse({'status': 'success'})
+
+    except User.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'User not found'}, status=404)
+    
+@csrf_exempt
+def check_following(request, user_id):
+    try:
+        data = json.loads(request.body)
+        current_user_id = data.get('user_id')
+        user_to_check = User.objects.get(user_id=user_id)
+        current_user = User.objects.get(user_id=current_user_id)
+        is_following = current_user.following.filter(user_id=user_to_check.user_id).exists()
+        return JsonResponse({'isFollowing': is_following})
+    except User.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'User not found'}, status=404)
+
+@csrf_exempt
+def check_like(request):
+    try:
+        data = json.loads(request.body)
+        user_id = data.get('user_id')
+        route_id = data.get('route_id')
+
+        user = User.objects.get(user_id=user_id)
+        is_liked = route_id in user.liked_routes
+        return JsonResponse({'isLiked': is_liked})
+    except User.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'User not found'}, status=404)
+
+@csrf_exempt
+def like_route(request):
+    try:
+        data = json.loads(request.body)
+        user_id = data.get('user_id')
+        route_id = data.get('route_id')
+        user = User.objects.get(user_id=user_id)
+        route = Route.objects.get(route_id=route_id)
+
+        if route_id in user.liked_routes:
+            user.liked_routes.remove(route_id)
+            route.likes -= 1
+            user.save()
+            route.save()
+            return JsonResponse({'status': 'success', 'liked': False, "likes": route.likes})
+        else:
+            user.liked_routes.append(route_id)
+            route.likes += 1
+            user.save()
+            route.save()
+
+        
+            return JsonResponse({'status': 'success', 'liked': True, "likes": route.likes})
+    except User.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'User not found'}, status=404)
+
+@csrf_exempt
+def bookmark_route(request):
+    try:
+        data = json.loads(request.body)
+        user_id = data.get('user_id')
+        route_id = data.get('route_id')
+        user = User.objects.get(user_id=user_id)
+        
+        if route_id in user.saved_routes:
+            user.saved_routes.remove(route_id)
+            user.save()
+            return JsonResponse({'status': 'success', 'bookmarked': False})
+        else:
+            user.saved_routes.append(route_id)
+            user.save()
+            return JsonResponse({'status': 'success', 'bookmarked': True})
+    except User.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'User not found'}, status=404)
+    
+@csrf_exempt
+def check_bookmark(request):
+    try:
+        data = json.loads(request.body)
+        user_id = data.get('user_id')
+        route_id = data.get('route_id')
+        user = User.objects.get(user_id=user_id)
+        is_bookmarked = route_id in user.saved_routes
+        return JsonResponse({'isBookmarked': is_bookmarked})
+    except User.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'User not found'}, status=404)
+    
+
+@csrf_exempt
+@api_view(['GET'])
+def load_bookmarks(request):
+    try:
+        user_id = request.GET.get('user_id')
+        user = User.objects.get(user_id=user_id)
+        bookmarked_routes = Route.objects.filter(route_id__in=user.saved_routes)
+        print(bookmarked_routes)
+
+        bookmarked_routes_list = [{
+            'route_id': route.route_id,
+            'title': route.title,
+            'description': route.description,
+            'photos': route.photos,
+            'rating': route.rating,
+            'likes': route.likes,
+            'comments': route.comments,
+            'saves': route.saves,
+            'node_ids': route.node_ids,
+            'node_names': route.node_names,
+            'duration': route.duration,
+            'duration_between': route.duration_between,
+            'mapView': route.mapView,
+            'username': User.objects.get(user_id=route.user).username,  
+            'user_id': route.user
+        } for route in bookmarked_routes]
+
+
+        return JsonResponse(bookmarked_routes_list, safe=False)
+    except User.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'User not found'}, status=404)
+    
+@csrf_exempt
+@api_view(['GET'])
+def my_routes(request):
+    try:
+        user_id = request.GET.get('user_id')
+        own_routes = Route.objects.filter(user=user_id)
+        print(own_routes)
+
+        own_routes_list = [{
+            'route_id': route.route_id,
+            'title': route.title,
+            'description': route.description,
+            'photos': route.photos,
+            'rating': route.rating,
+            'likes': route.likes,
+            'comments': route.comments,
+            'saves': route.saves,
+            'node_ids': route.node_ids,
+            'node_names': route.node_names,
+            'duration': route.duration,
+            'duration_between': route.duration_between,
+            'mapView': route.mapView,
+            'username': User.objects.get(user_id=route.user).username,  
+            'user_id': route.user
+        } for route in own_routes]
+
+
+        return JsonResponse(own_routes_list, safe=False)
+    except User.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'User not found'}, status=404)
+    
+
+
+@csrf_exempt
+@api_view(['POST'])
+def add_comment(request):
+    try:
+        data = json.loads(request.body)
+        user_id = data.get('user_id')
+        route_id = data.get('route_id')
+        comment_text = data.get('comment')
+
+        user = User.objects.get(user_id=user_id)
+        route = Route.objects.get(route_id=route_id)
+
+        comment = f"{user.username}: {comment_text}"
+        route.comments.append(comment)
+        route.save()
+
+        return JsonResponse({'status': 'success', 'comments': route.comments})
+    except User.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'User not found'}, status=404)
+    except Route.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'Route not found'}, status=404)

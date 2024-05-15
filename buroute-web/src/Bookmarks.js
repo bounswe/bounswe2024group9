@@ -5,7 +5,7 @@ import RouteCard from "./RouteCard";
 
 import "./search_style.css";
 
-function SearchResults() {
+function Bookmarks() {
   const auth = useAuth();
   const { user } = auth;
   const [searchValue, setSearchValue] = useState("");
@@ -36,7 +36,7 @@ function SearchResults() {
     const fetchRoutes = async () => {
       try {
         console.log("User ID:", user.user_id);
-        const response = await fetch(`${process.env.REACT_APP_API_URL}/database_search/load_feed_via_id/?user_id=${user.user_id}`);
+        const response = await fetch(`http://localhost:8000/database_search/load_bookmarks/?user_id=${user.user_id}`);
         const data = await response.json();
         console.log(data);
         setRoutes(data);
@@ -80,13 +80,13 @@ function SearchResults() {
             onClick={() => (window.location.href = "/feed")}
           />
           <button
-            className="create-route-button"
-            onClick={() => {
-              window.location.href = '/bookmarks';
-            }}
+          className="create-route-button"
+          onClick={() => {
+              window.location.href = '/feed';
+          }}
           >
-            Bookmarks
-          </button>
+          Feed
+        </button>
           <button
             className="create-route-button"
             onClick={() => {
@@ -103,7 +103,7 @@ function SearchResults() {
         >
           My Routes
         </button>
-          <button
+        <button
           className="create-route-button"
           onClick={() => {
             window.location.href = '/routes';
@@ -138,7 +138,7 @@ function SearchResults() {
         </div>
       </header>
       <main className="container">
-      <h1>Feed</h1>
+      <h1>Bookmarks</h1>
         {searched && (
           <div className="search-display" ref={searchDisplayRef}>
             {isLoading ? (
@@ -159,17 +159,18 @@ function SearchResults() {
           </div>
         )}
         <div className="routes-container">
-          {routes.length > 0 ? (
-            routes.map((route, index) => <RouteCard key={index} route={route} />)
-          ) : (
-            <p>You are not following anyone. You can start journey by <Link to="/routes">visiting the routes page</Link>.</p>          )}
+        {routes.length > 0 ? (
+          routes.map((route, index) => <RouteCard key={index} route={route} />)
+        ) : (
+          <p>You have not bookmarked any routes. You can start by <Link to="/routes">visiting the routes page</Link>.</p>
+        )}
         </div>
       </main>
     </>
   );
 }
 
-export default SearchResults;
+export default Bookmarks;
 
 export const fetchSearchResults = async (searchString) => {
   try {
@@ -183,7 +184,7 @@ export const fetchSearchResults = async (searchString) => {
       return [];
     }
     
-    const response = await fetch(`${process.env.REACT_APP_API_URL}/wiki_search/search/${searchString}`);
+    const response = await fetch(`http://localhost:8000/wiki_search/search/${searchString}`);
     const data = await response.json();
     console.log(data.results.bindings);
     return data.results.bindings;

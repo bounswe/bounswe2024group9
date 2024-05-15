@@ -5,7 +5,7 @@ import RouteCard from "./RouteCard";
 
 import "./search_style.css";
 
-function SearchResults() {
+function AllRoutes() {
   const auth = useAuth();
   const { user } = auth;
   const [searchValue, setSearchValue] = useState("");
@@ -36,7 +36,7 @@ function SearchResults() {
     const fetchRoutes = async () => {
       try {
         console.log("User ID:", user.user_id);
-        const response = await fetch(`${process.env.REACT_APP_API_URL}/database_search/load_feed_via_id/?user_id=${user.user_id}`);
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/database_search/routes/`);
         const data = await response.json();
         console.log(data);
         setRoutes(data);
@@ -82,10 +82,10 @@ function SearchResults() {
           <button
             className="create-route-button"
             onClick={() => {
-              window.location.href = '/bookmarks';
+                window.location.href = '/feed';
             }}
-          >
-            Bookmarks
+            >
+            Feed
           </button>
           <button
             className="create-route-button"
@@ -98,18 +98,18 @@ function SearchResults() {
           <button
           className="create-route-button"
           onClick={() => {
+            window.location.href = '/bookmarks';
+          }}
+        >
+          Bookmarks
+        </button>
+        <button
+          className="create-route-button"
+          onClick={() => {
             window.location.href = '/my_routes';
           }}
         >
           My Routes
-        </button>
-          <button
-          className="create-route-button"
-          onClick={() => {
-            window.location.href = '/routes';
-          }}
-        >
-          Discover Top Routes
         </button>
           <button
             id="logout-button"
@@ -138,7 +138,7 @@ function SearchResults() {
         </div>
       </header>
       <main className="container">
-      <h1>Feed</h1>
+      <h1>Top Routes</h1>
         {searched && (
           <div className="search-display" ref={searchDisplayRef}>
             {isLoading ? (
@@ -159,17 +159,16 @@ function SearchResults() {
           </div>
         )}
         <div className="routes-container">
-          {routes.length > 0 ? (
-            routes.map((route, index) => <RouteCard key={index} route={route} />)
-          ) : (
-            <p>You are not following anyone. You can start journey by <Link to="/routes">visiting the routes page</Link>.</p>          )}
+          {routes.map((route, index) => (
+            <RouteCard key={index} route={route} />
+          ))}
         </div>
       </main>
     </>
   );
 }
 
-export default SearchResults;
+export default AllRoutes;
 
 export const fetchSearchResults = async (searchString) => {
   try {
