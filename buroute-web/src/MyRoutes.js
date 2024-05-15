@@ -36,7 +36,7 @@ function MyRoutes() {
     const fetchRoutes = async () => {
       try {
         console.log("User ID:", user.user_id);
-        const response = await fetch(`http://localhost:8000/database_search/own_routes/?user_id=${user.user_id}`);
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/database_search/own_routes/?user_id=${user.user_id}`);
         const data = await response.json();
         console.log(data);
         setRoutes(data);
@@ -182,7 +182,7 @@ export const fetchSearchResults = async (searchString) => {
       return [];
     }
     
-    const response = await fetch(`http://localhost:8000/wiki_search/search/${searchString}`);
+    const response = await fetch(`${process.env.REACT_APP_API_URL}/wiki_search/search/${searchString}`);
     const data = await response.json();
     console.log(data.results.bindings);
     return data.results.bindings;
