@@ -12,6 +12,7 @@ const WikidataSearch = () => {
   const [isConsistent, setConsistency] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const navigation = useNavigation();
+  const [selectedMode, setSelectedMode] = useState('Places'); // Default to Places
 
   let callTimeout;
 
@@ -109,9 +110,18 @@ const WikidataSearch = () => {
   const handleCreatePage = () => {
     setShowModal(true);
   };
+  const handleModeChange = (mode) => {
+    setSelectedMode(mode);
+    // Trigger search when mode changes
+    searchWikidata();
+  };
 
 return (
   <ScrollView style={{ flex: 1, padding: 20 }}>
+    <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 }}>
+    <Button title="Places" onPress={() => handleModeChange('Places')} color={selectedMode === 'Places' ? 'green' : 'black'} />
+    <Button title="Routes" onPress={() => handleModeChange('Routes')} color={selectedMode === 'Routes' ? 'green' : 'black'} />
+    </View>
     <TextInput
       style={{ marginBottom: 10, padding: 10, borderWidth: 1, borderColor: '#ccc', borderRadius: 5 }}
       placeholder="Search Wikidata"
