@@ -150,9 +150,10 @@ function SearchResults() {
           </div>
         )}
         <div className="routes-container">
-          {routes.map((route, index) => (
-            <RouteCard key={index} route={route} />
-          ))}
+          {routes.length > 0 ? (
+            routes.map((route, index) => <RouteCard key={index} route={route} />)
+          ) : (
+            <p>You are not following anyone. You can start journey by <Link to="/routes">visiting the routes page</Link>.</p>          )}
         </div>
       </main>
     </>

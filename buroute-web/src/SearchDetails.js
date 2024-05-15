@@ -123,6 +123,30 @@ function SearchDetails() {
             onClick={() => window.location.href = '/feed'}
           />
           <button
+          className="create-route-button"
+          onClick={() => {
+              window.location.href = '/feed';
+          }}
+          >
+          Feed
+        </button>
+          <button
+            className="create-route-button"
+            onClick={() => {
+              window.location.href = '/create_route';
+            }}
+          >
+            Create Route
+          </button>
+            <button
+            className="create-route-button"
+            onClick={() => {
+              window.location.href = '/bookmarks';
+            }}
+          >
+            Bookmarks
+          </button>
+          <button
             id="logout-button"
             onClick={() => {
               auth.logout();
