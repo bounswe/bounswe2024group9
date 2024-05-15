@@ -300,3 +300,73 @@ def check_following(request, user_id):
         return JsonResponse({'isFollowing': is_following})
     except User.DoesNotExist:
         return JsonResponse({'status': 'error', 'message': 'User not found'}, status=404)
+
+@csrf_exempt
+def check_like(request):
+    try:
+        data = json.loads(request.body)
+        user_id = data.get('user_id')
+        route_id = data.get('route_id')
+
+        user = User.objects.get(user_id=user_id)
+        is_liked = route_id in user.liked_routes
+        return JsonResponse({'isLiked': is_liked})
+    except User.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'User not found'}, status=404)
+
+@csrf_exempt
+def like_route(request):
+    try:
+        data = json.loads(request.body)
+        user_id = data.get('user_id')
+        route_id = data.get('route_id')
+        user = User.objects.get(user_id=user_id)
+        route = Route.objects.get(route_id=route_id)
+
+        if route_id in user.liked_routes:
+            user.liked_routes.remove(route_id)
+            route.likes -= 1
+            user.save()
+            route.save()
+            return JsonResponse({'status': 'success', 'liked': False, "likes": route.likes})
+        else:
+            user.liked_routes.append(route_id)
+            route.likes += 1
+            user.save()
+            route.save()
+
+        
+            return JsonResponse({'status': 'success', 'liked': True, "likes": route.likes})
+    except User.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'User not found'}, status=404)
+
+@csrf_exempt
+def bookmark_route(request):
+    try:
+        data = json.loads(request.body)
+        user_id = data.get('user_id')
+        route_id = data.get('route_id')
+        user = User.objects.get(user_id=user_id)
+        
+        if route_id in user.saved_routes:
+            user.saved_routes.remove(route_id)
+            user.save()
+            return JsonResponse({'status': 'success', 'bookmarked': False})
+        else:
+            user.saved_routes.append(route_id)
+            user.save()
+            return JsonResponse({'status': 'success', 'bookmarked': True})
+    except User.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'User not found'}, status=404)
+    
+@csrf_exempt
+def check_bookmark(request):
+    try:
+        data = json.loads(request.body)
+        user_id = data.get('user_id')
+        route_id = data.get('route_id')
+        user = User.objects.get(user_id=user_id)
+        is_bookmarked = route_id in user.saved_routes
+        return JsonResponse({'isBookmarked': is_bookmarked})
+    except User.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'User not found'}, status=404)
