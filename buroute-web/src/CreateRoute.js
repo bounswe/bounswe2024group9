@@ -95,7 +95,7 @@ function RouteCreation() {
             
             console.log('Data to be sent:', postData);
         
-            const response = await fetch('http://127.0.0.1:8000/database_search/create_route/', {
+            const response = await fetch(`${process.env.REACT_APP_API_URL}/database_search/create_route/`, {
                 method: 'POST',
                 headers: {
                 'Content-Type': 'application/json',
