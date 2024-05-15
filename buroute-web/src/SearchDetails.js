@@ -120,7 +120,7 @@ function SearchDetails() {
             src="/logo.jpg"
             alt="bar_logo"
             style={{ width: '75px', height: 'auto', padding: "5px" }}
-            onClick={() => window.location.href = '/search'}
+            onClick={() => window.location.href = '/feed'}
           />
           <button
             id="logout-button"

@@ -123,10 +123,10 @@ function RouteCreation() {
                     <button
                         className="search-button"
                         onClick={() => {
-                            window.location.href = '/search';
+                            window.location.href = '/feed';
                         }}
                     >
-                        Search
+                        Feed
                     </button>
                     <button
                         id="logout-button"
