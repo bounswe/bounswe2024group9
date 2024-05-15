@@ -87,7 +87,12 @@ const WikidataSearch = () => {
     try {
       const response = await fetch(Config.REACT_APP_API_URL+'/wiki_search/results/' + qValue);
       const data = await response.json();
-      navigation.navigate('SearchResultDetail', { result: data });
+      if(selectedMode === 'Places'){
+        navigation.navigate('SearchResultDetail', { result: data });
+      } else if(selectedMode === 'Routes') {
+        // Navigate to RouteList page for Routes mode
+        navigation.navigate('RouteList', { node: data });
+      }
     } catch (error) {
       console.error('There was a problem with the fetch operation:', error);
     }
