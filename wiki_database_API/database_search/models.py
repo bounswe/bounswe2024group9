@@ -91,7 +91,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     REQUIRED_FIELDS = [] # This is golding the field which is required to register the user. Since username and user_id are required fields, we don't need to specify any other fields.
 
     def __str__(self):
-        return self.username
+        return f"{self.username} , {self.e_mail} , {self.liked_routes}, {self.saved_routes}"
+
 
     def get_following_routes(self):
         following_users = self.following.all()

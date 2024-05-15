@@ -19,4 +19,8 @@ urlpatterns = [
     path('follow_user/', views.follow_user, name='follow_user'),
     path('unfollow_user/', views.unfollow_user, name='unfollow_user'),
     path('check_following/<int:user_id>/', views.check_following, name='check_following'),
+    path('check_like/', views.check_like, name='check_likes'),
+    path('check_bookmark/', views.check_bookmark, name='check_bookmarks'),
+    path('like_route/', views.like_route, name='like_route'),
+    path('bookmark_route/', views.bookmark_route, name='bookmark_route'),
 ]

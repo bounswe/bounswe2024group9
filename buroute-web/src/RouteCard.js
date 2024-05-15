@@ -18,17 +18,50 @@ const RouteCard = ({ route }) => {
   const [isLiked, setIsLiked] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [isFollowing, setIsFollowing] = useState(false);
+  const [likeCount, setLikeCount] = useState(route.likes); // Use local state for like count
 
-  const handleBookmark = () => {
-    setIsBookmarked(!isBookmarked);
-    
+  const handleBookmark = async () => {
+    try {
+      const response = await fetch(`http://localhost:8000/database_search/bookmark_route/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ user_id: user.user_id, route_id: route.route_id }),
+      });
+  
+      if (response.ok) {
+        const data = await response.json();
+        setIsBookmarked(data.bookmarked);
+      } else {
+        console.error('Error bookmarking route');
+      }
+    } catch (error) {
+      console.error('Error bookmarking route:', error);
+    }
   };
 
-  const handleLike = () => {
-    setIsLiked(!isLiked);
-    route.likes = isLiked ? route.likes - 1 : route.likes + 1;
-  };
+  const handleLike = async () => {
+    try {
+      const response = await fetch(`http://localhost:8000/database_search/like_route/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ user_id: user.user_id, route_id: route.route_id }),
+      });
 
+      if (response.ok) {
+        const data = await response.json();
+        setIsLiked(data.liked);
+        setLikeCount(data.likes); // Update local like count
+      } else {
+        console.error('Error liking route');
+      }
+    } catch (error) {
+      console.error('Error liking route:', error);
+    }
+  };
 
   useEffect(() => {
     const checkFollowingStatus = async () => {
@@ -50,6 +83,46 @@ const RouteCard = ({ route }) => {
 
     checkFollowingStatus();
   }, [route.user_id, user.user_id]);
+
+  useEffect(() => {
+    const checkLikeStatus = async () => {
+      try {
+        const response = await fetch(`http://localhost:8000/database_search/check_like/`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ user_id: user.user_id, route_id: route.route_id}),
+        });
+
+        const data = await response.json();
+        setIsLiked(data.isLiked);
+      } catch (error) {
+        console.error('Error checking like status:', error);
+      }
+    };
+
+    const checkBookmarkStatus = async () => {
+      try {
+        const response = await fetch(`http://localhost:8000/database_search/check_bookmark/`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ user_id: user.user_id, route_id: route.route_id}),
+        });
+
+        const data = await response.json();
+        setIsBookmarked(data.isBookmarked);
+      } catch (error) {
+        console.error('Error checking bookmark status:', error);
+      }
+    };
+
+    checkLikeStatus();
+    checkBookmarkStatus();
+  }, [route.route_id, user.user_id]);
+
 
   const handleFollow = async () => {
     try {
@@ -135,7 +208,7 @@ const RouteCard = ({ route }) => {
         <div className='right'>
           <img src={map} alt="No Map Available" className="route-map" />
           <div className="actions">
-            <div>Liked by {route.likes} others</div>
+            <div>Liked by {likeCount} others</div>
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
               <div onClick={handleLike}>
                   {isLiked ? (
