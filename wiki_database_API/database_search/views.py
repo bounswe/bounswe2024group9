@@ -14,7 +14,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 def route_list(request):
-    routes = Route.objects.all().order_by('-likes')
+    routes = Route.objects.all().order_by('-likes')[:20]
     
     routes_list = [{
         'route_id': route.route_id,

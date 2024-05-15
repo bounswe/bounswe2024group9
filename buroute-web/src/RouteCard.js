@@ -25,6 +25,7 @@ const RouteCard = ({ route }) => {
 
   const handleComment = async () => {
     try {
+      
       const response = await fetch(`http://localhost:8000/database_search/add_comment/`, {
         method: 'POST',
         headers: {
@@ -152,6 +153,9 @@ const RouteCard = ({ route }) => {
   const handleFollow = async () => {
     try {
       console.log("USER ID IS ", user.user_id);
+      // let button = document.getElementsByClassName('follow-button');
+      // console.log("BUTTON IS ", button);
+      // button.style.backgroundColor = '#a1bdc8d9';
       const response = await fetch(`http://localhost:8000/database_search/follow_user/`, {
         method: 'POST',
         headers: {
@@ -161,6 +165,7 @@ const RouteCard = ({ route }) => {
       });
 
       if (response.ok) {
+        // button.style.backgroundColor = '#a1bdffd9';
         setIsFollowing(true);
       } else {
         const error = await response.json();
@@ -198,15 +203,16 @@ const RouteCard = ({ route }) => {
         <div className="route-info">
 
           <div className='left'>
-            <h3 id={route.user_id}>{route.username}</h3>
-
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+            <h3 id={route.user_id} style={{ marginRight: '10px' }}>{route.username}</h3>
             {Number(route.user_id) !== Number(user.user_id) && (
               isFollowing ? (
-                <button onClick={handleUnfollow} className="follow-button">Unfollow</button>
+                <button onClick={handleUnfollow} className="follow-button" style={{ padding: '10px', backgroundColor: '#a1bdffd9', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>Unfollow</button>
               ) : (
-                <button onClick={handleFollow} className="follow-button">Follow</button>
+                <button onClick={handleFollow} className="follow-button" style={{ padding: '10px', backgroundColor: '#a1bdfad9', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>Follow</button>
               )
             )}
+          </div>
             <img src={photo} alt="Route" />
           </div>
 
