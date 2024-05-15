@@ -80,13 +80,13 @@ function AllRoutes() {
             onClick={() => (window.location.href = "/feed")}
           />
           <button
-          className="create-route-button"
-          onClick={() => {
-              window.location.href = '/feed';
-          }}
-          >
-          Feed
-        </button>
+            className="create-route-button"
+            onClick={() => {
+                window.location.href = '/feed';
+            }}
+            >
+            Feed
+          </button>
           <button
             className="create-route-button"
             onClick={() => {
@@ -95,6 +95,14 @@ function AllRoutes() {
           >
             Create Route
           </button>
+          <button
+          className="create-route-button"
+          onClick={() => {
+            window.location.href = '/bookmarks';
+          }}
+        >
+          Bookmarks
+        </button>
           <button
             id="logout-button"
             onClick={() => {

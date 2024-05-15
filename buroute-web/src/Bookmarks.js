@@ -142,9 +142,11 @@ function Bookmarks() {
           </div>
         )}
         <div className="routes-container">
-          {routes.map((route, index) => (
-            <RouteCard key={index} route={route} />
-          ))}
+        {routes.length > 0 ? (
+          routes.map((route, index) => <RouteCard key={index} route={route} />)
+        ) : (
+          <p>You have not bookmarked any routes. You can start by <Link to="/routes">visiting the routes page</Link>.</p>
+        )}
         </div>
       </main>
     </>
