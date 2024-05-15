@@ -27,6 +27,24 @@ const CreateRoute = ({navigation}) => {
         setCurrentPoi(poi);
     }
 
+    const getWikidataItem = (gMapsItem) => {
+        const name = gMapsItem.name;
+        const latitude = gMapsItem.coordinate.latitude;
+        const longitude = gMapsItem.coordinate.longitude;
+
+        console.log('sending info: ' + name + latitude + longitude);
+        // bu 3 info ile wikidata search yap, result i dondur (lat lon farki
+        // en az olan dogrudur)
+    }
+
+    const saveRoute = () => {
+        route.map((routeItem) => {
+            getWikidataItem(routeItem);
+            // donen itemi (eger donduyse) listeye ekle
+            // yoksa hata ver
+        });
+    }
+
 return (
 <View
     style={styles.map}>
@@ -93,7 +111,7 @@ return (
                 </View>
             ))}
                     <Button title="Back to Selection" onPress={() => setShowModal(false)}/>
-                    <Button title="Save Route" />
+                    <Button title="Save Route" onPress={saveRoute}/>
         </View>
     </Modal>
 </View>
