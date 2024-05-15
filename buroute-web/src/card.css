@@ -1,0 +1,137 @@
+  .route-card {
+    background-color: #e0e7ff;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column; /* Add this line */
+    margin: 20px 0;
+    margin-bottom: 0;
+    justify-content: space-between;
+    max-width: 1200px;
+    width: 1200px;
+  }
+
+  .route-info {
+    display: flex;
+    width: 100%;
+  }
+  
+  .left,
+  .middle,
+  .right {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .left {
+    text-align: center;
+  }
+
+  .middle {
+    flex: 1.5; /* Make the middle section wider */
+    text-align: left;
+    margin: 0 20px;
+    align-items: flex-start; /* Align items to the start of the container */
+}
+  
+  .middle h2 {
+    margin-top: 0;
+  }
+  
+  .middle p {
+    margin: 20px 0;
+  }
+  
+  .rating span {
+    color: gold;
+  }
+  
+  .right {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .route-photo {
+    max-width: 200px;
+    border-radius: 10px;
+  }
+  
+  .route-map {
+    width: 90%;
+    height: 80%;
+    border: none;
+    border-radius: 10px;
+    object-fit: cover;
+  }
+  
+  .actions {
+    margin-top: 10px;
+    text-align: center;
+  }
+  
+  .actions div {
+    margin-bottom: 5px;
+  }
+  
+  .icon-buttons {
+    display: flex;
+    gap: 10px;
+  }
+  
+  .icon {
+    cursor: pointer;
+    margin: 2px 8px;
+    width: 1.5em;
+    height: 1.5em;
+    vertical-align: -0.125em;
+  }
+  
+  #stars{
+    margin: 20px 0;
+  }
+
+  .route-card .route-info {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+  }
+  
+  .route-card.comment-section {
+    margin: 0;
+  }
+  
+  .route-card.comment-section input {
+    width: 98%;
+    padding: 10px;
+    margin-bottom: 10px;
+  }
+  
+  .route-card.comment-section button {
+    padding: 10px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+  }
+  
+  .comments-list {
+    margin-top: 10px;
+  }
+  
+  .comment {
+    background-color: #e9ecef;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+  }
+  
+
+@media (max-width: 1199px) {
+  .route-card {
+      width: auto;
+  }
+}
