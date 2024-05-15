@@ -1,6 +1,7 @@
 import React, {useState} from "react";
-import { StyleSheet, Text, View, Button, Modal, TextInput } from "react-native";
+import { StyleSheet, Text, View, Button, Modal, TextInput, SafeAreaView } from "react-native";
 import MapView, { PROVIDER_GOOGLE, Callout, Marker } from "react-native-maps";
+import RNPickerSelect from "react-native-picker-select";
 
 const CreateRoute = ({navigation}) => {
 
@@ -46,6 +47,69 @@ const CreateRoute = ({navigation}) => {
     }
 
 return (
+    <SafeAreaView style={styles.container}>
+      {/* First Box */}
+      <View style={styles.box}>
+        <TextInput style={styles.textInput} placeholder="Title"/>
+        <TextInput style={styles.textInput} placeholder="Description" multiline={true}/>
+        <TextInput style={styles.textInput} placeholder="Search"/>
+        <View style={styles.buttonsContainer}>
+          <Button title="Button 1" onPress={() => {}} />
+          <Button title="Button 2" onPress={() => {}} />
+          <Button title="Button 3" onPress={() => {}} />
+          <Button title="Button 4" onPress={() => {}} />
+          <Button title="Button 5" onPress={() => {}} />
+        </View>
+      </View>
+
+      {/* separator */}
+      <View
+        style={styles.separator}
+      />
+      {/* Second Box */}
+      <View style={styles.box}>
+      </View>
+    </SafeAreaView>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'flex-start',
+    padding: 16,
+  },
+  separator: {
+    borderBottomColor: 'black',
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+  box: {
+    marginVertical: 10,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    backgroundColor: 'magenta',
+    borderRadius: 8,
+  },
+  textInput: {
+    height: 40,
+    borderColor: '#ccc',
+    borderWidth: 1,
+    marginBottom: 10,
+    paddingHorizontal: 8,
+    borderRadius: 4,
+    backgroundColor: 'white',
+  },
+  buttonsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+});
+
+export default CreateRoute;
+
+/*
+return (
 <View
     style={styles.map}>
     <TextInput
@@ -80,9 +144,7 @@ return (
                             onPress={addPOI}>
                             <View>
                               <Text>{currentPoi.name}</Text>
-                              {/* can add proper buttons here
-                                    also conditional rendering
-                               */}
+
                               <Button
                                   title="Add">
                               </Button>
@@ -135,5 +197,4 @@ const styles = StyleSheet.create({
       padding: 10
     },
 });
-
-export default CreateRoute;
+*/
