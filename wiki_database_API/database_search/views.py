@@ -10,9 +10,23 @@ from .models import Route, Node, User
 from django.core import serializers
 import json
 import logging
+from rest_framework.decorators import api_view
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 
 logger = logging.getLogger(__name__)
 
+@swagger_auto_schema(
+    method='get',
+    operation_summary="List all the routes from the database",
+    operation_description="List all the routes from our database together with their id, title, rating, user, etc.",
+    manual_parameters=[],
+    responses={
+        200: 'Successful Response',
+        400: 'Bad Request',
+    }
+)
+@api_view(['GET'])
 def route_list(request):
     routes = Route.objects.all().order_by('-likes')
     
