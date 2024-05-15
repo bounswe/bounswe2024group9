@@ -15,6 +15,7 @@ function RouteCreation() {
     const [chain, setChain] = useState([]); 
     const [routeTitle, setRouteTitle] = useState('');
     const [routeDescription, setRouteDescription] = useState('');
+    const [routeRating, setRouteRating] = useState('');
     const [nodeNames, setNodeNames] = useState([]);
     const [clickOutside, setClickOutside] = useState(false);
 
@@ -59,7 +60,7 @@ function RouteCreation() {
             title: routeTitle,
             description: routeDescription,
             photos: [],
-            rating: 0,
+            rating: routeRating,
             likes: 0,
             comments: [],
             saves: 0,
@@ -90,6 +91,7 @@ function RouteCreation() {
         console.log('Route posted:', data);
         setChain([]);
         setNodeNames([]);
+        window.location.href = '/feed';
         } catch (error) {
         console.error('Error posting route:', error);
         }
@@ -105,116 +107,115 @@ function RouteCreation() {
         }
     };
 
-    const handleAddButtonClick = () => {
-        // Code for handling add button click
-    };
 
     return (
-        <>
-            <header>
-                <div className="header-bar">
-                    <img
-                        id="bar_logo"
-                        src="/logo.jpg"
-                        style={{ width: "75px", height: "auto", padding: "5px" }}
-                        alt="bar_logo"
-                        onClick={() => (window.location.href = "/feed")}
-                    />
-                    <button
-                        className="search-button"
-                        onClick={() => {
-                            window.location.href = '/feed';
-                        }}
-                    >
-                        Feed
-                    </button>
-                    <button
-                    className="create-route-button"
+    <>
+        <header>
+            <div className="header-bar">
+                <img
+                    id="bar_logo"
+                    src="/logo.jpg"
+                    style={{ width: "75px", height: "auto", padding: "5px" }}
+                    alt="bar_logo"
+                    onClick={() => (window.location.href = "/feed")}
+                />
+                <button
+                    className="search-button"
                     onClick={() => {
-                      window.location.href = '/bookmarks';
+                        window.location.href = '/feed';
                     }}
-                  >
-                    Bookmarks
-                  </button>
-                    <button
-                        id="logout-button"
-                        onClick={() => {
-                            auth.logout();
-                            window.location.href = '/login';
-                        }}
-                    >
-                        Log Out
-                    </button>
+                >
+                    Feed
+                </button>
+                <button
+                className="create-route-button"
+                onClick={() => {
+                  window.location.href = '/bookmarks';
+                }}
+              >
+                Bookmarks
+              </button>
+                <button
+                    id="logout-button"
+                    onClick={() => {
+                        auth.logout();
+                        window.location.href = '/login';
+                    }}
+                >
+                    Log Out
+                </button>
+            </div>
+        </header>
+        <div className="main-container" style={{ height: '85vh', position: 'relative' }}>
+            <div className="left" style={{ backgroundColor: '#e0eaFF', height: '80%', float: 'left', width: '30%', marginTop: '1%', marginLeft: '2%' }}>
+                <div className="nodeboxes" style={{ backgroundColor: '#e0eaFF', height: '80%', width: '90%', overflowY: 'auto', margin: '3%' }}>
+                    {nodeNames.map((nodeId, index) => (
+                        <NodeBox key={index} text={nodeId} /> 
+                    ))}
                 </div>
-            </header>
-            <div className="main-container" style={{ height: '85vh' }}>
-                <div className="left" style={{ backgroundColor: '#e0eaFF', height: '80%', float: 'left', width: '30%', marginTop: '1%', marginLeft: '2%' }}>
-                    <div className="nodeboxes" style={{ backgroundColor: '#e0eaFF', height: '80%', width: '90%', overflowY: 'auto', margin: '3%' }}>
-                        {nodeNames.map((nodeId, index) => (
-                            <NodeBox key={index} text={nodeId} /> 
-                        ))}
-                    </div>
-                    <div className="remove-button" style={{ backgroundColor: '#ff5f5f', height: '10%', marginLeft: '3%', width: '80%', cursor: 'pointer', textAlign: 'center', display: 'flex', justifyContent: 'center', alignItems: 'center' }} onClick={handleRemoveButtonClick}>
-                        Remove
-                    </div>
+                <div className="remove-button" onClick={handleRemoveButtonClick}>
+                    Remove Last Node
                 </div>
-                <div className="right" style={{ height: '80%', float: 'right', width: '60%', marginTop: '1%', marginRight: '5%', backgroundColor: 'white'}}>
-                    <div className="top-right" style={{ backgroundColor: '#e0eaFF', height: '30%', width: '100%' }}>
-                        <input
-                            type="text"
-                            placeholder="Route Title"
-                            value={routeTitle}
-                            onChange={(e) => setRouteTitle(e.target.value)}
-                            style={{ width: '80%', height: '10%', marginLeft: '10%', marginTop: '1%' }}
-                        />
-                        <textarea
-                            placeholder="Route Description"
-                            value={routeDescription}
-                            onChange={(e) => setRouteDescription(e.target.value)}
-                            style={{ width: '80%', height: '10%', marginLeft: '10%', marginTop: '1%' }}
-                        ></textarea>                    
+            </div>
+            <div className="right" style={{ height: '80%', float: 'right', width: '60%', marginTop: '1%', marginRight: '5%', backgroundColor: 'white'}}>
+                <div className="top-right" style={{backgroundColor: '#e0eaFF', height: '100%', width: '100%', display: 'flex',flexDirection: 'column'}}>
+                    <input
+                        type="text"
+                        placeholder="Route Title"
+                        value={routeTitle}
+                        onChange={(e) => setRouteTitle(e.target.value)}
+                        style={{ width: '40%', height: 15, marginLeft: '1%', marginTop: '1%' , borderRadius: '24px'}}
+                    />
+                    <textarea
+                        placeholder="Route Description"
+                        value={routeDescription}
+                        onChange={(e) => setRouteDescription(e.target.value)}
+                        style={{ width: '40%', height: 200, marginLeft: '1%', marginTop: '1%', borderRadius: '24px', padding: '10px' }}
+                    />
+                    <input
+                        type="text"
+                        placeholder="Route Rating"
+                        value={routeRating}
+                        onChange={(e) => setRouteRating(e.target.value)}
+                        style={{ width: '40%', height: 15, marginLeft: '1%', marginTop: '1%' , borderRadius: '24px'}}
+                    />
+                    <div style={{display: 'flex', position: 'relative'}}>
                         <input
                             type="text"
                             placeholder="Search..."
                             value={searchValue}
                             onChange={(e) => setSearchValue(e.target.value)}
-                            style={{ width: '60%', height: '10%', marginLeft: '10%', marginTop: '1%'}} 
-                        />
-                        <div className="add-button" style={{ float: 'right', backgroundColor: '#20B6DE', height: '12%', marginRight: '9%', marginTop: '1%', width: '18%', cursor: 'pointer', textAlign: 'center', display: 'flex', justifyContent: 'center', alignItems: 'center'}} onClick={handleSearch}>
+                            style={{ width: '40%', height: 15, marginLeft: '1%', marginTop: '1%' , borderRadius: '24px'}}
+                            />
+                        <div className="search-button2" onClick={handleSearch}>
                             Search
                         </div>
                         {isLoading ? (
-                            <p style={{ marginLeft: '10%'}}>Loading...</p>
+                            <p style={{ marginLeft: '10%', position: 'absolute', top: '100%', left: '0'}}>Loading...</p>
                         ) : searched && searchResults.length === 0 && !clickOutside ? (
-                            <p>No results found.</p>
+                            <p style={{ position: 'absolute', top: '100%', left: '0'}}>No results found.</p>
                         ) : (
-                            <div ref={searchResultsRef} style={{ marginLeft: '10%', backgroundColor: '#20B6DE', overflowY: 'auto', maxHeight: '200px', display: searchResults.length > 0 ? 'block' : 'none' }}>
+                            <div ref={searchResultsRef} style={{ position: 'absolute', top: '100%', cursor:"pointer", left: '15px', zIndex: 1, width: '42%', backgroundColor: ' rgb(161, 189, 250)', overflowY: 'auto', maxHeight: '200px', marginLeft: '10px%',display: searchResults.length > 0 ? 'block' : 'none' }}>
                                 {searchResults.map((result, index) => (
-                                    <div key={index}>
+                                    <div key={index} style={{border: '1px solid black', paddingLeft: '1%'}}>
                                         <p onClick={() => addToChain(result)}>{result.itemLabel.value}</p>
                                     </div>
                                 ))}
                             </div>
                         )}
-                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                            <div className="add-button" style={{ float: 'right', backgroundColor: '#20B6DE', height: '10%', marginTop: '1%', marginLeft: '10%', width: '20%', cursor: 'pointer', textAlign: 'center', display: 'flex', justifyContent: 'center', alignItems: 'center' }} onClick={handleAddButtonClick}>
-                                Add Description
-                            </div>
-                            <div className="add-button" style={{ float: 'right', backgroundColor: '#20B6DE', height: '10%', marginTop: '1%', width: '20%', cursor: 'pointer', textAlign: 'center', display: 'flex', justifyContent: 'center', alignItems: 'center' }} onClick={handleAddButtonClick}>
-                                Export
-                            </div>
-                            <div className="add-button" style={{ float: 'right', backgroundColor: '#20B6DE', height: '10%', marginTop: '1%', marginRight: '9%', width: '20%', cursor: 'pointer', textAlign: 'center', display: 'flex', justifyContent: 'center', alignItems: 'center'}} onClick={postRoute} >
-                                Post Route
-                            </div>
+                    </div>             
+                    
+                    <div style={{ display: 'flex', justifyContent: 'space-between', position: 'relative', marginTop: '1%' }}>
+                        <div className="add-button" onClick={postRoute} >
+                            Post Route
                         </div>
-                    </div>
-                    <div className="bottom-right" style={{ backgroundColor: '#e0eaFF', height: '75%', width: '100%', marginTop: '2%' }}>
-                        <div></div>
                     </div>
                 </div>
             </div>
-        </>
-    );
+        </div>
+    </>
+);
+
 }
 
 export default RouteCreation;
