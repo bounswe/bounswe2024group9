@@ -5,7 +5,7 @@ import RouteCard from "./RouteCard";
 
 import "./search_style.css";
 
-function SearchResults() {
+function AllRoutes() {
   const auth = useAuth();
   const { user } = auth;
   const [searchValue, setSearchValue] = useState("");
@@ -36,7 +36,7 @@ function SearchResults() {
     const fetchRoutes = async () => {
       try {
         console.log("User ID:", user.user_id);
-        const response = await fetch(`http://localhost:8000/database_search/load_feed_via_id/?user_id=${user.user_id}`);
+        const response = await fetch(`http://localhost:8000/database_search/routes/`);
         const data = await response.json();
         console.log(data);
         setRoutes(data);
@@ -80,13 +80,13 @@ function SearchResults() {
             onClick={() => (window.location.href = "/feed")}
           />
           <button
-            className="create-route-button"
-            onClick={() => {
-              window.location.href = '/bookmarks';
-            }}
+          className="create-route-button"
+          onClick={() => {
+              window.location.href = '/feed';
+          }}
           >
-            Bookmarks
-          </button>
+          Feed
+        </button>
           <button
             className="create-route-button"
             onClick={() => {
@@ -95,14 +95,6 @@ function SearchResults() {
           >
             Create Route
           </button>
-          <button
-          className="create-route-button"
-          onClick={() => {
-            window.location.href = '/routes';
-          }}
-        >
-          Discover Top Routes
-        </button>
           <button
             id="logout-button"
             onClick={() => {
@@ -159,7 +151,7 @@ function SearchResults() {
   );
 }
 
-export default SearchResults;
+export default AllRoutes;
 
 export const fetchSearchResults = async (searchString) => {
   try {

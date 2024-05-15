@@ -118,7 +118,7 @@ function RouteCreation() {
                         src="/logo.jpg"
                         style={{ width: "75px", height: "auto", padding: "5px" }}
                         alt="bar_logo"
-                        onClick={() => (window.location.href = "/search")}
+                        onClick={() => (window.location.href = "/feed")}
                     />
                     <button
                         className="search-button"

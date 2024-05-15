@@ -14,7 +14,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 def route_list(request):
-    routes = Route.objects.all()
+    routes = Route.objects.all().order_by('-likes')
     
     routes_list = [{
         'route_id': route.route_id,
@@ -408,3 +408,35 @@ def check_bookmark(request):
     except User.DoesNotExist:
         return JsonResponse({'status': 'error', 'message': 'User not found'}, status=404)
     
+
+@csrf_exempt
+@api_view(['GET'])
+def load_bookmarks(request):
+    try:
+        user_id = request.GET.get('user_id')
+        user = User.objects.get(user_id=user_id)
+        bookmarked_routes = Route.objects.filter(route_id__in=user.saved_routes)
+        print(bookmarked_routes)
+
+        bookmarked_routes_list = [{
+            'route_id': route.route_id,
+            'title': route.title,
+            'description': route.description,
+            'photos': route.photos,
+            'rating': route.rating,
+            'likes': route.likes,
+            'comments': route.comments,
+            'saves': route.saves,
+            'node_ids': route.node_ids,
+            'node_names': route.node_names,
+            'duration': route.duration,
+            'duration_between': route.duration_between,
+            'mapView': route.mapView,
+            'username': User.objects.get(user_id=route.user).username,  
+            'user_id': route.user
+        } for route in bookmarked_routes]
+
+
+        return JsonResponse(bookmarked_routes_list, safe=False)
+    except User.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'User not found'}, status=404)
