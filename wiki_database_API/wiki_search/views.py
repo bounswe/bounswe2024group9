@@ -142,9 +142,9 @@ def results(request, QID):
         same_period_entries = {}
 
     final = results
-    final['nearby'] = nearby_entries
-    final['period'] = same_period_entries
-    # final = {'results': results, 'nearby': nearby_entries, 'period': same_period_entries}
+    # final['nearby'] = nearby_entries
+    # final['period'] = same_period_entries
+    final = {'results': results, 'nearby': nearby_entries, 'period': same_period_entries}
 
     return JsonResponse(final)
 

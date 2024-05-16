@@ -10,7 +10,7 @@ const WikidataSearch = () => {
   const [selectedQValue, setSelectedQValue] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const navigation = useNavigation();
-  const [selectedMode, setSelectedMode] = useState('Places'); // Default to Places
+  const [selectedMode, setSelectedMode] = useState('Places');
 
   const fetchNodes = async () => {
     try {

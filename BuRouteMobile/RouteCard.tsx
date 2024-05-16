@@ -108,7 +108,7 @@ const RouteCard = ({ route, currentUser }) => {
             </View>
             <View style={styles.routeInfo}>
                 <Text style={styles.title}>{title}</Text>
-                <Text style={styles.routeUsername}>by {user.username}</Text>
+                <Text style={styles.routeUsername}></Text>
             </View>
             <FlatList
                 data={photos}

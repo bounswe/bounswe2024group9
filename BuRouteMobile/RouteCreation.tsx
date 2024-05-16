@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { View, TextInput, Text, TouchableOpacity, Button, Alert, FlatList, StyleSheet } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
 import Config from 'react-native-config';
 
 interface Node {
@@ -12,19 +11,20 @@ interface Node {
   description?: string;
 }
 
-const CreateRoute = () => {
+const CreateRoute = ({ route }) => {
+  const { username } = route.params;
+
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState<Node[]>([]);
   const [routeNodes, setRouteNodes] = useState<Node[]>([]);
-  const navigation = useNavigation();
 
   useEffect(() => {
     if (searchTerm.length > 2) {
       const fetchNodes = async () => {
         try {
-          const response = await fetch(`${Config.REACT_APP_API_URL}/database_search/nodes/?search=${searchTerm}`);
+          const response = await fetch(`http://10.0.2.2:8000/database_search/nodes/?search=${searchTerm}`);
           const data = await response.json();
           setSearchResults(data);
         } catch (error) {
@@ -34,17 +34,17 @@ const CreateRoute = () => {
 
       const searchWikidata = async () => {
         try {
-          const response = await fetch(`${Config.REACT_APP_API_URL}/wiki_search/search/${searchTerm}`);
+          const response = await fetch(`http://10.0.2.2:8000/wiki_search/search/${searchTerm}`);
           const data = await response.json();
           if (data.results.bindings.length === 0) {
             fetchNodes();
           } else {
             const results = data.results.bindings.map(result => ({
-              node_id: parseInt(result.item.value.split('/').pop(), 10), // Ensure node_id is a valid number
+              node_id: parseInt(result.item.value.split('/').pop(), 10),
               name: result.itemLabel.value,
-              latitude: 0,  // Placeholder, as latitude is not provided
-              longitude: 0, // Placeholder, as longitude is not provided
-              photo: '',    // Placeholder, as photo is not provided
+              latitude: 0,
+              longitude: 0,
+              photo: '',
               description: result.description ? result.description.value : 'No description available'
             }));
             setSearchResults(results);
@@ -75,18 +75,17 @@ const CreateRoute = () => {
   };
 
   const saveRoute = () => {
-    const routeData = {
-      title,
-      description,
-      nodes: routeNodes.map(node => node.node_id),
-    };
-
-    fetch(`${Config.REACT_APP_API_URL}/database_search/routes/`, {
+    fetch(`http://10.0.2.2:8000/database_search/routes/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(routeData),
+      body: JSON.stringify({
+        title,
+        description,
+        node_ids: routeNodes.map(node => node.node_id),
+        user: username
+      }),
     })
       .then(response => response.json())
       .then(data => {
@@ -103,7 +102,7 @@ const CreateRoute = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Edit Route</Text>
+      <Text style={styles.title}>Create Route</Text>
       <TextInput
         style={styles.input}
         placeholder="Route Title"
