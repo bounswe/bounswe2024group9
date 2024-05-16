@@ -10,6 +10,7 @@ import {
   View,
   Text,
   TouchableOpacity,
+  Linking
 } from 'react-native';
 import {NavigationProp} from '@react-navigation/native'; // Import NavigationProp type
 import Config from 'react-native-config';
@@ -70,6 +71,10 @@ const Signup = ({navigation}: Props) => {
     navigation.navigate('Login');
   };
 
+  const openKVKKTerms = () => {
+    Linking.openURL('https://www.resmigazete.gov.tr/eskiler/2018/03/20180310-5.htm');
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" />
@@ -126,15 +131,18 @@ const Signup = ({navigation}: Props) => {
         </View>
         <View style={styles.inputContainer}>
           <TouchableOpacity
-            onPress={() => setSubscribe(!subscribe)} // Toggle subscribe state
-            style={{flexDirection: 'row', alignItems: 'center'}}>
-            <View
-              style={[
-                styles.checkbox,
-                {backgroundColor: subscribe ? 'blue' : 'transparent'}, // Change color based on state
-              ]}
-            />
-            <Text style={{marginLeft: 8}}>I agree to the KVKK terms</Text>
+              onPress={() => setSubscribe(!subscribe)} // Toggle subscribe state
+              style={{flexDirection: 'row', alignItems: 'center'}}>
+              <View
+                style={[
+                  styles.checkbox,
+                  {backgroundColor: subscribe ? 'blue' : 'transparent'}, // Change color based on state
+                ]}
+              />
+              <Text style={{marginLeft: 8}}>
+                I agree to the{' '}
+                <Text style={{color: 'blue'}} onPress={openKVKKTerms}>KVKK terms</Text>
+              </Text>
           </TouchableOpacity>
         </View>
         <View style={styles.buttonContainer}>
