@@ -3,7 +3,7 @@ import { View, TextInput, Text, TouchableOpacity, Modal, Button, ScrollView } fr
 import { useNavigation } from '@react-navigation/native';
 import Config from 'react-native-config';
 
-const WikidataSearch = () => {
+const WikidataSearch = ({ route }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [nodes, setNodes] = useState([]);
@@ -11,6 +11,28 @@ const WikidataSearch = () => {
   const [showModal, setShowModal] = useState(false);
   const navigation = useNavigation();
   const [selectedMode, setSelectedMode] = useState('Places');
+  const [currentUser, setCurrentUser] = useState(null);
+  const {username} = route.params;
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      try {
+
+        const response = await fetch(`http://10.0.2.2:8000/database_search/user_detail/`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ username }),
+        });
+        const userData = await response.json();
+        setCurrentUser(userData);
+      } catch (error) {
+        console.error('Failed to fetch current user:', error);
+      }
+    };
+
+    fetchCurrentUser();
+  }, []);
 
   const fetchNodes = async () => {
     try {
@@ -70,25 +92,30 @@ const WikidataSearch = () => {
     };
   }, [searchTerm]);
 
-  const getLastItem = (thePath) => thePath.substring(thePath.lastIndexOf('/') + 1);
+  const getLastItem = (thePath) => {
+    if (thePath.endsWith('/')) {
+      thePath = thePath.slice(0, -1);
+    }
+    const numericPart = thePath.replace(/\D/g, '');
+    return numericPart;
+  };
 
   const handleResultClick = async (index) => {
     const selectedItem = searchResults[index];
     const qValue = getLastItem(selectedItem.Q);
     setSelectedQValue(qValue);
     try {
-        const response = await fetch(`${Config.REACT_APP_API_URL}/wiki_search/results/${qValue}`);
-        const data = await response.json();
-        if (selectedMode === 'Places') {
-            navigation.navigate('SearchResultDetail', { result: data });
-        } else if (selectedMode === 'Routes') {
-            navigation.navigate('RouteList', { qValue });
-        }
+      const response = await fetch(`http://10.0.2.2:8000/wiki_search/results/Q${qValue}`);
+      const data = await response.json();
+      if (selectedMode === 'Places') {
+        navigation.navigate('SearchResultDetail', { result: data });
+      } else if (selectedMode === 'Routes') {
+        navigation.navigate('RouteList', { qValue, currentUser });
+      }
     } catch (error) {
-        console.error('There was a problem with the fetch operation:', error);
+      console.error('There was a problem with the fetch operation:', error);
     }
-};
-
+  };
 
   const handleCustomNodeClick = (node) => {
     navigation.navigate('NodeDetails', { result: node });

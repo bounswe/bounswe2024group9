@@ -3,22 +3,20 @@ import { View, Text, FlatList, ActivityIndicator, StyleSheet } from 'react-nativ
 import RouteCard from './RouteCard';
 
 const RouteList = ({ route }) => {
-    const { qId } = route.params;
+    const { qId, currentUser } = route.params;
     const [routes, setRoutes] = useState([]);
-    const [currentUser, setCurrentUser] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
     const getLastItem = (thePath) => {
-      if (thePath.endsWith('/')) {
-        thePath = thePath.slice(0, -1);
-      }
-      const numericPart = thePath.replace(/\D/g, '');
-      return numericPart;
+        if (thePath.endsWith('/')) {
+            thePath = thePath.slice(0, -1);
+        }
+        const numericPart = thePath.replace(/\D/g, '');
+        return numericPart;
     };
 
     const fetchRoutes = async () => {
-        console.log(route.params.qValue);
         try {
             const response = await fetch(`http://10.0.2.2:8000/database_search/routes/by_qid/${getLastItem(route.params.qValue)}/`, {
                 method: 'GET',

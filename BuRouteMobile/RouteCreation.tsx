@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { View, TextInput, Text, TouchableOpacity, Button, Alert, FlatList, StyleSheet } from 'react-native';
-import Config from 'react-native-config';
 
 interface Node {
   node_id: number;
@@ -13,7 +12,6 @@ interface Node {
 
 const CreateRoute = ({ route }) => {
   const { username } = route.params;
-
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
@@ -75,7 +73,7 @@ const CreateRoute = ({ route }) => {
   };
 
   const saveRoute = () => {
-    fetch(`http://10.0.2.2:8000/database_search/routes/`, {
+    fetch(`http://10.0.2.2:8000/database_search/create_route/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -84,15 +82,20 @@ const CreateRoute = ({ route }) => {
         title,
         description,
         node_ids: routeNodes.map(node => node.node_id),
+        node_names: routeNodes.map(node => node.name),
         user: username
       }),
     })
       .then(response => response.json())
       .then(data => {
-        Alert.alert('Success', 'Route saved successfully');
-        setTitle('');
-        setDescription('');
-        setRouteNodes([]);
+        if (data.status === 'success') {
+          Alert.alert('Success', 'Route saved successfully');
+          setTitle('');
+          setDescription('');
+          setRouteNodes([]);
+        } else {
+          throw new Error(data.error);
+        }
       })
       .catch(error => {
         console.error(error);

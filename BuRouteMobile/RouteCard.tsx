@@ -7,7 +7,9 @@ const RouteCard = ({ route, currentUser }) => {
     const [likes, setLikes] = useState(initialLikes);
     const [comments, setComments] = useState(initialComments);
     const [newComment, setNewComment] = useState('');
-
+    const [isFollowing, setIsFollowing] = useState(false);
+    const [isBookmarked, setIsBookmarked] = useState(false);
+    console.log("ssssssssss" + currentUser.user_id);
     useEffect(() => {
         const fetchUserData = async () => {
             try {
@@ -25,10 +27,58 @@ const RouteCard = ({ route, currentUser }) => {
         fetchUserData();
     }, [user_id]);
 
+    useEffect(() => {
+        const checkFollowingStatus = async () => {
+            try {
+                const response = await fetch(`http://10.0.2.2:8000/database_search/check_following/${user_id}/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ user_id: currentUser.user_id }),
+                });
+
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+
+                const result = await response.json();
+                setIsFollowing(result.isFollowing);
+            } catch (error) {
+                console.error('Error checking follow status:', error);
+            }
+        };
+        checkFollowingStatus();
+    }, [user_id, currentUser.user_id]);
+
+    useEffect(() => {
+        const checkBookmarkStatus = async () => {
+            try {
+                const response = await fetch(`http://10.0.2.2:8000/database_search/check_bookmark/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ user_id: currentUser.user_id, route_id }),
+                });
+
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+
+                const result = await response.json();
+                setIsBookmarked(result.isBookmarked);
+            } catch (error) {
+                console.error('Error checking bookmark status:', error);
+            }
+        };
+        checkBookmarkStatus();
+    }, [route_id, currentUser.user_id]);
+
     const handleFollow = async () => {
-        console.log(route);
         try {
-            const response = await fetch(`http://10.0.2.2:8000/database_search/follow_user/`, {
+            const endpoint = isFollowing ? 'unfollow_user' : 'follow_user';
+            const response = await fetch(`http://10.0.2.2:8000/database_search/${endpoint}/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -41,6 +91,7 @@ const RouteCard = ({ route, currentUser }) => {
             }
 
             const result = await response.json();
+            setIsFollowing(!isFollowing);
             console.log(result.message);
         } catch (error) {
             console.error('Error:', error);
@@ -69,14 +120,13 @@ const RouteCard = ({ route, currentUser }) => {
     };
 
     const handleComment = async () => {
-        console.log(currentUser);
         try {
             const response = await fetch(`http://10.0.2.2:8000/database_search/add_comment/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ user_id : currentUser.user_id, route_id : route_id, comment : newComment }),
+                body: JSON.stringify({ user_id: currentUser.user_id, route_id, comment: newComment }),
             });
 
             if (!response.ok) {
@@ -86,6 +136,27 @@ const RouteCard = ({ route, currentUser }) => {
             const result = await response.json();
             setComments(result.comments);
             setNewComment('');
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    };
+
+    const handleBookmark = async () => {
+        try {
+            const response = await fetch(`http://10.0.2.2:8000/database_search/bookmark_route/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ user_id: currentUser.user_id, route_id }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+
+            const result = await response.json();
+            setIsBookmarked(result.bookmarked);
         } catch (error) {
             console.error('Error:', error);
         }
@@ -103,7 +174,7 @@ const RouteCard = ({ route, currentUser }) => {
                     <Text style={styles.username}>{route.username}</Text>
                 </View>
                 <TouchableOpacity style={styles.followButton} onPress={handleFollow}>
-                    <Text style={styles.followButtonText}>Follow</Text>
+                    <Text style={styles.followButtonText}>{isFollowing ? 'Unfollow' : 'Follow'}</Text>
                 </TouchableOpacity>
             </View>
             <View style={styles.routeInfo}>
@@ -124,8 +195,8 @@ const RouteCard = ({ route, currentUser }) => {
                     <TouchableOpacity style={styles.actionButton} onPress={handleLike}>
                         <Text style={styles.actionButtonText}>Like</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.actionButton}>
-                        <Text style={styles.actionButtonText}>Comment</Text>
+                    <TouchableOpacity style={styles.actionButton} onPress={handleBookmark}>
+                        <Text style={styles.actionButtonText}>{isBookmarked ? 'Unbookmark' : 'Bookmark'}</Text>
                     </TouchableOpacity>
                 </View>
                 <FlatList
@@ -140,7 +211,7 @@ const RouteCard = ({ route, currentUser }) => {
                     placeholder="Add a comment..."
                 />
                 <TouchableOpacity style={styles.submitButton} onPress={handleComment}>
-                    <Text style={styles.submitButtonText}>Post</Text>
+                    <Text style={styles.submitButtonText}>Comment</Text>
                 </TouchableOpacity>
             </View>
         </View>

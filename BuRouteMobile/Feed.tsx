@@ -62,7 +62,7 @@ const Feed = ({ route }) => {
     }, []);
 
     const handleSearchBarPress = () => {
-        navigation.navigate('WikidataSearch');
+        navigation.navigate('WikidataSearch', {username});
     };
 
     const handleAddRoutePress = () => {

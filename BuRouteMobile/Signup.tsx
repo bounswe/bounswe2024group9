@@ -56,7 +56,7 @@ const Signup = ({navigation}: Props) => {
 
           Alert.alert('User saved successfully!');
           setTimeout(() => {
-              navigation.navigate('WikidataSearch', {json});
+              navigation.navigate('Feed', {username});
           }, 2000);
         }
     }
