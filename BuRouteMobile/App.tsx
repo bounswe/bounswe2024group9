@@ -9,6 +9,7 @@ import CreateRoute from './RouteCreation';
 import Login from './Login';
 import Signup from './Signup.tsx';
 import RouteList from './RouteList.tsx';
+import Feed from './Feed';
 
 const Stack = createStackNavigator();
 
@@ -52,6 +53,10 @@ const App = () => {
         <Stack.Screen
             name="RouteList" 
             component={RouteList}
+        />
+        <Stack.Screen
+           name="Feed"
+           component={Feed}
         />
       </Stack.Navigator>
     </NavigationContainer>

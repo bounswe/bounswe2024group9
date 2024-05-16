@@ -10,6 +10,7 @@ from .models import Route, Node, User
 from django.core import serializers
 import json
 import logging
+import random
 
 logger = logging.getLogger(__name__)
 
@@ -84,12 +85,28 @@ def user_list(request):
     users_list = serializers.serialize('json', users)
     return JsonResponse(users_list, safe=False)
 
+@csrf_exempt
 def user_detail(request, pk):
     user = get_object_or_404(User, pk=pk)
     user_json = serializers.serialize('json', [user]) # User is put in array because serialize expects a list
     user_data = json.loads(user_json)[0]  # Deserialize the JSON and take the first element
     return JsonResponse(user_data, safe=False)
-  
+
+@csrf_exempt
+def user_detail_from_username(request):
+    username = request.GET.get('username')
+    if username is None:
+        return JsonResponse({'error': 'username parameter is required'}, status=400)
+    
+    user = get_object_or_404(User, username=username)
+    user_data = {
+        'user_id': user.user_id,
+        'username': user.username,
+        'e_mail': user.e_mail,
+        'profile_picture': user.profile_picture.url if user.profile_picture else None,
+    }
+    return JsonResponse(user_data)
+
 @csrf_exempt
 def create_user(request):
     if request.method == 'POST':
@@ -230,7 +247,6 @@ def logout_user(request):
 @api_view(['GET'])
 def feed_view(request):
     username = request.GET.get('username')
-    print(username)
     if username is None:
         return JsonResponse({'error': 'username parameter is required'}, status=400)
 
@@ -240,9 +256,31 @@ def feed_view(request):
         return JsonResponse({'error': 'User not found'}, status=404)
 
     following_routes = user.get_following_routes().order_by('-likes')[:10]
-    following_route_json = serializers.serialize('json', following_routes)
-    following_route_list = json.loads(following_route_json)
-    return JsonResponse(following_route_list, safe=False)
+
+    if not following_routes:
+        all_routes = list(Route.objects.all())
+        random_routes = random.sample(all_routes, 10) if len(all_routes) > 10 else all_routes
+        following_routes = random_routes
+
+    routes_list = [{
+        'route_id': route.route_id,
+        'title': route.title,
+        'description': route.description,
+        'photos': route.photos,
+        'rating': route.rating,
+        'likes': route.likes,
+        'comments': route.comments,
+        'saves': route.saves,
+        'node_ids': route.node_ids,
+        'node_names': route.node_names,
+        'duration': route.duration,
+        'duration_between': route.duration_between,
+        'mapView': route.mapView,
+        'user_id': route.user,
+        'username': User.objects.get(user_id=route.user).username
+    } for route in following_routes]
+
+    return JsonResponse(routes_list, safe=False)
 
 @csrf_exempt
 @api_view(['GET'])
@@ -462,7 +500,6 @@ def my_routes(request):
 
 
 @csrf_exempt
-@api_view(['POST'])
 def add_comment(request):
     try:
         data = json.loads(request.body)
@@ -482,3 +519,4 @@ def add_comment(request):
         return JsonResponse({'status': 'error', 'message': 'User not found'}, status=404)
     except Route.DoesNotExist:
         return JsonResponse({'status': 'error', 'message': 'Route not found'}, status=404)
+
