@@ -232,7 +232,7 @@ const RouteCard = ({ route }) => {
               <h4>Route nodes: </h4>
               {node_ids.map((node_id, index) => (
                 <span key={node_id}>
-                  <a href={`${process.env.REACT_APP_WEB_URL}/result/${node_id.trim()}`}>{node_names[index]}</a>
+                  <a href={`${process.env.REACT_APP_WEB_URL}/wiki_search/results/${node_id.trim()}`}>{node_names[index]}</a>
                   {index < node_ids.length - 1 && ' -> '}
                 </span>
               ))}

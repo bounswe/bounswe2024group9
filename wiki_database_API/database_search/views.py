@@ -202,7 +202,7 @@ def create_node(request):
     
 @csrf_exempt
 @swagger_auto_schema(
-    method='post',
+    # method='post',
     operation_summary="Create a new route",
     operation_description="Create a new route with the provided title, description, photos, rating, likes, comments, saves, node IDs, node names, map view, and user ID.",
     request_body=openapi.Schema(
@@ -228,15 +228,21 @@ def create_node(request):
         405: 'Method Not Allowed'
     }
 )
-@api_view(['POST'])
+# @api_view(['POST'])
 def create_route(request):
     if request.method == 'POST':
         try:
+            print('a')
+            print(request.POST)
+            print('b')
+            print(request.body)
+            print('c')
             if request.POST: # Checking if the request contains form data
                 data = request.POST
             else: # If not, it should contain JSON data
-                data = json.loads(request.body.decode('utf-8')) 
-
+                data = json.loads(request.body.decode('utf-8'))
+            print('d')
+            print(data)
             title = data.get('title')
             description = data.get('description')
             photos = data.get('photos', [])
