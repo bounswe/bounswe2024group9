@@ -10,9 +10,23 @@ from .models import Route, Node, User
 from django.core import serializers
 import json
 import logging
+from rest_framework.decorators import api_view
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 
 logger = logging.getLogger(__name__)
 
+@swagger_auto_schema(
+    method='get',
+    operation_summary="List top 20 liked routes from the database",
+    operation_description="List top 20 liked routes from our database together with their id, title, rating, user, etc.",
+    manual_parameters=[],
+    responses={
+        200: 'Successful Response',
+        400: 'Bad Request',
+    }
+)
+@api_view(['GET'])
 def route_list(request):
     routes = Route.objects.all().order_by('-likes')[:20]
     
@@ -89,8 +103,27 @@ def user_detail(request, pk):
     user_json = serializers.serialize('json', [user]) # User is put in array because serialize expects a list
     user_data = json.loads(user_json)[0]  # Deserialize the JSON and take the first element
     return JsonResponse(user_data, safe=False)
-  
+
 @csrf_exempt
+@swagger_auto_schema(
+    method='post',
+    operation_summary="Create a new user",
+    operation_description="Create a new user with the provided username, email, and password.",
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            'username': openapi.Schema(type=openapi.TYPE_STRING, description='Username of the new user'),
+            'email': openapi.Schema(type=openapi.TYPE_STRING, description='Email of the new user'),
+            'password': openapi.Schema(type=openapi.TYPE_STRING, description='Password of the new user'),
+        },
+        required=['username', 'email', 'password'],
+    ),
+    responses={
+        200: 'User created successfully',
+        400: 'Bad Request'
+    }
+)
+@api_view(['POST'])
 def create_user(request):
     if request.method == 'POST':
         data = json.loads(request.body)
@@ -128,6 +161,26 @@ def create_user(request):
         return HttpResponse(status=405)
 
 @csrf_exempt
+@swagger_auto_schema(
+    method='post',
+    operation_summary="Create a new node",
+    operation_description="Create a new node with the provided name, latitude, longitude, and photo.",
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            'name': openapi.Schema(type=openapi.TYPE_STRING, description='Name of the new node'),
+            'latitude': openapi.Schema(type=openapi.TYPE_STRING, description='Latitude of the node'),
+            'longitude': openapi.Schema(type=openapi.TYPE_STRING, description='Longitude of the node'),
+            'photo': openapi.Schema(type=openapi.TYPE_FILE, description='Photo of the node'),
+        },
+        required=['name', 'latitude', 'longitude'],
+    ),
+    responses={
+        200: 'Node created successfully',
+        405: 'Method Not Allowed'
+    }
+)
+@api_view(['POST'])
 def create_node(request):
     if request.method == 'POST':
         name = request.POST.get('name')
@@ -148,6 +201,34 @@ def create_node(request):
         return HttpResponse(status=405)
     
 @csrf_exempt
+@swagger_auto_schema(
+    method='post',
+    operation_summary="Create a new route",
+    operation_description="Create a new route with the provided title, description, photos, rating, likes, comments, saves, node IDs, node names, map view, and user ID.",
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            'title': openapi.Schema(type=openapi.TYPE_STRING, description='Title of the new route'),
+            'description': openapi.Schema(type=openapi.TYPE_STRING, description='Description of the route'),
+            'photos': openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Items(type=openapi.TYPE_STRING), description='Photos of the route'),
+            'rating': openapi.Schema(type=openapi.TYPE_NUMBER, description='Rating of the route'),
+            'likes': openapi.Schema(type=openapi.TYPE_NUMBER, description='Likes count of the route'),
+            'comments': openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Items(type=openapi.TYPE_STRING), description='Comments on the route'),
+            'saves': openapi.Schema(type=openapi.TYPE_NUMBER, description='Saves count of the route'),
+            'node_ids': openapi.Schema(type=openapi.TYPE_STRING, description='Node IDs associated with the route'),
+            'node_names': openapi.Schema(type=openapi.TYPE_STRING, description='Node names associated with the route'),
+            'mapView': openapi.Schema(type=openapi.TYPE_STRING, description='Map view of the route'),
+            'user': openapi.Schema(type=openapi.TYPE_STRING, description='User ID of the route creator'),
+        },
+        required=['title', 'description', 'user'],
+    ),
+    responses={
+        200: 'Route created successfully',
+        400: 'Bad Request',
+        405: 'Method Not Allowed'
+    }
+)
+@api_view(['POST'])
 def create_route(request):
     if request.method == 'POST':
         try:
@@ -194,8 +275,26 @@ def create_route(request):
 
     else:
         return HttpResponse(status=405)
-    
+
 @csrf_exempt
+@swagger_auto_schema(
+    method='post',
+    operation_summary="Delete a route",
+    operation_description="Delete a specific route by its ID.",
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            'routeId': openapi.Schema(type=openapi.TYPE_STRING, description='ID of the route to delete'),
+        },
+        required=['routeId'],
+    ),
+    responses={
+        200: 'Route deleted successfully',
+        400: 'Error deleting route',
+        405: 'Method Not Allowed'
+    }
+)
+@api_view(['POST'])
 def delete_route(request):
     if request.method == 'POST':
         try:
@@ -209,6 +308,25 @@ def delete_route(request):
         return HttpResponse(status=405)
 
 @csrf_exempt
+@swagger_auto_schema(
+    method='post',
+    operation_summary="Log in a user",
+    operation_description="Authenticate a user with the provided username and password.",
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            'username': openapi.Schema(type=openapi.TYPE_STRING, description='Username of the user'),
+            'password': openapi.Schema(type=openapi.TYPE_STRING, description='Password of the user'),
+        },
+        required=['username', 'password'],
+    ),
+    responses={
+        200: 'User logged in successfully',
+        400: 'Invalid username or password',
+        405: 'Method Not Allowed'
+    }
+)
+@api_view(['POST'])
 def login_user(request):
     if request.method == 'POST':
         try:
@@ -229,7 +347,17 @@ def login_user(request):
             return JsonResponse({'error': 'Invalid username or password'}, status=400)
     else:
         return HttpResponse(status=405)
-    
+
+@swagger_auto_schema(
+    method='post',
+    operation_summary="Log out a user",
+    operation_description="Log out the current authenticated user.",
+    responses={
+        200: 'User logged out successfully',
+        405: 'Method Not Allowed'
+    }
+)
+@api_view(['POST'])
 @csrf_exempt
 def logout_user(request):
     if request.method == 'POST':
@@ -240,6 +368,25 @@ def logout_user(request):
     
 
 @csrf_exempt
+@swagger_auto_schema(
+    method='get',
+    operation_summary="Get feed by username",
+    operation_description="Retrieve the feed for a specific user by their username.",
+    manual_parameters=[
+        openapi.Parameter(
+            name='username',
+            in_=openapi.IN_QUERY,
+            type=openapi.TYPE_STRING,
+            description="Username of the user",
+            required=True
+        ),
+    ],
+    responses={
+        200: 'Feed retrieved successfully',
+        400: 'username parameter is required',
+        404: 'User not found'
+    }
+)
 @api_view(['GET'])
 def feed_view(request):
     username = request.GET.get('username')
@@ -257,7 +404,26 @@ def feed_view(request):
     following_route_list = json.loads(following_route_json)
     return JsonResponse(following_route_list, safe=False)
 
+
 @csrf_exempt
+@swagger_auto_schema(
+    method='get',
+    operation_summary="Get feed by user ID",
+    operation_description="Retrieve the feed for a specific user by their ID.",
+    manual_parameters=[
+        openapi.Parameter(
+            name='user_id',
+            in_=openapi.IN_QUERY,
+            type=openapi.TYPE_STRING,
+            description="ID of the user",
+            required=True
+        ),
+    ],
+    responses={
+        200: 'Feed retrieved successfully',
+        404: 'User not found'
+    }
+)
 @api_view(['GET'])
 def feed_view_via_id_web(request):
     print(request.GET)
@@ -291,10 +457,28 @@ def feed_view_via_id_web(request):
     print(routes_list)
     return JsonResponse(routes_list, safe=False)
 
-
-
 @csrf_exempt
 @require_POST
+@swagger_auto_schema(
+    method='post',
+    operation_summary="Follow a user",
+    operation_description="Follow a specific user by their ID.",
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            'follow_user_id': openapi.Schema(type=openapi.TYPE_STRING, description='ID of the user to follow'),
+            'user_id': openapi.Schema(type=openapi.TYPE_STRING, description='ID of the current user'),
+        },
+        required=['follow_user_id', 'user_id'],
+    ),
+    responses={
+        200: 'User followed successfully',
+        404: 'User not found',
+        400: 'Bad Request',
+        405: 'Method Not Allowed'
+    }
+)
+@api_view(['POST'])
 def follow_user(request):
     try:
         data = json.loads(request.body)
@@ -309,8 +493,29 @@ def follow_user(request):
     except User.DoesNotExist:
         return JsonResponse({'status': 'error', 'message': 'User not found'}, status=404)
 
+
 @csrf_exempt
 @require_POST
+@swagger_auto_schema(
+    method='post',
+    operation_summary="Unfollow a user",
+    operation_description="Unfollow a specific user by their ID.",
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            'unfollow_user_id': openapi.Schema(type=openapi.TYPE_STRING, description='ID of the user to unfollow'),
+            'user_id': openapi.Schema(type=openapi.TYPE_STRING, description='ID of the current user'),
+        },
+        required=['unfollow_user_id', 'user_id'],
+    ),
+    responses={
+        200: 'User unfollowed successfully',
+        404: 'User not found',
+        400: 'Bad Request',
+        405: 'Method Not Allowed'
+    }
+)
+@api_view(['POST'])
 def unfollow_user(request):
     try:
         data = json.loads(request.body)
@@ -325,8 +530,28 @@ def unfollow_user(request):
 
     except User.DoesNotExist:
         return JsonResponse({'status': 'error', 'message': 'User not found'}, status=404)
-    
+
+
 @csrf_exempt
+@swagger_auto_schema(
+    method='post',
+    operation_summary="Check if a user is following another user",
+    operation_description="Check if the current user is following a specific user by their ID.",
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            'user_id': openapi.Schema(type=openapi.TYPE_STRING, description='ID of the current user which we want to check if s/he is following another user'),
+        },
+        required=['user_id'],
+    ),
+    responses={
+        200: 'Check completed successfully',
+        404: 'User not found',
+        400: 'Bad Request',
+        405: 'Method Not Allowed'
+    }
+)
+@api_view(['POST'])
 def check_following(request, user_id):
     try:
         data = json.loads(request.body)
@@ -339,6 +564,26 @@ def check_following(request, user_id):
         return JsonResponse({'status': 'error', 'message': 'User not found'}, status=404)
 
 @csrf_exempt
+@swagger_auto_schema(
+    method='post',
+    operation_summary="Check if a user likes a route",
+    operation_description="Check if the current user has liked a specific route.",
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            'user_id': openapi.Schema(type=openapi.TYPE_STRING, description='ID of the current user'),
+            'route_id': openapi.Schema(type=openapi.TYPE_STRING, description='ID of the route'),
+        },
+        required=['user_id', 'route_id'],
+    ),
+    responses={
+        200: 'Check completed successfully',
+        404: 'User not found',
+        400: 'Bad Request',
+        405: 'Method Not Allowed'
+    }
+)
+@api_view(['POST'])
 def check_like(request):
     try:
         data = json.loads(request.body)
@@ -351,6 +596,27 @@ def check_like(request):
     except User.DoesNotExist:
         return JsonResponse({'status': 'error', 'message': 'User not found'}, status=404)
 
+@csrf_exempt
+@swagger_auto_schema(
+    method='post',
+    operation_summary="Like or unlike a route",
+    operation_description="Toggle like status for a specific route by the current user.",
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            'user_id': openapi.Schema(type=openapi.TYPE_STRING, description='ID of the current user'),
+            'route_id': openapi.Schema(type=openapi.TYPE_STRING, description='ID of the route'),
+        },
+        required=['user_id', 'route_id'],
+    ),
+    responses={
+        200: 'Like status toggled successfully',
+        404: 'User not found',
+        400: 'Bad Request',
+        405: 'Method Not Allowed'
+    }
+)
+@api_view(['POST'])
 @csrf_exempt
 def like_route(request):
     try:
@@ -377,6 +643,28 @@ def like_route(request):
     except User.DoesNotExist:
         return JsonResponse({'status': 'error', 'message': 'User not found'}, status=404)
 
+
+@csrf_exempt
+@swagger_auto_schema(
+    method='post',
+    operation_summary="Bookmark or unbookmark a route",
+    operation_description="Toggle bookmark status for a specific route by the current user.",
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            'user_id': openapi.Schema(type=openapi.TYPE_STRING, description='ID of the current user'),
+            'route_id': openapi.Schema(type=openapi.TYPE_STRING, description='ID of the route'),
+        },
+        required=['user_id', 'route_id'],
+    ),
+    responses={
+        200: 'Bookmark status toggled successfully',
+        404: 'User not found',
+        400: 'Bad Request',
+        405: 'Method Not Allowed'
+    }
+)
+@api_view(['POST'])
 @csrf_exempt
 def bookmark_route(request):
     try:
@@ -397,6 +685,27 @@ def bookmark_route(request):
         return JsonResponse({'status': 'error', 'message': 'User not found'}, status=404)
     
 @csrf_exempt
+@swagger_auto_schema(
+    method='post',
+    operation_summary="Check if a user has bookmarked a route",
+    operation_description="Check if the current user has bookmarked a specific route.",
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            'user_id': openapi.Schema(type=openapi.TYPE_STRING, description='ID of the current user'),
+            'route_id': openapi.Schema(type=openapi.TYPE_STRING, description='ID of the route'),
+        },
+        required=['user_id', 'route_id'],
+    ),
+    responses={
+        200: 'Check completed successfully',
+        404: 'User not found',
+        400: 'Bad Request',
+        405: 'Method Not Allowed'
+    }
+)
+@api_view(['POST'])
+@csrf_exempt
 def check_bookmark(request):
     try:
         data = json.loads(request.body)
@@ -410,6 +719,18 @@ def check_bookmark(request):
     
 
 @csrf_exempt
+@swagger_auto_schema(
+    method='get',
+    operation_summary="Load all bookmarks for a user",
+    operation_description="Retrieve all routes bookmarked by a specific user.",
+    manual_parameters=[
+        openapi.Parameter('user_id', openapi.IN_QUERY, description="ID of the user", type=openapi.TYPE_STRING),
+    ],
+    responses={
+        200: 'Bookmarks retrieved successfully',
+        404: 'User not found'
+    }
+)
 @api_view(['GET'])
 def load_bookmarks(request):
     try:
@@ -436,11 +757,54 @@ def load_bookmarks(request):
             'user_id': route.user
         } for route in bookmarked_routes]
 
-
         return JsonResponse(bookmarked_routes_list, safe=False)
     except User.DoesNotExist:
         return JsonResponse({'status': 'error', 'message': 'User not found'}, status=404)
-    
+
+@csrf_exempt
+@swagger_auto_schema(
+    method='post',
+    operation_summary="Add a comment to a route",
+    operation_description="Add a comment to a specific route by the current user.",
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            'user_id': openapi.Schema(type=openapi.TYPE_STRING, description='ID of the current user'),
+            'route_id': openapi.Schema(type=openapi.TYPE_STRING, description='ID of the route'),
+            'comment': openapi.Schema(type=openapi.TYPE_STRING, description='Comment text'),
+        },
+        required=['user_id', 'route_id', 'comment'],
+    ),
+    responses={
+        200: 'Comment added successfully',
+        404: 'User or Route not found',
+        400: 'Bad Request',
+        405: 'Method Not Allowed'
+    }
+)
+@api_view(['POST'])
+def add_comment(request):
+    try:
+        data = json.loads(request.body)
+        user_id = data.get('user_id')
+        route_id = data.get('route_id')
+        comment_text = data.get('comment')
+
+        user = User.objects.get(user_id=user_id)
+        route = Route.objects.get(route_id=route_id)
+
+        comment = f"{user.username}: {comment_text}"
+        route.comments.append(comment)
+        route.save()
+
+        return JsonResponse({'status': 'success', 'comments': route.comments})
+    except User.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'User not found'}, status=404)
+    except Route.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'Route not found'}, status=404)
+
+
+
 @csrf_exempt
 @api_view(['GET'])
 def my_routes(request):
@@ -471,27 +835,3 @@ def my_routes(request):
         return JsonResponse(own_routes_list, safe=False)
     except User.DoesNotExist:
         return JsonResponse({'status': 'error', 'message': 'User not found'}, status=404)
-    
-
-
-@csrf_exempt
-@api_view(['POST'])
-def add_comment(request):
-    try:
-        data = json.loads(request.body)
-        user_id = data.get('user_id')
-        route_id = data.get('route_id')
-        comment_text = data.get('comment')
-
-        user = User.objects.get(user_id=user_id)
-        route = Route.objects.get(route_id=route_id)
-
-        comment = f"{user.username}: {comment_text}"
-        route.comments.append(comment)
-        route.save()
-
-        return JsonResponse({'status': 'success', 'comments': route.comments})
-    except User.DoesNotExist:
-        return JsonResponse({'status': 'error', 'message': 'User not found'}, status=404)
-    except Route.DoesNotExist:
-        return JsonResponse({'status': 'error', 'message': 'Route not found'}, status=404)
