@@ -1,41 +1,79 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView } from 'react-native';
-import { useRoute } from '@react-navigation/native';
-import Config from 'react-native-config';
+import React, { useEffect, useState } from 'react';
+import { View, Text, FlatList, ActivityIndicator, StyleSheet } from 'react-native';
+import RouteCard from './RouteCard';
 
-const RouteList = () => {
-  const route = useRoute();
-  const [routes, setRoutes] = useState([]);
+const RouteList = ({ route }) => {
+    const { qId } = route.params;
+    const [routes, setRoutes] = useState([]);
+    const [currentUser, setCurrentUser] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
-  useEffect(() => {
-    const node = route.params.node;
-    fetchRoutes(node);
-  }, [route.params.node]);
+    const getLastItem = (thePath) => {
+      if (thePath.endsWith('/')) {
+        thePath = thePath.slice(0, -1);
+      }
+      const numericPart = thePath.replace(/\D/g, '');
+      return numericPart;
+    };
 
-  const fetchRoutes = async (node) => {
-    try {
-      const response = await fetch(Config.REACT_APP_API_URL + '/database_search/routes/' + node.Q.value);
-      const data = await response.json();
-      setRoutes(data);
-    } catch (error) {
-      console.error('Error fetching routes:', error);
+    const fetchRoutes = async () => {
+        console.log(route.params.qValue);
+        try {
+            const response = await fetch(`http://10.0.2.2:8000/database_search/routes/by_qid/${getLastItem(route.params.qValue)}/`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+
+            const jsonData = await response.json();
+            setRoutes(jsonData);
+        } catch (error) {
+            setError(error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchRoutes();
+    }, []);
+
+    if (loading) {
+        return <ActivityIndicator size="large" color="#0000ff" style={styles.centered} />;
     }
-  };
 
-  return (
-    <ScrollView style={{ flex: 1, padding: 20 }}>
-      <View>
-        <Text style={{ fontWeight: 'bold', fontSize: 20, marginBottom: 10 }}>Routes including {route.params.node.itemLabel.value}</Text>
-        {routes.map((route, index) => (
-          <View key={index} style={{ marginBottom: 20 }}>
-            <Text style={{ fontWeight: 'bold' }}>Route ID: {route.route_id}</Text>
-            <Text>Title: {route.title}</Text>
-            {/* Add more details if needed */}
-          </View>
-        ))}
-      </View>
-    </ScrollView>
-  );
+    if (error) {
+        return <Text style={styles.centered}>Error: {error.message}</Text>;
+    }
+
+    return (
+        <View style={styles.container}>
+            <FlatList
+                data={routes}
+                keyExtractor={(item) => item.route_id.toString()}
+                renderItem={({ item }) => <RouteCard route={item} currentUser={currentUser} />}
+            />
+        </View>
+    );
 };
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: '#f2f2f2',
+        padding: 10,
+    },
+    centered: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+});
 
 export default RouteList;

@@ -7,6 +7,7 @@ import NodeCreationPage from './NodeCreationPage';
 import NodeDetails from './SearchResultDetailCustomNode';
 import Login from './Login';
 import Signup from './Signup.tsx';
+import RouteList from './RouteList.tsx';
 
 const Stack = createStackNavigator();
 
@@ -41,6 +42,10 @@ const App = () => {
         <Stack.Screen
             name="Signup" 
             component={Signup}
+        />
+        <Stack.Screen
+            name="RouteList" 
+            component={RouteList}
         />
       </Stack.Navigator>
     </NavigationContainer>
