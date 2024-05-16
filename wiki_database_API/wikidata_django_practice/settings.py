@@ -12,7 +12,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 
 from pathlib import Path
 from decouple import config
-
+import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 STATIC_ROOT = BASE_DIR / 'staticfiles'
@@ -37,7 +37,8 @@ ALLOWED_HOSTS = [
     '127.0.0.1',
     '10.0.2.2',
     '165.22.125.216',
-    'localhost'
+    'localhost',
+    os.environ["REACT_APP_API_URL"]
 ]
 
 SWAGGER_SETTINGS = {
