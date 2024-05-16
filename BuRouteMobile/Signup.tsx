@@ -9,6 +9,7 @@ import {
   Alert,
   View,
   Text,
+  TouchableOpacity,
 } from 'react-native';
 import {NavigationProp} from '@react-navigation/native'; // Import NavigationProp type
 import Config from 'react-native-config';
@@ -21,6 +22,7 @@ const Signup = ({navigation}: Props) => {
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [subscribe, setSubscribe] = useState(false);
 
   const handleSubmit = async () => {
     const userInfo = {username, name: '', email, password, is_superuser: false};
@@ -29,33 +31,43 @@ const Signup = ({navigation}: Props) => {
       console.log(email);
       console.log(password);
       console.log(Config.REACT_APP_API_URL);
+      console.log(subscribe);
       
-      const response = await fetch(Config.REACT_APP_API_URL+'/database_search/create_user/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          username: username,
-          name: "",
-          email: email,
-          password: password,
-        }),
-      });
+      if (!subscribe){
+        Alert.alert('You must agree to KVKK to continue!');
+      }else{
+        const response = await fetch(Config.REACT_APP_API_URL+'/database_search/create_user/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            username: username,
+            name: "",
+            email: email,
+            password: password,
+          }),
+        });
 
-      const json = await response.json();
-      console.log(json);
-      if (response.ok) {
+        const json = await response.json();
+        console.log(json);
+        if (response.ok) {
 
-        Alert.alert('User saved successfully!');
-        setTimeout(() => {
-            navigation.navigate('WikidataSearch', {json});
-        }, 2000);
+          Alert.alert('User saved successfully!');
+          setTimeout(() => {
+              navigation.navigate('WikidataSearch', {json});
+          }, 2000);
+        }
     }
     } catch (error) {
       console.error('Error:', error);
       Alert.alert('Failed to save user.');
     }
+  };
+
+  const handleLogin = () => {
+    //navigate to sign up page
+    navigation.navigate('Login');
   };
 
   return (
@@ -76,7 +88,10 @@ const Signup = ({navigation}: Props) => {
           color: 'black',
           marginBottom: 20,
         }}>
-        Already registered? Log in here.
+        Already registered?
+        <TouchableOpacity onPress={handleLogin}>
+          <Text style={styles.signupButton}> Log in here.</Text>
+        </TouchableOpacity>
       </Text>
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"
@@ -108,6 +123,19 @@ const Signup = ({navigation}: Props) => {
             placeholder="Enter your password"
             secureTextEntry={true}
           />
+        </View>
+        <View style={styles.inputContainer}>
+          <TouchableOpacity
+            onPress={() => setSubscribe(!subscribe)} // Toggle subscribe state
+            style={{flexDirection: 'row', alignItems: 'center'}}>
+            <View
+              style={[
+                styles.checkbox,
+                {backgroundColor: subscribe ? 'blue' : 'transparent'}, // Change color based on state
+              ]}
+            />
+            <Text style={{marginLeft: 8}}>I agree to the KVKK terms</Text>
+          </TouchableOpacity>
         </View>
         <View style={styles.buttonContainer}>
           <TouchableHighlight
@@ -143,6 +171,11 @@ const styles = StyleSheet.create({
   scrollView: {
     width: '100%',
   },
+  signupButton: {
+    color: 'blue',
+    textDecorationLine: 'underline',
+    marginBottom: -3,
+  },
   input: {
     textAlign: 'left',
     height: 50,
@@ -169,6 +202,13 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: 'black',
+  },
+  checkbox: {
+    width: 20,
+    height: 20,
+    borderRadius: 5,
+    borderWidth: 2,
+    borderColor: 'blue',
   },
 });
 
