@@ -5,14 +5,14 @@ services:
     image: poyrazogluyigit/buroute-db:latest
     command: python manage.py runserver 0.0.0.0:8000
     environment:
-      - REACT_APP_API_URL=http://127.0.0.1:8000
+      - REACT_APP_API_URL=http://165.22.125.216:8000
     ports:
       - "8000:8000"
   web:
     build: ./buroute-web
     image: poyrazogluyigit/buroute-web:latest
     environment:
-      - REACT_APP_API_URL=http://127.0.0.1:8000
+      - REACT_APP_API_URL=http://165.22.125.216:8000
     restart: on-failure
     ports:
       - "3000:3000" 
