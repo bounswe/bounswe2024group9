@@ -28,7 +28,7 @@ logger = logging.getLogger(__name__)
 )
 @api_view(['GET'])
 def route_list(request):
-    routes = Route.objects.all().order_by('-likes')
+    routes = Route.objects.all().order_by('-likes')[:20]
     
     routes_list = [{
         'route_id': route.route_id,
@@ -124,7 +124,6 @@ def user_detail(request, pk):
     }
 )
 @api_view(['POST'])
-@csrf_exempt
 def create_user(request):
     if request.method == 'POST':
         data = json.loads(request.body)
@@ -160,7 +159,6 @@ def create_user(request):
         })
     else:
         return HttpResponse(status=405)
-
 
 @csrf_exempt
 @swagger_auto_schema(
@@ -804,3 +802,36 @@ def add_comment(request):
         return JsonResponse({'status': 'error', 'message': 'User not found'}, status=404)
     except Route.DoesNotExist:
         return JsonResponse({'status': 'error', 'message': 'Route not found'}, status=404)
+
+
+
+@csrf_exempt
+@api_view(['GET'])
+def my_routes(request):
+    try:
+        user_id = request.GET.get('user_id')
+        own_routes = Route.objects.filter(user=user_id)
+        print(own_routes)
+
+        own_routes_list = [{
+            'route_id': route.route_id,
+            'title': route.title,
+            'description': route.description,
+            'photos': route.photos,
+            'rating': route.rating,
+            'likes': route.likes,
+            'comments': route.comments,
+            'saves': route.saves,
+            'node_ids': route.node_ids,
+            'node_names': route.node_names,
+            'duration': route.duration,
+            'duration_between': route.duration_between,
+            'mapView': route.mapView,
+            'username': User.objects.get(user_id=route.user).username,  
+            'user_id': route.user
+        } for route in own_routes]
+
+
+        return JsonResponse(own_routes_list, safe=False)
+    except User.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'User not found'}, status=404)

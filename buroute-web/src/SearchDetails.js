@@ -82,7 +82,7 @@ function SearchDetails() {
   useEffect(() => {
       const fetchRoutes = async () => {
           try {
-              const response = await fetch(`http://localhost:8000/database_search/routes/by_qid/${qid}/.`);
+              const response = await fetch(`${process.env.REACT_APP_API_URL}/database_search/routes/by_qid/${qid}/.`);
               const data = await response.json();
               console.log(data);
 
@@ -145,6 +145,14 @@ function SearchDetails() {
             }}
           >
             Bookmarks
+          </button>
+          <button
+            className="create-route-button"
+            onClick={() => {
+              window.location.href = '/my_routes';
+            }}
+          >
+            My Routes
           </button>
           <button
             id="logout-button"

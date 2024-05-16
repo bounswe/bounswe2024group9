@@ -36,7 +36,7 @@ function AllRoutes() {
     const fetchRoutes = async () => {
       try {
         console.log("User ID:", user.user_id);
-        const response = await fetch(`http://localhost:8000/database_search/routes/`);
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/database_search/routes/`);
         const data = await response.json();
         console.log(data);
         setRoutes(data);
@@ -103,6 +103,14 @@ function AllRoutes() {
         >
           Bookmarks
         </button>
+        <button
+          className="create-route-button"
+          onClick={() => {
+            window.location.href = '/my_routes';
+          }}
+        >
+          My Routes
+        </button>
           <button
             id="logout-button"
             onClick={() => {
@@ -130,6 +138,7 @@ function AllRoutes() {
         </div>
       </header>
       <main className="container">
+      <h1>Top Routes</h1>
         {searched && (
           <div className="search-display" ref={searchDisplayRef}>
             {isLoading ? (
@@ -173,7 +182,7 @@ export const fetchSearchResults = async (searchString) => {
       return [];
     }
     
-    const response = await fetch(`http://localhost:8000/wiki_search/search/${searchString}`);
+    const response = await fetch(`${process.env.REACT_APP_API_URL}/wiki_search/search/${searchString}`);
     const data = await response.json();
     console.log(data.results.bindings);
     return data.results.bindings;

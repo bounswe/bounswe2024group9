@@ -9,7 +9,7 @@ import ForgotPassword from './Forgot';
 import CreateRoute from './CreateRoute';
 import Bookmarks from './Bookmarks';
 import AllRoutes from './Routes';
-
+import MyRoutes from './MyRoutes';
 
 const App = () => {
   return (
@@ -39,6 +39,7 @@ const AppRoutes = () => {
           <Route path="/feed" element={<SearchResults />} />
           <Route path="/bookmarks" element={<Bookmarks />} />
           <Route path="/routes" element={<AllRoutes />} />
+          <Route path="/my_routes" element={<MyRoutes />} />
           <Route path="/result/:qid" element={<SearchDetails />} />
           <Route path="/create_route" element={<CreateRoute />} /> {/* Add route for CreateRoute */}
         </>

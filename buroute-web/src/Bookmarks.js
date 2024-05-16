@@ -36,7 +36,7 @@ function Bookmarks() {
     const fetchRoutes = async () => {
       try {
         console.log("User ID:", user.user_id);
-        const response = await fetch(`http://localhost:8000/database_search/load_bookmarks/?user_id=${user.user_id}`);
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/database_search/load_bookmarks/?user_id=${user.user_id}`);
         const data = await response.json();
         console.log(data);
         setRoutes(data);
@@ -96,6 +96,22 @@ function Bookmarks() {
             Create Route
           </button>
           <button
+          className="create-route-button"
+          onClick={() => {
+            window.location.href = '/my_routes';
+          }}
+        >
+          My Routes
+        </button>
+        <button
+          className="create-route-button"
+          onClick={() => {
+            window.location.href = '/routes';
+          }}
+        >
+          Discover Top Routes
+        </button>
+          <button
             id="logout-button"
             onClick={() => {
               auth.logout();
@@ -122,6 +138,7 @@ function Bookmarks() {
         </div>
       </header>
       <main className="container">
+      <h1>Bookmarks</h1>
         {searched && (
           <div className="search-display" ref={searchDisplayRef}>
             {isLoading ? (
@@ -167,7 +184,7 @@ export const fetchSearchResults = async (searchString) => {
       return [];
     }
     
-    const response = await fetch(`http://localhost:8000/wiki_search/search/${searchString}`);
+    const response = await fetch(`${process.env.REACT_APP_API_URL}/wiki_search/search/${searchString}`);
     const data = await response.json();
     console.log(data.results.bindings);
     return data.results.bindings;

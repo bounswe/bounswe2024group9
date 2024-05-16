@@ -25,7 +25,8 @@ const RouteCard = ({ route }) => {
 
   const handleComment = async () => {
     try {
-      const response = await fetch(`http://localhost:8000/database_search/add_comment/`, {
+      
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/database_search/add_comment/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -47,7 +48,7 @@ const RouteCard = ({ route }) => {
 
   const handleBookmark = async () => {
     try {
-      const response = await fetch(`http://localhost:8000/database_search/bookmark_route/`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/database_search/bookmark_route/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -68,7 +69,7 @@ const RouteCard = ({ route }) => {
 
   const handleLike = async () => {
     try {
-      const response = await fetch(`http://localhost:8000/database_search/like_route/`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/database_search/like_route/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -91,7 +92,7 @@ const RouteCard = ({ route }) => {
   useEffect(() => {
     const checkFollowingStatus = async () => {
       try {
-        const response = await fetch(`http://localhost:8000/database_search/check_following/${route.user_id}/`, {
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/database_search/check_following/${route.user_id}/`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -112,7 +113,7 @@ const RouteCard = ({ route }) => {
   useEffect(() => {
     const checkLikeStatus = async () => {
       try {
-        const response = await fetch(`http://localhost:8000/database_search/check_like/`, {
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/database_search/check_like/`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -129,7 +130,7 @@ const RouteCard = ({ route }) => {
 
     const checkBookmarkStatus = async () => {
       try {
-        const response = await fetch(`http://localhost:8000/database_search/check_bookmark/`, {
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/database_search/check_bookmark/`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -152,7 +153,10 @@ const RouteCard = ({ route }) => {
   const handleFollow = async () => {
     try {
       console.log("USER ID IS ", user.user_id);
-      const response = await fetch(`http://localhost:8000/database_search/follow_user/`, {
+      // let button = document.getElementsByClassName('follow-button');
+      // console.log("BUTTON IS ", button);
+      // button.style.backgroundColor = '#a1bdc8d9';
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/database_search/follow_user/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -161,6 +165,7 @@ const RouteCard = ({ route }) => {
       });
 
       if (response.ok) {
+        // button.style.backgroundColor = '#a1bdffd9';
         setIsFollowing(true);
       } else {
         const error = await response.json();
@@ -173,7 +178,7 @@ const RouteCard = ({ route }) => {
 
   const handleUnfollow = async () => {
     try {
-      const response = await fetch(`http://localhost:8000/database_search/unfollow_user/`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/database_search/unfollow_user/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -198,15 +203,16 @@ const RouteCard = ({ route }) => {
         <div className="route-info">
 
           <div className='left'>
-            <h3 id={route.user_id}>{route.username}</h3>
-
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+            <h3 id={route.user_id} style={{ marginRight: '10px' }}>{route.username}</h3>
             {Number(route.user_id) !== Number(user.user_id) && (
               isFollowing ? (
-                <button onClick={handleUnfollow} className="follow-button">Unfollow</button>
+                <button onClick={handleUnfollow} className="follow-button" style={{ padding: '10px', backgroundColor: '#a1bdffd9', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>Unfollow</button>
               ) : (
-                <button onClick={handleFollow} className="follow-button">Follow</button>
+                <button onClick={handleFollow} className="follow-button" style={{ padding: '10px', backgroundColor: '#a1bdfad9', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>Follow</button>
               )
             )}
+          </div>
             <img src={photo} alt="Route" />
           </div>
 
@@ -223,7 +229,7 @@ const RouteCard = ({ route }) => {
               <h4>Route nodes: </h4>
               {node_ids.map((node_id, index) => (
                 <span key={node_id}>
-                  <a href={`http://localhost:3000/result/${node_id.trim()}`}>{node_names[index]}</a>
+                  <a href={`${process.env.REACT_APP_WEB_URL}/result/${node_id.trim()}`}>{node_names[index]}</a>
                   {index < node_ids.length - 1 && ' -> '}
                 </span>
               ))}

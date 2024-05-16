@@ -53,45 +53,66 @@ function RouteCreation() {
         setSearchResults(results);
         setIsLoading(false); 
     };
+    
 
      const postRoute = async () => {
-        try {
-        const postData = {
-            title: routeTitle,
-            description: routeDescription,
-            photos: [],
-            rating: routeRating,
-            likes: 0,
-            comments: [],
-            saves: 0,
-            node_ids: chain.join(', '),
-            node_names: nodeNames.join(', '),
-            duration: [],
-            duration_between: [],
-            mapView: 'Your Map View URL',
-            user: user.user_id
-        };
-    
-        console.log('Data to be sent:', postData);
-    
-        const response = await fetch('http://127.0.0.1:8000/database_search/create_route/', {
-            method: 'POST',
-            headers: {
-            'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(postData),
-        });
-        if (!response.ok) {
-            const error = await response.text();
-            throw new Error(error);
+        if (chain.length === 0) {
+            alert('Please add at least one node to the route.');
+            return
         }
+
+        console.log(routeRating)
+        console.log(isNaN(routeRating))
+        console.log(!routeRating)
+        if (routeRating < 0 || routeRating > 5 || isNaN(routeRating) || !routeRating){
+            alert('Please enter a valid rating between 0 and 5.');
+            return
+        }
+
+        if (routeTitle.length === 0) {
+            alert('Please enter a title for the route.');
+            return
+        }
+
+        try {
+
+            const postData = {
+                title: routeTitle,
+                description: routeDescription,
+                photos: [],
+                rating: routeRating,
+                likes: 0,
+                comments: [],
+                saves: 0,
+                node_ids: chain.join(', '),
+                node_names: nodeNames.join(', '),
+                duration: [],
+                duration_between: [],
+                mapView: 'Your Map View URL',
+                user: user.user_id
+            };
+            
+            
+            console.log('Data to be sent:', postData);
         
-        console.log('Response:', response);
-        const data = await response.json();
-        console.log('Route posted:', data);
-        setChain([]);
-        setNodeNames([]);
-        window.location.href = '/feed';
+            const response = await fetch(`${process.env.REACT_APP_API_URL}/database_search/create_route/`, {
+                method: 'POST',
+                headers: {
+                'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(postData),
+            });
+            if (!response.ok) {
+                const error = await response.text();
+                throw new Error(error);
+            }
+            
+            console.log('Response:', response);
+            const data = await response.json();
+            console.log('Route posted:', data);
+            setChain([]);
+            setNodeNames([]);
+            window.location.href = '/my_routes';
         } catch (error) {
         console.error('Error posting route:', error);
         }
@@ -128,13 +149,29 @@ function RouteCreation() {
                     Feed
                 </button>
                 <button
-                className="create-route-button"
-                onClick={() => {
-                  window.location.href = '/bookmarks';
-                }}
-              >
-                Bookmarks
-              </button>
+                    className="create-route-button"
+                    onClick={() => {
+                        window.location.href = '/bookmarks';
+                    }}
+                >
+                    Bookmarks
+                </button>
+                <button
+                    className="create-route-button"
+                    onClick={() => {
+                        window.location.href = '/my_routes';
+                    }}
+                >
+                    My Routes
+                </button>
+                <button
+                    className="create-route-button"
+                    onClick={() => {
+                        window.location.href = '/routes';
+                    }}
+                >
+                    Discover Top Routes
+                </button>
                 <button
                     id="logout-button"
                     onClick={() => {
@@ -173,11 +210,13 @@ function RouteCreation() {
                         style={{ width: '40%', height: 200, marginLeft: '1%', marginTop: '1%', borderRadius: '24px', padding: '10px' }}
                     />
                     <input
-                        type="text"
+                        type="number"
+                        min="0"
+                        max="5"
                         placeholder="Route Rating"
                         value={routeRating}
                         onChange={(e) => setRouteRating(e.target.value)}
-                        style={{ width: '40%', height: 15, marginLeft: '1%', marginTop: '1%' , borderRadius: '24px'}}
+                        style={{ width: '40%', height: 15, marginLeft: '1%', marginTop: '1%' , borderRadius: '24px', padding: '5px'}}
                     />
                     <div style={{display: 'flex', position: 'relative'}}>
                         <input
