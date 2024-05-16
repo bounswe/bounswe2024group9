@@ -18,8 +18,8 @@ logger = logging.getLogger(__name__)
 
 @swagger_auto_schema(
     method='get',
-    operation_summary="List all the routes from the database",
-    operation_description="List all the routes from our database together with their id, title, rating, user, etc.",
+    operation_summary="List top 20 liked routes from the database",
+    operation_description="List top 20 liked routes from our database together with their id, title, rating, user, etc.",
     manual_parameters=[],
     responses={
         200: 'Successful Response',
