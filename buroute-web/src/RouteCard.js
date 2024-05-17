@@ -8,12 +8,12 @@ const RouteCard = ({ route }) => {
   console.log("ROUTE IS ", route);
   const auth = useAuth();
   const { user } = auth; 
-  console.log("USER IS ", user);
+  // console.log("USER IS ", user);
   const duration = Array.isArray(route.duration) ? route.duration : [];
   const durationBetween = Array.isArray(route.duration_between) ? route.duration_between : [];
   const node_ids = route.node_ids.split(',');
   const node_names = route.node_names.split(',');
-  console.log("Node IDS are ", node_ids);
+  // console.log("Node IDS are ", node_ids);
   const photo = route.photos.length > 0 ? route.photos[0] : '/no_image.png';
   const [isLiked, setIsLiked] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false);
@@ -25,7 +25,10 @@ const RouteCard = ({ route }) => {
 
   const handleComment = async () => {
     try {
-      
+      if (comment === '') {
+        alert('Please enter a comment');
+        return;
+      }
       const response = await fetch(`${process.env.REACT_APP_API_URL}/database_search/add_comment/`, {
         method: 'POST',
         headers: {
@@ -278,7 +281,7 @@ const RouteCard = ({ route }) => {
             onChange={(e) => setComment(e.target.value)}
             placeholder="Add a comment"
           />
-          <button onClick={handleComment}>Comment</button>
+          <button onClick={handleComment} style={{ padding: '10px', backgroundColor: '#a1bdffd9', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>Comment</button>
           <div className="comments-list">
             {comments.map((c, index) => (
               <div key={index} className="comment">

@@ -6,9 +6,9 @@ from drf_yasg import openapi
 
 schema_view = get_schema_view(
     openapi.Info(
-        title="Wikidata API",
+        title="Wikidata and Database API",
         default_version='v1',
-        description="Wikidata API, takes string as input and makes search across Wikidata by using SPARQL queries. ",
+        description="Wikidata and Database API, takes string as input and makes search across Wikidata by using SPARQL queries. Also on the database side, it takes different kinds of inputs and makes operaritions about User and Routes",
     ),
     public=True,
     permission_classes=(permissions.AllowAny,),
