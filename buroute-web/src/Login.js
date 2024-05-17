@@ -21,7 +21,7 @@ export const Login = () => {
     setLoading(true); // Show loading indicator
 
     try {
-      const response = await fetch(`http://localhost:8000/database_search/login/`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/database_search/login/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
