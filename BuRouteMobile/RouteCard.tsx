@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Image, StyleSheet, FlatList, TouchableOpacity, TextInput } from 'react-native';
+import { View, Text, Image, StyleSheet, FlatList, TouchableOpacity, TextInput, Alert } from 'react-native';
 
 const RouteCard = ({ route, currentUser }) => {
-    const { route_id, title, description, photos, mapView, user_id, likes: initialLikes, comments: initialComments } = route;
+    const { route_id, title, description, photos, mapView, user_id, likes: initialLikes, comments: initialComments, node_names } = route;
     const [user, setUser] = useState(null);
     const [likes, setLikes] = useState(initialLikes);
     const [comments, setComments] = useState(initialComments);
@@ -13,6 +13,8 @@ const RouteCard = ({ route, currentUser }) => {
     const defaultProfilePicture = require('C:/Users/Halil/Ornek/profile.jpg');
     const defaultPhoto = require('C:/Users/Halil/Ornek/image.jpg');
     const defaultMapView = require('C:/Users/Halil/Ornek/map.jpg');
+
+    const nodes = node_names ? node_names.split(',') : [];
 
     useEffect(() => {
         const fetchUserData = async () => {
@@ -166,6 +168,10 @@ const RouteCard = ({ route, currentUser }) => {
         }
     };
 
+    const handleNodeClick = (nodeName) => {
+        // Alert.alert('Node Clicked', `You clicked on node: ${nodeName}`);
+    };
+
     if (!user) {
         return null;
     }
@@ -173,7 +179,7 @@ const RouteCard = ({ route, currentUser }) => {
     return (
         <View style={styles.card}>
             <View style={styles.header}>
-                <Image source={ defaultProfilePicture } style={styles.profilePicture} />
+                <Image source={defaultProfilePicture} style={styles.profilePicture} />
                 <View style={styles.userInfo}>
                     <Text style={styles.username}>{route.username}</Text>
                 </View>
@@ -183,15 +189,25 @@ const RouteCard = ({ route, currentUser }) => {
             </View>
             <View style={styles.routeInfo}>
                 <Text style={styles.title}>{title}</Text>
-                <Text style={styles.routeUsername}></Text>
+
+                <FlatList
+                    data={nodes}
+                    horizontal
+                    keyExtractor={(item, index) => index.toString()}
+                    renderItem={({ item }) => (
+                        <TouchableOpacity onPress={() => handleNodeClick(item)}>
+                            <Text style={styles.nodeName}>{item}</Text>
+                        </TouchableOpacity>
+                    )}
+                />
             </View>
             <FlatList
                 data={photos}
                 horizontal
                 keyExtractor={(item, index) => index.toString()}
-                renderItem={({ item }) => <Image source={ defaultPhoto } style={styles.photo} />}
+                renderItem={({ item }) => <Image source={defaultPhoto} style={styles.photo} />}
             />
-            <Image source={ defaultMapView } style={styles.mapView} />
+            <Image source={defaultMapView} style={styles.mapView} />
             <View style={styles.footer}>
                 <Text style={styles.likes}>Liked by {likes} others</Text>
                 <Text style={styles.description}>{description}</Text>
@@ -253,17 +269,19 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
     },
     routeInfo: {
-        flexDirection: 'row',
-        alignItems: 'center',
+        flexDirection: 'column',
         marginBottom: 10,
     },
     title: {
         fontWeight: 'bold',
         fontSize: 18,
-        marginRight: 10,
+        marginBottom: 10,
     },
-    routeUsername: {
-        color: 'gray',
+    nodeName: {
+        marginRight: 10,
+        padding: 5,
+        backgroundColor: '#e0e0e0',
+        borderRadius: 5,
     },
     followButton: {
         backgroundColor: '#1DA1F2',

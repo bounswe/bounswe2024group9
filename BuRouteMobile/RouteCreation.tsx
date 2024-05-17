@@ -134,7 +134,7 @@ const CreateRoute = ({ route }) => {
         onChangeText={setSearchTerm}
       />
       <FlatList
-        data={searchResults.slice(0, 3)} // Limit to 3 search results
+        data={searchResults.slice(0, 5)} // Limit to 3 search results
         keyExtractor={(item) => item.node_id.toString()}
         renderItem={({ item }) => (
           <TouchableOpacity onPress={() => addNodeToRoute(item)}>

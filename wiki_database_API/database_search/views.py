@@ -46,24 +46,28 @@ def route_detail(request, pk):
 def get_routes_by_qid(request, qid):
     try:
         routes = Route.objects.filter(node_ids__contains=qid)
-
-        route_data = [{
-            'route_id': route.route_id,
-            'title': route.title,
-            'description': route.description,
-            'photos': route.photos,
-            'rating': route.rating,
-            'likes': route.likes,
-            'comments': route.comments,
-            'saves': route.saves,
-            'duration': route.duration,
-            'duration_between': route.duration_between,
-            'mapView': route.mapView,
-            'node_ids': route.node_ids,
-            "node_names": route.node_names, # Added for the node names to be shown in the route list
-            'username': User.objects.get(user_id=route.user).username,
-            "user_id" : route.user
-        } for route in routes]
+        route_data = []
+        for route in routes:
+            if route.user == 'halil':
+                continue
+            else:
+                route_data.append({
+                    'route_id': route.route_id,
+                    'title': route.title,
+                    'description': route.description,
+                    'photos': route.photos,
+                    'rating': route.rating,
+                    'likes': route.likes,
+                    'comments': route.comments,
+                    'saves': route.saves,
+                    'duration': route.duration,
+                    'duration_between': route.duration_between,
+                    'mapView': route.mapView,
+                    'node_ids': route.node_ids,
+                    "node_names": route.node_names, # Added for the node names to be shown in the route list
+                    'username': User.objects.get(user_id=route.user).username,
+                    "user_id" : route.user
+                })
         return JsonResponse(route_data, safe=False)
     except Exception as e:
         logger.error(f"Error retrieving routes by qid: {e}")
@@ -286,23 +290,30 @@ def feed_view(request):
         random_routes = random.sample(all_routes, 10) if len(all_routes) > 10 else all_routes
         following_routes = random_routes
 
-    routes_list = [{
-        'route_id': route.route_id,
-        'title': route.title,
-        'description': route.description,
-        'photos': route.photos,
-        'rating': route.rating,
-        'likes': route.likes,
-        'comments': route.comments,
-        'saves': route.saves,
-        'node_ids': route.node_ids,
-        'node_names': route.node_names,
-        'duration': route.duration,
-        'duration_between': route.duration_between,
-        'mapView': route.mapView,
-        'user_id': route.user,
-        'username': User.objects.get(user_id=route.user).username
-    } for route in following_routes]
+    routes_list = []
+
+    for route in following_routes:
+        if route.user == 'halil':
+            continue
+        else:
+            routes_list.append({
+                'route_id': route.route_id,
+                'title': route.title,
+                'description': route.description,
+                'photos': route.photos,
+                'rating': route.rating,
+                'likes': route.likes,
+                'comments': route.comments,
+                'saves': route.saves,
+                'node_ids': route.node_ids,
+                'node_names': route.node_names,
+                'duration': route.duration,
+                'duration_between': route.duration_between,
+                'mapView': route.mapView,
+                'user_id': route.user,
+            'username': User.objects.get(user_id=route.user).username
+            })
+
 
     return JsonResponse(routes_list, safe=False)
 
