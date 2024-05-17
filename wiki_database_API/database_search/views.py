@@ -49,12 +49,14 @@ def route_list(request):
     } for route in routes]
     return JsonResponse(routes_list, safe=False)
 
+@csrf_exempt
 def route_detail(request, pk):
     route = get_object_or_404(Route, pk=pk)
     route_json = serializers.serialize('json', [route]) # Node is put in array because serialize expects a list
     route_data = json.loads(route_json)[0]  # Deserialize the JSON and take the first element
     return JsonResponse(route_data, safe=False)
 
+@csrf_exempt
 def get_routes_by_qid(request, qid):
     try:
         routes = Route.objects.filter(node_ids__contains=qid)
@@ -81,18 +83,21 @@ def get_routes_by_qid(request, qid):
         logger.error(f"Error retrieving routes by qid: {e}")
         return JsonResponse({'error': 'An error occurred while retrieving routes'}, status=500)
 
+@csrf_exempt
 def node_list(request):
     nodes = Node.objects.all()
     nodes_list = serializers.serialize('json', nodes)
     nodes_list_json = json.loads(nodes_list)
     return JsonResponse(nodes_list_json, safe=False)
 
+@csrf_exempt
 def node_detail(request, pk):
     node = get_object_or_404(Node, pk=pk)
     node_json = serializers.serialize('json', [node]) # Node is put in array because serialize expects a list
     node_data = json.loads(node_json)[0]  # Deserialize the JSON and take the first element
     return JsonResponse(node_data, safe=False)
 
+@csrf_exempt
 def user_list(request):
     users = User.objects.all()
     users_list = serializers.serialize('json', users)
