@@ -3,6 +3,7 @@ import { View, Text, FlatList, ActivityIndicator, StyleSheet, TextInput, Touchab
 import RouteCard from './RouteCard';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/FontAwesome'; // Assuming you have react-native-vector-icons installed
+import Config from 'react-native-config'
 
 const Feed = ({ route }) => {
     const { username } = route.params;
@@ -15,7 +16,7 @@ const Feed = ({ route }) => {
 
     const fetchUserData = async () => {
         try {
-            const response = await fetch(`http://10.0.2.2:8000/database_search/user_detail/?username=${username}`, {
+            const response = await fetch(`${Config.REACT_APP_API_URL}/database_search/user_detail/?username=${username}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -36,7 +37,7 @@ const Feed = ({ route }) => {
 
     const fetchFeedData = async () => {
         try {
-            const response = await fetch(`http://10.0.2.2:8000/database_search/load_feed/?username=${username}`, {
+            const response = await fetch(`${Config.REACT_APP_API_URL}/database_search/load_feed/?username=${username}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, TextInput, Text, TouchableOpacity, Button, Alert, FlatList, StyleSheet } from 'react-native';
+import Config from 'react-native-config';
 
 interface Node {
   node_id: number;
@@ -31,7 +32,7 @@ const CreateRoute = ({ route }) => {
     if (searchTerm.length > 2) {
       const searchWikidata = async () => {
         try {
-          const response = await fetch(`http://10.0.2.2:8000/wiki_search/search/${searchTerm}`);
+          const response = await fetch(`${Config.REACT_APP_API_URL}/wiki_search/search/${searchTerm}`);
           const data = await response.json();
           const results = data.results.bindings.map(result => ({
             node_id: getLastItem(result.item.value),
@@ -90,7 +91,7 @@ const CreateRoute = ({ route }) => {
     };
 
     try {
-      const response = await fetch('http://10.0.2.2:8000/database_search/create_route/', {
+      const response = await fetch(`${Config.REACT_APP_API_URL}/database_search/create_route/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

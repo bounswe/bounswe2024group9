@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, Image, StyleSheet, FlatList, TouchableOpacity, TextInput, Alert } from 'react-native';
+import Config from 'react-native-config';
+
 
 const RouteCard = ({ route, currentUser }) => {
     const { route_id, title, description, photos, mapView, user_id, likes: initialLikes, comments: initialComments, node_names } = route;
@@ -10,16 +12,15 @@ const RouteCard = ({ route, currentUser }) => {
     const [isFollowing, setIsFollowing] = useState(false);
     const [isBookmarked, setIsBookmarked] = useState(false);
 
-    const defaultProfilePicture = require('C:/Users/Halil/Ornek/profile.jpg');
-    const defaultPhoto = require('C:/Users/Halil/Ornek/image.jpg');
-    const defaultMapView = require('C:/Users/Halil/Ornek/map.jpg');
+    const defaultProfilePicture = require('./profile.jpg');
+    const defaultMapView = require('./map.jpg');
 
     const nodes = node_names ? node_names.split(',') : [];
 
     useEffect(() => {
         const fetchUserData = async () => {
             try {
-                const response = await fetch(`http://10.0.2.2:8000/database_search/users/${user_id}/`);
+                const response = await fetch(`${Config.REACT_APP_API_URL}/database_search/users/${user_id}/`);
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
                 }
@@ -36,7 +37,7 @@ const RouteCard = ({ route, currentUser }) => {
     useEffect(() => {
         const checkFollowingStatus = async () => {
             try {
-                const response = await fetch(`http://10.0.2.2:8000/database_search/check_following/${user_id}/`, {
+                const response = await fetch(`${Config.REACT_APP_API_URL}/database_search/check_following/${user_id}/`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -60,7 +61,7 @@ const RouteCard = ({ route, currentUser }) => {
     useEffect(() => {
         const checkBookmarkStatus = async () => {
             try {
-                const response = await fetch(`http://10.0.2.2:8000/database_search/check_bookmark/`, {
+                const response = await fetch(`${Config.REACT_APP_API_URL}/database_search/check_bookmark/`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -84,7 +85,7 @@ const RouteCard = ({ route, currentUser }) => {
     const handleFollow = async () => {
         try {
             const endpoint = isFollowing ? 'unfollow_user' : 'follow_user';
-            const response = await fetch(`http://10.0.2.2:8000/database_search/${endpoint}/`, {
+            const response = await fetch(`${Config.REACT_APP_API_URL}/database_search/${endpoint}/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -106,7 +107,7 @@ const RouteCard = ({ route, currentUser }) => {
 
     const handleLike = async () => {
         try {
-            const response = await fetch(`http://10.0.2.2:8000/database_search/like_route/`, {
+            const response = await fetch(`${Config.REACT_APP_API_URL}/database_search/like_route/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -127,7 +128,7 @@ const RouteCard = ({ route, currentUser }) => {
 
     const handleComment = async () => {
         try {
-            const response = await fetch(`http://10.0.2.2:8000/database_search/add_comment/`, {
+            const response = await fetch(`${Config.REACT_APP_API_URL}/database_search/add_comment/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -149,7 +150,7 @@ const RouteCard = ({ route, currentUser }) => {
 
     const handleBookmark = async () => {
         try {
-            const response = await fetch(`http://10.0.2.2:8000/database_search/bookmark_route/`, {
+            const response = await fetch(`${Config.REACT_APP_API_URL}/database_search/bookmark_route/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

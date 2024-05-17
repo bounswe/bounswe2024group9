@@ -89,7 +89,7 @@ const WikidataSearch = ({ route }) => {
     setSelectedQValue(qValue);
 
     try {
-      const response = await fetch(`http://10.0.2.2:8000/wiki_search/results/Q${qValue}`);
+      const response = await fetch(`${Config.REACT_APP_API_URL}/wiki_search/results/Q${qValue}`);
       const data = await response.json();
       if (selectedMode === 'Places') {
         navigation.navigate('SearchResultDetail', { result: data });

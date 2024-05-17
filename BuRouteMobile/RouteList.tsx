@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, ActivityIndicator, StyleSheet } from 'react-native';
 import RouteCard from './RouteCard';
+import Config from 'react-native-config';
+
 
 const RouteList = ({ route }) => {
     const { qId, currentUser } = route.params;
@@ -18,7 +20,7 @@ const RouteList = ({ route }) => {
 
     const fetchRoutes = async () => {
         try {
-            const response = await fetch(`http://10.0.2.2:8000/database_search/routes/by_qid/${getLastItem(route.params.qValue)}/`, {
+            const response = await fetch(`${Config.REACT_APP_API_URL}/database_search/routes/by_qid/${getLastItem(route.params.qValue)}/`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
