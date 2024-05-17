@@ -505,6 +505,21 @@ def feed_view_via_id_web(request):
 )
 
 @csrf_exempt
+def user_detail_from_username(request):
+    username = request.GET.get('username')
+    if username is None:
+        return JsonResponse({'error': 'username parameter is required'}, status=400)
+    
+    user = get_object_or_404(User, username=username)
+    user_data = {
+        'user_id': user.user_id,
+        'username': user.username,
+        'e_mail': user.e_mail,
+        'profile_picture': user.profile_picture.url if user.profile_picture else None,
+    }
+    return JsonResponse(user_data)
+
+@csrf_exempt
 @api_view(['POST'])
 def follow_user(request):
     try:
