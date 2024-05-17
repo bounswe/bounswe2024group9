@@ -11,7 +11,8 @@ interface Node {
 }
 
 const CreateRoute = ({ route }) => {
-  const { username } = route.params;
+  const { currentUser } = route.params;
+
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
@@ -20,33 +21,19 @@ const CreateRoute = ({ route }) => {
 
   useEffect(() => {
     if (searchTerm.length > 2) {
-      const fetchNodes = async () => {
-        try {
-          const response = await fetch(`http://10.0.2.2:8000/database_search/nodes/?search=${searchTerm}`);
-          const data = await response.json();
-          setSearchResults(data);
-        } catch (error) {
-          console.error('Failed to fetch nodes:', error);
-        }
-      };
-
       const searchWikidata = async () => {
         try {
           const response = await fetch(`http://10.0.2.2:8000/wiki_search/search/${searchTerm}`);
           const data = await response.json();
-          if (data.results.bindings.length === 0) {
-            fetchNodes();
-          } else {
-            const results = data.results.bindings.map(result => ({
-              node_id: parseInt(result.item.value.split('/').pop(), 10),
-              name: result.itemLabel.value,
-              latitude: 0,
-              longitude: 0,
-              photo: '',
-              description: result.description ? result.description.value : 'No description available'
-            }));
-            setSearchResults(results);
-          }
+          const results = data.results.bindings.map(result => ({
+            node_id: parseInt(result.item.value.split('/').pop(), 10),
+            name: result.itemLabel.value,
+            latitude: 0,
+            longitude: 0,
+            photo: '',
+            description: result.description ? result.description.value : 'No description available'
+          }));
+          setSearchResults(results);
         } catch (error) {
           console.error('Error searching Wikidata:', error);
         }
@@ -72,35 +59,55 @@ const CreateRoute = ({ route }) => {
     }
   };
 
-  const saveRoute = () => {
-    fetch(`http://10.0.2.2:8000/database_search/create_route/`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        title,
-        description,
-        node_ids: routeNodes.map(node => node.node_id),
-        node_names: routeNodes.map(node => node.name),
-        user: username
-      }),
-    })
-      .then(response => response.json())
-      .then(data => {
-        if (data.status === 'success') {
-          Alert.alert('Success', 'Route saved successfully');
-          setTitle('');
-          setDescription('');
-          setRouteNodes([]);
-        } else {
-          throw new Error(data.error);
-        }
-      })
-      .catch(error => {
-        console.error(error);
-        Alert.alert('Error', 'Failed to save route');
+  const saveRoute = async () => {
+    if (routeNodes.length === 0) {
+      Alert.alert('Please add at least one node to the route.');
+      return;
+    }
+
+    const postData = {
+      title,
+      description,
+      photos: [],
+      rating: 0, // Update this if you want to include rating functionality
+      likes: 0,
+      comments: [],
+      saves: 0,
+      node_ids: routeNodes.map(node => node.node_id),
+      node_names: routeNodes.map(node => node.name),
+      duration: [],
+      duration_between: [],
+      mapView: 'Your Map View URL',
+      user: currentUser.username,
+    };
+
+    try {
+      const response = await fetch('http://10.0.2.2:8000/database_search/create_route/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(postData),
       });
+
+      if (!response.ok) {
+        const error = await response.text();
+        throw new Error(error);
+      }
+
+      const data = await response.json();
+      if (data.status === 'success') {
+        Alert.alert('Success', 'Route saved successfully');
+        setTitle('');
+        setDescription('');
+        setRouteNodes([]);
+      } else {
+        throw new Error(data.error);
+      }
+    } catch (error) {
+      console.error('Error posting route:', error);
+      Alert.alert('Error', 'Failed to save route');
+    }
   };
 
   return (
@@ -119,7 +126,7 @@ const CreateRoute = ({ route }) => {
         onChangeText={setSearchTerm}
       />
       <FlatList
-        data={searchResults}
+        data={searchResults.slice(0, 3)} // Limit to 3 search results
         keyExtractor={(item) => item.node_id.toString()}
         renderItem={({ item }) => (
           <TouchableOpacity onPress={() => addNodeToRoute(item)}>

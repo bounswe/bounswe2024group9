@@ -9,7 +9,11 @@ const RouteCard = ({ route, currentUser }) => {
     const [newComment, setNewComment] = useState('');
     const [isFollowing, setIsFollowing] = useState(false);
     const [isBookmarked, setIsBookmarked] = useState(false);
-    console.log("ssssssssss" + currentUser.user_id);
+
+    const defaultProfilePicture = require('C:/Users/Halil/Ornek/profile.jpg');
+    const defaultPhoto = require('C:/Users/Halil/Ornek/image.jpg');
+    const defaultMapView = require('C:/Users/Halil/Ornek/map.jpg');
+
     useEffect(() => {
         const fetchUserData = async () => {
             try {
@@ -169,7 +173,7 @@ const RouteCard = ({ route, currentUser }) => {
     return (
         <View style={styles.card}>
             <View style={styles.header}>
-                <Image source={{ uri: user.profile_picture }} style={styles.profilePicture} />
+                <Image source={ defaultProfilePicture } style={styles.profilePicture} />
                 <View style={styles.userInfo}>
                     <Text style={styles.username}>{route.username}</Text>
                 </View>
@@ -185,9 +189,9 @@ const RouteCard = ({ route, currentUser }) => {
                 data={photos}
                 horizontal
                 keyExtractor={(item, index) => index.toString()}
-                renderItem={({ item }) => <Image source={{ uri: item }} style={styles.photo} />}
+                renderItem={({ item }) => <Image source={ defaultPhoto } style={styles.photo} />}
             />
-            <Image source={{ uri: mapView }} style={styles.mapView} />
+            <Image source={ defaultMapView } style={styles.mapView} />
             <View style={styles.footer}>
                 <Text style={styles.likes}>Liked by {likes} others</Text>
                 <Text style={styles.description}>{description}</Text>

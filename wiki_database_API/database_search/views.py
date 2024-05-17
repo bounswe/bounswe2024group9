@@ -14,6 +14,7 @@ import random
 
 logger = logging.getLogger(__name__)
 
+@csrf_exempt
 def route_list(request):
     routes = Route.objects.all().order_by('-likes')[:20]
     
@@ -106,6 +107,35 @@ def user_detail_from_username(request):
         'profile_picture': user.profile_picture.url if user.profile_picture else None,
     }
     return JsonResponse(user_data)
+
+
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.shortcuts import get_object_or_404
+from .models import User
+import json
+
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
+from django.views.decorators.csrf import csrf_exempt
+from .models import User
+
+@csrf_exempt
+def user_detail_from_username(request):
+    username = request.GET.get('username')
+    if username is None:
+        return JsonResponse({'error': 'username parameter is required'}, status=400)
+    
+    user = get_object_or_404(User, username=username)
+    user_data = {
+        'user_id': user.user_id,
+        'username': user.username,
+        'email': user.e_mail,
+        'profile_picture': user.profile_picture.url if user.profile_picture else None,
+    }
+    return JsonResponse(user_data)
+
+
 
 @csrf_exempt
 def create_user(request):
@@ -339,7 +369,7 @@ def follow_user(request):
 def unfollow_user(request):
     try:
         data = json.loads(request.body)
-        user_to_unfollow_id = data.get('unfollow_user_id') 
+        user_to_unfollow_id = data.get('follow_user_id') 
         current_user_id = data.get('user_id')  
 
         user_to_unfollow = User.objects.get(user_id=user_to_unfollow_id)

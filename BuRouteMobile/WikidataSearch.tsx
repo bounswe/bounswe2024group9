@@ -11,28 +11,11 @@ const WikidataSearch = ({ route }) => {
   const [showModal, setShowModal] = useState(false);
   const navigation = useNavigation();
   const [selectedMode, setSelectedMode] = useState('Places');
-  const [currentUser, setCurrentUser] = useState(null);
-  const {username} = route.params;
+  const {currentUser} = route.params;
+  console.log(currentUser);
   useEffect(() => {
-    const fetchCurrentUser = async () => {
-      try {
 
-        const response = await fetch(`http://10.0.2.2:8000/database_search/user_detail/`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ username }),
-        });
-        const userData = await response.json();
-        setCurrentUser(userData);
-      } catch (error) {
-        console.error('Failed to fetch current user:', error);
-      }
-    };
-
-    fetchCurrentUser();
-  }, []);
+  }, [route.params]);
 
   const fetchNodes = async () => {
     try {
@@ -104,13 +87,20 @@ const WikidataSearch = ({ route }) => {
     const selectedItem = searchResults[index];
     const qValue = getLastItem(selectedItem.Q);
     setSelectedQValue(qValue);
+
     try {
       const response = await fetch(`http://10.0.2.2:8000/wiki_search/results/Q${qValue}`);
       const data = await response.json();
       if (selectedMode === 'Places') {
         navigation.navigate('SearchResultDetail', { result: data });
       } else if (selectedMode === 'Routes') {
-        navigation.navigate('RouteList', { qValue, currentUser });
+        // await fetchCurrentUser();
+        console.log(currentUser.username);
+        if (currentUser) {
+          navigation.navigate('RouteList', { qValue, currentUser });
+        } else {
+          console.error('Current user is not set.');
+        }
       }
     } catch (error) {
       console.error('There was a problem with the fetch operation:', error);
