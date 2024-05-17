@@ -56,6 +56,9 @@ SWAGGER_SETTINGS = {
     },
 }
 
+CSRF_TRUSTED_ORIGINS = ['http://165.22.125.216',
+                        ]
+
 
 
 # Application definition

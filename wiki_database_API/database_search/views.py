@@ -27,6 +27,7 @@ logger = logging.getLogger(__name__)
     }
 )
 @api_view(['GET'])
+@csrf_exempt
 def route_list(request):
     routes = Route.objects.all().order_by('-likes')[:20]
     
@@ -49,12 +50,14 @@ def route_list(request):
     } for route in routes]
     return JsonResponse(routes_list, safe=False)
 
+@csrf_exempt
 def route_detail(request, pk):
     route = get_object_or_404(Route, pk=pk)
     route_json = serializers.serialize('json', [route]) # Node is put in array because serialize expects a list
     route_data = json.loads(route_json)[0]  # Deserialize the JSON and take the first element
     return JsonResponse(route_data, safe=False)
 
+@csrf_exempt
 def get_routes_by_qid(request, qid):
     try:
         routes = Route.objects.filter(node_ids__contains=qid)
@@ -81,23 +84,27 @@ def get_routes_by_qid(request, qid):
         logger.error(f"Error retrieving routes by qid: {e}")
         return JsonResponse({'error': 'An error occurred while retrieving routes'}, status=500)
 
+@csrf_exempt
 def node_list(request):
     nodes = Node.objects.all()
     nodes_list = serializers.serialize('json', nodes)
     nodes_list_json = json.loads(nodes_list)
     return JsonResponse(nodes_list_json, safe=False)
 
+@csrf_exempt
 def node_detail(request, pk):
     node = get_object_or_404(Node, pk=pk)
     node_json = serializers.serialize('json', [node]) # Node is put in array because serialize expects a list
     node_data = json.loads(node_json)[0]  # Deserialize the JSON and take the first element
     return JsonResponse(node_data, safe=False)
 
+@csrf_exempt
 def user_list(request):
     users = User.objects.all()
     users_list = serializers.serialize('json', users)
     return JsonResponse(users_list, safe=False)
 
+@csrf_exempt
 def user_detail(request, pk):
     user = get_object_or_404(User, pk=pk)
     user_json = serializers.serialize('json', [user]) # User is put in array because serialize expects a list
@@ -124,6 +131,7 @@ def user_detail(request, pk):
     }
 )
 @api_view(['POST'])
+@csrf_exempt
 def create_user(request):
     if request.method == 'POST':
         data = json.loads(request.body)
@@ -181,6 +189,7 @@ def create_user(request):
     }
 )
 @api_view(['POST'])
+@csrf_exempt
 def create_node(request):
     if request.method == 'POST':
         name = request.POST.get('name')
@@ -229,6 +238,7 @@ def create_node(request):
     }
 )
 # @api_view(['POST'])
+@csrf_exempt
 def create_route(request):
     if request.method == 'POST':
         try:
@@ -301,6 +311,7 @@ def create_route(request):
     }
 )
 @api_view(['POST'])
+@csrf_exempt
 def delete_route(request):
     if request.method == 'POST':
         try:
@@ -333,6 +344,7 @@ def delete_route(request):
     }
 )
 @api_view(['POST'])
+@csrf_exempt
 def login_user(request):
     if request.method == 'POST':
         try:
@@ -354,6 +366,7 @@ def login_user(request):
     else:
         return HttpResponse(status=405)
 
+@csrf_exempt
 @swagger_auto_schema(
     method='post',
     operation_summary="Log out a user",
@@ -394,6 +407,7 @@ def logout_user(request):
     }
 )
 @api_view(['GET'])
+@csrf_exempt
 def feed_view(request):
     username = request.GET.get('username')
     print(username)
@@ -431,6 +445,7 @@ def feed_view(request):
     }
 )
 @api_view(['GET'])
+@csrf_exempt
 def feed_view_via_id_web(request):
     print(request.GET)
     user_id = request.GET.get('user_id')
@@ -485,6 +500,7 @@ def feed_view_via_id_web(request):
     }
 )
 @api_view(['POST'])
+@csrf_exempt
 def follow_user(request):
     try:
         data = json.loads(request.body)
@@ -522,6 +538,7 @@ def follow_user(request):
     }
 )
 @api_view(['POST'])
+@csrf_exempt
 def unfollow_user(request):
     try:
         data = json.loads(request.body)
@@ -558,6 +575,7 @@ def unfollow_user(request):
     }
 )
 @api_view(['POST'])
+@csrf_exempt
 def check_following(request, user_id):
     try:
         data = json.loads(request.body)
@@ -590,6 +608,7 @@ def check_following(request, user_id):
     }
 )
 @api_view(['POST'])
+@csrf_exempt
 def check_like(request):
     try:
         data = json.loads(request.body)
@@ -738,6 +757,7 @@ def check_bookmark(request):
     }
 )
 @api_view(['GET'])
+@csrf_exempt
 def load_bookmarks(request):
     try:
         user_id = request.GET.get('user_id')
@@ -789,6 +809,7 @@ def load_bookmarks(request):
     }
 )
 @api_view(['POST'])
+@csrf_exempt
 def add_comment(request):
     try:
         data = json.loads(request.body)
