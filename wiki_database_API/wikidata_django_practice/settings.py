@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 
 from pathlib import Path
 from decouple import config
+import os
 import mimetypes
 mimetypes.add_type("text/css", ".css", True)
 mimetypes.add_type("text/javascript", ".js", True)
@@ -43,7 +44,8 @@ ALLOWED_HOSTS = [
     '127.0.0.1',
     '10.0.2.2',
     '165.22.125.216',
-    'localhost'
+    'localhost',
+    os.environ["REACT_APP_API_URL"]
 ]
 
 SWAGGER_SETTINGS = {
