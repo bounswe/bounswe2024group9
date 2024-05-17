@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
 import { View, TextInput, Button, Text, TouchableOpacity, TouchableHighlight, StyleSheet, StatusBar, ScrollView, ActivityIndicator } from 'react-native';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import Config from 'react-native-config';
 
-const Login = ({ navigation }) => {
+const Login = () => {
+
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [success, setSuccess] = useState(''); 
     const [loading, setLoading] = useState(false);
+    const navigation = useNavigation();
 
     useFocusEffect(
         React.useCallback(() => {

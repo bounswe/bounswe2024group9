@@ -17,6 +17,9 @@ const WikidataSearch = ({ route }) => {
 
   }, [route.params]);
 
+  console.log("here is the route:          ")
+  console.log(route)
+
   const fetchNodes = async () => {
     try {
       const response = await fetch(`${Config.REACT_APP_API_URL}/database_search/nodes/`);
