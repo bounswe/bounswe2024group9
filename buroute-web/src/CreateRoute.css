@@ -1,0 +1,106 @@
+.search-button {
+    font-size: 14px;
+    height: 50px;
+    width: 120px;
+    background-color: rgb(161, 189, 250);
+    color: white;
+    border: none;
+    border-radius: 24px;
+    cursor: pointer;
+    text-align: center;
+    /* Changes cursor to indicate button is clickable */
+    margin-left: 10px;
+    /* Adjust margin to match the spacing */
+}
+
+.search-button2 {
+    font-size: 14px;
+    height: 30px;
+    width: 120px;
+    background-color: rgb(161, 189, 250);
+    color: white;
+    border: none;
+    display: inline-block;
+    line-height: 30px; /* Set line-height equal to button height for vertical centering */
+    border-radius: 24px;
+    cursor: pointer;
+    text-align: center;
+    /* Changes cursor to indicate button is clickable */
+    margin-left: 10px;
+    margin-top: 1%;
+    /* Adjust margin to match the spacing */
+}
+
+
+/* Add hover effect for button */
+.search-button:hover {
+    background-color: rgb(128, 168, 253);
+    /* Slightly darker blue on hover */
+}
+
+.search-button2:hover {
+    background-color: rgb(128, 168, 253);
+    /* Slightly darker blue on hover */
+}
+
+.remove-button {
+    font-size: 14px;
+    height: 50px;
+    line-height: 50px;
+    width: 80%;
+    background-color: rgb(224, 95, 144);
+    color: white;
+    border: none;
+    display: inline-block;
+    border-radius: 24px;
+    cursor: pointer;
+    text-align: center;
+    /* Changes cursor to indicate button is clickable */
+    margin-left: 8px;
+    margin-top: 7px;
+    /* Adjust margin to match the spacing */
+}
+.remove-button:hover {
+    background-color: rgb(213, 50, 112);
+
+}
+
+.nodebox {
+    background-color: rgb(161, 189, 250);
+    font-size: 14px;
+    height: 50px;
+    line-height: 50px;
+    width: 80%;
+    overflow-y: auto;
+    margin-left: 10%;
+    border-radius: 24px;
+
+}
+.add-button {
+    position: relative;
+    font-size: 14px;
+    height: 30px;
+    width: 42%;
+    background-color: rgb(161, 189, 250);
+    color: white;
+    border: none;
+    display: inline-block;
+    line-height: 30px; /* Set line-height equal to button height for vertical centering */
+    border-radius: 24px;
+    cursor: pointer;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* Changes cursor to indicate button is clickable */
+    margin-left: 10px;
+    margin-top: 7px;
+    /* Adjust margin to match the spacing */
+}
+
+
+/* Add hover effect for button */
+.add-button:hover {
+    background-color: rgb(128, 168, 253);
+    /* Slightly darker blue on hover */
+}

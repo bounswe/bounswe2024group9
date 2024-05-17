@@ -1,5 +1,5 @@
 header {
-  position: sticky;
+  /* position: sticky; */
   top: -54px; /* value to scroll past the logo so just the search bar is sticky */
   z-index: 2;
 }
@@ -19,7 +19,6 @@ header {
 .centered-search {
   display: flex;
   align-items: center;
-  height: 100vh;
   font-size: 1.5em;
   flex-direction: column;
 }
@@ -54,15 +53,24 @@ header {
 
 .container {
   display: flex;
-  justify-content: center; /* Center container contents */
+  flex-direction: column;
+  align-items: center; /* Center container contents */
+  padding: 20px;
 }
 
 .search-display {
+  position: absolute;
+  top: 180px; /* Adjust based on the height of the header and search bar */
   width: 100%;
+  padding: 20px;
   max-width: 600px; /* Same as input width to align items */
-  margin: auto; /* Center the search display block */
-  padding: 16px;
-  box-sizing: border-box; /* Include padding in the element's total width */
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  z-index: 1000;
+  max-height: 300px; /* Adjust based on your preference */
+  overflow-y: auto;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .search-result {
@@ -126,4 +134,28 @@ header {
   height: 50px;
   margin-right: auto;
   display: block;
+}
+
+.create-route-button {
+  font-size: 14px;
+  height: 50px;
+  width: 120px;
+  background-color: rgb(161, 189, 250); 
+  color: white;
+  border: none;
+  border-radius: 24px;
+  cursor: pointer; /* Changes cursor to indicate button is clickable */
+  margin-left: 10px; /* Adjust margin to match the spacing */
+}
+
+/* Add hover effect for button */
+.create-route-button:hover {
+  background-color: rgb(128, 168, 253); /* Slightly darker blue on hover */
+}
+
+.posts-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
 }

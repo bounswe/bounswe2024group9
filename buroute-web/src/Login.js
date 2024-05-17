@@ -36,7 +36,7 @@ export const Login = () => {
       if (response.ok) {
         setError(null);
         auth.login(data); 
-        window.location.href = '/search';
+        window.location.href = '/feed';
       } else {
         // Display error message if login failed
         setError(data.error);

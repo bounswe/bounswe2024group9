@@ -9,7 +9,6 @@ import likeIcon from './like.png';
 import heart from './heart1.png';
 import comment from './comment.png';
 import save from './save-instagram.png';
-import route from './route.PNG';
 
 
 export default function staticRoute() {
@@ -43,7 +42,7 @@ export default function staticRoute() {
       </div>
       <div className='right'>
         <div className='top-right-corner'>
-            <img src={route} alt="kiz kulesi" style={{ width: '100%', height: '100%'}}/>
+            <img src={kizKulesi} alt="kiz kulesi" style={{ width: '100%', height: '100%'}}/>
         </div>
         <div style={{paddingBottom: 4, paddingTop: 4}}>
             <img src={likeIcon} alt='likeIcon' style={{ height: '17px', marginRight: '5px' }} />

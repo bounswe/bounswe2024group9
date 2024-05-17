@@ -49,6 +49,26 @@
 
             document.getElementById('createNodeForm').reset();
         }
+        
+        function submitRouteForm(event) {
+            event.preventDefault();
+            var formData = new FormData(document.getElementById('createRouteForm'));
+
+            fetch('/database_search/create_route/', {
+                method: 'POST',
+                body: formData
+            }).then(response => response.json())
+            .then(data => {
+                console.log('Success:', data);
+                alert('Route created successfully! Route ID: ' + data.route_id);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to create route.');
+            });
+
+            document.getElementById('createRouteForm').reset();
+        }
     </script>
 </head>
 <body>
@@ -116,5 +136,48 @@
         <input type="text" name="longitude" placeholder="Longitude" required>
         <input type="submit" value="Create Node">
     </form>
+    <h1>Create Route </h1>
+    <form id="createRouteForm" onsubmit="submitRouteForm(event)" enctype="multipart/form-data">
+        <label for="title">Title:</label><br>
+        <input type="text" id="title" name="title" required><br><br>
+        <label for="description">Description:</label><br>
+        <textarea id="description" name="description" rows="4" cols="50" required></textarea><br><br>
+        <label for="photos">Photos:</label><br>
+        <input type="file" id="photos" name="photos[]" multiple><br><br>
+        <label for="rating">Rating:</label><br>
+        <input type="number" id="rating" name="rating" min="1" max="5" required><br><br>
+        <label for="likes">Likes:</label><br>
+        <input type="number" id="likes" name="likes" min="0" value="0"><br><br>
+        <label for="comments">Comments:</label><br>
+        <textarea id="comments" name="comments" rows="4" cols="50"></textarea><br><br>
+        <label for="saves">Saves:</label><br>
+        <input type="number" id="saves" name="saves" min="0" value="0"><br><br>
+        <label for="duration">Duration:</label><br>
+        <input type="text" id="duration" name="duration"><br><br>
+        <label for="duration_between">Duration Between:</label><br>
+        <input type="text" id="duration_between" name="duration_between"><br><br>
+        <label for="mapView">Map View:</label><br>
+        <input type="text" id="mapView" name="mapView"><br><br>
+        
+        <label for="node_ids">Node IDs:</label><br>
+        <input type="text" id="node_ids" name="node_ids"><br><br>
+        <label for="user">User:</label><br>
+        <input type="text" id="user" name="user"><br><br>
+        <input type="submit" value="Submit">
+    </form>
+
+    <form id="getRoutesByQidForm" onsubmit="submitForm(event, 'getRoutesByQidForm', '/database_search/routes/by_qid/')">
+        <label for="qid">Enter QID:</label><br>
+        <input type="text" id="qid" name="q" placeholder="Ex: 1"><br><br>
+        <input type="submit" value="Get Routes by QID">
+    </form>
+
+    <form action="{% url 'delete_route' %}" method="POST" id="deleteRouteForm">
+        {% csrf_token %}
+        <label for="routeId">Route ID:</label>
+        <input type="text" id="routeId" name="routeId">
+        <input type="submit" value="Delete Route">
+    </form>
+
 </body>
 </html>

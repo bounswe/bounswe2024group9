@@ -20,7 +20,6 @@
 .centered-search {
   display: flex;
   align-items: center;
-  height: 100vh;
   font-size: 1.5em;
   flex-direction: column;
 }
@@ -161,5 +160,58 @@
   .dropdown {
     max-width: 100%; /* Allows dropdowns to fill the container */
   }
+}
 
+.search-display {
+  position: absolute;
+  top: 180px; /* Adjust based on the height of the header and search bar */
+  width: 100%;
+  padding: 20px;
+  max-width: 600px; /* Same as input width to align items */
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  z-index: 1000;
+  max-height: 300px; /* Adjust based on your preference */
+  overflow-y: auto;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.search-result {
+  background-color: rgb(192, 212, 255);
+  margin-bottom: 8px; /* Space between items */
+  border-radius: 8px; /* Rounded corners for polish */
+  overflow: hidden; /* Ensures nothing spills out of the border radius */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow for each item */
+  transition: transform 0.2s, box-shadow 0.2s; /* Smooth transition for hover effect */
+}
+
+.search-result:hover {
+  transform: translateY(-2px); /* Slightly lift the item on hover */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); /* Enhance shadow on hover */
+}
+
+.result-button {
+  cursor: pointer; /* Change cursor on hover */
+  width: 100%; /* Extend button to full width of its parent */
+  padding: 16px; /* Padding inside the button */
+  border: none; /* Remove default button border */
+  background-color: transparent; /* No background to blend with the item */
+  text-align: left; /* Align text to the left */
+  display: block; /* Make the button block level */
+  transition: background-color 0.2s; /* Smooth transition for hover effect */
+}
+
+.result-button:hover {
+  background-color: rgb(133, 171, 252); /* Slight background color change on hover */
+}
+
+.result-button h3 {
+  margin: 0; /* Remove default margins */
+  color: #333; /* Dark text color for contrast */
+}
+
+.result-button p {
+  margin: 0;
+  color: #666; /* Lighter text color for the ID */
 }

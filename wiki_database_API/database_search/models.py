@@ -5,7 +5,9 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, Permis
 # from django.utils.translation import ugettext_lazy as _ For global interface it is mentioned but for now it is not necessary
 # Django version bigger than 3.1 for JSONField
 
+import logging
 
+logger = logging.getLogger(__name__)
 class Node(models.Model):
     name = models.CharField(max_length=255)
     node_id = models.AutoField(primary_key=True)
@@ -28,14 +30,12 @@ class Route(models.Model):
     likes = models.PositiveIntegerField(default=0)
     comments = models.JSONField(default=list, blank=True) 
     saves = models.PositiveIntegerField(default=0)
-    nodes = models.ManyToManyField(Node, related_name='routes')
+    node_ids = models.TextField()
+    node_names = models.TextField() 
     duration = models.JSONField(default=list, blank=True)  # Time spent in the location. Type: minutes
     duration_between = models.JSONField(default=list, blank=True)  #Time spent between locations like 15 min between node 1 and 2
     mapView = models.URLField()
-
-import logging
-
-logger = logging.getLogger(__name__)
+    user = models.CharField(max_length=255, default = None) # It is keeping the userid
 
 # For now it is controlling the username but if the email is controlled aalso it should be specified
 class CustomUserManager(BaseUserManager): 
@@ -74,7 +74,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     # For followers and following, you would typically use a many-to-many field. However, this requires a through table or self-referential M2M field
     # It needs to be implemented in the future
     # followers = models.ManyToManyField('self', symmetrical=False, related_name='followed_by', blank=True)
-    # following = models.ManyToManyField('self', symmetrical=False, related_name='following', blank=True)
+    following = models.ManyToManyField('self', symmetrical=False, related_name='following_users', blank=True)
 
     is_active = models.BooleanField(default=True) # This field is required for Django's AbstractBaseUser. It is used to determine whether the user is active or not. It is like instead of deleting the user, it is better to deactivate it.
     is_staff = models.BooleanField(default=False) # This field is required for Django's AbstractBaseUser. It is used to determine whether the user is a staff member or not. It is used to determine whether the user is allowed to access the admin site or not.
@@ -82,13 +82,20 @@ class User(AbstractBaseUser, PermissionsMixin):
     
     objects = CustomUserManager()
 
+    liked_routes = models.JSONField(default=list, blank=True) 
+    saved_routes = models.JSONField(default=list, blank=True) 
+
     USERNAME_FIELD = 'username' # This is the field that is used for authentication.
     REQUIRED_FIELDS = [] # This is golding the field which is required to register the user. Since username and user_id are required fields, we don't need to specify any other fields.
 
     def __str__(self):
-        return self.username
+        return f"{self.username} , {self.e_mail} , {self.liked_routes}, {self.saved_routes}"
 
 
+    def get_following_routes(self):
+        following_users = self.following.all()
+        routes = Route.objects.filter(user__in=following_users)
+        return routes
 
 # When a field is changed in the model, the database must be updated.
 # To do this, run the following commands:

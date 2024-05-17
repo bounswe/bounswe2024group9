@@ -2,32 +2,56 @@ import React from 'react';
 import { View, Text, Image, ScrollView, TouchableOpacity, StyleSheet, Linking } from 'react-native';
 import Config from 'react-native-config';
 
-
 const SearchResultDetail = ({ route, navigation }) => {
   const { results, nearby, period } = route.params.result;
+
   const getLastItem = (thePath) => thePath.substring(thePath.lastIndexOf('/') + 1);
 
-  const mainResult = results.results.bindings[0];
-  const description = mainResult['description'].value;
-  let imageUrl = null;
+  let mainResult = {};
+  let description = '';
+  let imageUrl = '';
+  let latitude = '';
+  let longitude = '';
+  let wikipediaLink = '';
 
-  try {
-    imageUrl = mainResult['image'].value;
-  } catch (error) {
-    console.error("Error retrieving image URL:", error);
+  if (results.results.bindings.length > 0) {
+    mainResult = results.results.bindings[0];
+
+    try {
+      description = mainResult['description'].value;
+    } catch (error) {
+      console.error("Error retrieving description:", error);
+    }
+
+    try {
+      imageUrl = mainResult['image'].value;
+      console.log(imageUrl);
+    } catch (error) {
+      console.error("Error retrieving image URL:", error);
+    }
+
+    try {
+      latitude = mainResult['latitude'].value;
+    } catch (error) {
+      console.error("Error retrieving latitude:", error);
+    }
+
+    try {
+      longitude = mainResult['longitude'].value;
+    } catch (error) {
+      console.error("Error retrieving longitude:", error);
+    }
+
+    try {
+      wikipediaLink = mainResult['article'].value;
+    } catch (error) {
+      console.error("Error retrieving Wikipedia link:", error);
+    }
   }
 
-  const latitude = mainResult['latitude'].value;
-  const longitude = mainResult['longitude'].value;
-  const wikipediaLink = mainResult['article'].value;
-
-  const handleAddToNode = () => {
-    console.log('Added to Node');
-  };
-
   const handleItemClick = async (newContent) => {
-    const response = await fetch(Config.REACT_APP_API_URL+'/wiki_search/results/' + getLastItem(newContent['item'].value));
-        const data = await response.json();
+    const response = await fetch(Config.REACT_APP_API_URL + '/wiki_search/results/' + getLastItem(newContent['item'].value));
+    const data = await response.json();
     navigation.push('SearchResultDetail', { result: data });
   };
 
@@ -72,25 +96,18 @@ const SearchResultDetail = ({ route, navigation }) => {
             </TouchableOpacity>
           )}
         </View>
-        <View style={styles.descriptionContainer}>
-          <ScrollView>
-            <Text>{description}</Text>
-            <Text style={styles.title}>Nearby:</Text>
-            <View style={styles.column}>
-              {renderRecommendations(nearby)}
-            </View>
-            <Text style={styles.title}>Historical Periods:</Text>
-            <View style={styles.column}>
-              {renderRecommendations(period)}
-            </View>
-          </ScrollView>
-        </View>
+        <ScrollView style={styles.descriptionContainer}>
+          <Text>{description}</Text>
+          <Text style={styles.title}>Nearby:</Text>
+          <View style={styles.column}>
+            {renderRecommendations(nearby)}
+          </View>
+          <Text style={styles.title}>Historical Periods:</Text>
+          <View style={styles.column}>
+            {renderRecommendations(period)}
+          </View>
+        </ScrollView>
       </View>
-      <TouchableOpacity
-        onPress={handleAddToNode}
-        style={styles.addButton}>
-        <Text style={styles.addButtonText}>Add to Node</Text>
-      </TouchableOpacity>
     </View>
   );
 };
