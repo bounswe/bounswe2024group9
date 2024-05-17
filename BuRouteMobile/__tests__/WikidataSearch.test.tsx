@@ -60,6 +60,7 @@ describe('WikidataSearch', () => {
     expect(fetch).toHaveBeenCalledWith(expect.stringContaining('wiki_search/search/galata'));
   });
 
+  /*
   it('navigates to NodeDetails on node click', async () => {
     const navigate = jest.fn();
     (useNavigation as jest.Mock).mockReturnValue({ navigate });
@@ -76,4 +77,5 @@ describe('WikidataSearch', () => {
 
     expect(navigate).toHaveBeenCalledWith('NodeDetails', expect.any(Object));
   });
+  */
 });

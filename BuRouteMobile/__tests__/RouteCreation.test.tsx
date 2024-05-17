@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, fireEvent, act } from '@testing-library/react-native';
+import { render, fireEvent, act, screen } from '@testing-library/react-native';
 import CreateRoute from '../RouteCreation';
 import { useNavigation } from '@react-navigation/native';
 
@@ -7,6 +7,7 @@ import { useNavigation } from '@react-navigation/native';
 jest.mock('@react-navigation/native', () => ({
   useNavigation: jest.fn(),
 }));
+
 
 jest.useFakeTimers();
 
@@ -61,5 +62,23 @@ describe('RouteCreation', () => {
         fireEvent.changeText(descInput, 'line 1 \n line 2');
 
         expect(descInput.props.value).toBe('line 1 \n line 2');
+    });
+
+/*
+    it ('adds POI to the list and saves the route', async () => {
+        const {getByText, getByPlaceholderText} = render(<CreateRoute route={route}/>);
+        fireEvent.changeText(getByPlaceholderText('Search POI'), 'galata');
+
+        await act(async () => {
+           await jest.runAllTimers();
+        });
+
+        expect(getByText('Galata Tower')).toBeTruthy();
+
+        fireEvent.press(getByText('Galata Tower'));
+        fireEvent.press(getByText('Save'));
+
+        expect(getByText('Route saved successfully')).toBeTruthy();
+        */
     });
 });
