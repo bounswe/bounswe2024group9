@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, fireEvent, act } from '@testing-library/react-native';
-import WikidataSearch from './WikidataSearch';
+import WikidataSearch from '../WikidataSearch';
 import { useNavigation } from '@react-navigation/native';
 
 // Mocking the navigation hook

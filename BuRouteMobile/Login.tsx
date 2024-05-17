@@ -73,7 +73,7 @@ const Login = ({ navigation }) => {
     return (
         <View style={styles.container}>
             <StatusBar barStyle="dark-content" />
-            <Text style={styles.title}>Login</Text>
+            <Text style={styles.title}>Log in to Buroute</Text>
             <Text style={styles.subtitle}>
                 Don't have an account?  
                 <TouchableOpacity onPress={handleSignUp}>
