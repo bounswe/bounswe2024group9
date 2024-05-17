@@ -94,7 +94,6 @@ const WikidataSearch = ({ route }) => {
       if (selectedMode === 'Places') {
         navigation.navigate('SearchResultDetail', { result: data });
       } else if (selectedMode === 'Routes') {
-        // await fetchCurrentUser();
         console.log(currentUser.username);
         if (currentUser) {
           navigation.navigate('RouteList', { qValue, currentUser });

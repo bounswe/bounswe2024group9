@@ -198,49 +198,43 @@ def create_node(request):
 def create_route(request):
     if request.method == 'POST':
         try:
-            if request.POST:
-                data = request.POST
-                
-                # Extracting data from the request
-                title = data.get('title')
-                description = data.get('description')
-                photos = data.get('photos', [])
-                rating = data.get('rating')
-                likes = data.get('likes', 0)
-                comments = data.get('comments', [])
-                saves = data.get('saves', 0)
-                duration = data.get('duration', [])
-                duration_between = data.get('duration_between', [])
-                mapView = data.get('mapView')
-                node_ids = data.get('node_ids', [])  # List of node IDs
+            data = json.loads(request.body)
+            title = data.get('title')
+            description = data.get('description')
+            photos = data.get('photos', [])
+            rating = data.get('rating')
+            likes = data.get('likes', 0)
+            comments = data.get('comments', [])
+            saves = data.get('saves', 0)
+            node_ids = data.get('node_ids', '')
+            node_names = data.get('node_names', '')
+            duration = data.get('duration', [])
+            duration_between = data.get('duration_between', [])
+            mapView = data.get('mapView')
+            user = data.get('user')
 
-                # Fetch nodes from database
-                # nodes = Node.objects.filter(node_id__in=node_ids)
+            route = Route(
+                title=title,
+                description=description,
+                photos=photos,
+                rating=rating,
+                likes=likes,
+                comments=comments,
+                saves=saves,
+                node_ids=node_ids,
+                node_names=node_names,
+                duration=duration,
+                duration_between=duration_between,
+                mapView=mapView,
+                user=user
+            )
+            route.save()
 
-                # Creating the Route instance
-                route = Route.objects.create(
-                    title=title,
-                    description=description,
-                    photos=photos,
-                    rating=rating,
-                    likes=likes,
-                    comments=comments,
-                    saves=saves,
-                    mapView=mapView
-                )
-
-                # Adding nodes to the route
-                route.duration = duration
-                route.duration_between = duration_between
-                route.save()
-
-                return JsonResponse({'status': 'success', 'route_id': route.pk})
+            return JsonResponse({'status': 'success', 'route_id': route.route_id}, status=201)
         except Exception as e:
-            return JsonResponse({'error': str(e)}, status=400)
+            return JsonResponse({'status': 'error', 'error': str(e)}, status=400)
 
-
-    else:
-        return HttpResponse(status=405)
+    return JsonResponse({'status': 'error', 'error': 'Invalid request method'}, status=405)
 
 @csrf_exempt
 def login_user(request):

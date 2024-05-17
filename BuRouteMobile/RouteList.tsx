@@ -8,7 +8,6 @@ const RouteList = ({ route }) => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-
     const getLastItem = (thePath) => {
         if (thePath.endsWith('/')) {
             thePath = thePath.slice(0, -1);

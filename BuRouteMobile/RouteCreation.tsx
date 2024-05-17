@@ -19,6 +19,14 @@ const CreateRoute = ({ route }) => {
   const [searchResults, setSearchResults] = useState<Node[]>([]);
   const [routeNodes, setRouteNodes] = useState<Node[]>([]);
 
+      const getLastItem = (thePath) => {
+        if (thePath.endsWith('/')) {
+          thePath = thePath.slice(0, -1);
+        }
+        const numericPart = thePath.replace(/\D/g, '');
+        return numericPart;
+      };
+
   useEffect(() => {
     if (searchTerm.length > 2) {
       const searchWikidata = async () => {
@@ -26,7 +34,7 @@ const CreateRoute = ({ route }) => {
           const response = await fetch(`http://10.0.2.2:8000/wiki_search/search/${searchTerm}`);
           const data = await response.json();
           const results = data.results.bindings.map(result => ({
-            node_id: parseInt(result.item.value.split('/').pop(), 10),
+            node_id: getLastItem(result.item.value),
             name: result.itemLabel.value,
             latitude: 0,
             longitude: 0,
@@ -73,12 +81,12 @@ const CreateRoute = ({ route }) => {
       likes: 0,
       comments: [],
       saves: 0,
-      node_ids: routeNodes.map(node => node.node_id),
-      node_names: routeNodes.map(node => node.name),
+      node_ids: routeNodes.map(node => node.node_id).join(', '),
+      node_names: routeNodes.map(node => node.name).join(', '),
       duration: [],
       duration_between: [],
       mapView: 'Your Map View URL',
-      user: currentUser.username,
+      user: currentUser.user_id,
     };
 
     try {
