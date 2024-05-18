@@ -182,7 +182,8 @@ const RouteCard = ({ route, currentUser }) => {
             <View style={styles.header}>
                 <Image source={defaultProfilePicture} style={styles.profilePicture} />
                 <View style={styles.userInfo}>
-                    <Text style={styles.username}>{route.username}</Text>
+                    {console.log(user)}
+                    <Text style={styles.username}>{user.fields.username}</Text>
                 </View>
                 <TouchableOpacity style={styles.followButton} onPress={handleFollow}>
                     <Text style={styles.followButtonText}>{isFollowing ? 'Unfollow' : 'Follow'}</Text>
@@ -277,6 +278,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         fontSize: 18,
         marginBottom: 10,
+        color: 'black',
     },
     nodeName: {
         marginRight: 10,
@@ -341,6 +343,8 @@ const styles = StyleSheet.create({
         borderRadius: 5,
         padding: 5,
         marginTop: 10,
+        color: 'gray',
+
     },
     submitButton: {
         backgroundColor: '#1DA1F2',
