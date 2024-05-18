@@ -27,4 +27,5 @@ urlpatterns = [
     path('bookmark_route/', views.bookmark_route, name='bookmark_route'),
     path('add_comment/', views.add_comment, name='add_comment'),
     path('own_routes/', views.my_routes, name='own_routes'),
+    path('user_detail/', views.user_detail_from_username, name='user_detail_from_username'),
 ]

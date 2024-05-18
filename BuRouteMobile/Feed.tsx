@@ -49,7 +49,18 @@ const Feed = ({ route }) => {
             }
 
             const jsonData = await response.json();
-            setData(jsonData);
+            setData(jsonData.map((item) => ({
+                route_id: item.pk,
+                title: item.fields.title,
+                description: item.fields.description,
+                photos: item.fields.photos,
+                mapView: item.fields.mapView,
+                user_id: item.fields.user,
+                likes: item.fields.likes,
+                comments: item.fields.comments,
+                node_names: item.fields.node_names,
+            })));
+            console.log(data);
         } catch (error) {
             setError(error);
         } finally {
@@ -77,6 +88,8 @@ const Feed = ({ route }) => {
     if (error) {
         return <Text style={styles.centered}>Error: {error.message}</Text>;
     }
+
+    console.log(data);
 
     return (
         <View style={styles.container}>
