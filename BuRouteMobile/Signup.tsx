@@ -10,7 +10,6 @@ import {
   View,
   Text,
   TouchableOpacity,
-  Linking
 } from 'react-native';
 import {NavigationProp} from '@react-navigation/native'; // Import NavigationProp type
 import Config from 'react-native-config';
@@ -56,7 +55,7 @@ const Signup = ({navigation}: Props) => {
 
           Alert.alert('User saved successfully!');
           setTimeout(() => {
-              navigation.navigate('Feed', {username});
+              navigation.navigate('WikidataSearch', {json});
           }, 2000);
         }
     }
@@ -69,10 +68,6 @@ const Signup = ({navigation}: Props) => {
   const handleLogin = () => {
     //navigate to sign up page
     navigation.navigate('Login');
-  };
-
-  const openKVKKTerms = () => {
-    Linking.openURL('https://www.resmigazete.gov.tr/eskiler/2018/03/20180310-5.htm');
   };
 
   return (
@@ -131,18 +126,15 @@ const Signup = ({navigation}: Props) => {
         </View>
         <View style={styles.inputContainer}>
           <TouchableOpacity
-              onPress={() => setSubscribe(!subscribe)} // Toggle subscribe state
-              style={{flexDirection: 'row', alignItems: 'center'}}>
-              <View
-                style={[
-                  styles.checkbox,
-                  {backgroundColor: subscribe ? 'blue' : 'transparent'}, // Change color based on state
-                ]}
-              />
-              <Text style={{marginLeft: 8}}>
-                I agree to the{' '}
-                <Text style={{color: 'blue'}} onPress={openKVKKTerms}>KVKK terms</Text>
-              </Text>
+            onPress={() => setSubscribe(!subscribe)} // Toggle subscribe state
+            style={{flexDirection: 'row', alignItems: 'center'}}>
+            <View
+              style={[
+                styles.checkbox,
+                {backgroundColor: subscribe ? 'blue' : 'transparent'}, // Change color based on state
+              ]}
+            />
+            <Text style={{marginLeft: 8}}>I agree to the KVKK terms</Text>
           </TouchableOpacity>
         </View>
         <View style={styles.buttonContainer}>
