@@ -9,7 +9,7 @@ const SearchResultDetail = ({ route, navigation }) => {
 
   let mainResult = {};
   let description = '';
-  let imageUrl = null;
+  let imageUrl = '';
   let latitude = '';
   let longitude = '';
   let wikipediaLink = '';
@@ -25,6 +25,7 @@ const SearchResultDetail = ({ route, navigation }) => {
 
     try {
       imageUrl = mainResult['image'].value;
+      console.log(imageUrl);
     } catch (error) {
       console.error("Error retrieving image URL:", error);
     }
@@ -47,10 +48,6 @@ const SearchResultDetail = ({ route, navigation }) => {
       console.error("Error retrieving Wikipedia link:", error);
     }
   }
-
-  const handleAddToNode = () => {
-    console.log('Added to Node');
-  };
 
   const handleItemClick = async (newContent) => {
     const response = await fetch(Config.REACT_APP_API_URL + '/wiki_search/results/' + getLastItem(newContent['item'].value));
@@ -111,11 +108,6 @@ const SearchResultDetail = ({ route, navigation }) => {
           </View>
         </ScrollView>
       </View>
-      <TouchableOpacity
-        onPress={handleAddToNode}
-        style={styles.addButton}>
-        <Text style={styles.addButtonText}>Add to Node</Text>
-      </TouchableOpacity>
     </View>
   );
 };
