@@ -15,7 +15,7 @@ from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 
 logger = logging.getLogger(__name__)
-@csrf_exempt
+
 @swagger_auto_schema(
     method='get',
     operation_summary="List top 20 liked routes from the database",
@@ -26,7 +26,6 @@ logger = logging.getLogger(__name__)
         400: 'Bad Request',
     }
 )
-@csrf_exempt
 @api_view(['GET'])
 def route_list(request):
     routes = Route.objects.all().order_by('-likes')[:20]
@@ -56,7 +55,6 @@ def route_detail(request, pk):
     route_json = serializers.serialize('json', [route]) # Node is put in array because serialize expects a list
     route_data = json.loads(route_json)[0]  # Deserialize the JSON and take the first element
     return JsonResponse(route_data, safe=False)
-
 
 @csrf_exempt
 def get_routes_by_qid(request, qid):
@@ -105,7 +103,6 @@ def user_list(request):
     users_list = serializers.serialize('json', users)
     return JsonResponse(users_list, safe=False)
 
-@csrf_exempt
 def user_detail(request, pk):
     user = get_object_or_404(User, pk=pk)
     user_json = serializers.serialize('json', [user]) # User is put in array because serialize expects a list
@@ -131,7 +128,6 @@ def user_detail(request, pk):
         400: 'Bad Request'
     }
 )
-@csrf_exempt
 @api_view(['POST'])
 def create_user(request):
     if request.method == 'POST':
@@ -189,7 +185,6 @@ def create_user(request):
         405: 'Method Not Allowed'
     }
 )
-@csrf_exempt
 @api_view(['POST'])
 def create_node(request):
     if request.method == 'POST':
@@ -238,8 +233,7 @@ def create_node(request):
         405: 'Method Not Allowed'
     }
 )
-
-@csrf_exempt
+# @api_view(['POST'])
 def create_route(request):
     if request.method == 'POST':
         try:
@@ -311,8 +305,6 @@ def create_route(request):
         405: 'Method Not Allowed'
     }
 )
-
-@csrf_exempt
 @api_view(['POST'])
 def delete_route(request):
     if request.method == 'POST':
@@ -345,8 +337,6 @@ def delete_route(request):
         405: 'Method Not Allowed'
     }
 )
-
-@csrf_exempt
 @api_view(['POST'])
 def login_user(request):
     if request.method == 'POST':
@@ -369,7 +359,6 @@ def login_user(request):
     else:
         return HttpResponse(status=405)
 
-@csrf_exempt
 @swagger_auto_schema(
     method='post',
     operation_summary="Log out a user",
@@ -409,7 +398,6 @@ def logout_user(request):
         404: 'User not found'
     }
 )
-@csrf_exempt
 @api_view(['GET'])
 def feed_view(request):
     username = request.GET.get('username')
@@ -447,8 +435,6 @@ def feed_view(request):
         404: 'User not found'
     }
 )
-
-@csrf_exempt
 @api_view(['GET'])
 def feed_view_via_id_web(request):
     print(request.GET)
@@ -503,23 +489,6 @@ def feed_view_via_id_web(request):
         405: 'Method Not Allowed'
     }
 )
-
-@csrf_exempt
-def user_detail_from_username(request):
-    username = request.GET.get('username')
-    if username is None:
-        return JsonResponse({'error': 'username parameter is required'}, status=400)
-    
-    user = get_object_or_404(User, username=username)
-    user_data = {
-        'user_id': user.user_id,
-        'username': user.username,
-        'e_mail': user.e_mail,
-        'profile_picture': user.profile_picture.url if user.profile_picture else None,
-    }
-    return JsonResponse(user_data)
-
-@csrf_exempt
 @api_view(['POST'])
 def follow_user(request):
     try:
@@ -557,8 +526,6 @@ def follow_user(request):
         405: 'Method Not Allowed'
     }
 )
-
-@csrf_exempt
 @api_view(['POST'])
 def unfollow_user(request):
     try:
@@ -595,8 +562,6 @@ def unfollow_user(request):
         405: 'Method Not Allowed'
     }
 )
-
-@csrf_exempt
 @api_view(['POST'])
 def check_following(request, user_id):
     try:
@@ -629,8 +594,6 @@ def check_following(request, user_id):
         405: 'Method Not Allowed'
     }
 )
-
-@csrf_exempt
 @api_view(['POST'])
 def check_like(request):
     try:
@@ -779,8 +742,6 @@ def check_bookmark(request):
         404: 'User not found'
     }
 )
-
-@csrf_exempt
 @api_view(['GET'])
 def load_bookmarks(request):
     try:
@@ -832,8 +793,6 @@ def load_bookmarks(request):
         405: 'Method Not Allowed'
     }
 )
-
-@csrf_exempt
 @api_view(['POST'])
 def add_comment(request):
     try:
