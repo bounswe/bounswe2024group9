@@ -1,5 +1,7 @@
-<h1 align = "center"> Welcome to CMPE451 Group 9's Project Repository </h1> 
-💭 Hi! This is Group9 of Cmpe451. We are passionate computer engineer students gathered to create a sustainable working environment for complete project design of our future products. You can visit <a href = "https://github.com/bounswe/bounswe2024group9/wiki" target = "_blank">our Wiki web page</a> to get to know us!
+<h1 align = "center"> <img src= "https://github.com/bounswe/bounswe2024group9/assets/110239708/cfe28590-0739-4c58-8740-45e27c0a443b" width= 300px height=auto> </h1>
+
+<h1 align = "center"> Welcome to CMPE352 Group 9's Project Repository </h1> 
+💭 Hi! This is Group9 of Cmpe352. We are passionate computer engineer students gathered to create a sustainable working environment for complete project design of our future products. You can visit <a href = "https://github.com/bounswe/bounswe2024group9/wiki" target = "_blank">our Wiki web page</a> to get to know us!
 <br>
 <hr>
 <h3> 🚀  Who are we? </h3> 
@@ -55,3 +57,69 @@
   </tr>
   
 </table>
+
+# BuRoute
+
+## Dependencies
+You must have
+
+> docker 
+> docker-compose
+
+installed on your host (explained below). If not, you can download from [the official docker website.](https://www.docker.com/products/docker-desktop/) For ease of use, we suggest installing Docker Desktop; Docker Compose is included therein. 
+
+## Accessing the Web Page
+
+You can access the webpage [from here](http://165.22.125.216:3000).
+
+## Deploying the server
+
+#### Security Notice
+
+As this is a classroom setting, database security is not as tight as a production environment; thus, database and web services run on the same computer.
+
+#### Pull from Docker Hub
+
+You can pull the project from Docker Hub:
+
+
+
+#### Manual Deployment
+
+First, make sure that Docker and Docker Compose are installed on your host machine. If not, you can:
+    - Download Docker Desktop (recommended if host has a GUI)
+    - Use the following official script:
+    ```
+    curl -fsSL https://get.docker.com -o get-docker.sh
+    ```
+    ```
+    sh get-docker.sh
+    ```
+    
+After Docker & Docker Compose are installed on the host machine, you should clone the repository:
+```
+git clone https://github.com/bounswe/bounswe2024group9.git
+cd bounswe2024group9
+```
+Then, for the next step, you must register the IP Address of the host.
+* You must modify the docker-compose.yml file: Set the environment variable at the web services to your host.
+```
+services:
+    ...
+    web:
+        ...
+        environment:
+            - REACT_APP_API_URL=http://<ip_of_the_host>
+```
+* You must add the host IP address to ```ALLOWED_HOSTS = []``` variable at wiki_database_API/wikidata_django_practice/settings.py.
+
+For the penultimate step, you need to set the environment variables: simply change the name of ```.env.example``` under ```wiki_database_API``` to ```.env```.
+
+Now, you can deploy the service using Docker Compose:
+``` 
+docker compose build
+docker compose up 
+```
+
+
+

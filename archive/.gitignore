@@ -1,0 +1,11 @@
+/BuRouteMobile/node_modules
+/BuRouteMobile/android
+*.pyc
+__pycache__/
+.env
+myenv
+.DS_Store
+.idea
+keygen-apk/
+buroute-web/web_env
+wiki_database_API/db_env

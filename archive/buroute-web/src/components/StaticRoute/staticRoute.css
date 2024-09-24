@@ -1,0 +1,49 @@
+.centered-div {
+    max-width: 1200px;
+    height: 250;
+    background-color: #e0eaFF;
+    padding: 20px;
+    border-radius: 5px;
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+    /* Distribute items evenly along the main axis */
+}
+
+.left,
+.mid,
+.right {
+    flex: 1;
+    /* Equal width for all three divs */
+    /* Center the text horizontally */
+}
+
+.left {
+    background-color: #e0eaFF;
+    text-align: center;
+}
+
+.mid {
+    background-color: #e0eaFF;
+}
+
+.right {
+    background-color: #e0eaFF;
+}
+
+.top-left-corner {
+    background-color: #e0eaFF;
+    text-align: left;
+    padding-left: 10%;
+}
+.top-right-corner {
+    text-align: center;
+    height: 80%;
+}
+
+.buttom-right-corner {
+    background-color: #e0eaFF;
+    display: flex;
+    justify-content: space-between;
+}
+
