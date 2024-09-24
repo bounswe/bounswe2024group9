@@ -10,10 +10,6 @@
       <p align = "center"> <a href = "https://github.com/bounswe/bounswe2024group9/wiki/Ceylin-Gebes#introduction" target = "_blank">Ceylin</a></p>
     </td>
     <td align = "center">
-      <img src = "https://github.com/berkaykeskino/REVERSE/blob/main/Photos/BerkayB2.jpeg?raw=true" width = 80px>
-      <p align = "center"><a href = "https://github.com/bounswe/bounswe2024group9/wiki/Muhammet-Berkay-Keskin#introduction" target = "_blank">Berkay</a></p>
-    </td>
-    <td align = "center">
       <img src = "https://github.com/berkaykeskino/REVERSE/blob/main/Photos/MustafaB.jpeg?raw=true" width = 80px>
       <p align = "center"><a href = "https://github.com/bounswe/bounswe2024group9/wiki/Mustafa-Atak#who-am-i-for-real" target = "_blank">Mustafa</a></p>
     </td>
@@ -29,29 +25,9 @@
       <img src = "https://github.com/berkaykeskino/REVERSE/blob/main/Photos/eray.jpeg?raw=true" width = 80px>
       <p align = "center"><a href = "https://github.com/bounswe/bounswe2024group9/wiki/Eray-Ero%C4%9Flu" target = "_blank">Eray</a></p>
     </td>
-    <td align = "center">
-      <img src = "https://github.com/berkaykeskino/REVERSE/blob/main/Photos/ozgur.jpg?raw=true" width = 80px>
-      <p align = "center"><a href = "https://github.com/bounswe/bounswe2024group9/wiki/%C3%96zg%C3%BCr-%C3%96zerdem" target = "_blank">Özgür</a></p>
-    </td>
-
-  </tr>
-  <tr>
-    <td align = "center">
-      <img src = "https://github.com/berkaykeskino/REVERSE/blob/main/Photos/taha.jpg?raw=true" width = 80px>
-      <p align = "center"><a href = "https://github.com/bounswe/bounswe2024group9/wiki/Taha-Topalo%C4%9Flu" target = "_blank">Taha</a></p>
-    </td>
-    <td align = "center">
-      <img src = "https://github.com/berkaykeskino/REVERSE/blob/main/Photos/Yi%C4%9FitB.jpeg?raw=true" width = 80px>
-      <p align = "center"><a href = "https://github.com/bounswe/bounswe2024group9/wiki/Yigit-Kagan-Poyrazoglu" target = "_blank">Yiğit Kağan</a></p>
-    </td>
-    <td align = "center">
+      <td align = "center">
       <img src = "https://github.com/bounswe/bounswe2024group9/assets/73756179/d5d3450e-8782-45cf-bb0c-a52d7c93f42e" width = 80px>
       <p align = "center"><a href = "https://github.com/bounswe/bounswe2024group9/wiki/Halil-Karabacak" target = "_blank">Halil</a></p>
     </td>
-    <td align = "center">
-      <img src = "https://th.bing.com/th/id/OIP.K0bqeBV-HC14rIqEiVH5RwAAAA?w=200&h=200&rs=1&pid=ImgDetMain" width = 80px>
-      <p align = "center"><a href = "https://github.com/bounswe/bounswe2024group9/wiki/Ahmet-Burak-%C3%87i%C3%A7ek" target = "_blank">Burak</a></p>
-    </td>
   </tr>
-  
 </table>
