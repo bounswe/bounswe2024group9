@@ -29,5 +29,10 @@
       <img src = "https://github.com/bounswe/bounswe2024group9/assets/73756179/d5d3450e-8782-45cf-bb0c-a52d7c93f42e" width = 80px>
       <p align = "center"><a href = "https://github.com/bounswe/bounswe2024group9/wiki/Halil-Karabacak" target = "_blank">Halil</a></p>
     </td>
+     <td align = "center">
+      <img src = "https://github.com/user-attachments/assets/af94979a-67e0-409c-8d88-b3e819f793af" width = 80px>
+      <p align = "center"><a href = "https://github.com/bounswe/bounswe2024group9/wiki/Serhan-%C3%87akmak" target = "_blank">Serhan</a></p>
+    </td>
+    
   </tr>
 </table>
