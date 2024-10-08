@@ -34,7 +34,6 @@
       <p align = "center"><a href = "https://github.com/bounswe/bounswe2024group9/wiki/Serhan-%C3%87akmak" target = "_blank">Serhan</a></p>
     </td>
     <td align = "center">
-
       <img src = "https://github.com/user-attachments/assets/54eb4aae-3078-48a8-ae9b-46048084a92f" width = 80px>
       <p align = "center"><a href = "https://github.com/bounswe/bounswe2024group9/wiki/Damla-Kay%C4%B1k%C3%A7%C4%B1" target = "_blank">Damla</a></p>
     </td>
