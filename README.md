@@ -34,7 +34,7 @@
       <p align = "center"><a href = "https://github.com/bounswe/bounswe2024group9/wiki/Serhan-%C3%87akmak" target = "_blank">Serhan</a></p>
     </td>
     <td align = "center">
-      <img src = "![IMG_5589](https://github.com/user-attachments/assets/ae84dcce-6d02-4b15-a7ae-cc7abb631533)" width = 80px>
+      <img src = "https://github.com/user-attachments/assets/ae84dcce-6d02-4b15-a7ae-cc7abb631533" width = 80px>
       <p align = "center"><a href = "https://github.com/bounswe/bounswe2024group9/wiki/Damla-Kay%C4%B1k%C3%A7%C4%B1" target = "_blank">Damla</a></p>
     </td>
     
