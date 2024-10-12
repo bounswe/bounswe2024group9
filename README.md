@@ -40,3 +40,22 @@
     
   </tr>
 </table>
+
+<h3>How to run the project?</h3>
+<ol>
+    <li>Clone the repository to your local machine.</li>
+    <li>Open the terminal and navigate to the project directory.</li>
+    <li>Run the following command to install the required packages:
+        <pre><code>pip install -r requirements.txt</code></pre>
+    </li>
+    <li>Run the following command to start the server:
+        <pre><code>python manage.py runserver</code></pre>
+    </li>
+</ol>
+<p>Hooray! You can now enjoy our project! 🎉</p>
+
+<h4>Testing:</h4>
+<pre><code>python manage.py test</code></pre>
+
+
+
