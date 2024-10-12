@@ -48,6 +48,7 @@
     <li>Run the following command to install the required packages:
         <pre><code>pip install -r requirements.txt</code></pre>
     </li>
+    <li>Create a .env file in the outermost scope and then add JUDGE0_API_KEY=XXX where XXX refers to your API key.</li>
     <li>Run the following command to start the server:
         <pre><code>python manage.py runserver</code></pre>
     </li>
