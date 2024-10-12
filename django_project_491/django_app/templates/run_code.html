@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Code Execution</title>
+</head>
+<body>
+     <form method="POST">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Submit</button>
+     </form>
+
+    <h1>Output</h1>
+    <p>{{ result|linebreaks }}</p>
+
+</body>
+</html>

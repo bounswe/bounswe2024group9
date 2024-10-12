@@ -1,6 +1,8 @@
 from django.http import JsonResponse
 from SPARQLWrapper import SPARQLWrapper, JSON
-from .utils import run_code
+from .Utils.utils import run_code
+from .Utils.forms import *
+from django.shortcuts import render, redirect
 
 def wikidata_query_view(request):
     # search_string = request.GET.get('search', '').split()  # Assuming 'search' is passed as a query parameter
@@ -27,20 +29,17 @@ LIMIT 10
 
 
 def run_code_view(request):
-    query = """
-print("Hello, World!")
-a = 2
-b = 1
-print(a + b)
-
-import math
-
-print(math.sqrt(16))
-
-import numpy as np
-a = np.array([1, 2, 3])
-print(a)
-    """
-    language_id = 71  # Language ID for Python
-    result = run_code(query, language_id)
-    return JsonResponse(result)
+    if request.method == "POST":
+        form = code_form(request.POST)
+        if form.is_valid():
+            query = form.cleaned_data['query']
+            # language_id = form.cleaned_data['language_id']
+            language_id = 71 # Language ID for Python, for testing purposes
+            result = run_code(query, language_id)
+            if result["stderr"]:
+                return render(request, 'run_code.html', {'form': form, 'result': result['stderr']})
+            else:
+                return render(request, 'run_code.html', {'form': form, 'result': result['stdout']})
+    else:
+        form = code_form()
+        return render(request, 'run_code.html', {'form': form})

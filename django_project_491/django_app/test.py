@@ -1,5 +1,5 @@
 from django.test import TestCase
-from .utils import run_code
+from .Utils.utils import run_code
 
 
 class TestRunCode(TestCase):
