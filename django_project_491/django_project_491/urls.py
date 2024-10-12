@@ -18,6 +18,6 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('wikidata/', include('wikidata_query.urls')),
+    path('wikidata/', include('django_app.urls')),
 
 ]
