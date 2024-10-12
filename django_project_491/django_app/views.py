@@ -1,6 +1,6 @@
 from django.http import JsonResponse
 from SPARQLWrapper import SPARQLWrapper, JSON
-from .Utils.utils import run_code
+from .Utils.utils import *
 from .Utils.forms import *
 from django.shortcuts import render, redirect
 
@@ -30,16 +30,15 @@ LIMIT 10
 
 def run_code_view(request):
     if request.method == "POST":
-        form = code_form(request.POST)
+        form = code_form(request.POST, choices=LANGUAGES)
         if form.is_valid():
             query = form.cleaned_data['query']
-            # language_id = form.cleaned_data['language_id']
-            language_id = 71 # Language ID for Python, for testing purposes
+            language_id = int(form.cleaned_data['ProgrammingLanguage'])
             result = run_code(query, language_id)
             if result["stderr"]:
                 return render(request, 'run_code.html', {'form': form, 'result': result['stderr']})
             else:
                 return render(request, 'run_code.html', {'form': form, 'result': result['stdout']})
     else:
-        form = code_form()
+        form = code_form(choices=LANGUAGES)
         return render(request, 'run_code.html', {'form': form})

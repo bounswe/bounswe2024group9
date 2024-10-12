@@ -5,6 +5,18 @@ import os
 from dotenv import load_dotenv
 
 
+def get_languages():
+    """
+    Get a list of supported languages from Judge0 API.
+    """
+    response = requests.get('https://judge0-ce.p.rapidapi.com/languages', headers=HEADERS)
+    if response.status_code == 200:
+        return response.json()
+    else:
+        print(f"Error fetching languages: {response.status_code}, {response.text}")
+        return None
+
+
 def run_code(source_code, language_id):
     def create_submission(source_code, language_id):
         """
@@ -48,17 +60,22 @@ def run_code(source_code, language_id):
                 break
 
     API_URL = 'https://judge0-ce.p.rapidapi.com/submissions'
-    load_dotenv()
-    print(os.environ.get('JUDGE0_API_KEY'))
-
-    HEADERS = {
-        "content-type": "application/json",
-        "X-RapidAPI-Key": os.environ.get('JUDGE0_API_KEY'),
-        "X-RapidAPI-Host": "judge0-ce.p.rapidapi.com"
-    }
 
     token = create_submission(source_code, language_id)
     if token:
         return get_submission_result(token)
     else:
         raise Exception("Error creating submission")
+
+
+
+load_dotenv()
+print(os.environ.get('JUDGE0_API_KEY'))
+
+HEADERS = {
+    "content-type": "application/json",
+    "X-RapidAPI-Key": os.environ.get('JUDGE0_API_KEY'),
+    "X-RapidAPI-Host": "judge0-ce.p.rapidapi.com"
+}
+
+LANGUAGES = [ (lang["id"], lang["name"]) for lang in get_languages()]
