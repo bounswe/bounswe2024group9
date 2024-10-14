@@ -45,9 +45,9 @@ def run_code_view(request):
         return render(request, 'run_code.html', {'form': form})
     
 
-def wikipedia_data_views(request):  
-    qid = "Q28865" # temporary Q-ID for Python
-    info = modify_data(qid)
-    return JsonResponse({"info": info})
+def wikipedia_data_views(request): 
+    qid = "Q28865" # (temporary) Q-ID for Python
+    info_object = modify_data(qid)
+    return render(request, 'wikipedia_data.html', {'language': info_object})
     
     

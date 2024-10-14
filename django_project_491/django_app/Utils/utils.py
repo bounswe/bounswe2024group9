@@ -22,9 +22,11 @@ def modify_data(qid):
 
     # Use only first 2 paragraphs
     content = content.split("\n")
-    info = content[:2]
+    info = content[:3]
+    format_info = "\n".join(info)
 
-    return " ".join(info)
+
+    return {"title": title, "info": format_info}
 
 def get_languages():
     """
