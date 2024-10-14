@@ -40,3 +40,27 @@
     
   </tr>
 </table>
+
+<h3>How to run the project?</h3>
+<ol>
+    <li>Clone the repository to your local machine.</li>
+    <li>Create a .env file in the outermost scope and then add JUDGE0_API_KEY=XXX where XXX refers to your API key.</li>
+    <li>Open the terminal and run the following command to install the required packages.
+        <pre><code>pip install -r requirements.txt</code></pre>
+    </li>
+    <li>Navigate to the project directory with the following command.
+        <pre><code>cd django_project_491</code></pre>
+    </li>
+    <li> (Optional) Run the unit tests to make sure that everything is working with the following command.
+        <pre><code>python manage.py test</code></pre>
+    </li>
+    <li>Run the following command to start the server.
+        <pre><code>python manage.py runserver</code></pre>
+    </li>  
+</ol>
+<p>Hooray! You can now enjoy our project! 🎉</p>
+
+
+
+
+
