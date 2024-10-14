@@ -3,7 +3,28 @@ import time
 import json
 import os
 from dotenv import load_dotenv
+import xml.etree.ElementTree as ET
 
+def modify_data(qid):
+    # Wikidata API URL to fetch the Wikipedia title
+    url = f"https://www.wikidata.org/w/api.php?action=wbgetentities&format=xml&props=sitelinks&ids={qid}&sitefilter=enwiki".format(qid)
+
+    response = requests.get(url)
+    root = ET.fromstring(response.content)
+    title = root.find(".//sitelink").attrib['title']
+
+    # Wikipedia API URL to fetch the content of the page
+    wiki_url = f"https://en.wikipedia.org/w/api.php?action=query&prop=extracts&explaintext&format=json&titles={title}"
+    wiki_response = requests.get(wiki_url).json()
+    pages = wiki_response['query']['pages']
+    page_id = list(pages.keys())[0]
+    content = pages[page_id]['extract']
+
+    # Use only first 2 paragraphs
+    content = content.split("\n")
+    info = content[:2]
+
+    return " ".join(info)
 
 def get_languages():
     """
