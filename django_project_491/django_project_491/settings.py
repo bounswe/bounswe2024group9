@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -76,10 +77,15 @@ WSGI_APPLICATION = 'django_project_491.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'cmpe451',  # Replace with the actual database name
+        'USER': 'admin',  # Your RDS MySQL username
+        'PASSWORD': os.getenv('AWS_PASSWORD'),  # Your RDS MySQL password
+        'HOST': os.getenv('AWS_HOST'),  # Your RDS endpoint
+        'PORT': '3306',  # MySQL port
     }
 }
+
 
 
 # Password validation
