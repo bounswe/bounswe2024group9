@@ -4,6 +4,7 @@ from .Utils.utils import *
 from .Utils.forms import *
 from django.shortcuts import render, redirect
 
+
 def wikidata_query_view(request):
     # search_string = request.GET.get('search', '').split()  # Assuming 'search' is passed as a query parameter
     # filter_conditions = " && ".join([f'CONTAINS(LCASE(?itemLabel), "{term.lower()}")' for term in search_string])
@@ -42,3 +43,11 @@ def run_code_view(request):
     else:
         form = code_form(choices=LANGUAGES)
         return render(request, 'run_code.html', {'form': form})
+    
+
+def wikipedia_data_views(request): 
+    qid = "Q28865" # (temporary) Q-ID for Python
+    info_object = modify_data(qid)
+    return render(request, 'wikipedia_data.html', {'language': info_object})
+    
+    
