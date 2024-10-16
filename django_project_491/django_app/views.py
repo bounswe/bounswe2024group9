@@ -3,8 +3,10 @@ from SPARQLWrapper import SPARQLWrapper, JSON
 from .Utils.utils import *
 from .Utils.forms import *
 from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
 
 
+# @login_required
 def wikidata_query_view(request):
     # search_string = request.GET.get('search', '').split()  # Assuming 'search' is passed as a query parameter
     # filter_conditions = " && ".join([f'CONTAINS(LCASE(?itemLabel), "{term.lower()}")' for term in search_string])
@@ -29,6 +31,7 @@ LIMIT 10
         return JsonResponse({"error": str(e)}, status=500)
 
 
+@login_required
 def run_code_view(request):
     if request.method == "POST":
         form = code_form(request.POST, choices=LANGUAGES)
