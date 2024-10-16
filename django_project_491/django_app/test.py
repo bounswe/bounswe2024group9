@@ -56,7 +56,6 @@ class TestSearchResult(TestCase):
         request = None
         response = wiki_result(request, "Q15777") # C programming language 
         response_dict = json.loads(response.content)
-        print(response_dict['mainInfo'][0]['languageLabel'])
         self.assertTrue(response_dict['mainInfo'][0]['languageLabel']['value']=='C')
         self.assertTrue(response_dict['mainInfo'][0]['website']['value']=='https://www.iso.org/standard/74528.html')
         self.assertTrue(response_dict['wikipedia']['title']== 'C (programming language)')

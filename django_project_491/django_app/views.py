@@ -81,11 +81,11 @@ def wiki_result(response, wiki_id):
       WHERE {{
         BIND(wd:{wiki_id} AS ?language)
 
-        # Get all instances of the language, excluding programming languages
         ?language wdt:P31 ?instance.
         OPTIONAL {{ ?instance rdfs:label ?instanceLabel. FILTER(LANG(?instanceLabel) = "en") }}
         FILTER(?instance != wd:Q9143)  # Exclude programming language (wd:Q9143)
       }}
+      LIMIT 3
     """
 
     sparql.setQuery(query_instances)
@@ -93,11 +93,48 @@ def wiki_result(response, wiki_id):
     instances_results = sparql.query().convert()
 
     # Process the results to combine main info and instances
-    instances = [result['instanceLabel']['value'] for result in instances_results['results']['bindings'] if 'instanceLabel' in result]
+    instances = [
+        {
+            'instance': result['instance']['value'],  
+            'instanceLabel': result['instanceLabel']['value'] 
+        }
+        for result in instances_results['results']['bindings']
+        if 'instanceLabel' in result
+    ]
+
+    # Fetch Wikipedia data
     try:
         wikipedia_data = wikipedia_data_views(wiki_id)
-    except:
+    except Exception as e:
         wikipedia_data = []
+
+    # For each instance, find 3 other languages of that instance excluding the current language
+    for instance in instances:
+        instance_id = instance['instance'].split('/')[-1]  # Extract the ID from the URI
+        query_related_languages = f"""
+            SELECT ?relatedLanguage ?relatedLanguageLabel
+            WHERE {{
+                ?relatedLanguage wdt:P31 wd:{instance_id}.
+                FILTER(?relatedLanguage != wd:{wiki_id})  # Exclude the current language
+                OPTIONAL {{ ?relatedLanguage rdfs:label ?relatedLanguageLabel. FILTER(LANG(?relatedLanguageLabel) = "en") }}
+            }}
+            LIMIT 3
+        """
+        sparql.setQuery(query_related_languages)
+        sparql.setReturnFormat(JSON)
+        related_languages_results = sparql.query().convert()
+
+        # Extract related languages and add to the instance
+        related_languages = [
+            {
+                'relatedLanguage': result['relatedLanguage']['value'],  # Store the related language URI
+                'relatedLanguageLabel': result['relatedLanguageLabel']['value']  # Store the label
+            }
+            for result in related_languages_results['results']['bindings']
+            if 'relatedLanguageLabel' in result
+        ]
+        instance['relatedLanguages'] = related_languages  # Add related languages to the instance
+
     final_response = {
         'mainInfo': main_info_results['results']['bindings'],
         'instances': instances,
