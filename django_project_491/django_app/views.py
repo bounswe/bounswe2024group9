@@ -3,6 +3,43 @@ from SPARQLWrapper import SPARQLWrapper, JSON
 from .Utils.utils import *
 from .Utils.forms import *
 from django.shortcuts import render, redirect
+from urllib.parse import quote
+
+# Used for initial search - returns 5 best matching wiki id's
+def search(request, search_strings):
+    sparql = SPARQLWrapper("https://query.wikidata.org/sparql")
+    
+    search_terms = search_strings.split() # split into words
+    
+    # Generate SPARQL FILTER for each word in the search string
+    filter_conditions = " || ".join([f'CONTAINS(LCASE(?languageLabel), "{quote(term.lower())}")' for term in search_terms])
+
+    query = f"""
+    SELECT DISTINCT ?language (SAMPLE(?languageLabel) as ?languageLabel) 
+    WHERE {{
+        ?language wdt:P31 wd:Q9143.
+        ?language rdfs:label ?languageLabel.
+
+        # Filter for language names containing any of the search terms
+        FILTER({filter_conditions})
+
+        # Ensure that the label is in English
+        FILTER(LANG(?languageLabel) = "en")
+
+        SERVICE wikibase:label {{ 
+        bd:serviceParam wikibase:language "en". 
+        }}
+    }}
+    GROUP BY ?language
+    ORDER BY STRLEN(?languageLabel)
+    LIMIT 5
+    """
+
+    sparql.setQuery(query)
+    sparql.setReturnFormat(JSON)
+    results = sparql.query().convert()
+
+    return JsonResponse(results)
 
 
 def wikidata_query_view(request):
