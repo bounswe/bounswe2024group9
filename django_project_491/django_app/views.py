@@ -94,11 +94,14 @@ def wiki_result(response, wiki_id):
 
     # Process the results to combine main info and instances
     instances = [result['instanceLabel']['value'] for result in instances_results['results']['bindings'] if 'instanceLabel' in result]
-
+    try:
+        wikipedia_data = wikipedia_data_views(wiki_id)
+    except:
+        wikipedia_data = []
     final_response = {
         'mainInfo': main_info_results['results']['bindings'],
         'instances': instances,
-        'wikipedia': wikipedia_data_views(wiki_id)
+        'wikipedia': wikipedia_data
     }
 
     return JsonResponse(final_response)
