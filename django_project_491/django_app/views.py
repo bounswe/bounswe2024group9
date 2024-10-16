@@ -41,6 +41,7 @@ def wiki_search(request, search_strings):
 
     return JsonResponse(results)
 
+# Shows the resulting info of the chosen wiki item
 def wiki_result(response, wiki_id):
     sparql = SPARQLWrapper("https://query.wikidata.org/sparql")
 
@@ -74,14 +75,11 @@ def wiki_result(response, wiki_id):
     sparql.setReturnFormat(JSON)
     main_info_results = sparql.query().convert()
 
-    # Extract the language ID
-    language_id = f"wd:{wiki_id}"
-
     # Second query to get all instances of the language, excluding "programming language"
     query_instances = f"""
       SELECT ?instance ?instanceLabel
       WHERE {{
-        BIND({language_id} AS ?language)
+        BIND(wd:{wiki_id} AS ?language)
 
         # Get all instances of the language, excluding programming languages
         ?language wdt:P31 ?instance.
@@ -97,39 +95,13 @@ def wiki_result(response, wiki_id):
     # Process the results to combine main info and instances
     instances = [result['instanceLabel']['value'] for result in instances_results['results']['bindings'] if 'instanceLabel' in result]
 
-    # Prepare the final response
     final_response = {
         'mainInfo': main_info_results['results']['bindings'],
-        'instances': instances
+        'instances': instances,
+        'wikipedia': wikipedia_data_views(wiki_id)
     }
 
     return JsonResponse(final_response)
-
-
-
-def wikidata_query_view(request):
-    # search_string = request.GET.get('search', '').split()  # Assuming 'search' is passed as a query parameter
-    # filter_conditions = " && ".join([f'CONTAINS(LCASE(?itemLabel), "{term.lower()}")' for term in search_string])
-    # subqueries = "\n".join([f'BIND( IF(CONTAINS(LCASE(?itemLabel), "{term.lower()}"), 1, 0) AS ?match_{i})' for i, term in enumerate(search_string)])
-    
-    query = f"""
-        SELECT ?language ?languageLabel WHERE {{
-  ?language wdt:P31 wd:Q9143.  
-  SERVICE wikibase:label {{ bd:serviceParam wikibase:language "en". }}  
-}}
-LIMIT 10
-    """
-    # 'programming language' (Q9143)
-    sparql = SPARQLWrapper("https://query.wikidata.org/sparql")
-    sparql.setQuery(query)
-    sparql.setReturnFormat(JSON)
-    
-    try:
-        results = sparql.query().convert()
-        return JsonResponse(results)
-    except Exception as e:
-        return JsonResponse({"error": str(e)}, status=500)
-
 
 def run_code_view(request):
     if request.method == "POST":
@@ -147,9 +119,8 @@ def run_code_view(request):
         return render(request, 'run_code.html', {'form': form})
     
 
-def wikipedia_data_views(request): 
-    qid = "Q28865" # (temporary) Q-ID for Python
-    info_object = modify_data(qid)
-    return render(request, 'wikipedia_data.html', {'language': info_object})
+def wikipedia_data_views(wiki_id): 
+    info_object = modify_data(wiki_id)
+    return info_object
     
     
