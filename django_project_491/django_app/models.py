@@ -1,6 +1,11 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+from enum import Enum
 
+class UserType(Enum):
+    ADMIN = "admin"
+    USER = "user"
+    SUPER_USER = "super_user"
 
 class Comment(models.Model):
     _id = models.AutoField(primary_key=True)
@@ -27,7 +32,7 @@ class Question(models.Model):
     code_snippet = models.TextField()
     comments = models.ManyToManyField('Comment', related_name='question_comments', blank=True)
     upvotes = models.IntegerField(default=0)
-
+    userType = UserType.USER
 
     def run_snippet(self):
         raise NotImplementedError("API SHOULD BE CALLED FROM HERE")
@@ -55,3 +60,7 @@ class User(AbstractBaseUser):
     questions = models.ManyToManyField('Question', related_name='user_questions', blank=True)
     comments = models.ManyToManyField('Comment', related_name='user_comments', blank=True)
     bookmarks = models.TextField(blank=True, default="[]")  # Example : ['link1', 'link2']
+
+    # ADDING BOOKMARK FUNCTIONALITY
+    # ADDING QUESTION FUNCTIONALITY
+    # ADDING COMMENT FUNCTIONALITY
