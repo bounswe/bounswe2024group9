@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+</head>
+<body>
+    <form method="POST">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Login</button>
+    </form>
+    {% if form.errors %}
+      <ul class="errorlist">
+          {% for field, errors in form.errors.items %}
+              <li>{{ field }}: {{ errors|striptags }}</li>
+          {% endfor %}
+      </ul>
+  {% endif %}
+</body>
+</html>
