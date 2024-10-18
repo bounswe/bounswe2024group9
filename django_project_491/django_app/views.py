@@ -34,19 +34,17 @@ LIMIT 10
 
 @login_required
 def run_code_view(request):
-    if request.method == "POST":
-        form = code_form(request.POST, choices=LANGUAGES)
-        if form.is_valid():
-            query = form.cleaned_data['query']
-            language_id = int(form.cleaned_data['ProgrammingLanguage'])
-            result = run_code(query, language_id)
-            if result["stderr"]:
-                return render(request, 'run_code.html', {'form': form, 'result': result['stderr']})
-            else:
-                return render(request, 'run_code.html', {'form': form, 'result': result['stdout']})
-    else:
-        form = code_form(choices=LANGUAGES)
-        return render(request, 'run_code.html', {'form': form})
+    # TODO Uncomment the lines after connecting to the front-end
+
+    # source_code = request.POST.get('source_code', '')
+    # language_id = request.POST.get('language_name', '')
+
+    # TODO Example usage, delete this part after connecting to the front-end
+    source_code = "print('Hello, World!')"
+    language_id = 71  # Language ID for Python
+
+    result = run_code(source_code, language_id)
+    return JsonResponse(result)
 
 
 def wikipedia_data_views(request):
