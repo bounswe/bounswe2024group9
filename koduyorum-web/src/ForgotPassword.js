@@ -46,7 +46,7 @@ const ForgotPassword = () => {
         {error && <div className="error-message">{error}</div>}
         {message && <div className="success-message">{message}</div>}
         <form onSubmit={handleSubmit}>
-          <div className="form-group mail-box">
+          <div className="form-group">
             <label htmlFor="email">Email:</label>
             <input
               type="email"
@@ -57,7 +57,7 @@ const ForgotPassword = () => {
               required
             />
           </div>
-          <button type="submit" className="submit-button">Send Reset Link</button>
+          <button type="submit" className="login-button">Send Reset Link</button>
           <div className="signin-redirect">
             Want to login? <a href="/login">Click Here!</a>
         </div>

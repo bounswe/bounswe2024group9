@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider, useAuth } from './hooks/AuthProvider';
 import Signup from './Signup';
 import Login from './Login';
-import ForgotPassword from './Forgot';
+import ForgotPassword from './ForgotPassword';
 import Feed from './Feed';
 import './App.css';
 
