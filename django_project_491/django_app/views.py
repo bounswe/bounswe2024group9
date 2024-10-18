@@ -58,10 +58,12 @@ def wikipedia_data_views(request):
 def signup(request):
     if request.method == 'POST':
         form = SignupForm(request.POST)
+        
         if form.is_valid():
-            user = form.save()  # This saves the new user
-            # login(request, user)  # Automatically logs the user in after successful registration
+            form.save()  # This saves the new user
             return redirect('login')  # Redirect to some page after sign-up, e.g., the home page
+        else:
+            print(form.errors)
     else:
         form = SignupForm()
 

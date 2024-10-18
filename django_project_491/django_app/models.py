@@ -6,8 +6,6 @@ from enum import Enum
 # python manage.py makemigrations
 # python manage.py migrate
 
-
-
 class UserType(Enum):
     ADMIN = "admin"
     USER = "user"
@@ -87,7 +85,8 @@ class User(AbstractBaseUser):
     username = models.CharField(max_length=30, unique=True)
     email = models.EmailField(max_length=255, unique=True)
     # password = models.CharField(max_length=100) AbstractBaseUser already has password field
-    userType = models.CharField(max_length=20, choices=[(tag, tag.value) for tag in UserType], default=UserType.USER)
+    userType = models.CharField(max_length=20, choices=[(tag.value, tag.value) for tag in UserType], default=UserType.USER.value)
+
     
     # Relationships
     questions = models.ManyToManyField('Question', related_name='user_questions', blank=True)
@@ -105,12 +104,12 @@ class User(AbstractBaseUser):
     def has_perm(self, perm, obj=None): # 1/3 added because of my custom userType 
         if self.userType == UserType.ADMIN:
             return True 
-        return super().has_perm(perm, obj)
+        return False
 
     def has_module_perms(self, app_label): # 2/3 added because of my custom userType
         if self.userType == UserType.ADMIN:
             return True
-        return super().has_module_perms(app_label)
+        return False
 
     @property
     def is_staff(self): # 3/3 added because of my custom userType
