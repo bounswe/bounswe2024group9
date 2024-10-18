@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from enum import Enum
+from typing import List
 
 
 # After editing the models do not forget to run the following commands:
@@ -34,6 +35,8 @@ class Comment(models.Model):
 class Question(models.Model):
     _id = models.AutoField(primary_key=True)
     title = models.CharField(max_length=200)
+    about = models.CharField(max_length=200)
+    tags = models.JSONField(blank=True, default=list)  # Example : ['tag1', 'tag2']
     details = models.TextField()
     code_snippet = models.TextField()
     comments = models.ManyToManyField('Comment', related_name='question_comments', blank=True)
@@ -94,7 +97,7 @@ class User(AbstractBaseUser):
     # Relationships
     questions = models.ManyToManyField('Question', related_name='user_questions', blank=True)
     comments = models.ManyToManyField('Comment', related_name='user_comments', blank=True)
-    bookmarks = models.JSONField(blank=True, default=list)  # Example : ['link1', 'link2']
+    bookmarks: List[str] = models.JSONField(blank=True, default=list)  # Example : ['link1', 'link2']
 
     objects = UserManager()  # Required for the custom user model
 
@@ -119,5 +122,48 @@ class User(AbstractBaseUser):
         return self.userType == UserType.ADMIN
 
     # ADDING BOOKMARK FUNCTIONALITY
+    def add_bookmark(self, link: str):
+        """Adds a bookmark to the user."""
+        if link not in self.bookmarks:
+            self.bookmarks.append(link)
+            self.save()
+
+    def remove_bookmark(self, link: str):
+        """Removes a bookmark from the user."""
+        if link in self.bookmarks:
+            self.bookmarks.remove(link)
+            self.save()
+
+    def get_bookmarks(self) -> list:
+        """Returns the user's bookmarks."""
+        return self.bookmarks
+
     # ADDING QUESTION FUNCTIONALITY
+    def add_question(self, question: Question):
+        """Associates a question with the user."""
+        self.questions.add(question)
+        self.save()
+
+    def remove_question(self, question: Question):
+        """Removes a question association from the user."""
+        self.questions.remove(question)
+        self.save()
+
+    def get_questions(self):
+        """Returns all questions associated with the user."""
+        return self.questions.all()
+
     # ADDING COMMENT FUNCTIONALITY
+    def add_comment(self, comment: Comment):
+        """Associates a comment with the user."""
+        self.comments.add(comment)
+        self.save()
+
+    def remove_comment(self, comment: Comment):
+        """Removes a comment association from the user."""
+        self.comments.remove(comment)
+        self.save()
+
+    def get_comments(self):
+        """Returns all comments associated with the user."""
+        return self.comments.all()

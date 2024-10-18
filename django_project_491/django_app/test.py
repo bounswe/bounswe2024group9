@@ -7,19 +7,19 @@ from .views import wiki_result, wiki_search
 class TestRunCode(TestCase):
         def test_run_code(self):
             query = """
-print("Hello, World!")
-a = 2
-b = 1
-print(a + b)
+                print("Hello, World!")
+                a = 2
+                b = 1
+                print(a + b)
 
-import math
+                import math
 
-print(math.sqrt(16))
+                print(math.sqrt(16))
 
-import numpy as np
-a = np.array([1, 2, 3])
-print(a)
-"""
+                import numpy as np
+                a = np.array([1, 2, 3])
+                print(a)
+                """
             language_id = 71  # Language ID for Python
             expected = [
                 'Hello, World!',
