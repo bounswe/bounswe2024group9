@@ -5,6 +5,12 @@ import os
 from dotenv import load_dotenv
 import xml.etree.ElementTree as ET
 
+HEADERS = {
+    "content-type": "application/json",
+    "X-RapidAPI-Key": os.environ.get('JUDGE0_API_KEY'),
+    "X-RapidAPI-Host": "judge0-ce.p.rapidapi.com"
+}
+
 def modify_data(qid):
     # Wikidata API URL to fetch the Wikipedia title
     url = f"https://www.wikidata.org/w/api.php?action=wbgetentities&format=xml&props=sitelinks&ids={qid}&sitefilter=enwiki".format(qid)
@@ -36,8 +42,8 @@ def get_languages():
     if response.status_code == 200:
         return response.json()
     else:
-        print(f"Error fetching languages: {response.status_code}, {response.text}")
-        return None
+        print(response.text)
+        raise Exception("API RETURNED NON SUCCESSFUL RESPONSE. CONTROL YOUR ENV VARIABLES AND YOUR REQUEST LIMIT")
 
 
 def run_code(source_code, language_id):
@@ -90,15 +96,5 @@ def run_code(source_code, language_id):
     else:
         raise Exception("Error creating submission")
 
-
-
-load_dotenv()
-print(os.environ.get('JUDGE0_API_KEY'))
-
-HEADERS = {
-    "content-type": "application/json",
-    "X-RapidAPI-Key": os.environ.get('JUDGE0_API_KEY'),
-    "X-RapidAPI-Host": "judge0-ce.p.rapidapi.com"
-}
 
 LANGUAGES = [ (lang["id"], lang["name"]) for lang in get_languages()]

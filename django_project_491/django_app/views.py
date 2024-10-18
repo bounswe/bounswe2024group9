@@ -7,7 +7,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login
 
 
-# @login_required
+@login_required
 def wikidata_query_view(request):
     # search_string = request.GET.get('search', '').split()  # Assuming 'search' is passed as a query parameter
     # filter_conditions = " && ".join([f'CONTAINS(LCASE(?itemLabel), "{term.lower()}")' for term in search_string])
