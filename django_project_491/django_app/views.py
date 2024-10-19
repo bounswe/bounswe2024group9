@@ -151,14 +151,14 @@ def create_question(request : HttpRequest) -> HttpResponse:
         try:
             data = json.loads(request.body)
             title = data.get('title')
-            about = data.get('about')
+            language = data.get('language')
             details = data.get('details')
             code_snippet = data.get('code_snippet', '')  # There may not be a code snippet
             tags = data.get('tags', [])  # There may not be any tags
 
             question = Question.objects.create(
                 title=title,
-                about=about,
+                language=language,
                 details=details,
                 code_snippet=code_snippet,
                 tags=tags
@@ -173,6 +173,32 @@ def create_question(request : HttpRequest) -> HttpResponse:
 
     return JsonResponse({'error': 'Invalid request method'}, status=405)
 
+
+def list_questions_by_language(request):
+    # Get the language parameter from the HTTP GET request
+    language = request.GET.get('language', None)
+    
+    # Check if the language parameter is provided
+    if not language:
+        return JsonResponse({'error': 'Language parameter is required'}, status=400)
+    
+    # Fetch questions related to the provided language
+    questions = Question.objects.filter(language__iexact=language)
+    
+    # Convert the questions data to JSON format
+    questions_data = [{
+        'id': question._id,
+        'title': question.title,
+        'language': question.language,
+        'tags': question.tags,
+        'details': question.details,
+        'code_snippet': question.code_snippet,
+        'upvotes': question.upvotes,
+        'creationDate': question.creationDate.strftime('%Y-%m-%d %H:%M:%S'),
+    } for question in questions]
+    
+    # Return the questions data as JSON
+    return JsonResponse({'questions': questions_data}, safe=False, status=200)
 
 def home(request):
     return render(request, 'home.html')
