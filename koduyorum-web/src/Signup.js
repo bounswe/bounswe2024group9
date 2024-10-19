@@ -30,12 +30,12 @@ const Signup = () => {
       return;
     }
     if (password.match(/[A-Z]/) === null) {
-      setError("Password must contain at least one upper case letter.");
+      setError("Password must contain at least one uppercase letter.");
       setLoading(false);
       return;
     }
     if (password.match(/[a-z]/) === null) {
-      setError("Password must contain at least one lower case letter.");
+      setError("Password must contain at least one lowercase letter.");
       setLoading(false);
       return;
     }
@@ -71,28 +71,26 @@ const Signup = () => {
 
     try {
       const response = await fetch(
-        `${process.env.REACT_APP_API_URL}/django_app/create_user/`, // TODO: Update the API URL
+        `${process.env.REACT_APP_API_URL}/django_app/signup/`, // TODO: Update the API URL
         {
           method: "POST",
           headers: {
-            "Content-Type": "application/json",
+            "Content-Type": "application/x-www-form-urlencoded",
           },
-          body: JSON.stringify({
-            username: username,
-            email: email,
-            password: password,
+          body: new URLSearchParams({
+            username,
+            email,
+            password,
           }),
-        }
-      );
+          credentials: 'same-origin',
+      });
 
       const data = await response.json();
       if (response.ok) {
-        console.log(data);
-        auth.login(data);
-
-        window.location.href = "/feed";
+        window.location.href = "/login";
       } else {
-        setError(data.error || "An error occurred");
+        const data = await response.json();
+        setError(data.error || "An error occurred while signing up. Please try again later.");
       }
     } catch (error) {
       console.error("Error:", error);
