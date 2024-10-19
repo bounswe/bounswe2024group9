@@ -2,7 +2,12 @@
 """Django's command-line utility for administrative tasks."""
 import os
 import sys
+from dotenv import load_dotenv
+load_dotenv()
 
+# Should be using when installed pymysql
+# import pymysql 
+# pymysql.install_as_MySQLdb()
 
 def main():
     """Run administrative tasks."""
