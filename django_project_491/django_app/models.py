@@ -35,7 +35,7 @@ class Comment(models.Model):
 class Question(models.Model):
     _id = models.AutoField(primary_key=True)
     title = models.CharField(max_length=200)
-    about = models.CharField(max_length=200)
+    language = models.CharField(max_length=200)
     tags = models.JSONField(blank=True, default=list)  # Example : ['tag1', 'tag2']
     details = models.TextField()
     code_snippet = models.TextField()
