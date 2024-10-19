@@ -5,6 +5,15 @@ import os
 from dotenv import load_dotenv
 import xml.etree.ElementTree as ET
 
+HEADERS = {
+    "content-type": "application/json",
+    "X-RapidAPI-Key": os.environ.get('JUDGE0_API_KEY'),
+    "X-RapidAPI-Host": "judge0-ce.p.rapidapi.com"
+}
+
+Lang2ID = None
+ID2Lang = None
+
 def modify_data(qid):
     # Wikidata API URL to fetch the Wikipedia title
     url = f"https://www.wikidata.org/w/api.php?action=wbgetentities&format=xml&props=sitelinks&ids={qid}&sitefilter=enwiki".format(qid)
@@ -36,8 +45,8 @@ def get_languages():
     if response.status_code == 200:
         return response.json()
     else:
-        print(f"Error fetching languages: {response.status_code}, {response.text}")
-        return None
+        print(response.text)
+        raise Exception("API RETURNED NON SUCCESSFUL RESPONSE. CONTROL YOUR ENV VARIABLES AND YOUR REQUEST LIMIT")
 
 
 def run_code(source_code, language_id):
@@ -84,6 +93,17 @@ def run_code(source_code, language_id):
 
     API_URL = 'https://judge0-ce.p.rapidapi.com/submissions'
 
+    # The code below can be employed if the argument of this function is not a language_id but a language_name
+
+    # global Lang2ID, ID2Lang
+    #
+    # if Lang2ID is None or ID2Lang is None:
+    #     Lang2ID, ID2Lang = get_language_dicts()
+    # try:
+    #   token = create_submission(source_code, Lang2ID[language_name])
+    # except KeyError:
+    #     raise Exception("Language not found")
+
     token = create_submission(source_code, language_id)
     if token:
         return get_submission_result(token)
@@ -91,14 +111,7 @@ def run_code(source_code, language_id):
         raise Exception("Error creating submission")
 
 
-
-load_dotenv()
-print(os.environ.get('JUDGE0_API_KEY'))
-
-HEADERS = {
-    "content-type": "application/json",
-    "X-RapidAPI-Key": os.environ.get('JUDGE0_API_KEY'),
-    "X-RapidAPI-Host": "judge0-ce.p.rapidapi.com"
-}
-
-LANGUAGES = [ (lang["id"], lang["name"]) for lang in get_languages()]
+def get_language_dicts():
+    Lang2ID = { lang["name"]: lang["id"] for lang in get_languages()}
+    ID2Lang = { id : lang for lang, id in Lang2ID.items()}
+    return Lang2ID, ID2Lang
