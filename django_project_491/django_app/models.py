@@ -41,7 +41,7 @@ class Question(models.Model):
     code_snippet = models.TextField()
     comments = models.ManyToManyField('Comment', related_name='question_comments', blank=True)
     upvotes = models.IntegerField(default=0)
-    userType = UserType.USER
+    creationDate = models.DateTimeField(auto_now_add=True)
 
     def run_snippet(self):
         raise NotImplementedError("API SHOULD BE CALLED FROM HERE")
@@ -57,6 +57,8 @@ class Question(models.Model):
     def downvote(self):
         self.upvotes -= 1
         self.save()
+    
+    
 
 
 class UserManager(BaseUserManager):
