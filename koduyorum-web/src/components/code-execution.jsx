@@ -2,6 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import { Separator } from "./ui/seperator";
 import { LightAsync as SyntaxHighlighter } from "react-syntax-highlighter";
+import { Button } from "./ui/button";
 import { docco } from "react-syntax-highlighter/dist/esm/styles/hljs";
 
 const InputBlock = ({ inputType ,number, explanation, code }) => (
@@ -57,11 +58,12 @@ export default function CodeExecution() {
 console.log(Second_Greatest_Lowest([1, 2, 3, 4, 5])); `}
           />
         </div>
-
         <Separator className="my-8 bg-gray-700" />
 
         <div className="space-y-6">
-          <h2 className="text-xl font-semibold text-gray-200">Answers</h2>
+          <Button className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded">
+              Add Answer
+          </Button>
 
           <InputBlock
             inputType="Answer"
