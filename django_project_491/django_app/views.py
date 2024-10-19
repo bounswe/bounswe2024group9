@@ -204,5 +204,19 @@ def list_questions_by_language(request):
     # Return the questions data as JSON
     return JsonResponse({'questions': questions_data}, safe=False, status=200)
 
+def run_code_view(request):
+    type = request.GET.get('type', '') # Get type, comment or question
+    id = request.GET.get('id', '') # Get id of the comment or question
+
+    if type == 'comment':
+        comment = Comment.objects.get(_id=id)
+        outs = comment.run_snippet()
+    elif type == 'question':
+        question = Question.objects.get(_id=id)
+        outs = question.run_snippet()
+    else:
+        return JsonResponse({'error': 'Invalid type'}, status=400)
+    return JsonResponse({'output': outs})
+
 def home(request):
     return render(request, 'home.html')
