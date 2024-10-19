@@ -156,9 +156,13 @@ def create_question(request : HttpRequest) -> HttpResponse:
             code_snippet = data.get('code_snippet', '')  # There may not be a code snippet
             tags = data.get('tags', [])  # There may not be any tags
 
+            # TODO: ASSIGN LANGUAGE ID dynamically
+            language_id = 71  # Language ID for Python
+
             question = Question.objects.create(
                 title=title,
                 language=language,
+                language_id=language_id, 
                 details=details,
                 code_snippet=code_snippet,
                 tags=tags

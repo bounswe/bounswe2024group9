@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from enum import Enum
 from typing import List
+from .Utils.utils import *
 
 
 # After editing the models do not forget to run the following commands:
@@ -18,10 +19,13 @@ class Comment(models.Model):
     _id = models.AutoField(primary_key=True)
     details = models.TextField()
     code_snippet = models.TextField()
+    language_id = models.IntegerField(default=71)  # Language ID for Python
     upvotes = models.IntegerField(default=0)
 
     def run_snippet(self):
-        raise NotImplementedError("API SHOULD BE CALLED FROM HERE")
+        result = run_code(self.code_snippet, self.language_id)
+        outs = result['stdout'].split('\n')
+        return outs
 
     def upvote(self):
         self.upvotes += 1
@@ -36,6 +40,7 @@ class Question(models.Model):
     _id = models.AutoField(primary_key=True)
     title = models.CharField(max_length=200)
     language = models.CharField(max_length=200)
+    language_id = models.IntegerField(default=71)  # Language ID for Python
     tags = models.JSONField(blank=True, default=list)  # Example : ['tag1', 'tag2']
     details = models.TextField()
     code_snippet = models.TextField()
@@ -44,7 +49,9 @@ class Question(models.Model):
     creationDate = models.DateTimeField(auto_now_add=True)
 
     def run_snippet(self):
-        raise NotImplementedError("API SHOULD BE CALLED FROM HERE")
+        result = run_code(self.code_snippet, self.language_id)
+        outs = result['stdout'].split('\n')
+        return outs
 
     def add_comment(self, comment):
         self.comments.add(comment)
@@ -57,8 +64,6 @@ class Question(models.Model):
     def downvote(self):
         self.upvotes -= 1
         self.save()
-    
-    
 
 
 class UserManager(BaseUserManager):
