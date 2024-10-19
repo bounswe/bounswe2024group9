@@ -3,9 +3,10 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider, useAuth } from './hooks/AuthProvider';
 import Signup from './Signup';
 import Login from './Login';
-import ForgotPassword from './Forgot';
+import ForgotPassword from './ForgotPassword';
 import Feed from './Feed';
 import './App.css';
+import SearchResults from './SearchResults';
 
 
 const App = () => {
@@ -31,14 +32,16 @@ const AppRoutes = () => {
       <Route path="/signup" element={<Signup />} />
       <Route path="/login" element={<Login />} />
       <Route path="/forgot" element={<ForgotPassword />} />
+      <Route path="/feed" element={<Feed />} /> 
+      <Route path="/search" element={<SearchResults />} />
       {user ? (
         <>
-          <Route path="/feed" element={<Feed />} />
+          {/* <Route path="/feed" element={<Feed />} /> */}
         </>
       ) : (
         <Route path="/" element={<Navigate replace to="/login"/>} />
       )}
-      <Route path="*" element={<Navigate replace to="/login" state={{ from: 'private' }} />} />
+      {/* <Route path="*" element={<Navigate replace to="/login" state={{ from: 'private' }} />} /> */}
     </Routes>
   );
 };

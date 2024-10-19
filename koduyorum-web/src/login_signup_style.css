@@ -1,7 +1,15 @@
-.wrapper_entrance {
-  color: black;
+body {
   font-family: Arial, sans-serif;
-  background-color: #fff;
+  margin: 0;
+  padding: 0;
+  background-color: #f4f8fb; /* Light grey-blue */
+  color: #333;
+}
+
+.wrapper_entrance {
+  /* color: black; */
+  font-family: Arial, sans-serif;
+  background-color: #f4f8fb;
   background-size: 100% 100%;
   margin: 0;
   padding: 0;
@@ -9,42 +17,45 @@
   justify-content: center;
   align-items: center;
   min-height: 100vh;
+  
 }
 
 .container_center {
   background-color: #fff;
-  padding: 15px;
-  border-radius: 5px;
-  box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
-  width: 105%; 
-  max-width: 320px; 
-} 
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+  width: 100%;
+  max-width: 350px;
+}
 
 .wrapper_entrance h2 {
-  margin-bottom: 15px;
+  margin-bottom: 20px;
   text-align: center;
-  font-size: 1.5rem;
+  font-size: 1.8rem;
+  color: #333;
 }
 
 .wrapper_entrance .form-group {
-  margin-bottom: 15px;
-  margin-right: 5%;
+  margin-bottom: 20px;
+  /* margin-right: 5%; */
 }
 
 .wrapper_entrance label {
   display: block;
-  font-weight: normal;
-  font-size: 0.8rem;
+  font-weight: bold;
+  font-size: 0.9rem;
+  color: #333;
 }
 
 input[type="text"],
 input[type="password"] {
   width: 100%;
-  padding: 8px;
+  padding: 10px;
   border: 1px solid #ccc;
   border-radius: 5px;
-  font-size: 0.9rem;
-
+  font-size: 1rem;
+  box-sizing: border-box;
 }
 
 .login-button.loading {
@@ -56,12 +67,13 @@ input[type="password"] {
 
 .wrapper_entrance button {
   width: 100%;
-  padding: 10px;
-  background-color: #007bff;
+  padding: 12px;
+  background-color: #38b6ff; /* Main blue color */
   color: #fff;
   border: none;
   border-radius: 5px;
   cursor: pointer;
+  font-size: 1rem;
   transition: background-color 0.3s;
 }
 
@@ -69,9 +81,15 @@ input[type="password"] {
   background-color: #0056b3;
 }
 
-.wrapper_entrance .news-container {
-  display: flex;
-  align-items: center;
+/* Links */
+.wrapper_entrance a {
+  color: #007bff;
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.wrapper_entrance a:hover {
+  text-decoration: underline;
 }
 
 .wrapper_entrance .forgot-password {
@@ -85,7 +103,7 @@ input[type="password"] {
 
 .wrapper_entrance #login-button {
   margin-top: 3%;
-  background-color: rgb(0,128,153);
+  background-color: #38b6ff;
   font-size: 1rem;
 }
 
@@ -101,13 +119,17 @@ input[type="password"] {
 
 .wrapper_entrance #signup-button {
   margin-top: 3%;
-  background-color: rgb(0,128,153);
+  background-color: #38b6ff;
   font-size: 1rem;
+}
+
+.wrapper_entrance #signup-button:hover {
+  background-color: #0056b3;
 }
 
 .wrapper_entrance #signup-button:disabled {
   margin-top: 3%;
-  background-color: rgb(0,128,153);
+  background-color: #38b6ff;
   font-size: 1rem;
   cursor: not-allowed;
   opacity: 0.6;
@@ -145,17 +167,18 @@ input[type="password"] {
 
 } 
 
+/* Error Messages */
 .error-message {
-  color: white; 
-  background-color: rgba(244, 67, 54, 0.8);  
-  border-radius: 4px; 
-  padding: 4px; 
-  margin: 10px 0; 
-  text-align: center;  
+  color: white;
+  background-color: rgba(244, 67, 54, 0.9);
+  border-radius: 4px;
+  padding: 8px;
+  text-align: center;
+  margin: 10px 0;
 }
 
 .error-message:empty {
-  display: none; 
+  display: none;
 }
 
 .signup-redirect, .signin-redirect {
@@ -218,7 +241,7 @@ input[type="password"] {
 @media (max-width: 600px) {
   .container_center {
     width: 90%;
-    padding: 10px;
+    padding: 15px;
     
   }
 }

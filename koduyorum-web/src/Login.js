@@ -21,25 +21,28 @@ export const Login = () => {
     setLoading(true); // Show loading indicator
 
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/django_app/login/`, { // TODO: Update the API URL
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/django_app/login/`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/x-www-form-urlencoded',
         },
-        body: JSON.stringify({
+        body: new URLSearchParams({
           username,
           password,
+          remember: rememberMe ? 'on' : '',
         }),
+        credentials: 'same-origin',
       });
 
-      const data = await response.json();
+      
       if (response.ok) {
         setError(null);
-        auth.login(data); 
+        auth.login(); 
         window.location.href = '/feed';
       } else {
+        const data = await response.json();
         // Display error message if login failed
-        setError(data.error);
+        setError(data.error || 'An error occurred while logging in. Please try again later.');
       }
     } catch (error) {
       console.error('Error:', error);
