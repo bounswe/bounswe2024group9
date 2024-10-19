@@ -1,104 +1,86 @@
-import React from "react"
-import PropTypes from "prop-types"
-import { Textarea } from "./ui/textarea"
-import { Separator } from "./ui/seperator"
+import React from "react";
+import PropTypes from "prop-types";
+import { Separator } from "./ui/seperator";
+import { LightAsync as SyntaxHighlighter } from "react-syntax-highlighter";
+import { docco } from "react-syntax-highlighter/dist/esm/styles/hljs";
 
-const AnswerBlock = ({ number, explanation, code }) => (
+const InputBlock = ({ inputType ,number, explanation, code }) => (
   <div className="bg-gray-800 p-4 rounded-lg">
-    <h3 className="font-semibold mb-2 text-gray-200">Answer {number}</h3>
+    <h3 className="font-semibold mb-2 text-gray-200">{inputType} {number}</h3>
     <p className="mb-4 text-gray-300">{explanation}</p>
-    <Textarea
-      className="font-mono min-h-[150px] bg-gray-900 text-gray-100 border-gray-700"
-      readOnly
-      value={code}
-    />
+    {code && (
+      <SyntaxHighlighter language="javascript" style={docco}>
+        {code}
+      </SyntaxHighlighter>
+    )}
   </div>
-)
+);
 
-AnswerBlock.propTypes = {
-  number: PropTypes.number.isRequired,
+InputBlock.propTypes = {
+  inputType: PropTypes.string.isRequired,
+  number: PropTypes.number,
   explanation: PropTypes.string.isRequired,
-  code: PropTypes.string.isRequired,
-}
+  code: PropTypes.string,
+};
+
 
 export default function CodeExecution() {
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100">
       <div className="container mx-auto p-4 max-w-4xl">
-        <h1 className="text-2xl font-bold mb-4 text-gray-100">How do I center a div in CSS?</h1>
-        
-        <div className="space-y-6">
-          <div>
-            <h2 className="text-xl font-semibold mb-2 text-gray-200">Question</h2>
-            <Textarea
-              className="min-h-[100px] bg-gray-800 text-gray-100 border-gray-700"
-              placeholder="Enter your question details here..."
-              defaultValue="I'm trying to center a div both horizontally and vertically within its parent container. I've tried using margin: auto but it only centers horizontally. What's the best way to achieve this?"
-            />
-          </div>
-          
-          <div>
-            <h2 className="text-xl font-semibold mb-2 text-gray-200">Code</h2>
-            <Textarea
-              className="font-mono min-h-[150px] bg-gray-800 text-gray-100 border-gray-700"
-              placeholder="Enter your code here..."
-              defaultValue={`.parent {
-  width: 100%;
-  height: 100vh;
-}
+        <h1 className="text-2xl font-bold mb-4 text-gray-100">
+          Second Greatest and Second Lowest Number  
+        </h1>
 
-.child {
-  width: 200px;
-  height: 200px;
-  background-color: #f0f0f0;
-  margin: auto;
-}`}
-            />
-          </div>
-          
+        <div className="space-y-6">
+          <InputBlock
+            inputType="Question"
+            explanation="Hi, I am trying to compute the second smallest and second largest numbers from an array of numbers. I have written the following code, but it is not working as expected. Can you help me fix it?"
+            code={
+`function Second_Greatest_Lowest(arr_num) {
+  // Sort the array in ascending order using a custom comparison function
+  arr_num.sort(function(x, y) {
+    return x + y;
+  });
+
+  var uniqa = [arr_num[0]];
+  var result = [];
+
+  for (var j = 1; j < arr_num.length; j++) {
+    if (arr_num[j - 1] !== arr_num[j]) {
+      uniqa.push(arr_num[j]);
+    }
+  }
+  result.push(uniqa[1], uniqa[uniqa.length - 2]);
+  return result.join(',');
+}
+console.log(Second_Greatest_Lowest([1, 2, 3, 4, 5])); `}
+          />
         </div>
-        
+
         <Separator className="my-8 bg-gray-700" />
-        
+
         <div className="space-y-6">
           <h2 className="text-xl font-semibold text-gray-200">Answers</h2>
-          
-          <AnswerBlock
+
+          <InputBlock
+            inputType="Answer"
             number={1}
-            explanation="To center a div both horizontally and vertically, you can use Flexbox. It's a modern and efficient way to handle centering in CSS. Here's how you can modify your CSS:"
-            code={`.parent {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-  height: 100vh;
-}
-
-.child {
-  width: 200px;
-  height: 200px;
-  background-color: #f0f0f0;
-}`}
+            explanation="Puhahahahaha spaghetti code"
           />
-          
-          <AnswerBlock
-            number={2}
-            explanation="Another modern approach is to use CSS Grid. This method is particularly useful if you have multiple elements to center or need more complex layouts:"
-            code={`.parent {
-  display: grid;
-  place-items: center;
-  width: 100%;
-  height: 100vh;
-}
 
-.child {
-  width: 200px;
-  height: 200px;
-  background-color: #f0f0f0;
-}`}
+          <InputBlock
+            inputType="Answer"
+            number={2}
+            explanation="You are adding the numbers instead of comparing them. You should change the comparison function to return x - y instead of x + y."
+            code={`
+ arr_num.sort(function(x, y) {
+    return x - y;
+});
+              `}
           />
         </div>
       </div>
     </div>
-  )
+  );
 }
