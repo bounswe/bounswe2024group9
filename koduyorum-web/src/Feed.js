@@ -88,14 +88,14 @@ function Feed() {
             },
             {
                 id: 2,
-                title: "Best practices for React hooks",
+                title: "Second Greatest and Second Lowest Number",
                 language: "JavaScript",
-                labels: ["react", "frontend"],
+                labels: ["fundamentals", "arrays"],
                 status: "answered",
                 createdAt: "2024-03-02",
                 popularity: 15,
                 preview:
-                  "Hooks are a powerful feature in React, but sometimes they lead to unexpected behavior. What are the best practices for using React hooks? Specifically, how can I avoid issues related to stale closures and unnecessary re-renders in functional components?",
+                  "Hi, I am trying to compute the second smallest and second largest numbers from an array of numbers. I have written the following code, but it is not working as expected. Can you help me fix it?",
             },
             {
                 id: 3,
@@ -193,7 +193,7 @@ function Feed() {
 
           <div className="posts-list">
             {sortedPosts.map((post) => (
-              <div key={post.id} className="post-card">
+              <div key={post.id} className="post-card" onClick={() => (window.location.href = "/question")}>
                 <h2 className="post-title">{post.title}</h2>
                 <p className="post-preview">{truncateText(post.preview, 100)}</p>
                 <div className="post-labels">
