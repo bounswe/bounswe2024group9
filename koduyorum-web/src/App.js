@@ -6,7 +6,8 @@ import Login from './Login';
 import ForgotPassword from './ForgotPassword';
 import Feed from './Feed';
 import './App.css';
-import SearchResults from './SearchResults';
+// import SearchResults from './SearchResults';
+import CodeExecution from './components/code-execution';
 
 
 const App = () => {
@@ -33,7 +34,8 @@ const AppRoutes = () => {
       <Route path="/login" element={<Login />} />
       <Route path="/forgot" element={<ForgotPassword />} />
       <Route path="/feed" element={<Feed />} /> 
-      <Route path="/search" element={<SearchResults />} />
+      <Route path="/question" element={<CodeExecution />} />
+      {/* <Route path="/search" element={<SearchResults />} /> */}
       {user ? (
         <>
           {/* <Route path="/feed" element={<Feed />} /> */}
@@ -41,7 +43,8 @@ const AppRoutes = () => {
       ) : (
         <Route path="/" element={<Navigate replace to="/login"/>} />
       )}
-      {/* <Route path="*" element={<Navigate replace to="/login" state={{ from: 'private' }} />} /> */}
+      {/* <Route path="*" element={<Navigate replace to="/login" state={{ from: 'private' }} />} /> */} 
+      {/* login olmadan feede erişememeyi sağlayan kod, sonra commentten çıkarılacak */}
     </Routes>
   );
 };
