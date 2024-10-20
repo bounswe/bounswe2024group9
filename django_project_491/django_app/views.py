@@ -6,16 +6,20 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login
 from urllib.parse import quote
+from django.core.cache import cache
+import requests
+
 
 # Used for initial search - returns 5 best matching wiki id's
 @login_required
 def wiki_search(request, search_strings):
     sparql = SPARQLWrapper("https://query.wikidata.org/sparql")
-    
-    search_terms = search_strings.split() # split into words
-    
+
+    search_terms = search_strings.split()  # split into words
+
     # Generate SPARQL FILTER for each word in the search string
-    filter_conditions = " || ".join([f'CONTAINS(LCASE(?languageLabel), "{quote(term.lower())}")' for term in search_terms])
+    filter_conditions = " || ".join(
+        [f'CONTAINS(LCASE(?languageLabel), "{quote(term.lower())}")' for term in search_terms])
 
     query = f"""
     SELECT DISTINCT ?language (SAMPLE(?languageLabel) as ?languageLabel) 
@@ -43,6 +47,7 @@ def wiki_search(request, search_strings):
     results = sparql.query().convert()
 
     return JsonResponse(results)
+
 
 # Shows the resulting info of the chosen wiki item
 @login_required
@@ -99,8 +104,8 @@ def wiki_result(response, wiki_id):
     # Process the results to combine main info and instances
     instances = [
         {
-            'instance': result['instance']['value'],  
-            'instanceLabel': result['instanceLabel']['value'] 
+            'instance': result['instance']['value'],
+            'instanceLabel': result['instanceLabel']['value']
         }
         for result in instances_results['results']['bindings']
         if 'instanceLabel' in result
@@ -147,30 +152,49 @@ def wiki_result(response, wiki_id):
 
     return JsonResponse(final_response)
 
-def wikipedia_data_views(wiki_id): 
+
+def wikipedia_data_views(wiki_id):
     info_object = modify_data(wiki_id)
     return info_object
-        
+
+
+def get_languages():
+    """
+    Get a list of supported languages from Judge0 API.
+    """
+    Lang2ID = cache.get('Lang2ID')
+
+    if Lang2ID is not None:
+        return Lang2ID
+
+    # If not cached, make the API request
+    response = requests.get('https://judge0-ce.p.rapidapi.com/languages', headers=HEADERS)
+    if response.status_code == 200:
+        # Parse and cache the result with no timeout (indefinite caching)
+        Lang2ID = {lang['name']: lang['id'] for lang in response.json()}
+        cache.set('Lang2ID', Lang2ID, timeout=None)  # Cache indefinitely
+        return Lang2ID
+    else:
+        # Todo Notify user about having the API connection issue
+        return None
+
 
 @login_required
 def run_code_view(request):
-    # TODO Uncomment the lines after connecting to the front-end
-
-    # source_code = request.POST.get('source_code', '')
-    # language_id = request.POST.get('language_name', '')
-
-    # TODO Example usage, delete this part after connecting to the front-end
-    source_code = "print('Hello, World!')"
-    language_id = 71  # Language ID for Python
-
-    result = run_code(source_code, language_id)
+    source_code = request.POST.get('source_code', '')
+    language_name = request.POST.get('language_name', '')
+    Lang2ID = get_languages()
+    result = run_code(source_code, Lang2ID[language_name])
     return JsonResponse(result)
 
 
+
+# TODO The signup function is used to test the functionality of the authentication system
+# Thus when the front-end is connected, this function will be removed
 def signup(request):
     if request.method == 'POST':
         form = SignupForm(request.POST)
-        
+
         if form.is_valid():
             form.save()  # This saves the new user
             return redirect('login')  # Redirect to some page after sign-up, e.g., the home page
@@ -181,5 +205,7 @@ def signup(request):
 
     return render(request, 'signup.html', {'form': form})
 
+
+# Todo A sample home page view for testing purposes, will be removed after front-end connection.
 def home(request):
     return render(request, 'home.html')

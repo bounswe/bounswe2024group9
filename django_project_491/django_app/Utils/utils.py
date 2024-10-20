@@ -5,18 +5,18 @@ import os
 from dotenv import load_dotenv
 import xml.etree.ElementTree as ET
 
+load_dotenv()
+
 HEADERS = {
     "content-type": "application/json",
     "X-RapidAPI-Key": os.environ.get('JUDGE0_API_KEY'),
     "X-RapidAPI-Host": "judge0-ce.p.rapidapi.com"
 }
 
-Lang2ID = None
-ID2Lang = None
-
 def modify_data(qid):
     # Wikidata API URL to fetch the Wikipedia title
-    url = f"https://www.wikidata.org/w/api.php?action=wbgetentities&format=xml&props=sitelinks&ids={qid}&sitefilter=enwiki".format(qid)
+    url = f"https://www.wikidata.org/w/api.php?action=wbgetentities&format=xml&props=sitelinks&ids={qid}&sitefilter=enwiki".format(
+        qid)
 
     response = requests.get(url)
     root = ET.fromstring(response.content)
@@ -34,19 +34,8 @@ def modify_data(qid):
     info = content[:3]
     format_info = "\n".join(info)
 
-
     return {"title": title, "info": format_info}
 
-def get_languages():
-    """
-    Get a list of supported languages from Judge0 API.
-    """
-    response = requests.get('https://judge0-ce.p.rapidapi.com/languages', headers=HEADERS)
-    if response.status_code == 200:
-        return response.json()
-    else:
-        print(response.text)
-        raise Exception("API RETURNED NON SUCCESSFUL RESPONSE. CONTROL YOUR ENV VARIABLES AND YOUR REQUEST LIMIT")
 
 
 def run_code(source_code, language_id):
@@ -93,25 +82,8 @@ def run_code(source_code, language_id):
 
     API_URL = 'https://judge0-ce.p.rapidapi.com/submissions'
 
-    # The code below can be employed if the argument of this function is not a language_id but a language_name
-
-    # global Lang2ID, ID2Lang
-    #
-    # if Lang2ID is None or ID2Lang is None:
-    #     Lang2ID, ID2Lang = get_language_dicts()
-    # try:
-    #   token = create_submission(source_code, Lang2ID[language_name])
-    # except KeyError:
-    #     raise Exception("Language not found")
-
     token = create_submission(source_code, language_id)
     if token:
         return get_submission_result(token)
     else:
         raise Exception("Error creating submission")
-
-
-def get_language_dicts():
-    Lang2ID = { lang["name"]: lang["id"] for lang in get_languages()}
-    ID2Lang = { id : lang for lang, id in Lang2ID.items()}
-    return Lang2ID, ID2Lang
