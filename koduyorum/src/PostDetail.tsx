@@ -1,37 +1,77 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Alert } from 'react-native';
-import SyntaxHighlighter from 'react-native-syntax-highlighter';
-import { atomOneDark } from 'react-native-syntax-highlighter';
 
 const PostDetail = ({ route }) => {
-    const { post } = route.params;
-    
-    // State to hold the new comment input
+    const { post, user_id } = route.params;
+
+    const [comments, setComments] = useState([]);  // Start with an empty comments array
     const [newComment, setNewComment] = useState('');
-    const [comments, setComments] = useState(post.mockComments);
+
+    // Fetch comments when the component mounts
+    useEffect(() => {
+        const fetchComments = async () => {
+            try {
+                const response = await fetch(`http://10.0.2.2:8000/question/${post.id}/comments/`);
+                const data = await response.json();
+                if (response.status === 200) {
+                    setComments(data.comments);
+                } else {
+                    Alert.alert('Error', data.error || 'Failed to fetch comments');
+                }
+            } catch (error) {
+                console.error('Error fetching comments:', error);
+                Alert.alert('Error', 'Failed to fetch comments');
+            }
+        };
+
+        fetchComments();
+    }, [post.id]);
 
     // Function to handle adding a new comment
-    const handleAddComment = () => {
+    const handleAddComment = async () => {
         if (newComment.trim() === '') {
             Alert.alert('Comment cannot be empty');
             return;
         }
 
+        // Prepare the payload to send to the backend
         const newCommentObj = {
-            comment_id: comments.length + 1, // will be passed i think but may change when i connect to backed
-            text: newComment,
-            user: 'currentUser', 
+            question_id: post.id,  // The ID of the question the comment is associated with
+            details: newComment,  // The comment text
+            language: post.programmingLanguage,  // Programming language of the post
+            user_id: user_id,  // The logged-in user's ID
         };
 
-        setComments([...comments, newCommentObj]);
-        setNewComment(''); 
+        try {
+            // Send the comment to the backend
+            const response = await fetch('http://10.0.2.2:8000/create_comment/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(newCommentObj),
+            });
+
+            const data = await response.json();
+
+            if (response.status === 201) {
+                // If the comment is successfully added, update the comments state
+                setComments([...comments, { comment_id: data.comment_id, details: newComment, user: 'currentUser' }]);
+                setNewComment('');  // Clear the comment input
+            } else {
+                Alert.alert('Error', data.error || 'Failed to add comment');
+            }
+        } catch (error) {
+            console.error('Error adding comment:', error);
+            Alert.alert('Error', 'Failed to add comment');
+        }
     };
 
     const renderComments = () => {
-        return comments.map((comment) => (
-            <View key={comment.comment_id} style={styles.comment}>
+        return comments.map((comment, index) => (
+            <View key={index} style={styles.comment}>
                 <Text style={styles.commentUser}>{comment.user}:</Text>
-                <Text style={styles.commentText}>{comment.text}</Text>
+                <Text style={styles.commentText}>{comment.details}</Text>
             </View>
         ));
     };
@@ -43,9 +83,7 @@ const PostDetail = ({ route }) => {
 
             <View style={styles.codeContainer}>
                 <Text style={styles.codeTitle}>Code Snippet:</Text>
-                <SyntaxHighlighter language={post.programmingLanguage.toLowerCase()} style={atomOneDark}>
-                    {post.codeSnippet}
-                </SyntaxHighlighter>
+                <Text>{post.codeSnippet}</Text>
             </View>
 
             <View style={styles.commentsContainer}>
@@ -86,11 +124,6 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         padding: 15,
         marginBottom: 20,
-    },
-    codeTitle: {
-        fontSize: 16,
-        fontWeight: 'bold',
-        marginBottom: 10,
     },
     commentsContainer: {
         marginTop: 20,

@@ -16,4 +16,6 @@ urlpatterns = [
     path('list_questions/', list_questions_by_language, name='list_questions'),
     path('run_code/', run_code_view, name='run_code'),
     path('get_api_languages/', get_run_coder_api_languages, name='get_run_coder_api_languages'),
+    path('random_questions/', random_questions, name='random_questions'),
+    path('question/<int:question_id>/comments/', get_question_comments, name='get_question_comments'),
 ]

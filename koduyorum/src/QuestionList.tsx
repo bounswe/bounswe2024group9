@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, TextInput, Button, FlatList, StyleSheet, Text, TouchableOpacity } from 'react-native';
 import QuestionCard from './QuestionCard';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -8,170 +8,46 @@ const QuestionList = () => {
     const route = useRoute();
     const { username, user_id } = route.params;
 
-
-    // Mock data for questions
-    const mockQuestions = [
-        {
-            post_id: 1,
-            title: 'How to optimize React Native app performance?',
-            description: 'I am working on a React Native app and facing performance issues...',
-            user_id: 2,
-            likes: 15,
-            comments: 4,
-            programmingLanguage: 'JavaScript',
-            topic: 'Performance Optimization',
-            answered: true,
-            codeSnippet: `
-                function optimizePerformance() {
-                  const cache = new Map();
-                
-                  return function (key, computeFn) {
-                    if (cache.has(key)) {
-                      console.log('Returning from cache:', key);
-                      return cache.get(key);
-                    } else {
-                      const result = computeFn();
-                      cache.set(key, result);
-                      console.log('Computed and cached:', key);
-                      return result;
-                    }
-                  };
-                }
-                
-                const memoizedCompute = optimizePerformance();
-                memoizedCompute('expensiveOperation', () => {
-                  return 'heavy computation result';
-                });
-            `,
-            mockComments: [
-                { comment_id: 1, text: 'Try using the memoization technique!', user: 'user123' },
-                { comment_id: 2, text: 'Look into the VirtualizedLists.', user: 'devGuy' },
-            ],
-        },
-        {
-            post_id: 2,
-            title: 'Best practices for state management in Flutter?',
-            description: 'What are the best state management practices in Flutter...',
-            user_id: 3,
-            likes: 8,
-            comments: 2,
-            programmingLanguage: 'Dart',
-            topic: 'State Management',
-            answered: false,
-            codeSnippet: `
-                class MyAppState extends State<MyApp> {
-                  int _counter = 0;
-                
-                  void _incrementCounter() {
-                    setState(() {
-                      _counter++;
-                    });
-                  }
-                
-                  @override
-                  Widget build(BuildContext context) {
-                    return Scaffold(
-                      appBar: AppBar(
-                        title: Text('Flutter Counter App'),
-                      ),
-                      body: Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            Text('You have pushed the button this many times:'),
-                            Text(
-                              '$_counter',
-                              style: Theme.of(context).textTheme.headline4,
-                            ),
-                          ],
-                        ),
-                      ),
-                      floatingActionButton: FloatingActionButton(
-                        onPressed: _incrementCounter,
-                        tooltip: 'Increment',
-                        child: Icon(Icons.add),
-                      ),
-                    );
-                  }
-                }
-            `,
-            mockComments: [
-                { comment_id: 1, text: 'Use the Provider package!', user: 'flutterDev' },
-            ],
-        },
-        {
-            post_id: 3,
-            title: 'How to implement machine learning models in Python?',
-            description: 'I am trying to implement a machine learning model in Python...',
-            user_id: 4,
-            likes: 23,
-            comments: 6,
-            programmingLanguage: 'Python',
-            topic: 'Machine Learning',
-            answered: true,
-            codeSnippet: `
-                import numpy as np
-                from sklearn.model_selection import train_test_split
-                from sklearn.linear_model import LinearRegression
-                
-                # Generating some data
-                X = np.random.rand(100, 1) * 10
-                y = 2.5 * X + np.random.randn(100, 1) * 2
-                
-                # Splitting the data
-                X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
-                
-                # Fitting a linear regression model
-                model = LinearRegression()
-                model.fit(X_train, y_train)
-                
-                # Predicting and calculating error
-                y_pred = model.predict(X_test);
-                error = np.mean((y_pred - y_test) ** 2);
-                print(f'Mean squared error: {error}')
-            `,
-            mockComments: [
-                { comment_id: 1, text: 'You can use scikit-learn for this!', user: 'ml_guru' },
-                { comment_id: 2, text: 'Make sure to scale your data.', user: 'dataWizard' },
-            ],
-        },
-    ];
-
-    
     const [searchQuery, setSearchQuery] = useState('');
     const [searchField, setSearchField] = useState('title');
-    const [filteredQuestions, setFilteredQuestions] = useState(mockQuestions);
+    const [filteredQuestions, setFilteredQuestions] = useState([]);
     const [wikiSearchResults, setWikiSearchResults] = useState([]); // For Wiki API results
 
-    // Function to handle search using fetch
+    // Fetch questions from the backend
+    const fetchQuestions = async () => {
+        try {
+            const response = await fetch('http://10.0.2.2:8000/random_questions/');
+            const data = await response.json();
+            setFilteredQuestions(data.questions);
+        } catch (error) {
+            console.error('Error fetching questions:', error);
+        }
+    };
+
+    useEffect(() => {
+        fetchQuestions();
+    }, []);
+
+    // Function to handle search
     const handleSearch = async () => {
         if (searchQuery.trim() === '') {
-            setFilteredQuestions(mockQuestions);
+            fetchQuestions(); // Re-fetch all questions if search query is empty
         } else {
             if (searchField === 'programmingLanguage') {
                 try {
-                    // Make the API request using fetch
                     const response = await fetch(`http://10.0.2.2:8000/search/${encodeURIComponent(searchQuery)}`);
                     const data = await response.json();
-
                     setWikiSearchResults(data.results.bindings);
-                    setFilteredQuestions([]); // Clear filtered questions if showing Wiki search results
+                    setFilteredQuestions([]);
                 } catch (error) {
                     console.error('Error fetching wiki data', error);
                 }
-            } else if (searchField === 'topic') {
-                const filtered = mockQuestions.filter((question) =>
+            } else {
+                const filtered = filteredQuestions.filter((question) =>
                     question.topic.toLowerCase().includes(searchQuery.toLowerCase())
                 );
                 setFilteredQuestions(filtered);
-                setWikiSearchResults([]); // Clear Wiki search results
-            } else {
-                const filtered = mockQuestions.filter((question) =>
-                    question.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                    question.description.toLowerCase().includes(searchQuery.toLowerCase())
-                );
-                setFilteredQuestions(filtered);
-                setWikiSearchResults([]); // Clear Wiki search results
+                setWikiSearchResults([]);
             }
         }
     };
@@ -247,16 +123,16 @@ const QuestionList = () => {
             ) : (
                 <FlatList
                     data={filteredQuestions}
-                    keyExtractor={(item) => item.post_id.toString()}
+                    keyExtractor={(item) => item.id.toString()}
                     renderItem={({ item }) => (
-                        <QuestionCard post={item} currentUser={user_id} onPress={handlePress} />
+                        <QuestionCard post={item} currentUser={user_id} onPress={() => handlePress(item)} />
                     )}
                     ListEmptyComponent={<Text style={styles.emptyText}>No questions found</Text>}
                 />
             )}
-            
-            <TouchableOpacity 
-                style={styles.floatingButton} 
+
+            <TouchableOpacity
+                style={styles.floatingButton}
                 onPress={() => navigation.navigate('CreateQuestion', { username })}
             >
                 <Text style={styles.plusText}>+</Text>
