@@ -9,53 +9,163 @@ from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
 from .models import Question, Comment
+from urllib.parse import quote
+import requests
 
 
+# Used for initial search - returns 5 best matching wiki id's
 @login_required
-def wikidata_query_view(request):
-    # search_string = request.GET.get('search', '').split()  # Assuming 'search' is passed as a query parameter
-    # filter_conditions = " && ".join([f'CONTAINS(LCASE(?itemLabel), "{term.lower()}")' for term in search_string])
-    # subqueries = "\n".join([f'BIND( IF(CONTAINS(LCASE(?itemLabel), "{term.lower()}"), 1, 0) AS ?match_{i})' for i, term in enumerate(search_string)])
+def wiki_search(request, search_strings):
+    sparql = SPARQLWrapper("https://query.wikidata.org/sparql")
+
+    search_terms = search_strings.split()  # split into words
+
+    # Generate SPARQL FILTER for each word in the search string
+    filter_conditions = " || ".join(
+        [f'CONTAINS(LCASE(?languageLabel), "{quote(term.lower())}")' for term in search_terms])
 
     query = f"""
-        SELECT ?language ?languageLabel WHERE {{
-  ?language wdt:P31 wd:Q9143.  
-  SERVICE wikibase:label {{ bd:serviceParam wikibase:language "en". }}  
-}}
-LIMIT 10
+    SELECT DISTINCT ?language (SAMPLE(?languageLabel) as ?languageLabel) 
+    WHERE {{
+        ?language wdt:P31 wd:Q9143.
+        ?language rdfs:label ?languageLabel.
+
+        # Filter for language names containing any of the search terms
+        FILTER({filter_conditions})
+
+        # Ensure that the label is in English
+        FILTER(LANG(?languageLabel) = "en")
+
+        SERVICE wikibase:label {{ 
+        bd:serviceParam wikibase:language "en". 
+        }}
+    }}
+    GROUP BY ?language
+    ORDER BY STRLEN(?languageLabel)
+    LIMIT 5
     """
-    # 'programming language' (Q9143)
-    sparql = SPARQLWrapper("https://query.wikidata.org/sparql")
+
     sparql.setQuery(query)
     sparql.setReturnFormat(JSON)
+    results = sparql.query().convert()
 
-    try:
-        results = sparql.query().convert()
-        return JsonResponse(results)
-    except Exception as e:
-        return JsonResponse({"error": str(e)}, status=500)
+    return JsonResponse(results)
 
 
+# Shows the resulting info of the chosen wiki item
 @login_required
-def run_code_view(request):
-    # TODO Uncomment the lines after connecting to the front-end
+def wiki_result(response, wiki_id):
+    sparql = SPARQLWrapper("https://query.wikidata.org/sparql")
 
-    # source_code = request.POST.get('source_code', '')
-    # language_id = request.POST.get('language_name', '')
+    # First query to get the main language information
+    query_main_info = f"""
+      SELECT ?language ?languageLabel ?wikipediaLink ?influencedByLabel ?publicationDate ?inceptionDate ?website
+      WHERE {{
+        BIND(wd:{wiki_id} AS ?language)
 
-    # TODO Example usage, delete this part after connecting to the front-end
-    source_code = "print('Hello, World!')"
-    language_id = 71  # Language ID for Python
+        # Get the label of the language in English
+        ?language rdfs:label ?languageLabel.
+        FILTER(LANG(?languageLabel) = "en")
 
-    result = run_code(source_code, language_id)
-    return JsonResponse(result)
+        OPTIONAL {{ ?language wdt:P737 ?influencedBy. }}
+        OPTIONAL {{ ?language wdt:P577 ?publicationDate. }}
+        OPTIONAL {{ ?language wdt:P571 ?inceptionDate. }}
+        OPTIONAL {{ ?language wdt:P856 ?website. }}
+        OPTIONAL {{
+            ?wikipediaLink schema:about ?language;
+            schema:isPartOf <https://en.wikipedia.org/>.
+        }}
+
+        SERVICE wikibase:label {{ 
+          bd:serviceParam wikibase:language "en". 
+        }}
+      }}
+      LIMIT 1
+    """
+
+    sparql.setQuery(query_main_info)
+    sparql.setReturnFormat(JSON)
+    main_info_results = sparql.query().convert()
+
+    # Second query to get all instances of the language, excluding "programming language"
+    query_instances = f"""
+      SELECT ?instance ?instanceLabel
+      WHERE {{
+        BIND(wd:{wiki_id} AS ?language)
+
+        ?language wdt:P31 ?instance.
+        OPTIONAL {{ ?instance rdfs:label ?instanceLabel. FILTER(LANG(?instanceLabel) = "en") }}
+        FILTER(?instance != wd:Q9143)  # Exclude programming language (wd:Q9143)
+      }}
+      LIMIT 3
+    """
+
+    sparql.setQuery(query_instances)
+    sparql.setReturnFormat(JSON)
+    instances_results = sparql.query().convert()
+
+    # Process the results to combine main info and instances
+    instances = [
+        {
+            'instance': result['instance']['value'],
+            'instanceLabel': result['instanceLabel']['value']
+        }
+        for result in instances_results['results']['bindings']
+        if 'instanceLabel' in result
+    ]
+
+    # Fetch Wikipedia data
+    try:
+        wikipedia_data = wikipedia_data_views(wiki_id)
+    except Exception as e:
+        wikipedia_data = []
+
+    # For each instance, find 3 other languages of that instance excluding the current language
+    for instance in instances:
+        instance_id = instance['instance'].split('/')[-1]  # Extract the ID from the URI
+        query_related_languages = f"""
+            SELECT ?relatedLanguage ?relatedLanguageLabel
+            WHERE {{
+                ?relatedLanguage wdt:P31 wd:{instance_id}.
+                FILTER(?relatedLanguage != wd:{wiki_id})  # Exclude the current language
+                OPTIONAL {{ ?relatedLanguage rdfs:label ?relatedLanguageLabel. FILTER(LANG(?relatedLanguageLabel) = "en") }}
+            }}
+            LIMIT 3
+        """
+        sparql.setQuery(query_related_languages)
+        sparql.setReturnFormat(JSON)
+        related_languages_results = sparql.query().convert()
+
+        # Extract related languages and add to the instance
+        related_languages = [
+            {
+                'relatedLanguage': result['relatedLanguage']['value'],  # Store the related language URI
+                'relatedLanguageLabel': result['relatedLanguageLabel']['value']  # Store the label
+            }
+            for result in related_languages_results['results']['bindings']
+            if 'relatedLanguageLabel' in result
+        ]
+        instance['relatedLanguages'] = related_languages  # Add related languages to the instance
+
+    final_response = {
+        'mainInfo': main_info_results['results']['bindings'],
+        'instances': instances,
+        'wikipedia': wikipedia_data
+    }
+
+    return JsonResponse(final_response)
 
 
-def wikipedia_data_views(request):
-    qid = "Q28865"  # (temporary) Q-ID for Python
-    info_object = modify_data(qid)
-    return render(request, 'wikipedia_data.html', {'language': info_object})
-  
+def wikipedia_data_views(wiki_id):
+    info_object = modify_data(wiki_id)
+    return info_object
+
+
+@login_required # We are controlling if the user is logged in here
+def get_run_coder_api_languages():
+    Lang2ID = get_languages()
+    languages = [name for name, _ in Lang2ID]
+    return languages
 
 @csrf_exempt
 def signup(request):
@@ -88,6 +198,7 @@ def signup(request):
     
     return JsonResponse({'error': 'Invalid request method'}, status=405)
 
+@csrf_exempt
 def login_user(request):
     if request.method == 'POST':
         try:
@@ -110,7 +221,7 @@ def login_user(request):
             print("Failed login attempt for username:", username)
             return JsonResponse({'error': 'Invalid username or password'}, status=400)
     else:
-        # Method not allowed if not POST
+       # Method not allowed if not POST
         return HttpResponse(status=405)
 
 @csrf_exempt  # This is allowing POST requests without CSRF token
@@ -122,19 +233,27 @@ def create_comment(request : HttpRequest) -> HttpResponse:
             question_id = data.get('question_id')
             comment_details = data.get('details')
             code_snippet = data.get('code_snippet', '')  # It is optional
+            language = data.get('language')
 
-            # Fetch the question
+
             try:
                 question = Question.objects.get(_id=question_id)
             except Question.DoesNotExist:
                 return JsonResponse({'error': 'Question not found'}, status=404)
 
-            # Create the comment
-            comment = Comment.objects.create(details=comment_details, code_snippet=code_snippet)
+            Lang2ID = get_languages() 
+            language_id = Lang2ID.get(language, 71) # Default to Python
 
-            # Associate the comment with the question and the user
+            comment = Comment.objects.create(
+                details=comment_details, 
+                code_snippet=code_snippet,
+                language_id=language_id
+                )
+
             question.add_comment(comment)
-            request.user.add_comment(comment)
+
+            # TODO : CONTROL IF THE USER OBJECT EXISTS INSIDE THE REQUEST OBJECT
+            # request.user.add_comment(comment)
 
             return JsonResponse({'success': 'Comment created successfully', 'comment_id': comment._id}, status=201)
 
@@ -156,8 +275,8 @@ def create_question(request : HttpRequest) -> HttpResponse:
             code_snippet = data.get('code_snippet', '')  # There may not be a code snippet
             tags = data.get('tags', [])  # There may not be any tags
 
-            id_to_lang_dict = get_language_to_id_dict() 
-            language_id = id_to_lang_dict.get(language.lower(), 71) # Default to Python
+            Lang2ID = get_languages() 
+            language_id = Lang2ID.get(language, 71) # Default to Python
 
             question = Question.objects.create(
                 title=title,
@@ -179,17 +298,13 @@ def create_question(request : HttpRequest) -> HttpResponse:
 
 
 def list_questions_by_language(request):
-    # Get the language parameter from the HTTP GET request
     language = request.GET.get('language', None)
     
-    # Check if the language parameter is provided
     if not language:
         return JsonResponse({'error': 'Language parameter is required'}, status=400)
     
-    # Fetch questions related to the provided language
     questions = Question.objects.filter(language__iexact=language)
     
-    # Convert the questions data to JSON format
     questions_data = [{
         'id': question._id,
         'title': question.title,
@@ -201,9 +316,32 @@ def list_questions_by_language(request):
         'creationDate': question.creationDate.strftime('%Y-%m-%d %H:%M:%S'),
     } for question in questions]
     
-    # Return the questions data as JSON
     return JsonResponse({'questions': questions_data}, safe=False, status=200)
 
+@csrf_exempt
+def list_questions_by_tag(request):
+    tags = request.GET.get('tag_array', None)
+    
+    if not tags:
+        return JsonResponse({'error': 'Tag parameter is required'}, status=400)
+    
+    questions = Question.objects.filter(tags__contains=tags)
+
+    questions_data = [{
+        'id': question._id,
+        'title': question.title,
+        'language': question.language,
+        'tags': question.tags,
+        'details': question.details,
+        'code_snippet': question.code_snippet,
+        'upvotes': question.upvotes,
+        'creationDate': question.creationDate.strftime('%Y-%m-%d %H:%M:%S'),
+    } for question in questions]
+
+    return JsonResponse({'questions': questions_data}, safe=False, status=200)
+
+
+@login_required
 def run_code_view(request):
     type = request.GET.get('type', '') # Get type, comment or question
     id = request.GET.get('id', '') # Get id of the comment or question
@@ -217,6 +355,7 @@ def run_code_view(request):
     else:
         return JsonResponse({'error': 'Invalid type'}, status=400)
     return JsonResponse({'output': outs})
+
 
 def home(request):
     return render(request, 'home.html')
