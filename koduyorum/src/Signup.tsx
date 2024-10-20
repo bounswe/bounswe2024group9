@@ -25,25 +25,28 @@ const Signup = ({ navigation }: Props) => {
   const [subscribe, setSubscribe] = useState(false);
 
   const handleSubmit = async () => {
-    const userInfo = { username, name: '', email, password, is_superuser: false };
+    const userInfo = { username, email, password1: password, password2: password };
+    
     try {
       if (!subscribe) {
         Alert.alert('You must agree to KVKK to continue!');
       } else {
-        const response = await fetch('/django_app/signup/', {
+        const response = await fetch('http://10.0.2.2:8000/signup/', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify(userInfo),
         });
-
+  
         const json = await response.json();
         if (response.ok) {
           Alert.alert('User saved successfully!');
           setTimeout(() => {
-            navigation.navigate('Feed', { username });
+            navigation.navigate('QuestionList', { username });
           }, 2000);
+        } else {
+          Alert.alert(json.error || 'Failed to save user.');
         }
       }
     } catch (error) {

@@ -31,7 +31,7 @@ const Login = () => {
 
         setLoading(true);
 
-        const url = Platform.OS === 'android' ? 'http://10.0.2.2:8000/django_app/login/' : 'http://localhost:8000/django_app/login/';
+        const url ='http://10.0.2.2:8000/login/';
         
         try {
             const response = await fetch(url, {
@@ -50,7 +50,7 @@ const Login = () => {
 
             setSuccess('Login successful! Logging you in...');
             setTimeout(() => {
-                navigation.navigate('Feed', { username });
+                navigation.navigate('QuestionList', { username });
             }, 2000);
         } catch (error) {
             setError('Login failed, please try again later.');
@@ -60,7 +60,7 @@ const Login = () => {
     };
 
     const handleSignUp = () => {
-        navigation.navigate('QuestionList', { username });
+        navigation.navigate('Signup');
     };
 
     return (
