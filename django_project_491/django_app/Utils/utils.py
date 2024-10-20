@@ -110,10 +110,8 @@ def run_code(source_code, language_id):
     else:
         raise Exception("Error creating submission")
 
-
-def normalize_language_name(lang_name):
-    return lang_name.split(' (')[0].lower()
-
-def get_language_to_id_dict():
-    return { normalize_language_name(lang["name"]): lang["id"] for lang in get_languages() }
+def get_language_dicts():
+    Lang2ID = { lang["name"]: lang["id"] for lang in get_languages()}
+    ID2Lang = { id : lang for lang, id in Lang2ID.items()}
+    return Lang2ID, ID2Lang
 

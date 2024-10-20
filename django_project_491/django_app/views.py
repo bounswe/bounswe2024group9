@@ -132,9 +132,10 @@ def create_comment(request : HttpRequest) -> HttpResponse:
             # Create the comment
             comment = Comment.objects.create(details=comment_details, code_snippet=code_snippet)
 
-            # Associate the comment with the question and the user
             question.add_comment(comment)
-            request.user.add_comment(comment)
+
+            # TODO : CONTROL IF THE USER OBJECT EXISTS INSIDE THE REQUEST OBJECT
+            # request.user.add_comment(comment)
 
             return JsonResponse({'success': 'Comment created successfully', 'comment_id': comment._id}, status=201)
 
@@ -156,8 +157,8 @@ def create_question(request : HttpRequest) -> HttpResponse:
             code_snippet = data.get('code_snippet', '')  # There may not be a code snippet
             tags = data.get('tags', [])  # There may not be any tags
 
-            id_to_lang_dict = get_language_to_id_dict() 
-            language_id = id_to_lang_dict.get(language.lower(), 71) # Default to Python
+            Lang2ID, _ = get_language_dicts() 
+            language_id = Lang2ID.get(language, 71) # Default to Python
 
             question = Question.objects.create(
                 title=title,
@@ -179,17 +180,13 @@ def create_question(request : HttpRequest) -> HttpResponse:
 
 
 def list_questions_by_language(request):
-    # Get the language parameter from the HTTP GET request
     language = request.GET.get('language', None)
     
-    # Check if the language parameter is provided
     if not language:
         return JsonResponse({'error': 'Language parameter is required'}, status=400)
     
-    # Fetch questions related to the provided language
     questions = Question.objects.filter(language__iexact=language)
     
-    # Convert the questions data to JSON format
     questions_data = [{
         'id': question._id,
         'title': question.title,
@@ -201,8 +198,31 @@ def list_questions_by_language(request):
         'creationDate': question.creationDate.strftime('%Y-%m-%d %H:%M:%S'),
     } for question in questions]
     
-    # Return the questions data as JSON
     return JsonResponse({'questions': questions_data}, safe=False, status=200)
+
+@csrf_exempt
+def list_questions_by_tag(request):
+    tags = request.GET.get('tag_array', None)
+    
+    if not tags:
+        return JsonResponse({'error': 'Tag parameter is required'}, status=400)
+    
+    questions = Question.objects.filter(tags__contains=tags)
+
+    questions_data = [{
+        'id': question._id,
+        'title': question.title,
+        'language': question.language,
+        'tags': question.tags,
+        'details': question.details,
+        'code_snippet': question.code_snippet,
+        'upvotes': question.upvotes,
+        'creationDate': question.creationDate.strftime('%Y-%m-%d %H:%M:%S'),
+    } for question in questions]
+
+    return JsonResponse({'questions': questions_data}, safe=False, status=200)
+
+
 
 def run_code_view(request):
     type = request.GET.get('type', '') # Get type, comment or question
@@ -217,6 +237,8 @@ def run_code_view(request):
     else:
         return JsonResponse({'error': 'Invalid type'}, status=400)
     return JsonResponse({'output': outs})
+
+
 
 def home(request):
     return render(request, 'home.html')
