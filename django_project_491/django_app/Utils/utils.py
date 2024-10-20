@@ -13,6 +13,22 @@ HEADERS = {
     "X-RapidAPI-Host": "judge0-ce.p.rapidapi.com"
 }
 
+JUDGE0_KEY_CHANGED = False
+
+
+def check_api_key(response):
+    def change_api_key():
+        HEADERS["X-RapidAPI-Key"] = os.environ.get('ALTERNATIVE_JUDGE0_API_KEY')
+
+    if response.status_code == 429:
+        global JUDGE0_KEY_CHANGED
+        if not JUDGE0_KEY_CHANGED:
+            change_api_key()
+            JUDGE0_KEY_CHANGED = True
+            return True
+    return False
+
+
 def modify_data(qid):
     # Wikidata API URL to fetch the Wikipedia title
     url = f"https://www.wikidata.org/w/api.php?action=wbgetentities&format=xml&props=sitelinks&ids={qid}&sitefilter=enwiki".format(
@@ -37,7 +53,6 @@ def modify_data(qid):
     return {"title": title, "info": format_info}
 
 
-
 def run_code(source_code, language_id):
     def create_submission(source_code, language_id):
         """
@@ -58,6 +73,8 @@ def run_code(source_code, language_id):
             print(f"Submission created successfully. Token: {submission_token}")
             return submission_token
         else:
+            if check_api_key(response):
+                return create_submission(source_code, language_id)
             print(f"Error creating submission: {response.status_code}, {response.text}")
             return None
 

@@ -175,6 +175,9 @@ def get_languages():
         cache.set('Lang2ID', Lang2ID, timeout=None)  # Cache indefinitely
         return Lang2ID
     else:
+        if check_api_key(response):
+            return get_languages()
+
         # Todo Notify user about having the API connection issue
         return None
 
