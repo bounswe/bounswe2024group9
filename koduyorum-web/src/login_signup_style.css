@@ -1,0 +1,247 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f4f8fb; /* Light grey-blue */
+  color: #333;
+}
+
+.wrapper_entrance {
+  /* color: black; */
+  font-family: Arial, sans-serif;
+  background-color: #f4f8fb;
+  background-size: 100% 100%;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  
+}
+
+.container_center {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+  width: 100%;
+  max-width: 350px;
+}
+
+.wrapper_entrance h2 {
+  margin-bottom: 20px;
+  text-align: center;
+  font-size: 1.8rem;
+  color: #333;
+}
+
+.wrapper_entrance .form-group {
+  margin-bottom: 20px;
+  /* margin-right: 5%; */
+}
+
+.wrapper_entrance label {
+  display: block;
+  font-weight: bold;
+  font-size: 0.9rem;
+  color: #333;
+}
+
+input[type="text"],
+input[type="password"] {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 1rem;
+  box-sizing: border-box;
+}
+
+.login-button.loading {
+  background-color: #f0f0f0; 
+  color: #999;
+  pointer-events: none; 
+  opacity: 0.8; 
+}
+
+.wrapper_entrance button {
+  width: 100%;
+  padding: 12px;
+  background-color: #38b6ff; /* Main blue color */
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.3s;
+}
+
+.wrapper_entrance button:hover {
+  background-color: #0056b3;
+}
+
+/* Links */
+.wrapper_entrance a {
+  color: #007bff;
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.wrapper_entrance a:hover {
+  text-decoration: underline;
+}
+
+.wrapper_entrance .forgot-password {
+  color: black;
+}
+
+.wrapper_entrance .remember-forget-container .forgot-password {
+  margin-left: auto;
+  font-size: 0.8rem;
+}
+
+.wrapper_entrance #login-button {
+  margin-top: 3%;
+  background-color: #38b6ff;
+  font-size: 1rem;
+}
+
+.wrapper_entrance .news-container label {
+  margin-right: 10px; 
+  font-size: 0.8rem;
+}
+
+.wrapper_entrance .news-container .forgot-password {
+  margin-left: auto;
+  font-size: 0.8rem;
+}
+
+.wrapper_entrance #signup-button {
+  margin-top: 3%;
+  background-color: #38b6ff;
+  font-size: 1rem;
+}
+
+.wrapper_entrance #signup-button:hover {
+  background-color: #0056b3;
+}
+
+.wrapper_entrance #signup-button:disabled {
+  margin-top: 3%;
+  background-color: #38b6ff;
+  font-size: 1rem;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+
+.wrapper_entrance #link1 {
+  position: absolute;
+  top: 10px;
+  right: 25px; 
+  text-decoration: none;
+  color: black;
+  font-weight: bold;
+  font-size: 0.9rem;
+  margin-right: 3%;
+  margin-top: 1%;
+}
+
+.wrapper_entrance #link2 {
+  position: absolute;
+  top: 10px;
+  right: 115px; 
+  text-decoration: none;
+  color: black;
+  font-weight: bold;
+  font-size: 0.9rem;
+  margin-right: 5%;
+  margin-top: 1%;
+}
+
+.wrapper_entrance .logo {
+  width: 50px; 
+  margin-left: 10px; 
+  vertical-align: middle;
+
+} 
+
+/* Error Messages */
+.error-message {
+  color: white;
+  background-color: rgba(244, 67, 54, 0.9);
+  border-radius: 4px;
+  padding: 8px;
+  text-align: center;
+  margin: 10px 0;
+}
+
+.error-message:empty {
+  display: none;
+}
+
+.signup-redirect, .signin-redirect {
+  text-align: center;
+  margin-top: 20px; 
+}
+
+.signup-redirect a , .signin-redirect a{
+  color: #007bff; 
+  text-decoration: none;
+}
+
+.signup-redirect a:hover, .signin-redirect a:hover {
+  text-decoration: underline;
+}
+
+.wrapper_entrance .remember-forget-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: nowrap; 
+}
+
+.wrapper_entrance .remember-forget-container div,
+.wrapper_entrance .remember-forget-container a.forgot-password {
+  flex-basis: 50%;
+  display: flex;
+  align-items: center; 
+  margin: 7px 0;
+}
+
+.wrapper_entrance .remember-forget-container div {
+  justify-content: flex-start; 
+}
+
+.wrapper_entrance .remember-forget-container a.forgot-password {
+  justify-content: flex-end; 
+}
+
+.wrapper_entrance .remember-forget-container input[type="checkbox"] {
+  margin-right: 5px; 
+}
+
+.kvkk-container {
+  display: flex;
+  align-items: center;
+}
+
+.mail-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mail-box label {
+  margin-right: 10px;
+  font-size: 0.9rem;
+}
+
+@media (max-width: 600px) {
+  .container_center {
+    width: 90%;
+    padding: 15px;
+    
+  }
+}

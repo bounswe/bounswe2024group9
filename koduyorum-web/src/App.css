@@ -1,0 +1,79 @@
+/* General Styling */
+.App {
+  text-align: center;
+  background-color: #f4f6fc; /* Light grey-blue for overall background */
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Logo Animation */
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Header */
+.App-header {
+  background-color: #38b6ff; /* Using the main blue from your logo */
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: #f4f6fc;
+  padding: 20px;
+}
+
+/* Links */
+.App-link {
+  color: #61dafb; /* Slightly lighter blue for links */
+  text-decoration: none;
+  font-size: 1.2rem;
+  transition: color 0.3s;
+}
+
+.App-link:hover {
+  color: #0056b3; /* Darker blue for hover effect */
+}
+
+/* Buttons */
+.button {
+  padding: 12px 24px;
+  background-color: #38b6ff; /* Primary button color matching logo */
+  color: #f4f6fc;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.3s;
+}
+
+.button:hover {
+  background-color: #0056b3; /* Darker blue on hover */
+}
+
+/* Responsive Styling */
+@media (max-width: 768px) {
+  .App-header {
+    font-size: calc(8px + 2vmin);
+  }
+}
