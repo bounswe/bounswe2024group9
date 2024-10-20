@@ -1,12 +1,15 @@
-from django.http import JsonResponse
 from SPARQLWrapper import SPARQLWrapper, JSON
 from .Utils.utils import *
 from .Utils.forms import *
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import login
+from django.contrib.auth import login, authenticate, get_user_model
+from django.contrib.auth.forms import AuthenticationForm
+from django.http import HttpRequest, HttpResponse, JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import json
+from .models import Question, Comment
 from urllib.parse import quote
-from django.core.cache import cache
 import requests
 
 
@@ -158,57 +161,207 @@ def wikipedia_data_views(wiki_id):
     return info_object
 
 
-def get_languages():
-    """
-    Get a list of supported languages from Judge0 API.
-    """
-    Lang2ID = cache.get('Lang2ID')
+@login_required # We are controlling if the user is logged in here
+def get_run_coder_api_languages():
+    Lang2ID = get_languages()
+    languages = [name for name, _ in Lang2ID]
+    return languages
 
-    if Lang2ID is not None:
-        return Lang2ID
+@csrf_exempt
+def signup(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            username = data.get('username')
+            email = data.get('email')
+            password1 = data.get('password1')
+            password2 = data.get('password2')
+        except (KeyError, json.JSONDecodeError) as e:
+            return JsonResponse({'error': f'Malformed data: {str(e)}'}, status=400)
 
-    # If not cached, make the API request
-    response = requests.get('https://judge0-ce.p.rapidapi.com/languages', headers=HEADERS)
-    if response.status_code == 200:
-        # Parse and cache the result with no timeout (indefinite caching)
-        Lang2ID = {lang['name']: lang['id'] for lang in response.json()}
-        cache.set('Lang2ID', Lang2ID, timeout=None)  # Cache indefinitely
-        return Lang2ID
+        if password1 != password2:
+            return JsonResponse({'error': 'Passwords do not match'}, status=400)
+
+        User = get_user_model()
+
+        # Check if the username or email already exists
+        if User.objects.filter(username=username).exists():
+            return JsonResponse({'error': 'Username is already taken'}, status=400)
+        if User.objects.filter(email=email).exists():
+            return JsonResponse({'error': 'Email is already registered'}, status=400)
+
+        user = User(username=username, email=email)
+        user.set_password(password1)  # It will hash the password
+        user.save()
+
+        return JsonResponse({'success': 'User created successfully'}, status=201)
+    
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+@csrf_exempt
+def login_user(request):
+    if request.method == 'POST':
+        try:
+            # Parse the incoming JSON request body
+            data = json.loads(request.body)
+            username = data.get('username')
+            password = data.get('password')
+        except (KeyError, json.JSONDecodeError) as e:
+            # Handle malformed data
+            return JsonResponse({'error': 'Malformed data, error: ' + str(e)}, status=400)
+
+        # Authenticate the user
+        user = authenticate(username=username, password=password)
+        if user is not None:
+            # Authentication successful, log in the user
+            login(request, user)
+            return JsonResponse({'status': 'success', 'user_id': user.pk}, status=200)
+        else:
+            # Authentication failed, log the failed attempt and return an error
+            print("Failed login attempt for username:", username)
+            return JsonResponse({'error': 'Invalid username or password'}, status=400)
     else:
-        if check_api_key(response):
-            return get_languages()
+       # Method not allowed if not POST
+        return HttpResponse(status=405)
 
-        # Todo Notify user about having the API connection issue
-        return None
+@csrf_exempt  # This is allowing POST requests without CSRF token
+@login_required # We are controlling if the user is logged in here
+def create_comment(request : HttpRequest) -> HttpResponse:
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            question_id = data.get('question_id')
+            comment_details = data.get('details')
+            code_snippet = data.get('code_snippet', '')  # It is optional
+            language = data.get('language')
+
+
+            try:
+                question = Question.objects.get(_id=question_id)
+            except Question.DoesNotExist:
+                return JsonResponse({'error': 'Question not found'}, status=404)
+
+            Lang2ID = get_languages() 
+            language_id = Lang2ID.get(language, None) # Default to Python
+
+            if language_id is None:
+                return JsonResponse({'error': 'Invalid language'}, status=400)
+
+            comment = Comment.objects.create(
+                details=comment_details, 
+                code_snippet=code_snippet,
+                language_id=language_id
+                )
+
+            question.add_comment(comment)
+
+            # TODO : CONTROL IF THE USER OBJECT EXISTS INSIDE THE REQUEST OBJECT
+            # request.user.add_comment(comment)
+
+            return JsonResponse({'success': 'Comment created successfully', 'comment_id': comment._id}, status=201)
+
+        except (KeyError, json.JSONDecodeError) as e:
+            return JsonResponse({'error': f'Malformed data: {str(e)}'}, status=400)
+
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+
+@csrf_exempt  
+@login_required  
+def create_question(request : HttpRequest) -> HttpResponse:
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            title = data.get('title')
+            language = data.get('language')
+            details = data.get('details')
+            code_snippet = data.get('code_snippet', '')  # There may not be a code snippet
+            tags = data.get('tags', [])  # There may not be any tags
+
+            Lang2ID = get_languages() 
+            language_id = Lang2ID.get(language, None) # Default to Python
+
+            if language_id is None:
+                return JsonResponse({'error': 'Invalid language'}, status=400)
+        
+            question = Question.objects.create(
+                title=title,
+                language=language,
+                language_id=language_id, 
+                details=details,
+                code_snippet=code_snippet,
+                tags=tags
+            )
+
+            request.user.add_question(question)
+
+            return JsonResponse({'success': 'Question created successfully', 'question_id': question._id}, status=201)
+
+        except (KeyError, json.JSONDecodeError) as e:
+            return JsonResponse({'error': f'Malformed data: {str(e)}'}, status=400)
+
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+
+def list_questions_by_language(request):
+    language = request.GET.get('language', None)
+    
+    if not language:
+        return JsonResponse({'error': 'Language parameter is required'}, status=400)
+    
+    questions = Question.objects.filter(language__iexact=language)
+    
+    questions_data = [{
+        'id': question._id,
+        'title': question.title,
+        'language': question.language,
+        'tags': question.tags,
+        'details': question.details,
+        'code_snippet': question.code_snippet,
+        'upvotes': question.upvotes,
+        'creationDate': question.creationDate.strftime('%Y-%m-%d %H:%M:%S'),
+    } for question in questions]
+    
+    return JsonResponse({'questions': questions_data}, safe=False, status=200)
+
+@csrf_exempt
+def list_questions_by_tag(request):
+    tags = request.GET.get('tag_array', None)
+    
+    if not tags:
+        return JsonResponse({'error': 'Tag parameter is required'}, status=400)
+    
+    questions = Question.objects.filter(tags__contains=tags)
+
+    questions_data = [{
+        'id': question._id,
+        'title': question.title,
+        'language': question.language,
+        'tags': question.tags,
+        'details': question.details,
+        'code_snippet': question.code_snippet,
+        'upvotes': question.upvotes,
+        'creationDate': question.creationDate.strftime('%Y-%m-%d %H:%M:%S'),
+    } for question in questions]
+
+    return JsonResponse({'questions': questions_data}, safe=False, status=200)
 
 
 @login_required
 def run_code_view(request):
-    source_code = request.POST.get('source_code', '')
-    language_name = request.POST.get('language_name', '')
-    Lang2ID = get_languages()
-    result = run_code(source_code, Lang2ID[language_name])
-    return JsonResponse(result)
+    type = request.GET.get('type', '') # Get type, comment or question
+    id = request.GET.get('id', '') # Get id of the comment or question
 
-
-
-# TODO The signup function is used to test the functionality of the authentication system
-# Thus when the front-end is connected, this function will be removed
-def signup(request):
-    if request.method == 'POST':
-        form = SignupForm(request.POST)
-
-        if form.is_valid():
-            form.save()  # This saves the new user
-            return redirect('login')  # Redirect to some page after sign-up, e.g., the home page
-        else:
-            print(form.errors)
+    if type == 'comment':
+        comment = Comment.objects.get(_id=id)
+        outs = comment.run_snippet()
+    elif type == 'question':
+        question = Question.objects.get(_id=id)
+        outs = question.run_snippet()
     else:
-        form = SignupForm()
+        return JsonResponse({'error': 'Invalid type'}, status=400)
+    return JsonResponse({'output': outs})
 
-    return render(request, 'signup.html', {'form': form})
 
-
-# Todo A sample home page view for testing purposes, will be removed after front-end connection.
 def home(request):
     return render(request, 'home.html')
