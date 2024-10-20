@@ -63,14 +63,16 @@ const Signup = ({ navigation }: Props) => {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" />
-      <Text style={styles.titleText}>Create New Account</Text>
-      <Text style={styles.loginText}>
-        Already registered?
-        <TouchableOpacity onPress={handleLogin}>
-          <Text style={styles.signupButton}> Log in here.</Text>
-        </TouchableOpacity>
-      </Text>
       <ScrollView contentInsetAdjustmentBehavior="automatic" style={styles.scrollView}>
+        <View style={styles.titleContainer}>
+          <Text style={styles.titleText}>Create New Account</Text>
+        </View>
+        <Text style={styles.loginText}>
+          Already registered?
+          <TouchableOpacity onPress={handleLogin}>
+            <Text style={styles.signupButton}> Log in here.</Text>
+          </TouchableOpacity>
+        </Text>
         <View style={styles.inputContainer}>
           <Text style={styles.label}>USERNAME</Text>
           <TextInput
@@ -78,6 +80,7 @@ const Signup = ({ navigation }: Props) => {
             value={username}
             onChangeText={setUsername}
             placeholder="Enter your username"
+            placeholderTextColor="#9E9E9E"
           />
         </View>
         <View style={styles.inputContainer}>
@@ -87,6 +90,7 @@ const Signup = ({ navigation }: Props) => {
             value={email}
             onChangeText={setEmail}
             placeholder="Enter your email"
+            placeholderTextColor="#9E9E9E"
           />
         </View>
         <View style={styles.inputContainer}>
@@ -97,6 +101,7 @@ const Signup = ({ navigation }: Props) => {
             onChangeText={setPassword}
             placeholder="Enter your password"
             secureTextEntry={true}
+            placeholderTextColor="#9E9E9E"
           />
         </View>
         <View style={styles.inputContainer}>
@@ -107,7 +112,7 @@ const Signup = ({ navigation }: Props) => {
             <View
               style={[
                 styles.checkbox,
-                { backgroundColor: subscribe ? '#00BFFF' : 'transparent' }, // Light blue when checked
+                { backgroundColor: subscribe ? '#00BFFF' : 'transparent' },
               ]}
             />
             <Text style={{ marginLeft: 8 }}>
@@ -133,65 +138,61 @@ const Signup = ({ navigation }: Props) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#F5F5F5',
+  },
+  titleContainer: {
     justifyContent: 'center',
     alignItems: 'center',
+    marginTop: 50,
   },
   titleText: {
     color: '#00BFFF',
-    fontSize: 50,
-    textAlign: 'center',
-    marginTop: 60,
+    fontSize: 32,
     fontWeight: 'bold',
+    marginBottom: 20,
   },
   loginText: {
-    color: '#00BFFF',
+    color: '#555',
+    fontSize: 16,
+    textAlign: 'center',
     marginBottom: 20,
   },
   scrollView: {
     width: '100%',
+    paddingHorizontal: 20,
   },
   inputContainer: {
-    width: '80%',
-    marginBottom: 10,
-    alignSelf: 'center',
+    marginBottom: 15,
   },
   label: {
-    marginBottom: 2,
-    color: '#00BFFF',
-    textAlign: 'left',
-  },
-  signupButton: {
-    color: '#00BFFF',
-    textDecorationLine: 'underline',
-    marginBottom: -3,
+    marginBottom: 5,
+    color: '#555',
+    fontSize: 16,
   },
   input: {
-    textAlign: 'left',
-    height: 50,
-    borderColor: '#00BFFF',
-    borderRadius: 17,
+    height: 48,
     borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 10,
     paddingHorizontal: 10,
-    backgroundColor: '#F0F8FF',
-    width: '100%',
+    backgroundColor: '#fff',
   },
   buttonContainer: {
+    marginTop: 30,
     alignItems: 'center',
-    marginTop: 20,
   },
   button: {
-    flexDirection: 'row',
+    width: '100%',
+    height: 50,
+    borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
-    width: 300,
-    height: 58,
-    borderRadius: 17,
-    borderWidth: 2,
     backgroundColor: '#00BFFF',
-    borderColor: '#00BFFF',
+    elevation: 3,
   },
   buttonText: {
-    color: 'white',
+    color: '#fff',
+    fontSize: 18,
     fontWeight: 'bold',
   },
   checkbox: {
@@ -204,6 +205,11 @@ const styles = StyleSheet.create({
   linkText: {
     color: '#00BFFF',
     textDecorationLine: 'underline',
+  },
+  signupButton: {
+    color: '#00BFFF',
+    textDecorationLine: 'underline',
+    fontWeight: 'bold',
   },
 });
 

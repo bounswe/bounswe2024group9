@@ -7,7 +7,8 @@ import Login from './src/Login';
 import Signup from './src/Signup.tsx';
 import QuestionList from './src/QuestionList.tsx';
 import Feed from './src/Feed.tsx';
-import QuestionCard from './src/QuestionCard.tsx';
+import PostDetail from './src/PostDetail';
+
 
 const Stack = createStackNavigator();
 
@@ -23,7 +24,19 @@ const App = () => {
         <Stack.Screen
             name="Signup" 
             component={Signup}
+            options={{ headerShown: false }}
         />
+        <Stack.Screen
+            name="QuestionList" 
+            component={QuestionList}
+            options={{ headerShown: false }}
+        />
+        <Stack.Screen 
+          name="PostDetail" 
+          component={PostDetail} 
+          options={{ headerShown: false }}
+        />
+
       </Stack.Navigator>
     </NavigationContainer>
   );

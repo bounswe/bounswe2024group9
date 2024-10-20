@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, TextInput, Button, Text, TouchableOpacity, TouchableHighlight, StyleSheet, StatusBar, ScrollView, ActivityIndicator } from 'react-native';
+import { View, TextInput, Text, TouchableOpacity, TouchableHighlight, StyleSheet, StatusBar, ScrollView, ActivityIndicator } from 'react-native';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { Image } from 'react-native';
 
@@ -8,7 +8,7 @@ const Login = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
-    const [success, setSuccess] = useState(''); 
+    const [success, setSuccess] = useState('');
     const [loading, setLoading] = useState(false);
     const navigation = useNavigation();
 
@@ -23,27 +23,26 @@ const Login = () => {
     );
 
     const handleLogin = async () => {
+        if (!username || !password) {
+            setError('Please fill in all fields!');
+            setTimeout(() => setError(''), 2000);
+            return;
+        }
+
+        setLoading(true);
+
+        const url = Platform.OS === 'android' ? 'http://10.0.2.2:8000/django_app/login/' : 'http://localhost:8000/django_app/login/';
+        
         try {
-            if (!username || !password) {
-                setError('Please fill in all fields!');
-                setTimeout(() => setError(''), 2000);
-                return;
-            }
-            setLoading(true);
-            const response = await fetch('/django_app/login/', {
+            const response = await fetch(url, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({
-                    username,
-                    password
-                }),
+                body: JSON.stringify({ username, password }),
             });
 
             if (!response.ok) {
-                const errorResponse = await response.text();
-                console.log("Login failed with response:", errorResponse);
                 setError("Invalid username or password! Please try again.");
                 setTimeout(() => setError(''), 2000);
                 return;
@@ -51,41 +50,38 @@ const Login = () => {
 
             setSuccess('Login successful! Logging you in...');
             setTimeout(() => {
-                // navigation.navigate('Feed', { username });
-                }, 2000);
-        }
-        catch (error) {
-            setError(error.message);
-            console.log(error.message);
-            setTimeout(() => setError(''), 2000);
+                navigation.navigate('Feed', { username });
+            }, 2000);
+        } catch (error) {
+            setError('Login failed, please try again later.');
         } finally {
             setLoading(false);
         }
     };
 
     const handleSignUp = () => {
-        navigation.navigate('Signup');
+        navigation.navigate('QuestionList', { username });
     };
 
     return (
         <View style={styles.container}>
             <StatusBar barStyle="light-content" backgroundColor="#6200EE" />
-            {/* Container for image and title */}
-            <View style={styles.titleContainer}>
-                <Text style={styles.title}>Log in to </Text>
+            <ScrollView contentInsetAdjustmentBehavior="automatic" style={styles.scrollView}>
+                <View style={styles.titleContainer}>
+                    <Text style={styles.title}>Log in to</Text>
                     <Image 
                         source={require('../assets/login_logo.png')}
                         style={styles.logo} 
                     />
-            </View>
+                </View>
 
-            <Text style={styles.subtitle}>
-                Don't have an account?  
-                <TouchableOpacity onPress={handleSignUp}>
-                    <Text style={styles.signupButton}> Sign Up</Text>
-                </TouchableOpacity>
-            </Text>
-            <ScrollView contentInsetAdjustmentBehavior="automatic" style={styles.scrollView}>
+                <Text style={styles.subtitle}>
+                    Don't have an account?  
+                    <TouchableOpacity onPress={handleSignUp}>
+                        <Text style={styles.signupButton}> Sign Up</Text>
+                    </TouchableOpacity>
+                </Text>
+
                 <View style={styles.inputContainer}>
                     <Text style={styles.label}>USERNAME</Text>
                     <TextInput
@@ -134,96 +130,65 @@ const Login = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
         backgroundColor: '#F5F5F5',
     },
     titleContainer: {
         flexDirection: 'row',
-        alignItems: 'center',
         justifyContent: 'center',
-        marginTop: 60,
+        alignItems: 'center',
+        marginTop: 50,
+        marginBottom: 20,
     },
     title: {
-        color: '#00BFFF',
-        fontSize: 50,
-        textAlign: 'center',
-        marginTop: 60,
+        fontSize: 24,
+        color: '#333',
         fontWeight: 'bold',
     },
     logo: {
         width: 120,
         height: 80,
-        marginLeft: 8,
-        marginBottom: -70,
+        marginLeft: 10,
+        marginBottom: -5,
         resizeMode: 'contain',
     },
     subtitle: {
-        color: '#00BFFF',
-        marginBottom: 20,
+        color: '#555',
         fontSize: 16,
         textAlign: 'center',
+        marginBottom: 20,
     },
     signupButton: {
         color: '#00BFFF',
         textDecorationLine: 'underline',
-        marginBottom: -3,
-        fontSize: 16,
+        fontWeight: 'bold',
     },
     scrollView: {
-        width: '100%',
+        paddingHorizontal: 20,
+        marginTop: 20,
     },
     inputContainer: {
-        width: '80%',
-        marginBottom: 10,
-        alignSelf: 'center',
+        marginBottom: 15,
     },
     label: {
-        marginBottom: 2,
-        color: '#00BFFF',
-        textAlign: 'left',
+        marginBottom: 5,
+        color: '#555',
         fontSize: 16,
     },
     input: {
-        textAlign: 'left',
-        height: 50,
-        borderColor: '#00BFFF',
-        borderRadius: 17,
+        height: 48,
         borderWidth: 1,
+        borderColor: '#ccc',
+        borderRadius: 10,
         paddingHorizontal: 10,
-        backgroundColor: '#F0F8FF',
-        width: '100%',
-        fontSize: 16,
-    },
-    buttonContainer: {
-        alignItems: 'center',
-        marginTop: 20,
-    },
-    button: {
-        flexDirection: 'row',
-        justifyContent: 'center',
-        alignItems: 'center',
-        width: 300,
-        height: 58,
-        borderRadius: 17,
-        borderWidth: 2,
-        backgroundColor: '#00BFFF',
-        borderColor: '#00BFFF',
-        elevation: 6,
-    },
-    buttonText: {
-        color: 'white',
-        fontSize: 18,
-        fontWeight: 'bold',
+        backgroundColor: '#fff',
     },
     messageContainer: {
+        marginTop: 15,
         alignItems: 'center',
-        marginTop: 10,
     },
     message: {
         fontSize: 14,
         textAlign: 'center',
-        width: '80%',
     },
     error: {
         color: 'red',
@@ -231,7 +196,24 @@ const styles = StyleSheet.create({
     success: {
         color: 'green',
     },
+    buttonContainer: {
+        marginTop: 30,
+        alignItems: 'center',
+    },
+    button: {
+        width: '100%',
+        height: 50,
+        borderRadius: 10,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#00BFFF',
+        elevation: 3,
+    },
+    buttonText: {
+        color: '#fff',
+        fontSize: 18,
+        fontWeight: 'bold',
+    },
 });
-
 
 export default Login;
