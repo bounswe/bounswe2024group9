@@ -1,13 +1,11 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import WikidataSearch from './src/WikidataSearch';
-import SearchResultDetail from './src/SearchResultDetail';
 import Login from './src/Login';
 import Signup from './src/Signup.tsx';
 import QuestionList from './src/QuestionList.tsx';
-import Feed from './src/Feed.tsx';
 import PostDetail from './src/PostDetail';
+import WikiResultDetail from './src/WikiResultDetail';
 
 
 const Stack = createStackNavigator();
@@ -34,6 +32,11 @@ const App = () => {
         <Stack.Screen 
           name="PostDetail" 
           component={PostDetail} 
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen 
+          name="WikiResultDetail" 
+          component={WikiResultDetail} 
           options={{ headerShown: false }}
         />
 

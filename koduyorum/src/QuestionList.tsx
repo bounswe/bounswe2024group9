@@ -135,34 +135,69 @@ const QuestionList = () => {
         },
     ];
 
+    
     const [searchQuery, setSearchQuery] = useState('');
-    const [searchField, setSearchField] = useState('title'); 
+    const [searchField, setSearchField] = useState('title');
     const [filteredQuestions, setFilteredQuestions] = useState(mockQuestions);
+    const [wikiSearchResults, setWikiSearchResults] = useState([]); // For Wiki API results
 
-    // Function to handle search
-    const handleSearch = () => {
+    // Function to handle search using fetch
+    const handleSearch = async () => {
         if (searchQuery.trim() === '') {
             setFilteredQuestions(mockQuestions);
         } else {
-            const filtered = mockQuestions.filter((question) => {
-                if (searchField === 'programmingLanguage') {
-                    return question.programmingLanguage.toLowerCase().includes(searchQuery.toLowerCase());
-                } else if (searchField === 'topic') {
-                    return question.topic.toLowerCase().includes(searchQuery.toLowerCase());
-                } else {
-                    return (
-                        question.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                        question.description.toLowerCase().includes(searchQuery.toLowerCase())
-                    );
+            if (searchField === 'programmingLanguage') {
+                try {
+                    // Make the API request using fetch
+                    const response = await fetch(`http://10.0.2.2:8000/search/${encodeURIComponent(searchQuery)}`);
+                    const data = await response.json();
+
+                    setWikiSearchResults(data.results.bindings);
+                    setFilteredQuestions([]); // Clear filtered questions if showing Wiki search results
+                } catch (error) {
+                    console.error('Error fetching wiki data', error);
                 }
-            });
-            setFilteredQuestions(filtered);
+            } else if (searchField === 'topic') {
+                const filtered = mockQuestions.filter((question) =>
+                    question.topic.toLowerCase().includes(searchQuery.toLowerCase())
+                );
+                setFilteredQuestions(filtered);
+                setWikiSearchResults([]); // Clear Wiki search results
+            } else {
+                const filtered = mockQuestions.filter((question) =>
+                    question.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                    question.description.toLowerCase().includes(searchQuery.toLowerCase())
+                );
+                setFilteredQuestions(filtered);
+                setWikiSearchResults([]); // Clear Wiki search results
+            }
         }
     };
 
     const handlePress = (post) => {
         navigation.navigate('PostDetail', { post, currentUser });
     };
+
+    const handleWikiResultPress = async (wikiUrl) => {
+        const qid = wikiUrl.split('/').pop();
+    
+        try {
+            const response = await fetch(`http://10.0.2.2:8000/result/${qid}`);
+            const data = await response.json();
+    
+            navigation.navigate('WikiResultDetail', { wikiDetails: data });
+        } catch (error) {
+            console.error('Error fetching wiki result data:', error);
+        }
+    };
+    
+    const renderWikiResult = ({ item }) => (
+        <TouchableOpacity style={styles.wikiResultItem} onPress={() => handleWikiResultPress(item.language.value)}>
+            <Text style={styles.wikiResultText}>{item.languageLabel.value}</Text>
+        </TouchableOpacity>
+    );
+    
+    
 
     return (
         <View style={styles.container}>
@@ -180,42 +215,43 @@ const QuestionList = () => {
             {/* Search Filter by Field */}
             <View style={styles.searchFilterContainer}>
                 <TouchableOpacity
-                    style={[
-                        styles.filterButton,
-                        searchField === 'title' && styles.activeFilterButton,
-                    ]}
+                    style={[styles.filterButton, searchField === 'title' && styles.activeFilterButton]}
                     onPress={() => setSearchField('title')}
                 >
                     <Text style={styles.filterText}>Title</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                    style={[
-                        styles.filterButton,
-                        searchField === 'programmingLanguage' && styles.activeFilterButton,
-                    ]}
+                    style={[styles.filterButton, searchField === 'programmingLanguage' && styles.activeFilterButton]}
                     onPress={() => setSearchField('programmingLanguage')}
                 >
                     <Text style={styles.filterText}>Programming Language</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                    style={[
-                        styles.filterButton,
-                        searchField === 'topic' && styles.activeFilterButton,
-                    ]}
+                    style={[styles.filterButton, searchField === 'topic' && styles.activeFilterButton]}
                     onPress={() => setSearchField('topic')}
                 >
                     <Text style={styles.filterText}>Topic</Text>
                 </TouchableOpacity>
             </View>
 
-            <FlatList
-                data={filteredQuestions}
-                keyExtractor={(item) => item.post_id.toString()}
-                renderItem={({ item }) => (
-                    <QuestionCard post={item} currentUser={currentUser} onPress={handlePress} />
-                )}
-                ListEmptyComponent={<Text style={styles.emptyText}>No questions found</Text>}
-            />
+            {/* Display Wiki Search Results if searching by programmingLanguage */}
+            {searchField === 'programmingLanguage' && wikiSearchResults.length > 0 ? (
+                <FlatList
+                    data={wikiSearchResults}
+                    keyExtractor={(item) => item.language.value}
+                    renderItem={renderWikiResult}
+                    ListEmptyComponent={<Text style={styles.emptyText}>No results found</Text>}
+                />
+            ) : (
+                <FlatList
+                    data={filteredQuestions}
+                    keyExtractor={(item) => item.post_id.toString()}
+                    renderItem={({ item }) => (
+                        <QuestionCard post={item} currentUser={currentUser} onPress={handlePress} />
+                    )}
+                    ListEmptyComponent={<Text style={styles.emptyText}>No questions found</Text>}
+                />
+            )}
         </View>
     );
 };
@@ -262,6 +298,15 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         marginTop: 20,
         color: '#888',
+        fontSize: 16,
+    },
+    wikiResultItem: {
+        padding: 10,
+        backgroundColor: '#fff',
+        borderBottomWidth: 1,
+        borderColor: '#ccc',
+    },
+    wikiResultText: {
         fontSize: 16,
     },
 });
