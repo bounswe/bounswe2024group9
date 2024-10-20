@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import "./login_signup_style.css";
-import { useAuth } from "./hooks/AuthProvider";
+// import { useAuth } from "./hooks/AuthProvider";
 
 const Signup = () => {
   const [email, setEmail] = useState("");
@@ -10,7 +10,7 @@ const Signup = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [kvkk, setKvkk] = useState(false);
-  const auth = useAuth();
+  // const auth = useAuth();
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -85,7 +85,6 @@ const Signup = () => {
           credentials: 'same-origin',
       });
 
-      const data = await response.json();
       if (response.ok) {
         window.location.href = "/login";
       } else {

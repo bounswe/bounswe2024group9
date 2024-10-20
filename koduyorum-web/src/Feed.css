@@ -14,15 +14,17 @@ body {
   .navbar {
     background-color: #0077b6;
     color: white;
-    padding: 1rem 2rem;
+    padding: 0.5rem 2rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    height: auto;
   }
   
   .navbar-left {
     display: flex;
     align-items: center;
+    flex-wrap: wrap; 
   }
   
   .logo {
@@ -46,12 +48,32 @@ body {
     cursor: pointer;
     text-transform: uppercase;
   }
+
+  .nav-link, .search-input, .search-button {
+    margin-right: 10px; /* Space between elements */
+    flex: 1 1 auto; /* Allow items to adjust width */
+  }
   
   .search-input {
     padding: 0.5rem;
     width: 50%;
+    border: 1px solid #ccc;
+    border-radius: 5px 0 0 5px;
+    box-sizing: border-box;
+  }
+
+  .search-button {
+    padding: 0.5rem 1rem;
+    background-color: #38b6ff;
+    color: white;
     border: none;
     border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+
+  .search-button:hover {
+    background-color: #0056b3;
   }
   
   .feed-content {
@@ -106,6 +128,16 @@ body {
     padding: 1rem;
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    cursor: pointer; /* Cursor change */
+    transition: box-shadow 0.3s;
+    height: 200px; /* Fixed height */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .post-card:hover {
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); /* Hover effect */
   }
   
   .post-title {
@@ -173,5 +205,18 @@ body {
       width: 100%;
     }
   }
-  
-  
+
+  .tag-link {
+    display: inline-block;
+    background-color: #e0f7fa;
+    color: #0077b6;
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+
+  .tag-link:hover {
+      background-color: #b2ebf2;
+  }

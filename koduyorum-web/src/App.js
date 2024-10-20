@@ -6,7 +6,7 @@ import Login from './Login';
 import ForgotPassword from './ForgotPassword';
 import Feed from './Feed';
 import './App.css';
-// import SearchResults from './SearchResults';
+import SearchResults from './SearchResults';
 import CodeExecution from './components/code-execution';
 
 
@@ -35,7 +35,7 @@ const AppRoutes = () => {
       <Route path="/forgot" element={<ForgotPassword />} />
       <Route path="/feed" element={<Feed />} /> 
       <Route path="/question" element={<CodeExecution />} />
-      {/* <Route path="/search" element={<SearchResults />} /> */}
+      <Route path="/result/:wiki_id" element={<SearchResults />} />
       {user ? (
         <>
           {/* <Route path="/feed" element={<Feed />} /> */}
