@@ -28,9 +28,9 @@ const Login = () => {
             setTimeout(() => setError(''), 2000);
             return;
         }
-
+    
         setLoading(true);
-
+    
         const url ='http://10.0.2.2:8000/login/';
         
         try {
@@ -41,23 +41,30 @@ const Login = () => {
                 },
                 body: JSON.stringify({ username, password }),
             });
-
-            if (!response.ok) {
+    
+            const data = await response.json();  // Parse the JSON response
+    
+            if (response.ok && data.status === 'success') {
+                setSuccess('Login successful! Logging you in...');
+    
+                // Extract user_id from the response
+                const { user_id } = data;
+    
+                setTimeout(() => {
+                    navigation.navigate('QuestionList', { username, user_id });
+                }, 2000);
+            } else {
                 setError("Invalid username or password! Please try again.");
                 setTimeout(() => setError(''), 2000);
-                return;
             }
-
-            setSuccess('Login successful! Logging you in...');
-            setTimeout(() => {
-                navigation.navigate('QuestionList', { username });
-            }, 2000);
+    
         } catch (error) {
             setError('Login failed, please try again later.');
         } finally {
             setLoading(false);
         }
     };
+    
 
     const handleSignUp = () => {
         navigation.navigate('Signup');

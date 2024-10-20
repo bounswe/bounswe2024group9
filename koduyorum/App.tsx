@@ -6,7 +6,7 @@ import Signup from './src/Signup.tsx';
 import QuestionList from './src/QuestionList.tsx';
 import PostDetail from './src/PostDetail';
 import WikiResultDetail from './src/WikiResultDetail';
-
+import CreateQuestion from './src/CreateQuestion'; 
 
 const Stack = createStackNavigator();
 
@@ -37,6 +37,11 @@ const App = () => {
         <Stack.Screen 
           name="WikiResultDetail" 
           component={WikiResultDetail} 
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen 
+          name="CreateQuestion" 
+          component={CreateQuestion} 
           options={{ headerShown: false }}
         />
 

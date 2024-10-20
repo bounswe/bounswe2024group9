@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { View, TextInput, Button, FlatList, StyleSheet, Text, TouchableOpacity } from 'react-native';
 import QuestionCard from './QuestionCard';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 
 const QuestionList = () => {
     const navigation = useNavigation();
-    const currentUser = 1; // Mock current user ID
+    const route = useRoute();
+    const { username, user_id } = route.params;
+
 
     // Mock data for questions
     const mockQuestions = [
@@ -175,7 +177,7 @@ const QuestionList = () => {
     };
 
     const handlePress = (post) => {
-        navigation.navigate('PostDetail', { post, currentUser });
+        navigation.navigate('PostDetail', { post, user_id });
     };
 
     const handleWikiResultPress = async (wikiUrl) => {
@@ -247,11 +249,18 @@ const QuestionList = () => {
                     data={filteredQuestions}
                     keyExtractor={(item) => item.post_id.toString()}
                     renderItem={({ item }) => (
-                        <QuestionCard post={item} currentUser={currentUser} onPress={handlePress} />
+                        <QuestionCard post={item} currentUser={user_id} onPress={handlePress} />
                     )}
                     ListEmptyComponent={<Text style={styles.emptyText}>No questions found</Text>}
                 />
             )}
+            
+            <TouchableOpacity 
+                style={styles.floatingButton} 
+                onPress={() => navigation.navigate('CreateQuestion', { username })}
+            >
+                <Text style={styles.plusText}>+</Text>
+            </TouchableOpacity>
         </View>
     );
 };
@@ -308,6 +317,22 @@ const styles = StyleSheet.create({
     },
     wikiResultText: {
         fontSize: 16,
+    },
+    floatingButton: {
+        position: 'absolute',
+        bottom: 30,
+        right: 20,
+        backgroundColor: '#00BFFF',
+        width: 60,
+        height: 60,
+        borderRadius: 30,
+        justifyContent: 'center',
+        alignItems: 'center',
+        elevation: 5,
+    },
+    plusText: {
+        color: 'white',
+        fontSize: 32,
     },
 });
 
