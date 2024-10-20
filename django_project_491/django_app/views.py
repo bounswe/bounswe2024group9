@@ -242,7 +242,10 @@ def create_comment(request : HttpRequest) -> HttpResponse:
                 return JsonResponse({'error': 'Question not found'}, status=404)
 
             Lang2ID = get_languages() 
-            language_id = Lang2ID.get(language, 71) # Default to Python
+            language_id = Lang2ID.get(language, None) # Default to Python
+
+            if language_id is None:
+                return JsonResponse({'error': 'Invalid language'}, status=400)
 
             comment = Comment.objects.create(
                 details=comment_details, 
@@ -276,8 +279,11 @@ def create_question(request : HttpRequest) -> HttpResponse:
             tags = data.get('tags', [])  # There may not be any tags
 
             Lang2ID = get_languages() 
-            language_id = Lang2ID.get(language, 71) # Default to Python
+            language_id = Lang2ID.get(language, None) # Default to Python
 
+            if language_id is None:
+                return JsonResponse({'error': 'Invalid language'}, status=400)
+        
             question = Question.objects.create(
                 title=title,
                 language=language,
