@@ -4,6 +4,7 @@ import json
 import os
 from dotenv import load_dotenv
 import xml.etree.ElementTree as ET
+from django.core.cache import cache
 
 load_dotenv()
 
@@ -104,3 +105,26 @@ def run_code(source_code, language_id):
         return get_submission_result(token)
     else:
         raise Exception("Error creating submission")
+
+def get_languages():
+    """
+    Get a list of supported languages from Judge0 API.
+    """
+    Lang2ID = cache.get('Lang2ID')
+
+    if Lang2ID is not None:
+        return Lang2ID
+
+    # If not cached, make the API request
+    response = requests.get('https://judge0-ce.p.rapidapi.com/languages', headers=HEADERS)
+    if response.status_code == 200:
+        # Parse and cache the result with no timeout (indefinite caching)
+        Lang2ID = {lang['name']: lang['id'] for lang in response.json()}
+        cache.set('Lang2ID', Lang2ID, timeout=None)  # Cache indefinitely
+        return Lang2ID
+    else:
+        if check_api_key(response):
+            return get_languages()
+
+        # TODO: Notify user about having the API connection issue
+        return None

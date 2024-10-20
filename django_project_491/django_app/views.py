@@ -10,7 +10,6 @@ from django.views.decorators.csrf import csrf_exempt
 import json
 from .models import Question, Comment
 from urllib.parse import quote
-from django.core.cache import cache
 import requests
 
 
@@ -162,44 +161,11 @@ def wikipedia_data_views(wiki_id):
     return info_object
 
 
-def get_languages():
-    """
-    Get a list of supported languages from Judge0 API.
-    """
-    Lang2ID = cache.get('Lang2ID')
-
-    if Lang2ID is not None:
-        return Lang2ID
-
-    # If not cached, make the API request
-    response = requests.get('https://judge0-ce.p.rapidapi.com/languages', headers=HEADERS)
-    if response.status_code == 200:
-        # Parse and cache the result with no timeout (indefinite caching)
-        Lang2ID = {lang['name']: lang['id'] for lang in response.json()}
-        cache.set('Lang2ID', Lang2ID, timeout=None)  # Cache indefinitely
-        return Lang2ID
-    else:
-        if check_api_key(response):
-            return get_languages()
-
-        # TODO: Notify user about having the API connection issue
-        return None
-
-
-@login_required
-def run_code_view(request):
-    source_code = request.POST.get('source_code', '')
-    language_name = request.POST.get('language_name', '')
+@login_required # We are controlling if the user is logged in here
+def get_run_coder_api_languages():
     Lang2ID = get_languages()
-    result = run_code(source_code, Lang2ID[language_name])
-    return JsonResponse(result)
-
-
-def wikipedia_data_views(request):
-    qid = "Q28865"  # (temporary) Q-ID for Python
-    info_object = modify_data(qid)
-    return render(request, 'wikipedia_data.html', {'language': info_object})
-  
+    languages = [name for name, _ in Lang2ID]
+    return languages
 
 @csrf_exempt
 def signup(request):
@@ -232,6 +198,7 @@ def signup(request):
     
     return JsonResponse({'error': 'Invalid request method'}, status=405)
 
+@csrf_exempt
 def login_user(request):
     if request.method == 'POST':
         try:
@@ -266,15 +233,22 @@ def create_comment(request : HttpRequest) -> HttpResponse:
             question_id = data.get('question_id')
             comment_details = data.get('details')
             code_snippet = data.get('code_snippet', '')  # It is optional
+            language = data.get('language')
 
-            # Fetch the question
+
             try:
                 question = Question.objects.get(_id=question_id)
             except Question.DoesNotExist:
                 return JsonResponse({'error': 'Question not found'}, status=404)
 
-            # Create the comment
-            comment = Comment.objects.create(details=comment_details, code_snippet=code_snippet)
+            Lang2ID = get_languages() 
+            language_id = Lang2ID.get(language, 71) # Default to Python
+
+            comment = Comment.objects.create(
+                details=comment_details, 
+                code_snippet=code_snippet,
+                language_id=language_id
+                )
 
             question.add_comment(comment)
 
@@ -301,7 +275,7 @@ def create_question(request : HttpRequest) -> HttpResponse:
             code_snippet = data.get('code_snippet', '')  # There may not be a code snippet
             tags = data.get('tags', [])  # There may not be any tags
 
-            Lang2ID, _ = get_language_dicts() 
+            Lang2ID = get_languages() 
             language_id = Lang2ID.get(language, 71) # Default to Python
 
             question = Question.objects.create(
@@ -367,7 +341,7 @@ def list_questions_by_tag(request):
     return JsonResponse({'questions': questions_data}, safe=False, status=200)
 
 
-
+@login_required
 def run_code_view(request):
     type = request.GET.get('type', '') # Get type, comment or question
     id = request.GET.get('id', '') # Get id of the comment or question
