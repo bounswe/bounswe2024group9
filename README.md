@@ -52,7 +52,7 @@ AWS_HOST=XXX
 JUDGE0_API_KEY=XXX
 DJANGO_SECRET_KEY=XXX
 ALTERNATIVE_JUDGE0_API_KEY=XXX
-REACT_APP_API_URL=http://localhost:8000/</code></pre>
+REACT_APP_API_URL=XXX</code></pre>
     <li>Run the following command to run Docker image
         <pre><code>docker compose up</code></pre>
     </li>
