@@ -39,7 +39,7 @@ ALLOWED_HOSTS = [
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",  # Example for React running on port 3000
-    os.getenv('REACT_APP')
+    # os.getenv('REACT_APP')
 ]
 
 
