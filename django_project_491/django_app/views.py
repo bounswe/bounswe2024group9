@@ -161,11 +161,18 @@ def wikipedia_data_views(wiki_id):
     return info_object
 
 
-@login_required # We are controlling if the user is logged in here
-def get_run_coder_api_languages():
-    Lang2ID = get_languages()
-    languages = [name for name, _ in Lang2ID]
-    return languages
+@login_required
+def get_run_coder_api_languages(request):
+    languages = get_languages()
+    
+    print(languages)
+
+    if languages is not None:
+        return JsonResponse({'languages': languages}, status=200)
+    else:
+        return JsonResponse({'error': 'Failed to fetch languages'}, status=500)
+
+
 
 @csrf_exempt
 def signup(request):
@@ -227,27 +234,25 @@ def login_user(request):
 
 @csrf_exempt  # This is allowing POST requests without CSRF token
 @login_required # We are controlling if the user is logged in here
-@csrf_exempt
-@login_required
 def create_comment(request: HttpRequest) -> HttpResponse:
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
             question_id = data.get('question_id')
             comment_details = data.get('details')
-            code_snippet = data.get('code_snippet', '')  # Optional
+            code_snippet = data.get('code_snippet', '')
             language = data.get('language')
 
             try:
-                question = Question.objects.get(_id=question_id)
+                question = Question.objects.get(id=question_id)
             except Question.DoesNotExist:
                 return JsonResponse({'error': 'Question not found'}, status=404)
 
-            # Get language ID mapping
+            # Get the language ID mapping
             Lang2ID = get_languages()
-            language_id = 71 #Lang2ID.get(language, 71)  # Default to Python
-
-            # Create a new comment associated with the question and the logged-in user
+            language_id = Lang2ID.get(language, 71)
+            print(request.user)
+            # Create a new comment
             comment = Comment.objects.create(
                 details=comment_details,
                 code_snippet=code_snippet,
@@ -255,10 +260,10 @@ def create_comment(request: HttpRequest) -> HttpResponse:
                 author=request.user  # Associate the comment with the logged-in user
             )
 
-            # Associate the comment with the question
-            question.add_comment(comment)
+            # Associate the comment with the question (assuming a ForeignKey relationship)
+            question.comments.add(comment)  # Assuming a ManyToMany or ForeignKey relation
 
-            return JsonResponse({'success': 'Comment created successfully', 'comment_id': comment._id}, status=201)
+            return JsonResponse({'success': 'Comment created successfully', 'comment_id': comment.id}, status=201)
 
         except (KeyError, json.JSONDecodeError) as e:
             return JsonResponse({'error': f'Malformed data: {str(e)}'}, status=400)
@@ -287,7 +292,8 @@ def create_question(request : HttpRequest) -> HttpResponse:
                 language_id=language_id, 
                 details=details,
                 code_snippet=code_snippet,
-                tags=tags
+                tags=tags,
+                author=request.user
             )
 
             request.user.add_question(question)

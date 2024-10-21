@@ -17,10 +17,10 @@ const CreateQuestion = ({ route, navigation }) => {
     useEffect(() => {
         const fetchLanguages = async () => {
             try {
-                // idk but doesnt work rn
                 const response = await fetch('http://10.0.2.2:8000/get_api_languages/');
                 const data = await response.json();
-                setAvailableLanguages(data.languages);
+                const languageNames = Object.keys(data.languages); // Extract language names from the dictionary
+                setAvailableLanguages(languageNames);
             } catch (error) {
                 Alert.alert('Error', 'Failed to load languages.');
             }
@@ -41,6 +41,7 @@ const CreateQuestion = ({ route, navigation }) => {
             details,
             code_snippet: codeSnippet,
             tags: tags.split(',').map(tag => tag.trim()), 
+            author_id: user_id  // Include author_id from route.params
         };
 
         try {

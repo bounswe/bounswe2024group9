@@ -133,7 +133,7 @@ const QuestionList = () => {
 
             <TouchableOpacity
                 style={styles.floatingButton}
-                onPress={() => navigation.navigate('CreateQuestion', { username })}
+                onPress={() => navigation.navigate('CreateQuestion', { username, user_id })}
             >
                 <Text style={styles.plusText}>+</Text>
             </TouchableOpacity>
