@@ -3,7 +3,6 @@ from .views import *
 from django.contrib.auth.views import LoginView, LogoutView
 
 urlpatterns = [
-    path('run_code/', run_code_view, name='run_code'),
     path('wikipedia/', wikipedia_data_views, name='wikipedia'),
     path('login/', login_user, name='login'),
     path('signup/', signup, name='signup'),
@@ -18,4 +17,5 @@ urlpatterns = [
     path('get_api_languages/', get_run_coder_api_languages, name='get_run_coder_api_languages'),
     path('random_questions/', random_questions, name='random_questions'),
     path('question/<int:question_id>/comments/', get_question_comments, name='get_question_comments'),
+    path('code_execute/', post_sample_code, name='code_execute'), # for dynamic code execution
 ]

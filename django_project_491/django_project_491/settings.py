@@ -29,7 +29,13 @@ SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    '127.0.0.1',
+    '10.0.2.2',
+    '165.22.125.216',
+    'localhost',
+    os.environ["REACT_APP_API_URL"]
+]
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",  # Example for React running on port 3000
