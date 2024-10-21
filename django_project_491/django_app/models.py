@@ -22,6 +22,9 @@ class Comment(models.Model):
     language_id = models.IntegerField(default=71)  # Language ID for Python
     upvotes = models.IntegerField(default=0)
 
+    # Link each comment to a user (author)
+    author = models.ForeignKey('User', on_delete=models.CASCADE, related_name='authored_comments')  # Updated related_name
+
     def run_snippet(self):
         result = run_code(self.code_snippet, self.language_id)
         outs = result['stdout'].split('\n')
@@ -36,17 +39,22 @@ class Comment(models.Model):
         self.save()
 
 
+
 class Question(models.Model):
     _id = models.AutoField(primary_key=True)
     title = models.CharField(max_length=200)
-    language = models.CharField(max_length=200)
+    language = models.CharField(max_length=200)  # programmingLanguage field
     language_id = models.IntegerField(default=71)  # Language ID for Python
-    tags = models.JSONField(blank=True, default=list)  # Example : ['tag1', 'tag2']
+    tags = models.JSONField(blank=True, default=list)  # Example: ['tag1', 'tag2']
     details = models.TextField()
     code_snippet = models.TextField()
     comments = models.ManyToManyField('Comment', related_name='question_comments', blank=True)
     upvotes = models.IntegerField(default=0)
     creationDate = models.DateTimeField(auto_now_add=True)
+    topic = models.CharField(max_length=100, blank=True)
+    answered = models.BooleanField(default=False)
+    
+    author = models.ForeignKey('User', on_delete=models.CASCADE, related_name='questions')
 
     def run_snippet(self):
         result = run_code(self.code_snippet, self.language_id)
@@ -64,6 +72,12 @@ class Question(models.Model):
     def downvote(self):
         self.upvotes -= 1
         self.save()
+
+    def mark_as_answered(self):
+        self.answered = True
+        self.save()
+
+
 
 
 class UserManager(BaseUserManager):
@@ -97,21 +111,19 @@ class User(AbstractBaseUser):
     user_id = models.AutoField(primary_key=True)
     username = models.CharField(max_length=30, unique=True)
     email = models.EmailField(max_length=255, unique=True)
-    # password = models.CharField(max_length=100) AbstractBaseUser already has password field
     userType = models.CharField(max_length=20, choices=[(tag.value, tag.value) for tag in UserType],
                                 default=UserType.USER.value)
-
+    
     # Relationships
-    questions = models.ManyToManyField('Question', related_name='user_questions', blank=True)
-    comments = models.ManyToManyField('Comment', related_name='user_comments', blank=True)
-    bookmarks: List[str] = models.JSONField(blank=True, default=list)  # Example : ['link1', 'link2']
+    comments = models.ManyToManyField('Comment', related_name='user_comments', blank=True)  # Keep this related_name
+    bookmarks = models.JSONField(blank=True, default=list)  # Example: ['link1', 'link2']
 
-    objects = UserManager()  # Required for the custom user model
+    objects = UserManager()
 
-    USERNAME_FIELD = 'username'  # Control if the user is signin in with username. Needless line since it is default. I put it to make things more educational
-    REQUIRED_FIELDS = ['email']  # Do not accept user without email
+    USERNAME_FIELD = 'username'
+    REQUIRED_FIELDS = ['email']
 
-    def __str__(self):  # See username when the object is printed
+    def __str__(self):
         return self.username
 
     def has_perm(self, perm, obj=None):  # 1/3 added because of my custom userType

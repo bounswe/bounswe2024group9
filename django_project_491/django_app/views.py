@@ -161,11 +161,18 @@ def wikipedia_data_views(wiki_id):
     return info_object
 
 
-@login_required # We are controlling if the user is logged in here
-def get_run_coder_api_languages():
-    Lang2ID = get_languages()
-    languages = [name for name, _ in Lang2ID]
-    return languages
+@login_required
+def get_run_coder_api_languages(request):
+    languages = get_languages()
+    
+    print(languages)
+
+    if languages is not None:
+        return JsonResponse({'languages': languages}, status=200)
+    else:
+        return JsonResponse({'error': 'Failed to fetch languages'}, status=500)
+
+
 
 @csrf_exempt
 def signup(request):
@@ -194,9 +201,10 @@ def signup(request):
         user.set_password(password1)  # It will hash the password
         user.save()
 
-        return JsonResponse({'success': 'User created successfully'}, status=201)
-    
+        return JsonResponse({'success': 'User created successfully', 'user_id': user.pk, 'username': user.username}, status=201)
+
     return JsonResponse({'error': 'Invalid request method'}, status=405)
+
 
 @csrf_exempt
 def login_user(request):
@@ -226,37 +234,35 @@ def login_user(request):
 
 @csrf_exempt  # This is allowing POST requests without CSRF token
 @login_required # We are controlling if the user is logged in here
-def create_comment(request : HttpRequest) -> HttpResponse:
+def create_comment(request: HttpRequest) -> HttpResponse:
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
             question_id = data.get('question_id')
             comment_details = data.get('details')
-            code_snippet = data.get('code_snippet', '')  # It is optional
+            code_snippet = data.get('code_snippet', '')
             language = data.get('language')
 
-
+            # Fetch the question by its _id (since your model uses _id as the primary key)
             try:
                 question = Question.objects.get(_id=question_id)
             except Question.DoesNotExist:
                 return JsonResponse({'error': 'Question not found'}, status=404)
 
-            Lang2ID = get_languages() 
-            language_id = Lang2ID.get(language, None) # Default to Python
+            # Get the language ID mapping
+            Lang2ID = get_languages()
+            language_id = Lang2ID.get(language, 71)
 
-            if language_id is None:
-                return JsonResponse({'error': 'Invalid language'}, status=400)
-
+            # Create a new comment
             comment = Comment.objects.create(
-                details=comment_details, 
+                details=comment_details,
                 code_snippet=code_snippet,
-                language_id=language_id
-                )
+                language_id=language_id,
+                author=request.user  # Associate the comment with the logged-in user
+            )
 
-            question.add_comment(comment)
-
-            # TODO : CONTROL IF THE USER OBJECT EXISTS INSIDE THE REQUEST OBJECT
-            # request.user.add_comment(comment)
+            # Associate the comment with the question
+            question.comments.add(comment)
 
             return JsonResponse({'success': 'Comment created successfully', 'comment_id': comment._id}, status=201)
 
@@ -278,8 +284,8 @@ def create_question(request : HttpRequest) -> HttpResponse:
             code_snippet = data.get('code_snippet', '')  # There may not be a code snippet
             tags = data.get('tags', [])  # There may not be any tags
 
-            Lang2ID = get_languages() 
-            language_id = Lang2ID.get(language, None) # Default to Python
+            Lang2ID = get_languages() #returns NONE why idk 
+            language_id = 71 # Lang2ID.get(language, 71) # Default to Python
 
             if language_id is None:
                 return JsonResponse({'error': 'Invalid language'}, status=400)
@@ -290,7 +296,8 @@ def create_question(request : HttpRequest) -> HttpResponse:
                 language_id=language_id, 
                 details=details,
                 code_snippet=code_snippet,
-                tags=tags
+                tags=tags,
+                author=request.user
             )
 
             request.user.add_question(question)
@@ -348,6 +355,7 @@ def list_questions_by_tag(request):
 
 
 @login_required
+@csrf_exempt
 def run_code_view(request):
     type = request.GET.get('type', '') # Get type, comment or question
     id = request.GET.get('id', '') # Get id of the comment or question
@@ -365,3 +373,44 @@ def run_code_view(request):
 
 def home(request):
     return render(request, 'home.html')
+
+
+@csrf_exempt
+def random_questions(request):
+    # Retrieve 5 random questions
+    questions = Question.objects.order_by('?')[:5]
+
+    questions_data = [{
+        'id': question._id,
+        'title': question.title,
+        'description': question.details,
+        'user_id': question.author.pk,
+        'likes': question.upvotes,
+        'comments_count': question.comments.count(),
+        'programmingLanguage': question.language,
+        'codeSnippet': question.code_snippet,
+        'tags': question.tags,
+        'answered': question.answered,
+        'topic': question.topic
+    } for question in questions]
+
+    return JsonResponse({'questions': questions_data}, safe=False)
+
+
+@csrf_exempt
+def get_question_comments(request, question_id):
+    try:
+        question = Question.objects.get(_id=question_id)
+        comments = question.comments.all()
+
+        comments_data = [{
+            'comment_id': comment._id,
+            'details': comment.details,
+            'user': comment.author.username,
+            'upvotes': comment.upvotes,
+        } for comment in comments]
+
+        return JsonResponse({'comments': comments_data}, status=200)
+    
+    except Question.DoesNotExist:
+        return JsonResponse({'error': 'Question not found'}, status=404)
