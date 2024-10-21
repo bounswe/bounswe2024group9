@@ -287,6 +287,9 @@ def create_question(request : HttpRequest) -> HttpResponse:
             Lang2ID = get_languages() #returns NONE why idk 
             language_id = 71 # Lang2ID.get(language, 71) # Default to Python
 
+            if language_id is None:
+                return JsonResponse({'error': 'Invalid language'}, status=400)
+        
             question = Question.objects.create(
                 title=title,
                 language=language,
