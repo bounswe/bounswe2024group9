@@ -6,6 +6,7 @@ const PostDetail = ({ route }) => {
 
     const [comments, setComments] = useState([]);  // Start with an empty comments array
     const [newComment, setNewComment] = useState('');
+    const [codeOutput, setCodeOutput] = useState('');  // To store the code execution output
 
     // Fetch comments when the component mounts
     useEffect(() => {
@@ -66,6 +67,22 @@ const PostDetail = ({ route }) => {
         }
     };
 
+    const handleRunCode = async () => {
+        try {
+            const response = await fetch(`http://10.0.2.2:8000/run_code/?type=question&id=${post.id}`);
+            const data = await response.json();
+
+            if (response.status === 200) {
+                setCodeOutput(data.output);
+            } else {
+                Alert.alert('Error', data.error || 'Failed to run code');
+            }
+        } catch (error) {
+            console.error('Error running code:', error);
+            Alert.alert('Error', 'Failed to run code');
+        }
+    };
+
     const renderComments = () => {
         return comments.map((comment, index) => (
             <View key={index} style={styles.comment}>
@@ -84,6 +101,19 @@ const PostDetail = ({ route }) => {
                 <Text style={styles.codeTitle}>Code Snippet:</Text>
                 <Text>{post.codeSnippet}</Text>
             </View>
+
+            {/* Run Code Button */}
+            <TouchableOpacity style={styles.runButton} onPress={handleRunCode}>
+                <Text style={styles.runButtonText}>Run Code</Text>
+            </TouchableOpacity>
+
+            {/* Display Code Output */}
+            {codeOutput ? (
+                <View style={styles.outputContainer}>
+                    <Text style={styles.outputTitle}>Output:</Text>
+                    <Text style={styles.outputText}>{codeOutput}</Text>
+                </View>
+            ) : null}
 
             <View style={styles.commentsContainer}>
                 <Text style={styles.commentHeader}>Comments:</Text>
@@ -123,6 +153,35 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         padding: 15,
         marginBottom: 20,
+    },
+    runButton: {
+        backgroundColor: '#32CD32',
+        borderRadius: 5,
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        alignItems: 'center',
+        marginBottom: 10,
+    },
+    runButtonText: {
+        color: 'white',
+        fontWeight: 'bold',
+        fontSize: 16,
+    },
+    outputContainer: {
+        backgroundColor: '#e1e1e1',
+        padding: 10,
+        marginTop: 10,
+        borderRadius: 5,
+    },
+    outputTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        marginBottom: 5,
+    },
+    outputText: {
+        fontSize: 16,
+        color: '#333',
+        fontFamily: 'monospace',
     },
     commentsContainer: {
         marginTop: 20,
