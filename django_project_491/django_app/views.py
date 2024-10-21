@@ -421,11 +421,10 @@ def get_question_comments(request, question_id):
 # Will be removed in the final version.
 @csrf_exempt
 def post_sample_code(request):
-    source_code = request.GET.get('source_code', '')
-    language_id = request.GET.get('language_id', 71)  # Default to Python
+    data = json.loads(request.body)
 
-    print(source_code)
-    print(language_id)
+    source_code = data.get('source_code', '')  # Get 'code' from the JSON body
+    language_id = data.get('language_id', 71)  # Default to Python
 
     result = run_code(source_code, language_id)
     print(result)
