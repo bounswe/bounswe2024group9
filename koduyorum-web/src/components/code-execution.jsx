@@ -41,7 +41,7 @@ export default function CodeExecution() {
   useEffect(() => {
     const fetchLanguages = async () => {
       try {
-        const response = await fetch('http://127.0.0.1:8000/get_api_languages/'); // Adjust this URL if needed
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/get_api_languages/`); // Adjust this URL if needed
         const data = await response.json();
         setLanguages(data.languages); // Access the 'languages' key from the response
       } catch (error) {
@@ -58,7 +58,7 @@ export default function CodeExecution() {
     setLoading(true);    // Set loading state while fetching the output
 
     try {
-      const response = await fetch('http://127.0.0.1:8000/code_execute/', {  // Call your backend API
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/code_execute/`, {  // Call your backend API
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
