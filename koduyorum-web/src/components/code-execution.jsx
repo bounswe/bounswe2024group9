@@ -41,7 +41,7 @@ export default function CodeExecution() {
   useEffect(() => {
     const fetchLanguages = async () => {
       try {
-        const response = await fetch('http://127.0.0.1:8000/languages/'); // Adjust this URL if needed
+        const response = await fetch('http://127.0.0.1:8000/get_api_languages/'); // Adjust this URL if needed
         const data = await response.json();
         setLanguages(data.languages); // Access the 'languages' key from the response
       } catch (error) {
