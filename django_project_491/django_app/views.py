@@ -10,11 +10,10 @@ from django.views.decorators.csrf import csrf_exempt
 import json
 from .models import Question, Comment
 from urllib.parse import quote
-import requests
 
 
 # Used for initial search - returns 5 best matching wiki id's
-@login_required
+# @login_required
 def wiki_search(request, search_strings):
     sparql = SPARQLWrapper("https://query.wikidata.org/sparql")
 
@@ -48,12 +47,12 @@ def wiki_search(request, search_strings):
     sparql.setQuery(query)
     sparql.setReturnFormat(JSON)
     results = sparql.query().convert()
-
+    print(results)
     return JsonResponse(results)
 
 
 # Shows the resulting info of the chosen wiki item
-@login_required
+# @login_required
 def wiki_result(response, wiki_id):
     sparql = SPARQLWrapper("https://query.wikidata.org/sparql")
 
@@ -161,7 +160,7 @@ def wikipedia_data_views(wiki_id):
     return info_object
 
 
-@login_required
+# @login_required
 def get_run_coder_api_languages(request):
     languages = get_languages()
     
@@ -233,7 +232,7 @@ def login_user(request : HttpRequest) -> HttpResponse:
         return HttpResponse(status=405)
 
 @csrf_exempt  # This is allowing POST requests without CSRF token
-@login_required # We are controlling if the user is logged in here
+# @login_required # We are controlling if the user is logged in here
 def create_comment(request: HttpRequest) -> HttpResponse:
     if request.method == 'POST':
         try:
@@ -276,7 +275,7 @@ def create_comment(request: HttpRequest) -> HttpResponse:
 
 
 @csrf_exempt  
-@login_required  
+# @login_required
 def create_question(request : HttpRequest) -> HttpResponse:
     if request.method == 'POST':
         try:
@@ -357,7 +356,7 @@ def list_questions_by_tag(request):
     return JsonResponse({'questions': questions_data}, safe=False, status=200)
 
 
-@login_required
+# @login_required
 @csrf_exempt
 def run_code_view(request):
     type = request.GET.get('type', '') # Get type, comment or question
@@ -417,3 +416,24 @@ def get_question_comments(request, question_id):
     
     except Question.DoesNotExist:
         return JsonResponse({'error': 'Question not found'}, status=404)
+
+
+# Will be removed in the final version.
+@csrf_exempt
+def post_sample_code(request):
+    data = json.loads(request.body)
+
+    source_code = data.get('source_code', '')  # Get 'code' from the JSON body
+    language_id = data.get('language_id', 71)  # Default to Python
+
+    result = run_code(source_code, language_id)
+    print(result)
+
+    if result is None:
+        return JsonResponse({'error': 'Error running code'}, status=500)
+
+    try:
+        result = run_code(source_code, language_id)
+        return JsonResponse(result)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
