@@ -287,7 +287,7 @@ def create_question(request : HttpRequest) -> HttpResponse:
             code_snippet = data.get('code_snippet', '')  # There may not be a code snippet
             tags = data.get('tags', [])  # There may not be any tags
 
-            Lang2ID = get_languages() #returns NONE why idk 
+            Lang2ID = get_languages() 
             language_id = Lang2ID.get(language, None)
 
             if language_id is None:
