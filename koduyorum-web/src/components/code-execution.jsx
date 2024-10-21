@@ -2,27 +2,6 @@ import React, { useState, useEffect } from 'react';
 import * as PropTypes from "prop-types";
 import { Separator } from "./ui/seperator";
 
-function InputBlock(props) {
-  return (
-    <div className="p-4 border border-gray-700 rounded">
-      {props.inputType === "Question" && (
-        <>
-          <h3 className="font-semibold text-gray-300">{props.inputType}</h3>
-          <pre className="whitespace-pre-wrap">{props.code}</pre>
-          <p className="mt-2 text-gray-200">{props.explanation}</p>
-        </>
-      )}
-      {props.inputType === "Answer" && (
-        <>
-          <h3 className="font-semibold text-gray-300">Answer {props.number}</h3>
-          <p className="text-gray-200">{props.explanation}</p>
-          {props.code && <pre className="whitespace-pre-wrap">{props.code}</pre>}
-        </>
-      )}
-    </div>
-  );
-}
-
 InputBlock.propTypes = {
   code: PropTypes.string,
   inputType: PropTypes.string.isRequired,
@@ -106,11 +85,12 @@ export default function CodeExecution() {
 console.log(Second_Greatest_Lowest([1, 2, 3, 4, 5]));`}
           />
         </div>
-
         <Separator className="my-8 bg-gray-700" />
 
         <div className="space-y-6">
-          <h2 className="text-xl font-semibold text-gray-200">Answers</h2>
+          <Button className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded">
+              Add Answer
+          </Button>
 
           <InputBlock
             inputType="Answer"
