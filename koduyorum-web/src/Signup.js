@@ -81,8 +81,8 @@ const Signup = () => {
           body: JSON.stringify({
             username,
             email,
-            password,
-            confirmPassword
+            password1:password,
+            password2:confirmPassword
           }),
           credentials: 'same-origin',
       });
