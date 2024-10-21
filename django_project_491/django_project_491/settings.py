@@ -18,7 +18,8 @@ load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
@@ -29,10 +30,16 @@ SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    os.getenv('HEOKU_APP', ''),
+    '127.0.0.1',
+    '10.0.2.2',
+    'localhost',
+]
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",  # Example for React running on port 3000
+    os.getenv('REACT_APP')
 ]
 
 
