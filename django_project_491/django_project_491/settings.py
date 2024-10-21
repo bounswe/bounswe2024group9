@@ -35,11 +35,13 @@ ALLOWED_HOSTS = [
     '127.0.0.1',
     '10.0.2.2',
     'localhost',
+    'clownfish-app-brdp5.ondigitalocean.app',  # Add your backend domain here
+    'oyster-app-8k7np.ondigitalocean.app'    
 ]
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",  # Example for React running on port 3000
-    # os.getenv('REACT_APP')
+    "https://oyster-app-8k7np.ondigitalocean.app",  # Production frontend UR
 ]
 
 
