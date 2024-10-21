@@ -31,7 +31,7 @@ const QuestionList = () => {
     // Function to handle search
     const handleSearch = async () => {
         if (searchQuery.trim() === '') {
-            fetchQuestions(); // Re-fetch all questions if search query is empty
+            fetchQuestions();
         } else {
             if (searchField === 'programmingLanguage') {
                 try {
@@ -53,7 +53,7 @@ const QuestionList = () => {
     };
 
     const handlePress = (post) => {
-        navigation.navigate('PostDetail', { post, user_id });
+        navigation.navigate('PostDetail', { post, user_id, username });
     };
 
     const handleWikiResultPress = async (wikiUrl) => {

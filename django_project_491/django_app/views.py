@@ -194,9 +194,10 @@ def signup(request):
         user.set_password(password1)  # It will hash the password
         user.save()
 
-        return JsonResponse({'success': 'User created successfully'}, status=201)
-    
+        return JsonResponse({'success': 'User created successfully', 'user_id': user.pk, 'username': user.username}, status=201)
+
     return JsonResponse({'error': 'Invalid request method'}, status=405)
+
 
 @csrf_exempt
 def login_user(request):

@@ -26,7 +26,7 @@ const Signup = ({ navigation }: Props) => {
 
   const handleSubmit = async () => {
     const userInfo = { username, email, password1: password, password2: password };
-    
+  
     try {
       if (!subscribe) {
         Alert.alert('You must agree to KVKK to continue!');
@@ -42,8 +42,10 @@ const Signup = ({ navigation }: Props) => {
         const json = await response.json();
         if (response.ok) {
           Alert.alert('User saved successfully!');
+          
           setTimeout(() => {
-            navigation.navigate('QuestionList', { username });
+            // Navigate to the QuestionList screen with both username and user_id
+            navigation.navigate('QuestionList', { username: json.username, user_id: json.user_id });
           }, 2000);
         } else {
           Alert.alert(json.error || 'Failed to save user.');
@@ -54,6 +56,7 @@ const Signup = ({ navigation }: Props) => {
       Alert.alert('Failed to save user.');
     }
   };
+  
 
   const handleLogin = () => {
     navigation.navigate('Login');

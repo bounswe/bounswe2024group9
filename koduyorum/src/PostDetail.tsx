@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Alert } from 'react-native';
 
 const PostDetail = ({ route }) => {
-    const { post, user_id } = route.params;
+    const { post, user_id, username } = route.params;
 
     const [comments, setComments] = useState([]);  // Start with an empty comments array
     const [newComment, setNewComment] = useState('');
@@ -34,7 +34,6 @@ const PostDetail = ({ route }) => {
             return;
         }
 
-        // Prepare the payload to send to the backend
         const newCommentObj = {
             question_id: post.id,  // The ID of the question the comment is associated with
             details: newComment,  // The comment text
@@ -56,7 +55,7 @@ const PostDetail = ({ route }) => {
 
             if (response.status === 201) {
                 // If the comment is successfully added, update the comments state
-                setComments([...comments, { comment_id: data.comment_id, details: newComment, user: 'currentUser' }]);
+                setComments([...comments, { comment_id: data.comment_id, details: newComment, user: username }]);
                 setNewComment('');  // Clear the comment input
             } else {
                 Alert.alert('Error', data.error || 'Failed to add comment');
