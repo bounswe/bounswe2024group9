@@ -46,7 +46,13 @@
     <li>Clone the repository to your local machine.</li> 
     <pre><code>git clone https://github.com/bounswe/bounswe2024group9.git
 cd bounswe2024group9</code></pre>
-    <li>Create a .env file in the outermost scope and then add JUDGE0_API_KEY=XXX where XXX refers to your API key.</li>
+    <li>Create a .env file in the outermost scope and paste the following before saving.</li>
+    <pre><code>dAWS_PASSWORD=XXX
+AWS_HOST=cmpe451.cr2akoqe438k.eu-north-1.rds.amazonaws.com
+JUDGE0_API_KEY=XXX
+DJANGO_SECRET_KEY=XXX
+ALTERNATIVE_JUDGE0_API_KEY=XXX
+REACT_APP_API_URL=http://localhost:8000/</code></pre>
     <li>Run the following command to run Docker image
         <pre><code>docker compose up</code></pre>
     </li>
