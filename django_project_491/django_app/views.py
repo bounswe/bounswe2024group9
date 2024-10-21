@@ -207,7 +207,7 @@ def signup(request):
 
 
 @csrf_exempt
-def login_user(request):
+def login_user(request : HttpRequest) -> HttpResponse:
     if request.method == 'POST':
         try:
             # Parse the incoming JSON request body

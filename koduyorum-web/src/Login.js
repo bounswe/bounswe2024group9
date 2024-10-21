@@ -11,7 +11,7 @@ export const Login = () => {
   const [showLoginMessage, setShowLoginMessage] = useState(false); // State for controlling the visibility of the login message
   const [loading, setLoading] = useState(false); // State for controlling the loading indicator
 
-  const auth = useAuth();
+  // const auth = useAuth();
   const location = useLocation();
   const fromPrivate = location.state?.from === 'private';
 
@@ -37,7 +37,7 @@ export const Login = () => {
       
       if (response.ok) {
         setError(null);
-        auth.login(); 
+        // auth.login(); 
         window.location.href = '/feed';
       } else {
         const data = await response.json();

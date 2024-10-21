@@ -4,8 +4,8 @@ import { useAuth } from "./hooks/AuthProvider";
 import "./Feed.css";
 
 function Feed() {
-    const auth = useAuth();
-    const { user } = auth;
+    // const auth = useAuth();
+    // const { user } = auth;
     const [searchQuery, setSearchQuery] = useState("");
     const [searchResults, setSearchResults] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -127,7 +127,7 @@ function Feed() {
                     "Recursion can be tricky to understand. In C++, when should I use recursion vs iteration? I often find myself confused about the performance implications of recursion.",
             },
         ]);
-    }, [user]);
+    }, []);
 
     useEffect(() => {
         if (searched) {
@@ -171,7 +171,7 @@ function Feed() {
                 <button 
                     className="nav-link"
                     onClick={() => {
-                        auth.logout();
+                        // auth.logout();
                         window.location.href = '/login';
                     }}>Log Out</button>
             </div>

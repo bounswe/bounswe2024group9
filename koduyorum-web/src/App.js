@@ -13,41 +13,48 @@ import CodeExecution from './components/code-execution';
 const App = () => {
   return (
     <Router>
-      <AuthProvider> 
-        <AppRoutes />
-      </AuthProvider>
+      <Routes>
+        <Route path="/" element={<Navigate to="/login" />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/forgot" element={<ForgotPassword />} />
+        <Route path="/feed" element={<Feed />} />
+        <Route path="/question" element={<CodeExecution />} />
+        <Route path="/result/:wiki_id" element={<SearchResults />} />
+      </Routes>
     </Router>
   );
 };
 
-const AppRoutes = () => {
-  const { user, loading } = useAuth();
-  console.log("User state:", user);
+// const AppRoutes = () => {
+//   const { user, loading } = useAuth();
+//   console.log("User state:", user);
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
+//   if (loading) {
+//     return <div>Loading...</div>;
+//   }
 
-  return (
-    <Routes>
-      <Route path="/signup" element={<Signup />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/forgot" element={<ForgotPassword />} />
-      <Route path="/feed" element={<Feed />} /> 
-      <Route path="/question" element={<CodeExecution />} />
-      <Route path="/result/:wiki_id" element={<SearchResults />} />
-      {user ? (
-        <>
-          {/* <Route path="/feed" element={<Feed />} /> */}
-        </>
-      ) : (
-        <Route path="/" element={<Navigate replace to="/login"/>} />
-      )}
-      {/* <Route path="*" element={<Navigate replace to="/login" state={{ from: 'private' }} />} /> */} 
-      {/* login olmadan feede erişememeyi sağlayan kod, sonra commentten çıkarılacak */}
-    </Routes>
-  );
-};
+//   return (
+//     <Routes>
+//       <Route path="/" element={<Navigate to="/login" />} />
+//       <Route path="/signup" element={<Signup />} />
+//       <Route path="/login" element={<Login />} />
+//       <Route path="/forgot" element={<ForgotPassword />} />
+//       <Route path="/feed" element={<Feed />} /> 
+//       <Route path="/question" element={<CodeExecution />} />
+//       <Route path="/result/:wiki_id" element={<SearchResults />} />
+//       {user ? (
+//         <>
+//           {/* <Route path="/feed" element={<Feed />} /> */}
+//         </>
+//       ) : (
+//         <Route path="/" element={<Navigate replace to="/login"/>} />
+//       )}
+//       {/* <Route path="*" element={<Navigate replace to="/login" state={{ from: 'private' }} />} /> */} 
+//       {/* login olmadan feede erişememeyi sağlayan kod, sonra commentten çıkarılacak */}
+//     </Routes>
+//   );
+// };
 
 
 export default App;
