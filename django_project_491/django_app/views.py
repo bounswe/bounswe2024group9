@@ -243,15 +243,16 @@ def create_comment(request: HttpRequest) -> HttpResponse:
             code_snippet = data.get('code_snippet', '')
             language = data.get('language')
 
+            # Fetch the question by its _id (since your model uses _id as the primary key)
             try:
-                question = Question.objects.get(id=question_id)
+                question = Question.objects.get(_id=question_id)
             except Question.DoesNotExist:
                 return JsonResponse({'error': 'Question not found'}, status=404)
 
             # Get the language ID mapping
             Lang2ID = get_languages()
             language_id = Lang2ID.get(language, 71)
-            print(request.user)
+
             # Create a new comment
             comment = Comment.objects.create(
                 details=comment_details,
@@ -260,10 +261,10 @@ def create_comment(request: HttpRequest) -> HttpResponse:
                 author=request.user  # Associate the comment with the logged-in user
             )
 
-            # Associate the comment with the question (assuming a ForeignKey relationship)
-            question.comments.add(comment)  # Assuming a ManyToMany or ForeignKey relation
+            # Associate the comment with the question
+            question.comments.add(comment)
 
-            return JsonResponse({'success': 'Comment created successfully', 'comment_id': comment.id}, status=201)
+            return JsonResponse({'success': 'Comment created successfully', 'comment_id': comment._id}, status=201)
 
         except (KeyError, json.JSONDecodeError) as e:
             return JsonResponse({'error': f'Malformed data: {str(e)}'}, status=400)
