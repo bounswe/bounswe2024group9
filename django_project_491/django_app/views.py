@@ -251,7 +251,10 @@ def create_comment(request: HttpRequest) -> HttpResponse:
 
             # Get the language ID mapping
             Lang2ID = get_languages()
-            language_id = Lang2ID.get(language, 71)
+            language_id = Lang2ID.get(language, None)
+
+            if language_id is None:
+                return JsonResponse({'error': 'Invalid language'}, status=400)
 
             # Create a new comment
             comment = Comment.objects.create(
@@ -285,7 +288,7 @@ def create_question(request : HttpRequest) -> HttpResponse:
             tags = data.get('tags', [])  # There may not be any tags
 
             Lang2ID = get_languages() #returns NONE why idk 
-            language_id = 71 # Lang2ID.get(language, 71) # Default to Python
+            language_id = Lang2ID.get(language, None)
 
             if language_id is None:
                 return JsonResponse({'error': 'Invalid language'}, status=400)
