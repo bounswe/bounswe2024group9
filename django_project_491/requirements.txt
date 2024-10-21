@@ -2,6 +2,6 @@ Django==5.1.2
 python-dotenv==1.0.1
 requests==2.32.3
 SPARQLWrapper==2.0.0
-mysqlclient==2.2.4
 django-cors-headers==4.0.0
 gunicorn==22.0.0
+pymysql==1.1.1
