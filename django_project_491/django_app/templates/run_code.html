@@ -13,6 +13,10 @@
 
     <h1>Output</h1>
     <p>{{ result|linebreaks }}</p>
+    <form method="POST" action="{% url 'logout' %}">
+        {% csrf_token %}
+        <button type="submit">Logout</button>
+    </form>
 
 </body>
 </html>

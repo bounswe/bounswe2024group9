@@ -4,10 +4,36 @@ import json
 import os
 from dotenv import load_dotenv
 import xml.etree.ElementTree as ET
+from django.core.cache import cache
+
+load_dotenv()
+
+HEADERS = {
+    "content-type": "application/json",
+    "X-RapidAPI-Key": os.environ.get('JUDGE0_API_KEY'),
+    "X-RapidAPI-Host": "judge0-ce.p.rapidapi.com"
+}
+
+JUDGE0_KEY_CHANGED = False
+
+
+def check_api_key(response):
+    def change_api_key():
+        HEADERS["X-RapidAPI-Key"] = os.environ.get('ALTERNATIVE_JUDGE0_API_KEY')
+
+    if response.status_code == 429:
+        global JUDGE0_KEY_CHANGED
+        if not JUDGE0_KEY_CHANGED:
+            change_api_key()
+            JUDGE0_KEY_CHANGED = True
+            return True
+    return False
+
 
 def modify_data(qid):
     # Wikidata API URL to fetch the Wikipedia title
-    url = f"https://www.wikidata.org/w/api.php?action=wbgetentities&format=xml&props=sitelinks&ids={qid}&sitefilter=enwiki".format(qid)
+    url = f"https://www.wikidata.org/w/api.php?action=wbgetentities&format=xml&props=sitelinks&ids={qid}&sitefilter=enwiki".format(
+        qid)
 
     response = requests.get(url)
     root = ET.fromstring(response.content)
@@ -25,19 +51,7 @@ def modify_data(qid):
     info = content[:3]
     format_info = "\n".join(info)
 
-
     return {"title": title, "info": format_info}
-
-def get_languages():
-    """
-    Get a list of supported languages from Judge0 API.
-    """
-    response = requests.get('https://judge0-ce.p.rapidapi.com/languages', headers=HEADERS)
-    if response.status_code == 200:
-        return response.json()
-    else:
-        print(f"Error fetching languages: {response.status_code}, {response.text}")
-        return None
 
 
 def run_code(source_code, language_id):
@@ -60,6 +74,8 @@ def run_code(source_code, language_id):
             print(f"Submission created successfully. Token: {submission_token}")
             return submission_token
         else:
+            if check_api_key(response):
+                return create_submission(source_code, language_id)
             print(f"Error creating submission: {response.status_code}, {response.text}")
             return None
 
@@ -90,15 +106,25 @@ def run_code(source_code, language_id):
     else:
         raise Exception("Error creating submission")
 
+def get_languages():
+    """
+    Get a list of supported languages from Judge0 API.
+    """
+    Lang2ID = cache.get('Lang2ID')
 
+    if Lang2ID is not None:
+        return Lang2ID
 
-load_dotenv()
-print(os.environ.get('JUDGE0_API_KEY'))
+    # If not cached, make the API request
+    response = requests.get('https://judge0-ce.p.rapidapi.com/languages', headers=HEADERS)
+    if response.status_code == 200:
+        # Parse and cache the result with no timeout (indefinite caching)
+        Lang2ID = {lang['name']: lang['id'] for lang in response.json()}
+        cache.set('Lang2ID', Lang2ID, timeout=None)  # Cache indefinitely
+        return Lang2ID
+    else:
+        if check_api_key(response):
+            return get_languages()
 
-HEADERS = {
-    "content-type": "application/json",
-    "X-RapidAPI-Key": os.environ.get('JUDGE0_API_KEY'),
-    "X-RapidAPI-Host": "judge0-ce.p.rapidapi.com"
-}
-
-LANGUAGES = [ (lang["id"], lang["name"]) for lang in get_languages()]
+        # TODO: Notify user about having the API connection issue
+        return None

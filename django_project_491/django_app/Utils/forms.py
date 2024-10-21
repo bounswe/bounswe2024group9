@@ -1,5 +1,6 @@
 from django import forms
-
+from django.contrib.auth.forms import UserCreationForm
+from ..models import User
 
 class code_form(forms.Form):
     ProgrammingLanguage = forms.ChoiceField(choices=[])  # Empty by default

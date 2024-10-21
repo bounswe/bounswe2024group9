@@ -11,7 +11,7 @@ export const Login = () => {
   const [showLoginMessage, setShowLoginMessage] = useState(false); // State for controlling the visibility of the login message
   const [loading, setLoading] = useState(false); // State for controlling the loading indicator
 
-  const auth = useAuth();
+  // const auth = useAuth();
   const location = useLocation();
   const fromPrivate = location.state?.from === 'private';
 
@@ -21,15 +21,15 @@ export const Login = () => {
     setLoading(true); // Show loading indicator
 
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/django_app/login/`, {
+      const response = await fetch(`http://127.0.0.1:8000/login/`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
+          'Content-Type': 'application/json',
         },
-        body: new URLSearchParams({
+        body: JSON.stringify({
           username,
           password,
-          remember: rememberMe ? 'on' : '',
+          //remember: rememberMe ? 'on' : '',
         }),
         credentials: 'same-origin',
       });
@@ -37,7 +37,7 @@ export const Login = () => {
       
       if (response.ok) {
         setError(null);
-        auth.login(); 
+        // auth.login(); 
         window.location.href = '/feed';
       } else {
         const data = await response.json();
