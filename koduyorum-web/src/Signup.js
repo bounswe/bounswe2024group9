@@ -8,6 +8,7 @@ const Signup = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(null);
   const [error, setError] = useState(null);
   const [kvkk, setKvkk] = useState(false);
   // const auth = useAuth();
@@ -71,21 +72,23 @@ const Signup = () => {
 
     try {
       const response = await fetch(
-        `${process.env.REACT_APP_API_URL}/django_app/signup/`, // TODO: Update the API URL
+        `http://127.0.0.1:8000/signup/`, // TODO: Update the API URL
         {
           method: "POST",
           headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
+            "Content-Type": "application/json",
           },
-          body: new URLSearchParams({
+          body: JSON.stringify({
             username,
             email,
             password,
+            confirmPassword
           }),
           credentials: 'same-origin',
       });
 
       if (response.ok) {
+        setSuccess("Sign up successful. You can now log in.");
         window.location.href = "/login";
       } else {
         const data = await response.json();

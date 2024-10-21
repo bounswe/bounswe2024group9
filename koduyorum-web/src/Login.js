@@ -21,15 +21,15 @@ export const Login = () => {
     setLoading(true); // Show loading indicator
 
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/django_app/login/`, {
+      const response = await fetch(`http://127.0.0.1:8000/login/`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
+          'Content-Type': 'application/json',
         },
-        body: new URLSearchParams({
+        body: JSON.stringify({
           username,
           password,
-          remember: rememberMe ? 'on' : '',
+          //remember: rememberMe ? 'on' : '',
         }),
         credentials: 'same-origin',
       });
