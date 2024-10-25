@@ -42,7 +42,7 @@ At the end of out prensentation, one of the customer feedbacks we have recieved 
 | [Project Plan](https://github.com/user-attachments/files/17269124/451.Group.9.pdf), [Communication Plan](https://github.com/bounswe/bounswe2024group9/wiki/Communication-Plan),[ Responsibility Assignment Matrix](https://github.com/bounswe/bounswe2024group9/wiki/Responsibility-Assignment-Matrix)  | Done |
 | Weekly reports and any additional meeting notes  | [Done](https://github.com/bounswe/bounswe2024group9/wiki) |
 | Milestone Review  | Done |
-| Individual Contributions | 2/10 Done |
+| Individual Contributions | 8/9 Done |
 | A pre-release version of your software | [Done](https://github.com/bounswe/bounswe2024group9/releases/tag/customer-milestone-1) |
 
 
