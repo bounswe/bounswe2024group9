@@ -186,3 +186,28 @@ class User(AbstractBaseUser):
     def get_comments(self):
         """Returns all comments associated with the user."""
         return self.comments.all()
+
+class Annotation(models.Model):
+    _id = models.AutoField(primary_key=True)
+    text = models.TextField()
+    language_qid = models.IntegerField(default=0)  # QID of the question example : Q24582
+    annotation_starting_point = models.IntegerField(default=0) 
+    annotation_ending_point = models.IntegerField(default=0)
+    annotation_date = models.DateTimeField(auto_now_add=True)
+    author = models.ForeignKey('User', on_delete=models.CASCADE, related_name='annotations')
+    annotation_comments = models.ForeignKey(
+        'self',
+        on_delete=models.CASCADE,
+        related_name='child_annotations',
+        null=True,
+        blank=True
+    )
+
+    def __str__(self):
+        return self.text
+
+    def __repr__(self):
+        return self.text
+
+    def __unicode__(self):
+        return self.text
