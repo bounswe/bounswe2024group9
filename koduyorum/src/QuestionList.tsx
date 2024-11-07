@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, TextInput, Button, FlatList, StyleSheet, Text, TouchableOpacity } from 'react-native';
 import QuestionCard from './QuestionCard';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useNavigation, useRoute, useFocusEffect } from '@react-navigation/native'; // Import useFocusEffect
 
 const QuestionList = () => {
     const navigation = useNavigation();
@@ -24,9 +24,12 @@ const QuestionList = () => {
         }
     };
 
-    useEffect(() => {
-        fetchQuestions();
-    }, []);
+    // Fetch questions when the screen comes into focus
+    useFocusEffect(
+        React.useCallback(() => {
+            fetchQuestions();
+        }, [])
+    );
 
     // Function to handle search
     const handleSearch = async () => {
