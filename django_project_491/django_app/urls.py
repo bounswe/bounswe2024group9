@@ -18,4 +18,5 @@ urlpatterns = [
     path('random_questions/', random_questions, name='random_questions'),
     path('question/<int:question_id>/comments/', get_question_comments, name='get_question_comments'),
     path('code_execute/', post_sample_code, name='code_execute'), # for dynamic code execution
+    path('auth/check_token/', check_token, name='check_token'),
 ]

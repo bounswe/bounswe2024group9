@@ -10,10 +10,14 @@ from django.views.decorators.csrf import csrf_exempt
 import json
 from .models import Question, Comment
 from urllib.parse import quote
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.decorators import permission_classes, api_view
+from rest_framework.permissions import IsAuthenticated
 
 
 # Used for initial search - returns 5 best matching wiki id's
-# @login_required
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def wiki_search(request, search_strings):
     sparql = SPARQLWrapper("https://query.wikidata.org/sparql")
 
@@ -159,8 +163,8 @@ def wikipedia_data_views(wiki_id):
     info_object = modify_data(wiki_id)
     return info_object
 
-
-# @login_required
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def get_run_coder_api_languages(request):
     languages = get_languages()
     
@@ -219,10 +223,12 @@ def login_user(request : HttpRequest) -> HttpResponse:
 
         # Authenticate the user
         user = authenticate(username=username, password=password)
+        print(user)
         if user is not None:
             # Authentication successful, log in the user
             login(request, user)
-            return JsonResponse({'status': 'success', 'user_id': user.pk}, status=200)
+            refresh = RefreshToken.for_user(user)
+            return JsonResponse({'status': 'success', 'user_id': user.pk, 'token': str(refresh.access_token)}, status=200)
         else:
             # Authentication failed, log the failed attempt and return an error
             print("Failed login attempt for username:", username)
@@ -419,11 +425,12 @@ def get_question_comments(request, question_id):
 
 
 # Will be removed in the final version.
-@csrf_exempt
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def post_sample_code(request):
     data = json.loads(request.body)
 
-    source_code = data.get('source_code', '')  # Get 'code' from the JSON body
+    source_code = data.get('source_code', 'print(1+ 2)')  # Get 'code' from the JSON body
     language_id = data.get('language_id', 71)  # Default to Python
 
     result = run_code(source_code, language_id)
@@ -437,3 +444,9 @@ def post_sample_code(request):
         return JsonResponse(result)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def check_token(request):
+    return JsonResponse({'status': 'Token is valid'}, status=200)
