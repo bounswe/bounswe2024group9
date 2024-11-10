@@ -24,23 +24,20 @@ def wiki_search(request, search_strings):
         [f'CONTAINS(LCASE(?languageLabel), "{quote(term.lower())}")' for term in search_terms])
 
     query = f"""
-    SELECT DISTINCT ?language (SAMPLE(?languageLabel) as ?languageLabel) 
+    SELECT DISTINCT ?language ?languageLabel
     WHERE {{
-        ?language wdt:P31 wd:Q9143.
-        ?language rdfs:label ?languageLabel.
+    # Limit to specific instance types
+    VALUES ?instanceType {{ wd:Q9143 wd:Q66747126 wd:Q28455561 }}
+    
+    # Filter by instance type
+    ?language wdt:P31 ?instanceType.
 
-        # Filter for language names containing any of the search terms
-        FILTER({filter_conditions})
-
-        # Ensure that the label is in English
-        FILTER(LANG(?languageLabel) = "en")
-
-        SERVICE wikibase:label {{ 
-        bd:serviceParam wikibase:language "en". 
-        }}
+    # Filter for English language labels and check for search terms
+    ?language rdfs:label ?languageLabel.
+    FILTER(LANG(?languageLabel) = "en")
+    FILTER({filter_conditions})  # Use the dynamically constructed filter conditions here
     }}
-    GROUP BY ?language
-    ORDER BY STRLEN(?languageLabel)
+    ORDER BY STRLEN(?languageLabel)  # Order by the length of the language label
     LIMIT 5
     """
 
