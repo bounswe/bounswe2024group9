@@ -5,7 +5,7 @@ import json
 from django.views.decorators.csrf import csrf_exempt
 from ..Utils.utils import *
 from ..Utils.forms import *
-
+from typing import List
 
 def get_question(request: HttpRequest, question_id: int) -> HttpResponse:
     try:
@@ -20,19 +20,30 @@ def get_question(request: HttpRequest, question_id: int) -> HttpResponse:
             'upvotes': question.upvotes,
             'creationDate': question.creationDate.strftime('%Y-%m-%d %H:%M:%S'),
         }
-        comments = question.comments.all()
-        comments_data = [{
-                'comment_id': comment._id,
-                'details': comment.details,
-                'user': comment.author.username,
-                'upvotes': comment.upvotes,
-            } for comment in comments]
 
-
-        return JsonResponse({'question': question_data, 'comments': comments_data}, status=200)
+        return JsonResponse({'question': question_data}, status=200)
 
     except Question.DoesNotExist:
         return JsonResponse({'error': 'Question not found'}, status=404)
+
+@csrf_exempt
+def get_question_comments(request, question_id):
+    try:
+        question = Question.objects.get(_id=question_id)
+        comments : List[Comment] = question.comments.all()
+
+        comments_data = [{
+            'comment_id': comment._id,
+            'details': comment.details,
+            'user': comment.author.username,
+            'upvotes': comment.upvotes,
+        } for comment in comments]
+
+        return JsonResponse({'comments': comments_data}, status=200)
+    
+    except Question.DoesNotExist:
+        return JsonResponse({'error': 'Question not found'}, status=404)
+
 
 @csrf_exempt  
 def create_question(request : HttpRequest) -> HttpResponse:
@@ -212,25 +223,6 @@ def list_questions_by_hotness(request, page_number = 1):
     } for question in questions]
 
     return JsonResponse({'questions': questions_data}, safe=False, status=200)
-
-#TODO: Maybe removing that since we are using it with get_question
-@csrf_exempt
-def get_question_comments(request, question_id):
-    try:
-        question = Question.objects.get(_id=question_id)
-        comments : Comment = question.comments.all()
-
-        comments_data = [{
-            'comment_id': comment._id,
-            'details': comment.details,
-            'user': comment.author.username,
-            'upvotes': comment.upvotes,
-        } for comment in comments]
-
-        return JsonResponse({'comments': comments_data}, status=200)
-    
-    except Question.DoesNotExist:
-        return JsonResponse({'error': 'Question not found'}, status=404)
 
 
 @csrf_exempt

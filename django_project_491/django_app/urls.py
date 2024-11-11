@@ -18,13 +18,12 @@ urlpatterns = [
 
     path('create_question/', question_views.create_question, name='create_question'),
     path('get_question/<int:question_id>/', question_views.get_question, name='get_question'),
-    path('get_question/<int:question_id>/', question_views.get_question, name='get_question'),
+    path('question/<int:question_id>/comments/', question_views.get_question_comments, name='get_question_comments'),
     path('edit_question/<int:question_id>/', question_views.edit_question, name='edit_question'),
     path('delete_question/<int:question_id>/', question_views.delete_question, name='delete_question'),
     path('mark_as_answered/<int:question_id>/', question_views.mark_as_answered, name='mark_as_answered'), # TODO: IMPLEMENT THE LOGIC
     path('report_question/<int:question_id>/', question_views.report_question, name='report_question'),
     path('get_questions_by_hotness/<int:page_number>', question_views.list_questions_by_hotness, name='get_question_comments'),
-    path('question/<int:question_id>/comments/', question_views.get_question_comments, name='get_question_comments'),
     path('random_questions/', question_views.random_questions, name='random_questions'),
     path('list_questions/', question_views.list_questions_by_language, name='list_questions'),
 
