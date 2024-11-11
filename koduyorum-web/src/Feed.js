@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "./hooks/AuthProvider";
+import PostPreview from "./PostPreview";
 import "./Feed.css";
 
 function Feed() {
@@ -24,10 +25,9 @@ function Feed() {
     const searchParams = new URLSearchParams(location.search);
     const searchString = searchParams.get('query');
 
-    // Function to extract QID from URL
-    const extractQID = (url) => {
+    const getQID = async (url) => {
         return url.split("/").pop();
-    };
+    }
 
     const handleSearch = async () => {
         if (!searchQuery) {
@@ -65,68 +65,71 @@ function Feed() {
         return text.length > length ? text.substring(0, length) + "..." : text;
     };
 
-    const fetchWikiIdForTag = async (tag) => {
+    const fetchWikiId = async (string) => {
       try {
-          const response = await fetch(`/django_app/search/${tag}`);
+          const response = await fetch(`http://127.0.0.1:8000/search/${encodeURIComponent(string)}`);
           if (!response.ok) {
               throw new Error('Network response was not ok');
           }
           const data = await response.json();
           // Assuming the API returns an array of results and the first one is the most relevant
-          return data.results.bindings[0]?.language.value.split("/").pop(); // Extract the QID
+          return data.results.bindings[0]?.getQID(language.value); // Extract the QID
       } catch (error) {
-          console.error("Error fetching wiki ID for tag:", error);
+          console.error("Error fetching wiki ID:", error);
           return null;
       }
     };
   
 
     const handleTagClick = async (tag) => {
-      const wikiId = await fetchWikiIdForTag(tag);
-      if (wikiId) {
-          navigate(`/result/${wikiId}`);
-      } else {
-          console.error("No wiki ID found for tag:", tag);
-      }
-  };
-  
+        const wikiId = await fetchWikiId(tag);
+        if (wikiId) {
+            navigate(`/result/${wikiId}`);
+        } else {
+            console.error("No wiki ID found for tag:", tag);
+        }
+    };
 
+    const fetchPosts = async () => {
+        try {
+            const response = await fetch('http://127.0.0.1:8000/random_questions/');
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            const data = await response.json();
+            setPosts(data.questions);
+        } catch (error) {
+            console.error('Error fetching posts:', error.message);
+            setError('Failed to load posts. Please check your network or server configuration.');
+        }
+    };
+
+    const fetchSearchResults = async (query) => {
+        try {
+            const response = await fetch(`http://127.0.0.1:8000/search/${encodeURIComponent(query)}`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            const data = await response.json();
+            return data.results.bindings;
+        } catch (error) {
+            console.error('Error fetching search results:', error.message);
+            setError('Failed to load search results. Please check your network or server configuration.');
+            return [];
+        }
+    }
+    
+    const handleSearchResultClick = async (result) => {
+        const wikiId = await fetchWikiId(result.languageLabel.value);
+        if (wikiId) {
+            navigate(`/result/${wikiId}`);
+        } else {
+            console.error("No wiki ID found for search result:", result);
+        }
+    };
+  
     useEffect(() => {
-        setPosts([
-            {
-                id: 1,
-                title: "How to implement quicksort in Python?",
-                language: "Python",
-                labels: ["algorithms", "sorting"],
-                status: "unanswered",
-                createdAt: "2024-03-01",
-                popularity: 10,
-                preview:
-                    "I am trying to implement quicksort in Python. I’ve read about partitioning arrays, but I am not sure how to handle recursive calls efficiently. Should I use a helper function or can I do this all in one function? Also, what’s the best way to handle edge cases?",
-            },
-            {
-                id: 2,
-                title: "Second Greatest and Second Lowest Number",
-                language: "JavaScript",
-                labels: ["fundamentals", "arrays"],
-                status: "answered",
-                createdAt: "2024-03-02",
-                popularity: 15,
-                preview:
-                    "Hi, I am trying to compute the second smallest and second largest numbers from an array of numbers. I have written the following code, but it is not working as expected. Can you help me fix it?",
-            },
-            {
-                id: 3,
-                title: "Understanding recursion in C++",
-                language: "C++",
-                labels: ["recursion", "fundamentals"],
-                status: "answered",
-                createdAt: "2024-03-03",
-                popularity: 12,
-                preview:
-                    "Recursion can be tricky to understand. In C++, when should I use recursion vs iteration? I often find myself confused about the performance implications of recursion.",
-            },
-        ]);
+        fetchPosts();
     }, []);
 
     useEffect(() => {
@@ -216,22 +219,16 @@ function Feed() {
                         </select>
                     </div>
 
-                    <div className="posts-list">
-                        {sortedPosts.map((post) => (
-                            <div key={post.id} className="post-card" onClick={() => (window.location.href = "/question")}>
-                                <h2 className="post-title">{post.title}</h2>
-                                <p className="post-preview">{truncateText(post.preview, 100)}</p>
-                                <div className="post-labels">
-                                    {post.labels.map((label) => (
-                                        <button key={label} onClick={() => handleTagClick(label)} className="tag-link">{label}</button>
-                                    ))}
-                                </div>
-                                <div className="post-meta">
-                                    Language: {post.language} | Status: {post.status}
-                                </div>
-                            </div>
-                        ))}
+                    <div className="questions-list">
+                        {sortedPosts.length > 0 ? (
+                            sortedPosts.map((post) => (
+                                <PostPreview key={post.id} post={post} onClick={() => navigate(`/question`)} />
+                            ))
+                        ) : (
+                            <p className="empty-text">No questions found</p>
+                        )}
                     </div>
+
                     {searched && (
                         <div className="search-display" ref={searchDisplayRef}>
                             {isLoading ? (
@@ -243,7 +240,7 @@ function Feed() {
                                 <div key={index} className="search-result">
                                     <button
                                         className="result-button"
-                                        onClick={() => navigate(`/result/${extractQID(result.language.value)}`)}
+                                        onClick={() => handleSearchResultClick(result)}
                                     >
                                         <h3>{result.languageLabel.value}</h3>
                                     </button>
@@ -269,26 +266,4 @@ function Feed() {
 }
 
 export default Feed;
-
-export const fetchSearchResults = async (searchString) => {
-try {
-    console.log("Original search string:", searchString);
-
-    searchString = searchString.replace(/[^a-z0-9]/gi, '');
-
-    console.log("Alphanumeric search string:", searchString);
-
-    if (searchString === "") {
-        return [];
-    }
-
-    const response = await fetch(`${process.env.REACT_APP_API_URL}/django_app/search/${searchString}`);
-    const data = await response.json();
-    console.log(data.results.bindings);
-    return data.results.bindings;
-} catch (error) {
-    console.error("Error fetching search results:", error);
-    return []; // Return an empty array in case of error
-}
-};
 
