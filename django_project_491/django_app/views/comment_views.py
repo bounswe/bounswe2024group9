@@ -8,12 +8,11 @@ from ..Utils.forms import *
 
 
 
-@csrf_exempt  # This is allowing POST requests without CSRF token
-def create_comment(request: HttpRequest) -> HttpResponse:
+@csrf_exempt
+def create_comment(request: HttpRequest, question_id : int) -> HttpResponse:
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
-            question_id = data.get('question_id')
             comment_details = data.get('details')
             code_snippet = data.get('code_snippet', '')
             language = data.get('language')
@@ -36,11 +35,13 @@ def create_comment(request: HttpRequest) -> HttpResponse:
                 details=comment_details,
                 code_snippet=code_snippet,
                 language_id=language_id,
-                author=request.user  # Associate the comment with the logged-in user
+                author=request.user,  # Associate the comment with the logged-in user
+                question=question # Associate the comment with the current question
             )
 
-            # Associate the comment with the question
-            question.add_comment(comment)
+            user = request.user
+            user.authored_comments.add(comment)
+
 
             return JsonResponse({'success': 'Comment created successfully', 'comment_id': comment._id}, status=201)
 
@@ -50,7 +51,6 @@ def create_comment(request: HttpRequest) -> HttpResponse:
     return JsonResponse({'error': 'Invalid request method'}, status=405)
 
 
-#TODO: Implement edit_comment and delete_comment views
 @csrf_exempt
 def edit_comment(request: HttpRequest, comment_id:int) -> HttpResponse:
     if not comment_id:
@@ -85,7 +85,75 @@ def edit_comment(request: HttpRequest, comment_id:int) -> HttpResponse:
         return JsonResponse({'error': f'Malformed data: {str(e)}'}, status=400)
 
 
+@csrf_exempt
+def delete_comment(request: HttpRequest, comment_id : int) -> HttpResponse:
+    if not comment_id:
+        return JsonResponse({'error': 'Comment ID parameter is required'}, status=400)
+    
+    user_id = request.user.id
+    if not user_id:
+        return JsonResponse({'error': 'User ID parameter is required'}, status=400)
+    
+    deletor_user = User.objects.get(pk=user_id)
+
+    try:
+        comment = Comment.objects.get(_id=comment_id)
+        comment_owner_user_id = comment.author.id
+
+        if deletor_user.id != comment_owner_user_id and deletor_user.userType != UserType.ADMIN:
+            return JsonResponse({'error': 'Only admins and owner of the comments can delete comments'}, status=403)
+
+        comment.delete()
+
+        user = request.user
+        user.authored_comments.remove(comment)
+
+    except Comment.DoesNotExist:
+        return JsonResponse({'error': 'Comment not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': f'An error occurred: {str(e)}'}, status=500)
 
 @csrf_exempt
-def delete_comment(request: HttpRequest) -> HttpResponse:
-    raise NotImplementedError("Delete comment functionality is not implemented yet.")
+def mark_comment_as_answer(request: HttpRequest, comment_id : int) -> HttpResponse:
+    """
+    Marks a comment as the answer to a question. Only owner of the question and admin can mark a comment as the answer.
+    Args:
+        request (HttpRequest): The HTTP request object containing user information.
+        comment_id (int): The ID of the comment to be marked as the answer.
+    Returns:
+        HttpResponse: A JSON response indicating the success or failure of the operation.
+    Raises:
+        JsonResponse: If the comment ID is not provided, if the comment does not exist,
+                        if the user is not the author of the question, or if any other error occurs.
+    Responses:
+        200: Comment successfully marked as the answer.
+        400: Comment ID parameter is required.
+        403: Only the author of the question can mark a comment as the answer.
+        404: Comment not found.
+        500: An error occurred during the operation.
+    """
+    
+    if not comment_id:
+        return JsonResponse({'error': 'Comment ID parameter is required'}, status=400)
+
+    try:
+        comment = Comment.objects.get(_id=comment_id)
+        question : Question = Comment.question
+        user = request.user
+
+        if user != question.author and user.userType != UserType.ADMIN:
+            return JsonResponse({'error': 'Only the author of the question can mark a comment as the answer'}, status=403)
+
+        comment.answer_of_the_question = True
+        comment.save()
+
+        question.mark_as_answered(comment_id)
+        
+        question.save()
+
+        return JsonResponse({'success': f'Comment {comment_id} marked as the answer for question {question._id}'}, status=200)
+
+    except Comment.DoesNotExist:
+        return JsonResponse({'error': 'Comment not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': f'An error occurred: {str(e)}'}, status=500)

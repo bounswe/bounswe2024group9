@@ -84,8 +84,9 @@ def create_question(request : HttpRequest) -> HttpResponse:
                 tags=tags,
                 author=request.user
             )
-
-            request.user.add_question(question)            
+            
+            user = request.user
+            user.questions.add(question)   
 
             return JsonResponse({'success': 'Question created successfully', 'question_id': question._id}, status=201)
 
@@ -154,6 +155,9 @@ def delete_question(request: HttpRequest, question_id: int) -> HttpResponse:
             return JsonResponse({'error': 'Only admins and owner of the questions can delete questions'}, status=403)
 
         question.delete()
+
+        user = request.user
+        user.questions.remove(question)
 
     except Question.DoesNotExist:
         return JsonResponse({'error': 'Question not found'}, status=404)

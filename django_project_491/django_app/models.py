@@ -50,8 +50,9 @@ class Comment(models.Model):
     language_id = models.IntegerField(default=71)  # Language ID for Python
     upvotes = models.IntegerField(default=0)
     creationDate = models.DateTimeField(auto_now_add=True)
-    answer_of_the_question = models.BooleanField(default=False)
-    
+    answer_of_the_question = models.BooleanField(default=False) # This is a flag to indicate if the comment is an answer to the question that it is associated with
+    question = models.ForeignKey('Question', on_delete=models.CASCADE, related_name='comments')  # New field linking a comment to a question
+
     # Link each comment to a user (author)
     author = models.ForeignKey('User', on_delete=models.CASCADE, related_name='authored_comments')  # Updated related_name
 
@@ -67,6 +68,7 @@ class Comment(models.Model):
     def downvote(self):
         self.upvotes -= 1
         self.save()
+
 class Question(models.Model):
     _id = models.AutoField(primary_key=True)
     title = models.CharField(max_length=200)
@@ -75,7 +77,7 @@ class Question(models.Model):
     tags = models.JSONField(blank=True, default=list)  # Example: ['tag1', 'tag2']
     details = models.TextField()
     code_snippet = models.TextField()
-    comments = models.ManyToManyField('Comment', related_name='question_comments', blank=True)
+
     upvotes = models.IntegerField(default=0)
     creationDate = models.DateTimeField(auto_now_add=True)
     topic = models.CharField(max_length=100, blank=True)
@@ -88,10 +90,6 @@ class Question(models.Model):
         result = run_code(self.code_snippet, self.language_id)
         outs = result['stdout'].split('\n')
         return outs
-
-    def add_comment(self, comment): # Used
-        self.comments.add(comment)
-        self.save()
 
     def mark_as_answered(self): # TODO
         self.answered = True
@@ -144,8 +142,6 @@ class User(AbstractBaseUser):
     bio = models.TextField(blank=True, null=True) # May be removed later
 
     # Relationships
-    questions = models.ManyToManyField('Question', related_name='user_questions', blank=True)  # Keep this related_name
-    comments = models.ManyToManyField('Comment', related_name='user_comments', blank=True)  # Keep this related_name
     bookmarks = models.JSONField(blank=True, default=list)  # Example: ['link1', 'link2']
 
     objects = UserManager()
@@ -187,31 +183,9 @@ class User(AbstractBaseUser):
         """Returns the user's bookmarks."""
         return self.bookmarks
 
-    # ADDING QUESTION FUNCTIONALITY
-    def add_question(self, question: Question): # TODO
-        """Associates a question with the user."""
-        self.questions.add(question)
-        self.save()
-
-    def remove_question(self, question: Question): # TODO
-        """Removes a question association from the user."""
-        self.questions.remove(question)
-        self.save()
-
     def get_questions(self): # TODO
         """Returns all questions associated with the user."""
         return self.questions.all()
-
-    # ADDING COMMENT FUNCTIONALITY
-    def add_comment(self, comment: Comment): # TODO
-        """Associates a comment with the user."""
-        self.comments.add(comment)
-        self.save()
-
-    def remove_comment(self, comment: Comment): # TODO
-        """Removes a comment association from the user."""
-        self.comments.remove(comment)
-        self.save()
 
     def get_comments(self): # TODO
         """Returns all comments associated with the user."""
