@@ -20,7 +20,7 @@ const App = () => {
         <Route path="/forgot" element={<ForgotPassword />} />
         <Route path="/feed" element={<Feed />} />
         <Route path="/question" element={<CodeExecution />} />
-        <Route path="/result/:wiki_id" element={<SearchResults />} />
+        <Route path="/result/:wiki_id/:wiki_name" element={<SearchResults />} />
       </Routes>
     </Router>
   );

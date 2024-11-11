@@ -1,73 +1,58 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { useLocation, useNavigate } from 'react-router-dom';
-import './SearchResults.css'; // assuming you have some basic styles here
+import { useParams, useNavigate } from 'react-router-dom';
+import './SearchResults.css';
 
 const SearchResults = () => {
-  const [activeTab, setActiveTab] = useState('info'); // To switch between Info and Questions
-  const [infoData, setInfoData] = useState(null); // For Wikidata information
-  const [questionData, setQuestionData] = useState([]); // For related questions
-  const [loading, setLoading] = useState(true); // To show loading state
-  const [error, setError] = useState(null); // For error handling
-  const location = useLocation(); // To capture search query from the URL
-  const navigate = useNavigate(); // To navigate to other pages
+  const [activeTab, setActiveTab] = useState('info');
+  const [infoData, setInfoData] = useState(null);
+  const [questionData, setQuestionData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const { wiki_id, wiki_name} = useParams(); // Get wiki_id from the URL
+  const navigate = useNavigate();
 
-  // Extracting the search keyword from the query string (e.g., /searchresults?query=JavaScript)
-  const searchParams = new URLSearchParams(location.search);
-  const searchString = searchParams.get('query');
-
-  // Fetch Wikidata info and questions when the component mounts
   useEffect(() => {
-    if (searchString) {
-      fetchSearchData(searchString);
+    if (wiki_id) {
+      fetchSearchData([wiki_id, wiki_name]);
     }
-  }, [searchString]);
+  }, [wiki_id]);
 
-  // Function to fetch both Info and Questions data
-  const fetchSearchData = async (keyword) => {
+  const fetchSearchData = async ([wikiId, wikiName]) => {
     try {
       setLoading(true);
-      // Making two API requests in parallel
-      const [infoResponse, questionResponse] = await Promise.all([
-        axios.get(`/django_app/wikidata_query/${keyword}`), // Fetching Wikidata info
-        axios.get(`/django_app/questions/${keyword}`), // Fetching related questions
-      ]);
+      setError(null);
 
-      // Setting the responses in state
-      setInfoData(infoResponse.data);
-      setQuestionData(questionResponse.data);
-      setLoading(false);
+      const infoResponse = await fetch(`http://127.0.0.1:8000/result/${encodeURIComponent(wikiId)}`);
+      const questionResponse = await fetch(`http://127.0.0.1:8000/list_questions/?language=${encodeURIComponent(wikiName)}`);
+
+      if (!infoResponse.ok || !questionResponse.ok) {
+        throw new Error('Failed to load data');
+      }
+
+      const infoData = await infoResponse.json();
+      const questionData = await questionResponse.json();
+
+      setInfoData(infoData || { mainInfo: [], instances: [], wikipedia: {} });
+      setQuestionData(questionData || []);
     } catch (err) {
       console.error("Error fetching search data:", err);
       setError("Failed to load search data.");
+    } finally {
       setLoading(false);
     }
   };
 
-  // Function to handle tab switch between Info and Questions
-  const handleTabSwitch = (tab) => {
-    setActiveTab(tab);
-  };
+  const handleTabSwitch = (tab) => setActiveTab(tab);
 
-  // Function to handle tag click (redirecting to new search for that tag)
-  const handleTagClick = (tag) => {
-    navigate(`/searchresults?query=${tag}`);
-  };
+  const handleTagClick = (tag) => navigate(`/result/${tag}`);
 
-  // If data is still loading, show a loading spinner
-  if (loading) {
-    return <div className="loading">Loading...</div>;
-  }
+  if (loading) return <div className="loading">Loading...</div>;
 
-  // If an error occurred, show the error message
-  if (error) {
-    return <div className="error">{error}</div>;
-  }
+  if (error) return <div className="error">{error}</div>;
 
   return (
     <div className="search-results-container">
       <nav className="navbar">
-        {/* Your Navbar here, just like the one in Feed */}
         <div className="navbar-left">
           <a href="/feed" className="nav-link">Home</a>
           <a href="/profile" className="nav-link">Profile</a>
@@ -90,41 +75,67 @@ const SearchResults = () => {
         </button>
       </div>
 
-      {/* Display Wikidata info if "Info" tab is selected */}
-      {activeTab === 'info' && (
+      {/* Info Tab */}
+      {activeTab === 'info' && infoData && (
         <div className="info-section">
-          <h2>{infoData.label} (Wikidata Info)</h2>
-          <p><strong>Description:</strong> {infoData.description}</p>
-          <p><strong>Publication Date:</strong> {infoData.publicationDate}</p>
-          <p><strong>Inception Date:</strong> {infoData.inceptionDate}</p>
-          <p><strong>Website:</strong> <a href={infoData.website} target="_blank" rel="noopener noreferrer">{infoData.website}</a></p>
-          <div className="related-instances">
-            <h3>Related Instances</h3>
-            <ul>
-              {infoData.relatedInstances.map((instance, index) => (
-                <li key={index} onClick={() => handleTagClick(instance.label)}>
-                  {instance.label}
-                </li>
-              ))}
-            </ul>
-          </div>
+          <h2>{infoData.mainInfo[0]?.languageLabel.value || 'No Information Available'} (Wikidata Info)</h2>
+          {infoData.mainInfo.length > 0 ? (
+            <>
+              <p><strong>Publication Date:</strong> {new Date(infoData.mainInfo[0].publicationDate.value).toLocaleDateString()}</p>
+              <p>
+                <strong>Website:</strong> 
+                <a href={infoData.mainInfo[0].website.value} target="_blank" rel="noopener noreferrer">
+                  {infoData.mainInfo[0].website.value}
+                </a>
+              </p>
+              <p>
+                <strong>Wikipedia:</strong> 
+                <a href={infoData.mainInfo[0].wikipediaLink.value} target="_blank" rel="noopener noreferrer">
+                  {infoData.mainInfo[0].wikipediaLink.value}
+                </a>
+              </p>
+              <div className="related-instances">
+                <h3>Related Instances</h3>
+                {infoData.instances.map((instance, index) => (
+                  <div key={index} className="instance">
+                    <p><strong>{instance.instanceLabel}</strong></p>
+                    <ul>
+                      {instance.relatedLanguages.map((related, idx) => (
+                        <li key={idx} onClick={() => handleTagClick(related.relatedLanguageLabel)}>
+                          {related.relatedLanguageLabel}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            </>
+          ) : (
+            <p>No information available for this topic.</p>
+          )}
         </div>
       )}
 
-      {/* Display Questions if "Questions" tab is selected */}
+      {/* Questions Tab */}
       {activeTab === 'questions' && (
         <div className="questions-section">
-          <h2>Questions related to "{searchString}"</h2>
+          <h2>Questions related to "{wiki_id}"</h2>
           <ul>
-            {questionData.map((question, index) => (
-              <li key={index}>
-                <div className="question-card">
-                  <h3>{question.title}</h3>
-                  <p>{question.description}</p>
-                  <button onClick={() => window.location.href = "/code-execution"}>Go to Code Execution</button>
-                </div>
-              </li>
-            ))}
+            {questionData.length > 0 ? (
+              questionData.map((question, index) => (
+                <li key={index}>
+                  <div className="question-card">
+                    <h3>{question.title}</h3>
+                    <p>{question.description}</p>
+                    <button onClick={() => navigate(`/code-execution/${question.id}`)}>
+                      Go to Code Execution
+                    </button>
+                  </div>
+                </li>
+              ))
+            ) : (
+              <p>No questions found for this topic.</p>
+            )}
           </ul>
         </div>
       )}

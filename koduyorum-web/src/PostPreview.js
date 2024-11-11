@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faThumbsUp, faCommentDots } from '@fortawesome/free-solid-svg-icons';
 import './PostPreview.css';
 
-const PostPreview = ({ post, currentUser, onPress }) => {
+const PostPreview = ({ post, currentUser, onClick }) => {
     const {
         post_id,
         title,
@@ -20,7 +20,7 @@ const PostPreview = ({ post, currentUser, onPress }) => {
     const [comments, setComments] = useState(initialComments);
 
     return (
-        <div className="post-card" onClick={() => onPress(post)}>
+        <div className="post-card" onClick={onClick}>
             <div className={`status-label ${answered ? 'answered' : 'unanswered'}`}>
                 {answered ? 'Answered' : 'Unanswered'}
             </div>
