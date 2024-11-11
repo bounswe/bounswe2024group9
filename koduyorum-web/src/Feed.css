@@ -79,6 +79,7 @@ body {
   
   .feed-content {
     display: flex;
+    gap: 2rem;
     margin: 2rem;
   }
   

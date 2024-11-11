@@ -16,14 +16,7 @@
     color: white;
 }
 
-.tags-container, .contributors-container {
-    width: 20%;
-    background-color: white;
-    padding: 1rem;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  }
-  
+
 .tab-navigation {
     display: flex;
     gap: 60px;
@@ -54,10 +47,11 @@
     padding: 1rem;
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    margin-bottom: 1.5rem;
-    margin-left: 2rem;
-    margin-right: 5rem;
+   
 }
+.info-container {
+    margin: 0;
+  }
 
 .language-title {
     font-size: 2rem;

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "./hooks/AuthProvider";
+import { Navbar, LeftSidebar, RightSidebar } from './PageComponents'; 
 import PostPreview from "./PostPreview";
 import "./Feed.css";
 
@@ -29,6 +30,7 @@ function Feed() {
         return url.split("/").pop();
     }
 
+	// ------  NAVBAR FUNCTIONS ------
     const handleEnter = () => {
         if (searchResults.length > 0) {
             const topResult = searchResults[0];
@@ -51,6 +53,36 @@ function Feed() {
             setSearched(false);
         }
     };
+
+	const handleSearchResultClick = async (result) => {
+        const wikiIdName = await fetchWikiIdAndName(result.languageLabel.value);
+        const wikiId = wikiIdName[0];
+        const wikiName = wikiIdName[1];
+        console.log("Wiki ID and Name:", wikiId, wikiName);
+        if (wikiId) {
+            console.log("Navigating to:", `/result/${wikiId}/${encodeURIComponent(wikiName)}`);
+            navigate(`/result/${wikiId}/${encodeURIComponent(wikiName)}`);
+        } else {
+            console.error("No wiki ID found for search result:", result);
+        }
+    };
+
+	const handleSearchQueryChange = async (e) => {
+        const query = e.target.value;
+        setSearchQuery(query);
+
+        if (query) {
+            setIsLoading(true);
+            const results = await fetchSearchResults(query);
+            setSearchResults(results);
+            setSearched(true);
+            setIsLoading(false);
+        } else {
+            setSearchResults([]);
+            setSearched(false);
+        }
+    };
+	// --------------------------------
 
     const filteredPosts = posts.filter((post) => 
         (filter === "all" || post.status === filter) &&
@@ -129,34 +161,6 @@ function Feed() {
         }
     }
     
-    const handleSearchResultClick = async (result) => {
-        const wikiIdName = await fetchWikiIdAndName(result.languageLabel.value);
-        const wikiId = wikiIdName[0];
-        const wikiName = wikiIdName[1];
-        console.log("Wiki ID and Name:", wikiId, wikiName);
-        if (wikiId) {
-            console.log("Navigating to:", `/result/${wikiId}/${encodeURIComponent(wikiName)}`);
-            navigate(`/result/${wikiId}/${encodeURIComponent(wikiName)}`);
-        } else {
-            console.error("No wiki ID found for search result:", result);
-        }
-    };
-
-    const handleSearchQueryChange = async (e) => {
-        const query = e.target.value;
-        setSearchQuery(query);
-
-        if (query) {
-            setIsLoading(true);
-            const results = await fetchSearchResults(query);
-            setSearchResults(results);
-            setSearched(true);
-            setIsLoading(false);
-        } else {
-            setSearchResults([]);
-            setSearched(false);
-        }
-    };
   
     useEffect(() => {
         fetchPosts();
@@ -176,76 +180,20 @@ function Feed() {
 
     return (
         <div className="feed-container">
-            <div className="navbar">
-                <div className="navbar-left">
-                    <img
-                        id="bar_logo"
-                        src="resources/icon2-transparent.png"
-                        style={{ width: "75px", height: "auto", padding: "5px" }}
-                        alt="bar_logo"
-                        onClick={() => navigate('/feed')}
-                    />
-                    <button className="nav-link">Home</button>
-                    <button className="nav-link">Profile</button>
-                </div>
-                {/* Search Input and Dropdown Container */}
-                <div className="search-container">
-                    <input
-                        type="search"
-                        className="search-input"
-                        placeholder="Search posts..."
-                        value={searchQuery}
-                        onChange={handleSearchQueryChange}
-                        onKeyDown={(event) => {
-                            if (event.key === 'Enter') handleEnter();
-                        }}
-                    />
-                    <button className="search-button" onClick={() => handleSearch()}>Search</button>
-                    
-                    {/* Suggestions Dropdown */}
-                    {searched && searchResults.length > 0 && (
-                        <div className="search-suggestions" ref={searchDisplayRef}>
-                            {isLoading ? (
-                                <p className="centered-search">Searching...</p>
-                            ) : (
-                                searchResults.map((result, index) => (
-                                    <div
-                                        key={index}
-                                        className="search-suggestion"
-                                        onClick={() => handleSearchResultClick(result)}
-                                    >
-                                        {result.languageLabel.value}
-                                    </div>
-                                ))
-                            )}
-                        </div>
-                    )}
-                </div>
-                <button 
-                    className="nav-link"
-                    onClick={() => navigate('/login')}
-                >Log Out</button>
-            </div>
+            <Navbar
+			searchQuery={searchQuery}
+			handleSearchQueryChange={handleSearchQueryChange}
+			handleSearch={handleSearch}
+			handleEnter={handleEnter}
+			searchResults={searchResults}
+			isLoading={isLoading}
+			searched={searched}
+			handleSearchResultClick={handleSearchResultClick}
+		/>
 
             <div className="feed-content">
                 {/* Left Edge - Popular Tags */}
-                <div className="tags-container">
-                    <h3 className="section-title">Popular Tags</h3>
-                    <ul className="tags-list">
-                        <li>
-                            <button onClick={() => handleTagClick('javascript')} className="tag-link">JavaScript</button>
-                        </li>
-                        <li>
-                            <button onClick={() => handleTagClick('python')} className="tag-link">Python</button>
-                        </li>
-                        <li>
-                            <button onClick={() => handleTagClick('react')} className="tag-link">React</button>
-                        </li>
-                        <li>
-                            <button onClick={() => handleTagClick('algorithms')} className="tag-link">Algorithms</button>
-                        </li>
-                    </ul>
-                </div>
+                <LeftSidebar handleTagClick={handleTagClick} />
 
                 {/* Middle - Posts */}
                 <div className="posts-container">
@@ -277,7 +225,7 @@ function Feed() {
                         )}
                     </div>
 
-                    {searched && (
+                    {/* {searched && (
                         <div className="search-display" ref={searchDisplayRef}>
                             {isLoading ? (
                                 <p className="centered-search">Searching...</p>
@@ -296,18 +244,11 @@ function Feed() {
                             ))
                         )}
                     </div>
-                )}
+                )} */}
             </div>
 
             {/* Right Edge - Top Contributors */}
-            <div className="contributors-container">
-                <h3 className="section-title">Top Contributors</h3>
-                <ul className="contributors-list">
-                    <li>John Doe</li>
-                    <li>Jane Smith</li>
-                    <li>Bob Johnson</li>
-                </ul>
-            </div>
+            <RightSidebar />
         </div>
     </div>
 );
