@@ -154,7 +154,6 @@ def delete_question(request: HttpRequest, question_id: int) -> HttpResponse:
             return JsonResponse({'error': 'Only admins and owner of the questions can delete questions'}, status=403)
 
         question.delete()
-        vote
 
     except Question.DoesNotExist:
         return JsonResponse({'error': 'Question not found'}, status=404)

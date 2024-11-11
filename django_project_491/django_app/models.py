@@ -32,6 +32,7 @@ class Comment_Vote(models.Model):
 
     def __str__(self):
         return f"{self.user.username} {self.vote_type}ed {self.comment.details}"
+    
 class Question_Vote(models.Model):
     _id = models.AutoField(primary_key=True)
     vote_type = models.CharField(max_length=20, choices=[(tag.value, tag.value) for tag in VoteType])
@@ -140,7 +141,7 @@ class User(AbstractBaseUser):
                                 default=UserType.USER.value)
     
     profile_pic = models.ImageField(upload_to='profile_pics/', blank=True, null=True) # May be removed later
-
+    bio = models.TextField(blank=True, null=True) # May be removed later
 
     # Relationships
     questions = models.ManyToManyField('Question', related_name='user_questions', blank=True)  # Keep this related_name

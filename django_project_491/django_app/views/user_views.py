@@ -5,28 +5,26 @@ import json
 from django.views.decorators.csrf import csrf_exempt
 
 
-
-def get_user_profile(request):
-    user_id = request.GET.get('user_id', None)
+@csrf_exempt
+def get_user_profile_by_username(request, username : str) -> JsonResponse:
+    if not username:
+        return JsonResponse({'error': 'Username parameter is required'}, status=400)
     
-    if not user_id:
-        return JsonResponse({'error': 'User ID parameter is required'}, status=400)
-    
-    user : User = get_user_model().objects.get(pk=user_id)
+    user : User = get_user_model().objects.get(username=username)
     
     user_data = {
         'username': user.username,
         'email': user.email,
         'questions': [question._id for question in user.questions.all()],
         'comments': [comment._id for comment in user.comments.all()],
-        'bookmarks': [question._id for question in user.bookmarks.all()],
+        'bookmarks': user.bookmarks,
     }
     
     return JsonResponse({'user': user_data}, status=200)
 
-#TODO find what can be changed in the user profile. Maybe adding profile picture, bio, etc.
-def edit_user_profile(request):
-    will_be_edited_user_id = request.GET.get('user_id', None)
+#TODO find what can be changed in the user profile.
+@csrf_exempt
+def edit_user_profile(request, will_be_edited_user_id : int) -> JsonResponse:
     wants_to_edit_user_id = request.user.id
 
     if not will_be_edited_user_id:
@@ -47,16 +45,20 @@ def edit_user_profile(request):
     #TODO find what can be changed in the user profile. Maybe adding profile picture, bio, etc.
     if 'username' in data:
         will_be_edited_user.username = data['username']
-    
     if 'email' in data:
         will_be_edited_user.email = data['email']
+    if 'bio' in data:
+        will_be_edited_user.bio = data['bio']
+    if 'profile_pic' in data:
+        will_be_edited_user.profile_pic = data['profile_pic']
+
     
     will_be_edited_user.save()
     
     return JsonResponse({'success': 'User profile updated successfully'}, status=200)
 
-def delete_user_profile(request):
-    will_be_deleted_user_id = request.GET.get('user_id', None)
+@csrf_exempt
+def delete_user_profile(request, will_be_deleted_user_id : int) -> JsonResponse:
     wants_to_delete_user_id = request.user.id
 
     if not will_be_deleted_user_id:

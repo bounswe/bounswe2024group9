@@ -14,6 +14,9 @@ urlpatterns = [
 
     path('login/', user_views.login_user, name='login'),
     path('signup/', user_views.signup, name='signup'),
+    path('get_user_profile_by_username/<str:username>/', user_views.get_user_profile_by_username, name='get_user_profile'),
+    path('edit_user_profile/<int:will_be_edited_user_id>/', user_views.edit_user_profile, name='edit_user_profile'),
+    path('delete_user_profile/<int:will_be_deleted_user_id>/', user_views.delete_user_profile, name='delete_user_profile'),
     path('logout/', LogoutView.as_view(), name='logout'),
 
     path('get_question/<int:question_id>/', question_views.get_question_details, name='get_question'),
@@ -23,7 +26,6 @@ urlpatterns = [
     path('delete_question/<int:question_id>/', question_views.delete_question, name='delete_question'),
     path('mark_as_answered/<int:question_id>/', question_views.mark_as_answered, name='mark_as_answered'), 
     path('report_question/<int:question_id>/', question_views.report_question, name='report_question'),
-    
     path('list_questions_by_language/<str:language>/<int:page_number>', question_views.list_questions_by_language, name='list_questions'),
     path('list_questions_by_tags/<str:tags>/<int:page_number>/', question_views.list_questions_by_tags, name='list_questions_by_tags'),
     path('list_questions_by_hotness/<int:page_number>', question_views.list_questions_by_hotness, name='get_question_comments'),
