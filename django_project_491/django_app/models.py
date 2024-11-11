@@ -3,8 +3,8 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from enum import Enum
 from typing import List
 from .Utils.utils import *
-from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes.fields import GenericForeignKey
 
 # After editing the models do not forget to run the following commands:
 # python manage.py makemigrations
@@ -20,13 +20,37 @@ class VoteType(Enum):
     UPVOTE = "upvote"
     DOWNVOTE = "downvote"
 
+class ObjectTypes(Enum):
+    QUESTION = "question"
+    COMMENT = "comment"
+
+class Comment_Vote(models.Model):
+    _id = models.AutoField(primary_key=True)
+    vote_type = models.CharField(max_length=20, choices=[(tag.value, tag.value) for tag in VoteType])
+    user = models.ForeignKey('User', on_delete=models.CASCADE, related_name='comment_votes')
+    comment = models.ForeignKey('Comment', on_delete=models.CASCADE, related_name='votes')
+
+    def __str__(self):
+        return f"{self.user.username} {self.vote_type}ed {self.comment.details}"
+class Question_Vote(models.Model):
+    _id = models.AutoField(primary_key=True)
+    vote_type = models.CharField(max_length=20, choices=[(tag.value, tag.value) for tag in VoteType])
+    user = models.ForeignKey('User', on_delete=models.CASCADE, related_name='question_votes')
+    question = models.ForeignKey('Question', on_delete=models.CASCADE, related_name='votes')
+
+
+    def __str__(self):
+        return f"{self.user.username} {self.vote_type}ed {self.question.title}"
+
 class Comment(models.Model):
     _id = models.AutoField(primary_key=True)
     details = models.TextField()
     code_snippet = models.TextField()
     language_id = models.IntegerField(default=71)  # Language ID for Python
     upvotes = models.IntegerField(default=0)
-
+    creationDate = models.DateTimeField(auto_now_add=True)
+    answer_of_the_question = models.BooleanField(default=False)
+    
     # Link each comment to a user (author)
     author = models.ForeignKey('User', on_delete=models.CASCADE, related_name='authored_comments')  # Updated related_name
 
@@ -42,9 +66,6 @@ class Comment(models.Model):
     def downvote(self):
         self.upvotes -= 1
         self.save()
-
-
-
 class Question(models.Model):
     _id = models.AutoField(primary_key=True)
     title = models.CharField(max_length=200)
@@ -58,9 +79,7 @@ class Question(models.Model):
     creationDate = models.DateTimeField(auto_now_add=True)
     topic = models.CharField(max_length=100, blank=True)
     answered = models.BooleanField(default=False)
-    reported = models.BooleanField(default=False)
-    reported_count = models.IntegerField(default=0)
-
+    reported_by = models.ManyToManyField('User', related_name='reported_questions', blank=True)
 
     author = models.ForeignKey('User', on_delete=models.CASCADE, related_name='questions')
 
@@ -127,11 +146,6 @@ class User(AbstractBaseUser):
     questions = models.ManyToManyField('Question', related_name='user_questions', blank=True)  # Keep this related_name
     comments = models.ManyToManyField('Comment', related_name='user_comments', blank=True)  # Keep this related_name
     bookmarks = models.JSONField(blank=True, default=list)  # Example: ['link1', 'link2']
-
-    upvoted_questions = models.ManyToManyField('Question', related_name='upvoted_by_users', blank=True)
-    downvoted_questions = models.ManyToManyField('Question', related_name='downvoted_by_users', blank=True)
-    upvoted_comments = models.ManyToManyField('Comment', related_name='upvoted_by_users', blank=True)
-    downvoted_comments = models.ManyToManyField('Comment', related_name='downvoted_by_users', blank=True)
 
     objects = UserManager()
 

@@ -16,16 +16,18 @@ urlpatterns = [
     path('signup/', user_views.signup, name='signup'),
     path('logout/', LogoutView.as_view(), name='logout'),
 
-    path('create_question/', question_views.create_question, name='create_question'),
-    path('get_question/<int:question_id>/', question_views.get_question, name='get_question'),
+    path('get_question/<int:question_id>/', question_views.get_question_details, name='get_question'),
     path('question/<int:question_id>/comments/', question_views.get_question_comments, name='get_question_comments'),
+    path('create_question/', question_views.create_question, name='create_question'),
     path('edit_question/<int:question_id>/', question_views.edit_question, name='edit_question'),
     path('delete_question/<int:question_id>/', question_views.delete_question, name='delete_question'),
-    path('mark_as_answered/<int:question_id>/', question_views.mark_as_answered, name='mark_as_answered'), # TODO: IMPLEMENT THE LOGIC
+    path('mark_as_answered/<int:question_id>/', question_views.mark_as_answered, name='mark_as_answered'), 
     path('report_question/<int:question_id>/', question_views.report_question, name='report_question'),
-    path('get_questions_by_hotness/<int:page_number>', question_views.list_questions_by_hotness, name='get_question_comments'),
+    
+    path('list_questions_by_language/<str:language>/<int:page_number>', question_views.list_questions_by_language, name='list_questions'),
+    path('list_questions_by_tags/<str:tags>/<int:page_number>/', question_views.list_questions_by_tags, name='list_questions_by_tags'),
+    path('list_questions_by_hotness/<int:page_number>', question_views.list_questions_by_hotness, name='get_question_comments'),
     path('random_questions/', question_views.random_questions, name='random_questions'),
-    path('list_questions/', question_views.list_questions_by_language, name='list_questions'),
 
     path('upvote_object/<int:question_id>/', utilization_views.upvote_object, name='upvote_object'), # TODO: CHANGE THE UPVOTE LOGIC
     path('downvote_object/<int:question_id>/', utilization_views.downvote_object, name='downvote_object'), # TODO: CHANGE THE DOWNVOTE LOGIC
