@@ -1,0 +1,298 @@
+from SPARQLWrapper import SPARQLWrapper, JSON
+from ..Utils.utils import *
+from ..Utils.forms import *
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import login, authenticate, get_user_model
+from django.contrib.auth.forms import AuthenticationForm
+from django.http import HttpRequest, HttpResponse, JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import json
+from ..models import Question, Comment, UserType, User, Vote, VoteType
+from urllib.parse import quote
+from django.contrib.contenttypes.models import ContentType
+
+
+
+# Used for initial search - returns 5 best matching wiki id's
+# @login_required
+def wiki_search(request, search_strings):
+    sparql = SPARQLWrapper("https://query.wikidata.org/sparql")
+
+    search_terms = search_strings.split()  # split into words
+
+    # Generate SPARQL FILTER for each word in the search string
+    filter_conditions = " || ".join(
+        [f'CONTAINS(LCASE(?languageLabel), "{quote(term.lower())}")' for term in search_terms])
+
+    query = f"""
+    SELECT DISTINCT ?language (SAMPLE(?languageLabel) as ?languageLabel) 
+    WHERE {{
+        ?language wdt:P31 wd:Q9143.
+        ?language rdfs:label ?languageLabel.
+
+        # Filter for language names containing any of the search terms
+        FILTER({filter_conditions})
+
+        # Ensure that the label is in English
+        FILTER(LANG(?languageLabel) = "en")
+
+        SERVICE wikibase:label {{ 
+        bd:serviceParam wikibase:language "en". 
+        }}
+    }}
+    GROUP BY ?language
+    ORDER BY STRLEN(?languageLabel)
+    LIMIT 5
+    """
+
+    sparql.setQuery(query)
+    sparql.setReturnFormat(JSON)
+    results = sparql.query().convert()
+    print(results)
+    return JsonResponse(results)
+
+
+# Shows the resulting info of the chosen wiki item
+def wiki_result(response, wiki_id):
+    sparql = SPARQLWrapper("https://query.wikidata.org/sparql")
+
+    # First query to get the main language information
+    query_main_info = f"""
+      SELECT ?language ?languageLabel ?wikipediaLink ?influencedByLabel ?publicationDate ?inceptionDate ?website
+      WHERE {{
+        BIND(wd:{wiki_id} AS ?language)
+
+        # Get the label of the language in English
+        ?language rdfs:label ?languageLabel.
+        FILTER(LANG(?languageLabel) = "en")
+
+        OPTIONAL {{ ?language wdt:P737 ?influencedBy. }}
+        OPTIONAL {{ ?language wdt:P577 ?publicationDate. }}
+        OPTIONAL {{ ?language wdt:P571 ?inceptionDate. }}
+        OPTIONAL {{ ?language wdt:P856 ?website. }}
+        OPTIONAL {{
+            ?wikipediaLink schema:about ?language;
+            schema:isPartOf <https://en.wikipedia.org/>.
+        }}
+
+        SERVICE wikibase:label {{ 
+          bd:serviceParam wikibase:language "en". 
+        }}
+      }}
+      LIMIT 1
+    """
+
+    sparql.setQuery(query_main_info)
+    sparql.setReturnFormat(JSON)
+    main_info_results = sparql.query().convert()
+
+    # Second query to get all instances of the language, excluding "programming language"
+    query_instances = f"""
+      SELECT ?instance ?instanceLabel
+      WHERE {{
+        BIND(wd:{wiki_id} AS ?language)
+
+        ?language wdt:P31 ?instance.
+        OPTIONAL {{ ?instance rdfs:label ?instanceLabel. FILTER(LANG(?instanceLabel) = "en") }}
+        FILTER(?instance != wd:Q9143)  # Exclude programming language (wd:Q9143)
+      }}
+      LIMIT 3
+    """
+
+    sparql.setQuery(query_instances)
+    sparql.setReturnFormat(JSON)
+    instances_results = sparql.query().convert()
+
+    # Process the results to combine main info and instances
+    instances = [
+        {
+            'instance': result['instance']['value'],
+            'instanceLabel': result['instanceLabel']['value']
+        }
+        for result in instances_results['results']['bindings']
+        if 'instanceLabel' in result
+    ]
+
+    # Fetch Wikipedia data
+    try:
+        wikipedia_data = wikipedia_data_views(wiki_id)
+    except Exception as e:
+        wikipedia_data = []
+
+    # For each instance, find 3 other languages of that instance excluding the current language
+    for instance in instances:
+        instance_id = instance['instance'].split('/')[-1]  # Extract the ID from the URI
+        query_related_languages = f"""
+            SELECT ?relatedLanguage ?relatedLanguageLabel
+            WHERE {{
+                ?relatedLanguage wdt:P31 wd:{instance_id}.
+                FILTER(?relatedLanguage != wd:{wiki_id})  # Exclude the current language
+                OPTIONAL {{ ?relatedLanguage rdfs:label ?relatedLanguageLabel. FILTER(LANG(?relatedLanguageLabel) = "en") }}
+            }}
+            LIMIT 3
+        """
+        sparql.setQuery(query_related_languages)
+        sparql.setReturnFormat(JSON)
+        related_languages_results = sparql.query().convert()
+
+        # Extract related languages and add to the instance
+        related_languages = [
+            {
+                'relatedLanguage': result['relatedLanguage']['value'],  # Store the related language URI
+                'relatedLanguageLabel': result['relatedLanguageLabel']['value']  # Store the label
+            }
+            for result in related_languages_results['results']['bindings']
+            if 'relatedLanguageLabel' in result
+        ]
+        instance['relatedLanguages'] = related_languages  # Add related languages to the instance
+
+    final_response = {
+        'mainInfo': main_info_results['results']['bindings'],
+        'instances': instances,
+        'wikipedia': wikipedia_data
+    }
+
+    return JsonResponse(final_response)
+
+
+def wikipedia_data_views(wiki_id):
+    info_object = modify_data(wiki_id)
+    return info_object
+
+
+def get_run_coder_api_languages(request):
+    languages = get_languages()
+    
+    print(languages)
+
+    if languages is not None:
+        return JsonResponse({'languages': languages}, status=200)
+    else:
+        return JsonResponse({'error': 'Failed to fetch languages'}, status=500)
+
+
+@csrf_exempt
+def run_code_view(request):
+    type = request.GET.get('type', '') # Get type, comment or question
+    id = request.GET.get('id', '') # Get id of the comment or question
+
+    if type == 'comment':
+        comment = Comment.objects.get(_id=id)
+        outs = comment.run_snippet()
+    elif type == 'question':
+        question = Question.objects.get(_id=id)
+        outs = question.run_snippet()
+    else:
+        return JsonResponse({'error': 'Invalid type'}, status=400)
+    return JsonResponse({'output': outs})
+
+
+
+def upvote_object(request, object_type, object_id):
+    if not object_id:
+        return JsonResponse({'error': 'Object ID parameter is required'}, status=400)
+    
+    user = request.user  # Get the logged-in user
+    model = None
+
+    if object_type == 'question':
+        model = Question
+    elif object_type == 'comment':
+        model = Comment
+    else:
+        return JsonResponse({'error': 'Invalid object type'}, status=400)
+
+    try:
+        question_or_comment_object = model.objects.get(pk=object_id)
+    except model.DoesNotExist:
+        return JsonResponse({'error': f'{object_type.capitalize()} not found'}, status=404)
+
+    # Get the content type for the object
+    content_type = ContentType.objects.get_for_model(model)
+
+    # Check if the user has already voted
+    existing_vote = Vote.objects.filter(user=user, content_type=content_type, object_id=object_id).first()
+    if existing_vote:
+        if existing_vote.vote_type == VoteType.UPVOTE.value:
+            return JsonResponse({'error': f'You have already upvoted this {object_type}'}, status=400)
+        else:
+            # Change the downvote to an upvote
+            existing_vote.vote_type = VoteType.UPVOTE.value
+            existing_vote.save()
+            question_or_comment_object.upvotes += 2 # One for resetting the vote and one for the upvote
+            question_or_comment_object.save()
+            return JsonResponse({'success': f'Changed downvote to upvote on {object_type}'}, status=200)
+
+    # Create a new upvote
+    Vote.objects.create(user=user, content_type=content_type, object_id=object_id, vote_type=VoteType.UPVOTE.value)
+    question_or_comment_object.upvote() 
+    return JsonResponse({'success': f'{object_type.capitalize()} upvoted successfully'}, status=200)
+
+
+def downvote_object(request, object_type, object_id):
+    if not object_id:
+        return JsonResponse({'error': 'Object ID parameter is required'}, status=400)
+    
+    user = request.user  # Get the logged-in user
+    model = None
+
+    if object_type == 'question':
+        model = Question
+    elif object_type == 'comment':
+        model = Comment
+    else:
+        return JsonResponse({'error': 'Invalid object type'}, status=400)
+
+    try:
+        question_or_comment_object = model.objects.get(pk=object_id)
+    except model.DoesNotExist:
+        return JsonResponse({'error': f'{object_type.capitalize()} not found'}, status=404)
+
+    # Get the content type for the object
+    content_type = ContentType.objects.get_for_model(model)
+
+    # Check if the user has already voted
+    existing_vote = Vote.objects.filter(user=user, content_type=content_type, object_id=object_id).first()
+    if existing_vote:
+        if existing_vote.vote_type == VoteType.DOWNVOTE.value:
+            return JsonResponse({'error': f'You have already downvoted this {object_type}'}, status=400)
+        else:
+            # Change the upvote to downvote
+            existing_vote.vote_type = VoteType.DOWNVOTE.value
+            existing_vote.save()
+            question_or_comment_object.upvotes -= 2 # One for resetting the vote and one for the downvote
+            question_or_comment_object.save()
+            return JsonResponse({'success': f'Changed upvote to downvote on {object_type}'}, status=200)
+
+    # Create a new upvote
+    Vote.objects.create(user=user, content_type=content_type, object_id=object_id, vote_type=VoteType.DOWNVOTE.value)
+    question_or_comment_object.downvote()  
+    return JsonResponse({'success': f'{object_type.capitalize()} upvoted successfully'}, status=200)
+
+
+
+def home(request):
+    return render(request, 'home.html')
+
+
+# Will be removed in the final version.
+@csrf_exempt
+def post_sample_code(request):
+    
+    data = json.loads(request.body)
+
+    source_code = data.get('source_code', '')  # Get 'code' from the JSON body
+    language_id = data.get('language_id', 71)  # Default to Python
+
+    result = run_code(source_code, language_id)
+    print(result)
+
+    if result is None:
+        return JsonResponse({'error': 'Error running code'}, status=500)
+
+    try:
+        result = run_code(source_code, language_id)
+        return JsonResponse(result)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
