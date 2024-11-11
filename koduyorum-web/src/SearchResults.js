@@ -42,105 +42,45 @@ const SearchResults = () => {
     }
   };
 
-  const handleTabSwitch = (tab) => setActiveTab(tab);
-
-  const handleTagClick = (tag) => navigate(`/result/${tag}`);
-
   if (loading) return <div className="loading">Loading...</div>;
 
   if (error) return <div className="error">{error}</div>;
 
   return (
     <div className="search-results-container">
-      <nav className="navbar">
-        <div className="navbar-left">
-          <a href="/feed" className="nav-link">Home</a>
-          <a href="/profile" className="nav-link">Profile</a>
-          <a href="/logout" className="nav-link">Logout</a>
-        </div>
-      </nav>
+        <h1>Results for "{wiki_name}"</h1>
 
-      <div className="tabs">
-        <button
-          onClick={() => handleTabSwitch('info')}
-          className={activeTab === 'info' ? 'active' : ''}
-        >
-          Info
-        </button>
-        <button
-          onClick={() => handleTabSwitch('questions')}
-          className={activeTab === 'questions' ? 'active' : ''}
-        >
-          Questions
-        </button>
-      </div>
+        {/* Displaying main information */}
+        {infoData.mainInfo.length > 0 && (
+            <div>
+                <h2>{infoData.mainInfo[0]?.languageLabel?.value || "No title available"}</h2>
+                <p><strong>Publication Date:</strong> {infoData.mainInfo[0]?.publicationDate?.value || "N/A"}</p>
+                <p><strong>Website:</strong> 
+                    <a href={infoData.mainInfo[0]?.website?.value} target="_blank" rel="noopener noreferrer">
+                        {infoData.mainInfo[0]?.website?.value || "N/A"}
+                    </a>
+                </p>
+            </div>
+        )}
 
-      {/* Info Tab */}
-      {activeTab === 'info' && infoData && (
-        <div className="info-section">
-          <h2>{infoData.mainInfo[0]?.languageLabel.value || 'No Information Available'} (Wikidata Info)</h2>
-          {infoData.mainInfo.length > 0 ? (
-            <>
-              <p><strong>Publication Date:</strong> {new Date(infoData.mainInfo[0].publicationDate.value).toLocaleDateString()}</p>
-              <p>
-                <strong>Website:</strong> 
-                <a href={infoData.mainInfo[0].website.value} target="_blank" rel="noopener noreferrer">
-                  {infoData.mainInfo[0].website.value}
-                </a>
-              </p>
-              <p>
-                <strong>Wikipedia:</strong> 
-                <a href={infoData.mainInfo[0].wikipediaLink.value} target="_blank" rel="noopener noreferrer">
-                  {infoData.mainInfo[0].wikipediaLink.value}
-                </a>
-              </p>
-              <div className="related-instances">
+        {/* Displaying related instances */}
+        {infoData.instances.length > 0 && (
+            <div>
                 <h3>Related Instances</h3>
-                {infoData.instances.map((instance, index) => (
-                  <div key={index} className="instance">
-                    <p><strong>{instance.instanceLabel}</strong></p>
-                    <ul>
-                      {instance.relatedLanguages.map((related, idx) => (
-                        <li key={idx} onClick={() => handleTagClick(related.relatedLanguageLabel)}>
-                          {related.relatedLanguageLabel}
+                <ul>
+                    {infoData.instances.map((instance, index) => (
+                        <li key={index}>
+                            <strong>{instance.instanceLabel}</strong>:
+                            {instance.relatedLanguages.map((lang, i) => (
+                                <span key={i}> {lang.relatedLanguageLabel}</span>
+                            ))}
                         </li>
-                      ))}
-                    </ul>
-                  </div>
-                ))}
-              </div>
-            </>
-          ) : (
-            <p>No information available for this topic.</p>
-          )}
-        </div>
-      )}
-
-      {/* Questions Tab */}
-      {activeTab === 'questions' && (
-        <div className="questions-section">
-          <h2>Questions related to "{wiki_id}"</h2>
-          <ul>
-            {questionData.length > 0 ? (
-              questionData.map((question, index) => (
-                <li key={index}>
-                  <div className="question-card">
-                    <h3>{question.title}</h3>
-                    <p>{question.description}</p>
-                    <button onClick={() => navigate(`/code-execution/${question.id}`)}>
-                      Go to Code Execution
-                    </button>
-                  </div>
-                </li>
-              ))
-            ) : (
-              <p>No questions found for this topic.</p>
-            )}
-          </ul>
-        </div>
-      )}
+                    ))}
+                </ul>
+            </div>
+        )}
     </div>
-  );
-};
+);
+}
 
 export default SearchResults;

@@ -29,6 +29,12 @@ function Feed() {
         return url.split("/").pop();
     }
 
+    const handleEnter = () => {
+        if (searchResults.length > 0) {
+            const topResult = searchResults[0];
+            handleSearchResultClick(topResult);
+        }
+    };
     const handleSearch = async () => {
         if (!searchQuery) {
             return;
@@ -54,8 +60,6 @@ function Feed() {
             post.preview?.toLowerCase().includes(searchQuery.toLowerCase())
         )
     );
-    
-    
 
     const sortedPosts = filteredPosts.sort((a, b) => {
         if (sort === "newest") {
@@ -84,8 +88,6 @@ function Feed() {
           return null;
       }
     };
-
-  
 
     const handleTagClick = async (tag) => {
         const wikiIdAndName = await fetchWikiIdAndName(tag);
@@ -131,10 +133,28 @@ function Feed() {
         const wikiIdName = await fetchWikiIdAndName(result.languageLabel.value);
         const wikiId = wikiIdName[0];
         const wikiName = wikiIdName[1];
+        console.log("Wiki ID and Name:", wikiId, wikiName);
         if (wikiId) {
+            console.log("Navigating to:", `/result/${wikiId}/${encodeURIComponent(wikiName)}`);
             navigate(`/result/${wikiId}/${encodeURIComponent(wikiName)}`);
         } else {
             console.error("No wiki ID found for search result:", result);
+        }
+    };
+
+    const handleSearchQueryChange = async (e) => {
+        const query = e.target.value;
+        setSearchQuery(query);
+
+        if (query) {
+            setIsLoading(true);
+            const results = await fetchSearchResults(query);
+            setSearchResults(results);
+            setSearched(true);
+            setIsLoading(false);
+        } else {
+            setSearchResults([]);
+            setSearched(false);
         }
     };
   
@@ -163,30 +183,48 @@ function Feed() {
                         src="resources/icon2-transparent.png"
                         style={{ width: "75px", height: "auto", padding: "5px" }}
                         alt="bar_logo"
-                        onClick={() => (window.location.href = "/feed")}
+                        onClick={() => navigate('/feed')}
                     />
                     <button className="nav-link">Home</button>
                     <button className="nav-link">Profile</button>
                 </div>
-                <input
-                    type="search"
-                    className="search-input"
-                    placeholder="Search posts..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    onKeyDown={(event) => {
-                        if (event.key === 'Enter') {
-                            handleSearch();
-                        }
-                    }}
-                />
-                <button className="search-button" onClick={handleSearch}>Search</button>
+                {/* Search Input and Dropdown Container */}
+                <div className="search-container">
+                    <input
+                        type="search"
+                        className="search-input"
+                        placeholder="Search posts..."
+                        value={searchQuery}
+                        onChange={handleSearchQueryChange}
+                        onKeyDown={(event) => {
+                            if (event.key === 'Enter') handleEnter();
+                        }}
+                    />
+                    <button className="search-button" onClick={() => handleSearch()}>Search</button>
+                    
+                    {/* Suggestions Dropdown */}
+                    {searched && searchResults.length > 0 && (
+                        <div className="search-suggestions" ref={searchDisplayRef}>
+                            {isLoading ? (
+                                <p className="centered-search">Searching...</p>
+                            ) : (
+                                searchResults.map((result, index) => (
+                                    <div
+                                        key={index}
+                                        className="search-suggestion"
+                                        onClick={() => handleSearchResultClick(result)}
+                                    >
+                                        {result.languageLabel.value}
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                    )}
+                </div>
                 <button 
                     className="nav-link"
-                    onClick={() => {
-                        // auth.logout();
-                        window.location.href = '/login';
-                    }}>Log Out</button>
+                    onClick={() => navigate('/login')}
+                >Log Out</button>
             </div>
 
             <div className="feed-content">

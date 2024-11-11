@@ -221,3 +221,35 @@ body {
   .tag-link:hover {
       background-color: #b2ebf2;
   }
+
+  .search-container {
+    position: relative;
+    display: inline-block;
+    width: 50%; /* Ensures it aligns with the search input width */
+}
+
+  /* Search Suggestions Dropdown */
+.search-suggestions { /* Added styles for suggestions dropdown */
+  position: absolute;
+  top: 100%; /* Aligns dropdown to the bottom of the search input */
+  left: 0;
+  width: 50%; /* Matches width of search input */
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 0 0 5px 5px;
+  max-height: 200px;
+  overflow-y: auto;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+}
+
+.search-suggestion { /* Styling for individual suggestion */
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  color: #0077b6;
+  transition: background-color 0.3s;
+}
+
+.search-suggestion:hover {
+  background-color: #f0f8ff;
+}
