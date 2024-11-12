@@ -15,7 +15,7 @@ function PostQuestion() {
     useEffect(() => {
         const fetchLanguages = async () => {
             try {
-                const response = await fetch('http://127.0.0.1:8000/get_api_languages/');
+                const response = await fetch(`${process.env.REACT_APP_API_URL}/get_api_languages/`);
                 const data = await response.json();
                 
                 if (data && Array.isArray(data.languages)) {
@@ -49,7 +49,7 @@ function PostQuestion() {
         };
 
         try {
-            const response = await fetch('http://127.0.0.1:8000/create_question/', {
+            const response = await fetch(`${process.env.REACT_APP_API_URL}/create_question/`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(postData),

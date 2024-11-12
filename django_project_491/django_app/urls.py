@@ -48,7 +48,7 @@ urlpatterns = [
     path('random_questions/', question_views.random_questions, name='random_questions'),
     path('question/<int:question_id>/comments/', question_views.get_question_comments, name='get_question_comments'),
     path('code_execute/', utilization_views.post_sample_code, name='code_execute'),
-    # path('question_of_the_day/', utilization_views.question_of_the_day, name='question_of_the_day'),
+    path('question_of_the_day/', user_views.question_of_the_day, name='question_of_the_day'),
     path('interested_languages/', user_views.add_interested_languages_for_a_user, name='interested_languages'),
-    # path('specific_feed/<int:user_id>/', question_views.list_questions_according_to_the_user, name='specific_feed'),
+    path('specific_feed/<int:user_id>/', user_views.list_questions_according_to_the_user, name='specific_feed'),
 ]

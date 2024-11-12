@@ -82,7 +82,7 @@ const handleSearchQueryChange = async (e) => {
 
 const fetchWikiIdAndName = async (string) => {
   try {
-      const response = await fetch(`http://127.0.0.1:8000/search/${encodeURIComponent(string)}`);
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/search/${encodeURIComponent(string)}`);
       if (!response.ok) {
           throw new Error('Network response was not ok');
       }
@@ -108,7 +108,7 @@ const handleTagClick = async (tag) => {
 
 const fetchPosts = async () => {
     try {
-        const response = await fetch('http://127.0.0.1:8000/random_questions/');
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/random_questions/`);
         if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
         }
@@ -122,7 +122,7 @@ const fetchPosts = async () => {
 
 const fetchSearchResults = async (query) => {
     try {
-        const response = await fetch(`http://127.0.0.1:8000/search/${encodeURIComponent(query)}`);
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/search/${encodeURIComponent(query)}`);
         if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
         }
@@ -140,15 +140,15 @@ const fetchSearchResults = async (query) => {
       setLoading(true);
       setError(null);
 
-      const infoResponse = await fetch(`http://127.0.0.1:8000/result/${encodeURIComponent(wikiId)}`);
-      const questionResponse = await fetch(`http://127.0.0.1:8000/list_questions/?language=${encodeURIComponent(wikiName)}`);
+      const infoResponse = await fetch(`${process.env.REACT_APP_API_URL}/result/${encodeURIComponent(wikiId)}`);
+      const questionResponse = await fetch(`${process.env.REACT_APP_API_URL}/list_questions_by_language/${encodeURIComponent(wikiName)}/1`);
 
       if (!infoResponse.ok || !questionResponse.ok) {
         throw new Error('Failed to load data');
       }
 
       const infoData = await infoResponse.json();
-      const questionData = await questionResponse.json();
+      const questionData = await questionResponse.json()['questions'];      
 
       setInfoData(infoData || { mainInfo: [], instances: [], wikipedia: {} });
       setQuestionData(questionData || []);
