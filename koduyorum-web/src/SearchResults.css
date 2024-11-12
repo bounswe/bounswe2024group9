@@ -15,3 +15,57 @@
     background-color: #38b6ff;
     color: white;
 }
+
+
+.tab-navigation {
+    display: flex;
+    gap: 60px;
+    margin-bottom: 20px;
+    margin-top: 10px;
+    justify-content: center; 
+    align-items: center;
+  }
+  
+  .tab-button {
+    padding: 10px 20px;
+    background-color: #dceaf9;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: bold;
+
+  }
+  
+  .tab-button.active-tab {
+    border-bottom: 2px solid #007bff;
+    color: #007bff;
+  }
+  
+  .info-box {
+    width: 100%;
+    background-color: white;
+    padding: 1rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+   
+}
+.info-container {
+    margin: 0;
+  }
+
+.language-title {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 1rem;
+}
+
+.related-instances {
+    list-style-type: disc;
+    padding-left: 1.5rem;
+    margin-top: 1rem;
+}
+
+.related-instances li {
+    margin-bottom: 0.5rem;
+}
