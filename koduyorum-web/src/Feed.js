@@ -109,7 +109,7 @@ function Feed() {
 
     const fetchWikiIdAndName = async (string) => {
       try {
-          const response = await fetch(`http://127.0.0.1:8000/search/${encodeURIComponent(string)}`);
+          const response = await fetch(`${process.env.REACT_APP_API_URL}/search/${encodeURIComponent(string)}`);
           if (!response.ok) {
               throw new Error('Network response was not ok');
           }
@@ -170,7 +170,7 @@ function Feed() {
 
     const fetchQuestionOfTheDay = async () => {
         try {
-            const response = await fetch(`${process.env.REACT_APP_API_URL}/question_of_the_day`); //TODO: Change to actual API endpoint
+            const response = await fetch(`${process.env.REACT_APP_API_URL}/question_of_the_day`);
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
@@ -280,6 +280,10 @@ function Feed() {
 
             {/* Right Edge - Top Contributors */}
             <RightSidebar />
+            {/* Floating "Create Question" button */}
+            <button className="floating-button" onClick={() => navigate('/post_question')}>
+                    +
+                </button>
         </div>
     </div>
 );

@@ -296,3 +296,28 @@ body {
 .question-of-the-day button:hover {
   background-color: #e67e22;
 }
+
+/* Floating button for creating a new question */
+.floating-button {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 50px;
+  height: 50px;
+  background-color: #0077b6;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  font-size: 2rem;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.3s ease;
+}
+
+.floating-button:hover {
+  background-color: #005f8d;
+}
