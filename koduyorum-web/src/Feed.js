@@ -107,10 +107,19 @@ function Feed() {
         return text.length > length ? text.substring(0, length) + "..." : text;
     };
 
-    const fetchWikiIdAndName = async (string) => {
+    const fetchWikiIdAndName = async (tag) => {
       try {
-          const response = await fetch(`${process.env.REACT_APP_API_URL}/search/${encodeURIComponent(string)}`);
-          if (!response.ok) {
+          const response = await fetch(`/django_app/search/${tag}`,
+                {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + localStorage.getItem('authToken'),
+                    },
+                }
+
+          );
+           if (!response.ok) {
               throw new Error('Network response was not ok');
           }
           const data = await response.json();
@@ -290,4 +299,34 @@ function Feed() {
 }
 
 export default Feed;
+
+export const fetchSearchResults = async (searchString) => {
+try {
+    console.log("Original search string:", searchString);
+
+    searchString = searchString.replace(/[^a-z0-9]/gi, '');
+
+    console.log("Alphanumeric search string:", searchString);
+
+    if (searchString === "") {
+        return [];
+    }
+
+    const response = await fetch(`${process.env.REACT_APP_API_URL}/django_app/search/${searchString}`,
+        {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + localStorage.getItem('authToken'),
+            },
+        }
+    );
+    const data = await response.json();
+    console.log(data.results.bindings);
+    return data.results.bindings;
+} catch (error) {
+    console.error("Error fetching search results:", error);
+    return []; // Return an empty array in case of error
+}
+};
 

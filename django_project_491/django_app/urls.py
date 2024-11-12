@@ -16,8 +16,9 @@ urlpatterns = [
     path('get_user_profile_by_username/<str:username>/', user_views.get_user_profile_by_username, name='get_user_profile'),
     path('edit_user_profile/<int:will_be_edited_user_id>/', user_views.edit_user_profile, name='edit_user_profile'),
     path('delete_user_profile/<int:will_be_deleted_user_id>/', user_views.delete_user_profile, name='delete_user_profile'),
-    path('logout/', LogoutView.as_view(), name='logout'),
-
+    path('logout/', logout_user, name='logout'),
+    path('auth/check_token/', check_token, name='check_token'),
+    
     path('get_question/<int:question_id>/', question_views.get_question_details, name='get_question'),
     path('question/<int:question_id>/comments/', question_views.get_question_comments, name='get_question_comments'),
     path('create_question/', question_views.create_question, name='create_question'),
