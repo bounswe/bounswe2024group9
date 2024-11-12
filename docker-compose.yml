@@ -8,6 +8,8 @@ services:
       - REACT_APP_API_URL=http://localhost:8000/
     ports:
       - "8000:8000"
+    volumes:
+      - ./django_project_491:/app
 
   web:
     build: ./koduyorum-web
@@ -19,3 +21,5 @@ services:
       - "3000:3000"
     depends_on:
       - app
+    volumes:
+      - ./koduyorum-web:/web

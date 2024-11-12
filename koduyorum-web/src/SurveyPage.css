@@ -1,0 +1,72 @@
+/* SurveyPage.css */
+
+.survey-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    background-color: #f4f6f8;
+  }
+  
+  .survey-title {
+    font-size: 28px; /* Increased font size */
+    font-weight: bold;
+    margin-bottom: 20px;
+  }
+  
+  .survey-form {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 400px; /* Increased width */
+    padding: 30px; /* Increased padding */
+    border-radius: 8px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    background-color: #ffffff;
+  }
+  
+  .survey-label {
+    font-size: 20px;
+    font-weight: 500;
+    margin-bottom: 8px;
+  }
+  
+  .survey-select {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 20px; /* Increased margin */
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+  }
+  
+  .checkbox-group {
+    display: flex;
+    flex-direction: column; /* Stacks checkboxes vertically */
+    width: 100%;
+    margin-bottom: 20px; /* Increased margin */
+  }
+  
+  .checkbox-label {
+    font-size: 14px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+  }
+  
+  .checkbox-label input {
+    margin-right: 8px; /* Spacing between checkbox and label */
+  }
+  
+  .survey-button {
+    width: 100%;
+    padding: 12px; /* Increased padding */
+    border-radius: 4px;
+    border: none;
+    background-color: #4c9ff0;
+    color: #ffffff;
+    font-size: 16px;
+    cursor: pointer;
+    font-weight: bold;
+  }
