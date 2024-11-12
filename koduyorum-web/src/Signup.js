@@ -18,57 +18,57 @@ const Signup = () => {
     setLoading(true);
     setError(null);
 
-    if (password !== confirmPassword) {
-      setError("Password and confirm password do not match");
-      setLoading(false);
-      return;
-    }
+    // if (password !== confirmPassword) {
+    //   setError("Password and confirm password do not match");
+    //   setLoading(false);
+    //   return;
+    // }
 
-    // Block of meeting password requirements
-    if (password.match(/\d+/) === null) {
-      setError("Password must contain at least one number.");
-      setLoading(false);
-      return;
-    }
-    if (password.match(/[A-Z]/) === null) {
-      setError("Password must contain at least one uppercase letter.");
-      setLoading(false);
-      return;
-    }
-    if (password.match(/[a-z]/) === null) {
-      setError("Password must contain at least one lowercase letter.");
-      setLoading(false);
-      return;
-    }
-    if (password.length < 8 || password.length > 16) {
-      setError("Password must be 8 to 16 characters long.");
-      setLoading(false);
-      return;
-    }
+    // // Block of meeting password requirements
+    // if (password.match(/\d+/) === null) {
+    //   setError("Password must contain at least one number.");
+    //   setLoading(false);
+    //   return;
+    // }
+    // if (password.match(/[A-Z]/) === null) {
+    //   setError("Password must contain at least one uppercase letter.");
+    //   setLoading(false);
+    //   return;
+    // }
+    // if (password.match(/[a-z]/) === null) {
+    //   setError("Password must contain at least one lowercase letter.");
+    //   setLoading(false);
+    //   return;
+    // }
+    // if (password.length < 8 || password.length > 16) {
+    //   setError("Password must be 8 to 16 characters long.");
+    //   setLoading(false);
+    //   return;
+    // }
 
-    // valid email format
-    if (
-      email.match(
-        /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-      ) === null
-    ) {
-      setError("Please enter a valid email.");
-      setLoading(false);
-      return;
-    }
+    // // valid email format
+    // if (
+    //   email.match(
+    //     /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+    //   ) === null
+    // ) {
+    //   setError("Please enter a valid email.");
+    //   setLoading(false);
+    //   return;
+    // }
 
-    // username requirements
-    if (!username.match(/^[0-9a-zA-Z]+$/)) {
-      setError("Username must only consist of alphanumerical characters.");
-      setLoading(false);
-      return;
-    }
+    // // username requirements
+    // if (!username.match(/^[0-9a-zA-Z]+$/)) {
+    //   setError("Username must only consist of alphanumerical characters.");
+    //   setLoading(false);
+    //   return;
+    // }
 
-    if (username.length < 5 || username.length > 16) {
-      setError("Username must be 5 to 16 characters long.");
-      setLoading(false);
-      return;
-    }
+    // if (username.length < 5 || username.length > 16) {
+    //   setError("Username must be 5 to 16 characters long.");
+    //   setLoading(false);
+    //   return;
+    // }
 
     try {
       const response = await fetch(

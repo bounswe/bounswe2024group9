@@ -1,4 +1,4 @@
-from ..models import UserType, User
+from ..models import UserType, User, Question
 from django.contrib.auth import login, authenticate, get_user_model
 from django.http import HttpRequest, HttpResponse, JsonResponse
 import json
@@ -138,3 +138,80 @@ def login_user(request : HttpRequest) -> HttpResponse:
     else:
        # Method not allowed if not POST
         return HttpResponse(status=405)
+
+
+@csrf_exempt
+def add_interested_languages_for_a_user(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        user_id = data.get('user_id')
+        user : User = get_user_model().objects.get(pk=user_id)
+    
+        user.interested_topics = data.get('interested_topics', [])
+        user.known_languages = data.get('known_languages', [])
+        user.save()
+        return JsonResponse({'success': 'Interested languages updated successfully'}, status=200)
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+
+    
+@csrf_exempt
+def question_of_the_day(request):
+    # Retrieve 5 random questions
+    question = Question.objects.order_by('?')[0]
+
+    question_data = {
+        'id': question._id,
+        'title': question.title,
+        'description': question.details,
+        'user_id': question.author.pk,
+        'likes': question.upvotes,
+        'comments_count': question.comments.count(),
+        'programmingLanguage': question.language,
+        'codeSnippet': question.code_snippet,
+        'tags': question.tags,
+        'answered': question.answered,
+        'topic': question.topic
+    }
+
+    return JsonResponse({'question': question_data}, safe=False)
+@csrf_exempt
+def list_questions_according_to_the_user(request, user_id : int):
+    questions = []
+
+    user : User = get_user_model().objects.get(pk=user_id)
+    known_languages = user.known_languages
+    for language in known_languages:
+        questions += list(Question.objects.filter(language=language))
+    
+    interested_topics = user.interested_topics
+    for topic in interested_topics:
+        questions += list(Question.objects.filter(tags__contains=topic))
+    
+    if len(questions) == 0:
+        questions = list(Question.objects.all())
+    
+    questions = questions[:10]
+
+    questions_data = [{
+        'id': question._id,
+        'title': question.title,
+        'description': question.details,
+        'user_id': question.author.pk,
+        'likes': question.upvotes,
+        'comments_count': question.comments.count(),
+        'programmingLanguage': question.language,
+        'codeSnippet': question.code_snippet,
+        'tags': question.tags,
+        'answered': question.answered,
+        'topic': question.topic
+    } for question in questions]
+
+    return JsonResponse({'questions': questions_data}, safe=False)
+
+@csrf_exempt
+def get_user_preferred_languages(request):
+    data = json.loads(request.body)
+    user_id = data.get('user_id')
+    user : User = get_user_model().objects.get(pk=user_id)
+    return JsonResponse({'known_languages': user.known_languages, 'interested_topics': user.interested_topics}, status=200)
