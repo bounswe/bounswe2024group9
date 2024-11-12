@@ -59,12 +59,6 @@ export default function CodeExecution() {
         'Authorization': `Bearer ${token}`,  // Add the token here
       }}
             ); // Adjust this URL if needed
-        if (response.status === 401) {
-        // Redirect to login page
-        console.log("Received 405 Method Not Allowed - Redirecting to login");
-        window.location.href = '/login'; // Adjust '/login' to your login route
-          return;
-    }
         const data = await response.json();
         setLanguages(data.languages); // Access the 'languages' key from the response
       } catch (error) {
@@ -90,12 +84,6 @@ export default function CodeExecution() {
         },
         body: JSON.stringify({ source_code: code, language_id: languageId }),  // Send code and language ID as JSON
       });
-      if (response.status === 401) {
-        // Redirect to login page
-        console.log("Received 405 Method Not Allowed - Redirecting to login");
-        window.location.href = '/login'; // Adjust '/login' to your login route
-          return;
-    }
       const data = await response.json();  // Parse the JSON response
       setOutput(data.stdout);  // Set the output from backend
 

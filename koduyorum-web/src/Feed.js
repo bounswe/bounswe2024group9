@@ -31,37 +31,6 @@ function Feed() {
         return url.split("/").pop();
     }
 
-      const verifyToken = async () => {
-        const token = localStorage.getItem('authToken');
-        if (!token) {
-              window.location.href = '/login'; // Adjust '/login' to your login route
-            return;
-        }
-        try {
-            const response = await fetch(`${process.env.REACT_APP_API_URL}/auth/check_token/`, {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-
-            if (response.status === 401) {
-                   console.log("Received 405 Method Not Allowed - Redirecting to login");
-                    window.location.href = '/login'; // Adjust '/login' to your login route
-                return;
-            }
-        } catch (error) {
-            console.error("Error verifying token:", error);
-               console.log("Received 405 Method Not Allowed - Redirecting to login");
-              window.location.href = '/login'; // Adjust '/login' to your login route
-            return;
-        }
-    };
-
-    useEffect(() => {
-        verifyToken(); // Call verifyToken when component mounts
-    }, []);
-
 	// ------  NAVBAR FUNCTIONS ------
     const handleEnter = () => {
         if (searchResults.length > 0) {
@@ -150,12 +119,6 @@ function Feed() {
                 }
 
           );
-           if (response.status === 401) {
-        // Redirect to login page
-            console.log("Received 401 Method Not Allowed - Redirecting to login");
-            window.location.href = '/login'; // Adjust '/login' to your login route
-          return;
-        }
            if (!response.ok) {
               throw new Error('Network response was not ok');
           }
@@ -358,12 +321,6 @@ try {
             },
         }
     );
-    if (response.status === 401) {
-        // Redirect to login page
-        console.log("Received 401 Method Not Allowed - Redirecting to login");
-        window.location.href = '/login'; // Adjust '/login' to your login route
-        return;
-    }
     const data = await response.json();
     console.log(data.results.bindings);
     return data.results.bindings;
