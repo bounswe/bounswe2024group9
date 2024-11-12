@@ -136,6 +136,8 @@ class User(AbstractBaseUser):
     
     profile_pic = models.ImageField(upload_to='profile_pics/', blank=True, null=True) # May be removed later
     bio = models.TextField(blank=True, null=True) # May be removed later
+    interested_topics = models.JSONField(blank=True, default=list)  # Example: ['NLP', 'Computer Vision']
+    known_languages = models.JSONField(blank=True, default=list)  # Example: ['Python', 'Java']
 
     # Relationships
     bookmarks = models.JSONField(blank=True, default=list)  # Example: ['link1', 'link2']

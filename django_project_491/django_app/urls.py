@@ -1,10 +1,9 @@
 from django.urls import path
 from .views import comment_views, question_views, user_views, utilization_views
 
-from django.contrib.auth.views import LoginView, LogoutView
+from django.contrib.auth.views import LogoutView
 
 urlpatterns = [
-
     path('home/', utilization_views.home, name='home'),
 
     path('wikipedia/', utilization_views.wikipedia_data_views, name='wikipedia'),
@@ -18,8 +17,6 @@ urlpatterns = [
     path('edit_user_profile/<int:will_be_edited_user_id>/', user_views.edit_user_profile, name='edit_user_profile'),
     path('delete_user_profile/<int:will_be_deleted_user_id>/', user_views.delete_user_profile, name='delete_user_profile'),
     path('logout/', LogoutView.as_view(), name='logout'),
-    #TODO: For super_users in the platform more ideas should be added. May be related tot he reporting post sysdtem and reported posts system.
-    #TODO: Bookmarking is not added yet.
 
     path('get_question/<int:question_id>/', question_views.get_question_details, name='get_question'),
     path('question/<int:question_id>/comments/', question_views.get_question_comments, name='get_question_comments'),
@@ -34,8 +31,8 @@ urlpatterns = [
     path('list_questions_by_hotness/<int:page_number>', question_views.list_questions_by_hotness, name='get_question_comments'),
     path('random_questions/', question_views.random_questions, name='random_questions'),
 
-    path('upvote_object/<str:object_type>/<int:object_id>/', utilization_views.upvote_object, name='upvote_object'), # TODO: CHANGE THE UPVOTE LOGIC
-    path('downvote_object/<str:object_type>/<int:object_id>/', utilization_views.downvote_object, name='downvote_object'), # TODO: CHANGE THE DOWNVOTE LOGIC
+    path('upvote_object/<str:object_type>/<int:object_id>/', utilization_views.upvote_object, name='upvote_object'),
+    path('downvote_object/<str:object_type>/<int:object_id>/', utilization_views.downvote_object, name='downvote_object'),
 
     path('create_comment/<int:question_id>', comment_views.create_comment, name='create_comment'),
     path('edit_comment/<int:comment_id>', comment_views.edit_comment, name='edit_comment'),
@@ -44,4 +41,14 @@ urlpatterns = [
 
     path('run_code/<str:type>/<int:id>', utilization_views.run_code_of_question_or_comment, name='run_code'),
 
+    # Newcomers from 'main' to the end:
+    path('create_comment/', comment_views.create_comment, name='create_comment'),
+    path('list_questions/', question_views.list_questions_by_language, name='list_questions'),
+    # path('run_code/', utilization_views.run_code_view, name='run_code'),
+    path('random_questions/', question_views.random_questions, name='random_questions'),
+    path('question/<int:question_id>/comments/', question_views.get_question_comments, name='get_question_comments'),
+    path('code_execute/', utilization_views.post_sample_code, name='code_execute'),
+    # path('question_of_the_day/', utilization_views.question_of_the_day, name='question_of_the_day'),
+    path('interested_languages/', user_views.add_interested_languages_for_a_user, name='interested_languages'),
+    # path('specific_feed/<int:user_id>/', question_views.list_questions_according_to_the_user, name='specific_feed'),
 ]
