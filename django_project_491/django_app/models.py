@@ -3,8 +3,7 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from enum import Enum
 from typing import List
 from .Utils.utils import *
-from django.contrib.contenttypes.models import ContentType
-from django.contrib.contenttypes.fields import GenericForeignKey
+
 
 # After editing the models do not forget to run the following commands:
 # python manage.py makemigrations
@@ -20,9 +19,6 @@ class VoteType(Enum):
     UPVOTE = "upvote"
     DOWNVOTE = "downvote"
 
-class ObjectTypes(Enum):
-    QUESTION = "question"
-    COMMENT = "comment"
 
 class Comment_Vote(models.Model):
     _id = models.AutoField(primary_key=True)
@@ -49,7 +45,7 @@ class Comment(models.Model):
     code_snippet = models.TextField()
     language_id = models.IntegerField(default=71)  # Language ID for Python
     upvotes = models.IntegerField(default=0)
-    creationDate = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True)
     answer_of_the_question = models.BooleanField(default=False) # This is a flag to indicate if the comment is an answer to the question that it is associated with
     question = models.ForeignKey('Question', on_delete=models.CASCADE, related_name='comments')  # New field linking a comment to a question
 
@@ -61,13 +57,13 @@ class Comment(models.Model):
         outs = result['stdout'].split('\n')
         return outs
 
-    def upvote(self):
-        self.upvotes += 1
-        self.save()
+    # def upvote(self):
+    #     self.upvotes += 1
+    #     self.save()
 
-    def downvote(self):
-        self.upvotes -= 1
-        self.save()
+    # def downvote(self):
+    #     self.upvotes -= 1
+    #     self.save()
 
 class Question(models.Model):
     _id = models.AutoField(primary_key=True)
@@ -79,7 +75,7 @@ class Question(models.Model):
     code_snippet = models.TextField()
 
     upvotes = models.IntegerField(default=0)
-    creationDate = models.DateTimeField(auto_now_add=True)
+    created_at  = models.DateTimeField(auto_now_add=True)
     topic = models.CharField(max_length=100, blank=True)
     answered = models.BooleanField(default=False)
     reported_by = models.ManyToManyField('User', related_name='reported_questions', blank=True)
@@ -95,13 +91,13 @@ class Question(models.Model):
         self.answered = True
         self.save()
 
-    def upvote(self):
-        self.upvotes += 1
-        self.save()
+    # def upvote(self):
+    #     self.upvotes += 1
+    #     self.save()
 
-    def downvote(self):
-        self.upvotes -= 1
-        self.save()
+    # def downvote(self):
+    #     self.upvotes -= 1
+    #     self.save()
 
 
 class UserManager(BaseUserManager):
@@ -182,11 +178,3 @@ class User(AbstractBaseUser):
     def get_bookmarks(self) -> list: # TODO
         """Returns the user's bookmarks."""
         return self.bookmarks
-
-    def get_questions(self): # TODO
-        """Returns all questions associated with the user."""
-        return self.questions.all()
-
-    def get_comments(self): # TODO
-        """Returns all comments associated with the user."""
-        return self.comments.all()

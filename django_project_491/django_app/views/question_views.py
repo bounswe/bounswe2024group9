@@ -1,5 +1,4 @@
 from ..models import Question, Comment, UserType, User, VoteType
-from django.contrib.auth import login, authenticate, get_user_model
 from django.http import HttpRequest, HttpResponse, JsonResponse
 import json
 from django.views.decorators.csrf import csrf_exempt
@@ -19,7 +18,7 @@ def get_question_details(request: HttpRequest, question_id: int) -> HttpResponse
             'details': question.details,
             'code_snippet': question.code_snippet,
             'upvote_count': question.upvotes,
-            'creationDate': question.creationDate.strftime('%Y-%m-%d %H:%M:%S'),
+            'creationDate': question.created_at .strftime('%Y-%m-%d %H:%M:%S'),
             'author' : question.author.username,
             'comments_count': question.comments.count(),
             'answered': question.answered,
@@ -47,7 +46,7 @@ def get_question_comments(request, question_id):
             'upvotes': comment.upvotes,
             'code_snippet': comment.code_snippet,
             'language': comment.language,
-            'creationDate': comment.creationDate.strftime('%Y-%m-%d %H:%M:%S'),
+            'creationDate': comment.created_at.strftime('%Y-%m-%d %H:%M:%S'),
             'upvoted_by': [user.username for user in comment.votes.filter(vote_type=VoteType.UPVOTE.value)],
             'downvoted_by': [user.username for user in comment.votes.filter(vote_type=VoteType.DOWNVOTE.value)],
             'answer_of_the_question': comment.answer_of_the_question
@@ -214,7 +213,7 @@ def list_questions_by_language(request, language: str, page_number = 1) -> HttpR
         'details': question.details,
         'code_snippet': question.code_snippet,
         'upvotes': question.upvotes,
-        'creationDate': question.creationDate.strftime('%Y-%m-%d %H:%M:%S'),
+        'creationDate': question.created_at .strftime('%Y-%m-%d %H:%M:%S'),
     } for question in questions]
     
     return JsonResponse({'questions': questions_data}, safe=False, status=200)
@@ -237,7 +236,7 @@ def list_questions_by_tags(request, tags: str, page_number=1) -> HttpResponse:
         'details': question.details,
         'code_snippet': question.code_snippet,
         'upvotes': question.upvotes,
-        'creationDate': question.creationDate.strftime('%Y-%m-%d %H:%M:%S'),
+        'creationDate': question.created_at .strftime('%Y-%m-%d %H:%M:%S'),
     } for question in questions]
 
     return JsonResponse({'questions': questions_data}, safe=False, status=200)
@@ -254,7 +253,7 @@ def list_questions_by_hotness(request, page_number = 1):
         'details': question.details,
         'code_snippet': question.code_snippet,
         'upvotes': question.upvotes,
-        'creationDate': question.creationDate.strftime('%Y-%m-%d %H:%M:%S'),
+        'creationDate': question.created_at .strftime('%Y-%m-%d %H:%M:%S'),
     } for question in questions]
 
     return JsonResponse({'questions': questions_data}, safe=False, status=200)

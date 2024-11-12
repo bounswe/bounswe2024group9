@@ -34,15 +34,14 @@ urlpatterns = [
     path('list_questions_by_hotness/<int:page_number>', question_views.list_questions_by_hotness, name='get_question_comments'),
     path('random_questions/', question_views.random_questions, name='random_questions'),
 
-    path('upvote_object/<int:question_id>/', utilization_views.upvote_object, name='upvote_object'), # TODO: CHANGE THE UPVOTE LOGIC
-    path('downvote_object/<int:question_id>/', utilization_views.downvote_object, name='downvote_object'), # TODO: CHANGE THE DOWNVOTE LOGIC
+    path('upvote_object/<str:object_type>/<int:object_id>/', utilization_views.upvote_object, name='upvote_object'), # TODO: CHANGE THE UPVOTE LOGIC
+    path('downvote_object/<str:object_type>/<int:object_id>/', utilization_views.downvote_object, name='downvote_object'), # TODO: CHANGE THE DOWNVOTE LOGIC
 
     path('create_comment/<int:question_id>', comment_views.create_comment, name='create_comment'),
     path('edit_comment/<int:comment_id>', comment_views.edit_comment, name='edit_comment'),
     path('delete_comment/<int:comment_id>', comment_views.delete_comment, name='delete_comment'),
     path('mark_comment_as_answer/<int:comment_id>', comment_views.mark_comment_as_answer, name='mark_comment_as_answer'),
 
-    path('code_execute/', utilization_views.post_sample_code, name='code_execute'), # for dynamic code execution
-    path('run_code/', utilization_views.run_code_view, name='run_code'),
+    path('run_code/<str:type>/<int:id>', utilization_views.run_code_of_question_or_comment, name='run_code'),
 
 ]

@@ -1,4 +1,4 @@
-from ..models import Question, Comment, UserType, User
+from ..models import UserType, User
 from django.contrib.auth import login, authenticate, get_user_model
 from django.http import HttpRequest, HttpResponse, JsonResponse
 import json

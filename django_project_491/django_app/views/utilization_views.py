@@ -1,14 +1,11 @@
 from SPARQLWrapper import SPARQLWrapper, JSON
 from ..Utils.utils import *
 from ..Utils.forms import *
-from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth import login, authenticate, get_user_model
-from django.contrib.auth.forms import AuthenticationForm
-from django.http import HttpRequest, HttpResponse, JsonResponse
+from django.shortcuts import render
+from django.http import  JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
-from ..models import Question, Comment, UserType, User, Vote, VoteType
+from ..models import Question, Comment, VoteType, Question_Vote, Comment_Vote
 from urllib.parse import quote
 from django.contrib.contenttypes.models import ContentType
 
@@ -173,9 +170,7 @@ def get_run_coder_api_languages(request):
 
 
 @csrf_exempt
-def run_code_view(request):
-    type = request.GET.get('type', '') # Get type, comment or question
-    id = request.GET.get('id', '') # Get id of the comment or question
+def run_code_of_question_or_comment(request, type: str, id: int):
 
     if type == 'comment':
         comment = Comment.objects.get(_id=id)
@@ -189,87 +184,143 @@ def run_code_view(request):
 
 
 
-def upvote_object(request, object_type, object_id):
+def upvote_object(request, object_type: str, object_id: int):
     if not object_id:
         return JsonResponse({'error': 'Object ID parameter is required'}, status=400)
     
     user = request.user  # Get the logged-in user
-    model = None
 
+    # Handle upvote logic based on the object type
     if object_type == 'question':
-        model = Question
+        try:
+            question = Question.objects.get(pk=object_id)
+        except Question.DoesNotExist:
+            return JsonResponse({'error': f'{object_type.capitalize()} not found'}, status=404)
+
+        # Check for existing upvote
+        existing_vote = Question_Vote.objects.filter(user=user, question=question).first()
+        if existing_vote:
+            if existing_vote.vote_type == VoteType.UPVOTE.value:
+                return JsonResponse({'error': 'You have already upvoted this question'}, status=400)
+            else:
+                # Change existing downvote to upvote
+                existing_vote.vote_type = VoteType.UPVOTE.value
+                existing_vote.save()
+                question.upvotes += 1
+                question.save()
+                return JsonResponse({'success': 'Changed downvote to upvote'}, status=200)
+
+        # Create a new upvote
+        Question_Vote.objects.create(
+            vote_type=VoteType.UPVOTE.value,
+            user=user,
+            question=question
+        )
+        question.upvotes += 1
+        question.save()
+        return JsonResponse({'success': 'Question upvoted successfully'}, status=200)
+
     elif object_type == 'comment':
-        model = Comment
+        try:
+            comment = Comment.objects.get(pk=object_id)
+        except Comment.DoesNotExist:
+            return JsonResponse({'error': f'{object_type.capitalize()} not found'}, status=404)
+
+        # Check for existing upvote
+        existing_vote = Comment_Vote.objects.filter(user=user, comment=comment).first()
+        if existing_vote:
+            if existing_vote.vote_type == VoteType.UPVOTE.value:
+                return JsonResponse({'error': 'You have already upvoted this comment'}, status=400)
+            else:
+                # Change existing downvote to upvote
+                existing_vote.vote_type = VoteType.UPVOTE.value
+                existing_vote.save()
+                comment.upvotes += 2 # One for resetting the vote and one for the upvote
+                comment.save()
+                return JsonResponse({'success': 'Changed downvote to upvote'}, status=200)
+
+        # Create a new upvote
+        Comment_Vote.objects.create(
+            vote_type=VoteType.UPVOTE.value,
+            user=user,
+            comment=comment
+        )
+        comment.upvotes += 1
+        comment.save()
+        return JsonResponse({'success': 'Comment upvoted successfully'}, status=200)
+
     else:
         return JsonResponse({'error': 'Invalid object type'}, status=400)
 
-    try:
-        question_or_comment_object = model.objects.get(pk=object_id)
-    except model.DoesNotExist:
-        return JsonResponse({'error': f'{object_type.capitalize()} not found'}, status=404)
-
-    # Get the content type for the object
-    content_type = ContentType.objects.get_for_model(model)
-
-    # Check if the user has already voted
-    existing_vote = Vote.objects.filter(user=user, content_type=content_type, object_id=object_id).first()
-    if existing_vote:
-        if existing_vote.vote_type == VoteType.UPVOTE.value:
-            return JsonResponse({'error': f'You have already upvoted this {object_type}'}, status=400)
-        else:
-            # Change the downvote to an upvote
-            existing_vote.vote_type = VoteType.UPVOTE.value
-            existing_vote.save()
-            question_or_comment_object.upvotes += 2 # One for resetting the vote and one for the upvote
-            question_or_comment_object.save()
-            return JsonResponse({'success': f'Changed downvote to upvote on {object_type}'}, status=200)
-
-    # Create a new upvote
-    Vote.objects.create(user=user, content_type=content_type, object_id=object_id, vote_type=VoteType.UPVOTE.value)
-    question_or_comment_object.upvote() 
-    return JsonResponse({'success': f'{object_type.capitalize()} upvoted successfully'}, status=200)
 
 
-def downvote_object(request, object_type, object_id):
+def downvote_object(request, object_type: str, object_id: int):
     if not object_id:
         return JsonResponse({'error': 'Object ID parameter is required'}, status=400)
     
     user = request.user  # Get the logged-in user
-    model = None
 
+    # Handle downvote logic based on the object type
     if object_type == 'question':
-        model = Question
+        try:
+            question = Question.objects.get(pk=object_id)
+        except Question.DoesNotExist:
+            return JsonResponse({'error': f'{object_type.capitalize()} not found'}, status=404)
+
+        # Check for existing downvote
+        existing_vote = Question_Vote.objects.filter(user=user, question=question).first()
+        if existing_vote:
+            if existing_vote.vote_type == VoteType.DOWNVOTE.value:
+                return JsonResponse({'error': 'You have already downvoted this question'}, status=400)
+            else:
+                # Change existing upvote to downvote
+                existing_vote.vote_type = VoteType.DOWNVOTE.value
+                existing_vote.save()
+                question.upvotes -= 1
+                question.save()
+                return JsonResponse({'success': 'Changed upvote to downvote'}, status=200)
+
+        # Create a new downvote
+        Question_Vote.objects.create(
+            vote_type=VoteType.DOWNVOTE.value,
+            user=user,
+            question=question
+        )
+        question.upvotes -= 1
+        question.save()
+        return JsonResponse({'success': 'Question downvoted successfully'}, status=200)
+
     elif object_type == 'comment':
-        model = Comment
+        try:
+            comment = Comment.objects.get(pk=object_id)
+        except Comment.DoesNotExist:
+            return JsonResponse({'error': f'{object_type.capitalize()} not found'}, status=404)
+
+        # Check for existing downvote
+        existing_vote = Comment_Vote.objects.filter(user=user, comment=comment).first()
+        if existing_vote:
+            if existing_vote.vote_type == VoteType.DOWNVOTE.value:
+                return JsonResponse({'error': 'You have already downvoted this comment'}, status=400)
+            else:
+                # Change existing upvote to downvote
+                existing_vote.vote_type = VoteType.DOWNVOTE.value
+                existing_vote.save()
+                comment.upvotes -= 1
+                comment.save()
+                return JsonResponse({'success': 'Changed upvote to downvote'}, status=200)
+
+        # Create a new downvote
+        Comment_Vote.objects.create(
+            vote_type=VoteType.DOWNVOTE.value,
+            user=user,
+            comment=comment
+        )
+        comment.upvotes -= 1
+        comment.save()
+        return JsonResponse({'success': 'Comment downvoted successfully'}, status=200)
+
     else:
         return JsonResponse({'error': 'Invalid object type'}, status=400)
-
-    try:
-        question_or_comment_object = model.objects.get(pk=object_id)
-    except model.DoesNotExist:
-        return JsonResponse({'error': f'{object_type.capitalize()} not found'}, status=404)
-
-    # Get the content type for the object
-    content_type = ContentType.objects.get_for_model(model)
-
-    # Check if the user has already voted
-    existing_vote = Vote.objects.filter(user=user, content_type=content_type, object_id=object_id).first()
-    if existing_vote:
-        if existing_vote.vote_type == VoteType.DOWNVOTE.value:
-            return JsonResponse({'error': f'You have already downvoted this {object_type}'}, status=400)
-        else:
-            # Change the upvote to downvote
-            existing_vote.vote_type = VoteType.DOWNVOTE.value
-            existing_vote.save()
-            question_or_comment_object.upvotes -= 2 # One for resetting the vote and one for the downvote
-            question_or_comment_object.save()
-            return JsonResponse({'success': f'Changed upvote to downvote on {object_type}'}, status=200)
-
-    # Create a new upvote
-    Vote.objects.create(user=user, content_type=content_type, object_id=object_id, vote_type=VoteType.DOWNVOTE.value)
-    question_or_comment_object.downvote()  
-    return JsonResponse({'success': f'{object_type.capitalize()} upvoted successfully'}, status=200)
-
 
 
 def home(request):
