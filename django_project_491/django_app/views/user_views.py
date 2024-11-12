@@ -115,6 +115,7 @@ def signup(request):
     return JsonResponse({'error': 'Invalid request method'}, status=405)
 
 
+
 @csrf_exempt
 def login_user(request : HttpRequest) -> HttpResponse:
     if request.method == 'POST':
@@ -132,7 +133,8 @@ def login_user(request : HttpRequest) -> HttpResponse:
         if user is not None:
             # Authentication successful, log in the user
             login(request, user)
-            return JsonResponse({'status': 'success', 'user_id': user.pk}, status=200)
+            refresh = RefreshToken.for_user(user)
+            return JsonResponse({'status': 'success', 'user_id': user.pk, 'token': str(refresh.access_token)}, status=200)
         else:
             # Authentication failed, log the failed attempt and return an error
             print("Failed login attempt for username:", username)
