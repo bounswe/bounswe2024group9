@@ -444,3 +444,24 @@ def post_sample_code(request):
         return JsonResponse(result)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+    
+@csrf_exempt
+def question_of_the_day(request):
+    # Retrieve 5 random questions
+    question = Question.objects.order_by('?')[0]
+
+    question_data = {
+        'id': question._id,
+        'title': question.title,
+        'description': question.details,
+        'user_id': question.author.pk,
+        'likes': question.upvotes,
+        'comments_count': question.comments.count(),
+        'programmingLanguage': question.language,
+        'codeSnippet': question.code_snippet,
+        'tags': question.tags,
+        'answered': question.answered,
+        'topic': question.topic
+    }
+
+    return JsonResponse({'question': question_data}, safe=False)
