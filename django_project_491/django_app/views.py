@@ -483,3 +483,42 @@ def question_of_the_day(request):
     }
 
     return JsonResponse({'question': question_data}, safe=False)
+
+def list_questions_according_to_the_user(request):
+    questions = []
+    
+    user_id = request.user_id
+    user : User = get_user_model().objects.get(pk=user_id)
+    known_languages = user.known_languages
+    for language in known_languages:
+        questions += list(Question.objects.filter(language=language))
+    
+    interested_topics = user.interested_topics
+    for topic in interested_topics:
+        questions += list(Question.objects.filter(tag=topic))
+    
+    if questions.count() == 0:
+        questions = list(Question.objects.all())
+    
+    questions = questions[:10]
+
+    questions_data = [{
+        'id': question._id,
+        'title': question.title,
+        'description': question.details,
+        'user_id': question.author.pk,
+        'likes': question.upvotes,
+        'comments_count': question.comments.count(),
+        'programmingLanguage': question.language,
+        'codeSnippet': question.code_snippet,
+        'tags': question.tags,
+        'answered': question.answered,
+        'topic': question.topic
+    } for question in questions]
+
+    return JsonResponse({'questions': questions_data}, safe=False)
+
+def get_user_preferred_languages(request):
+    user_id = request.user_id
+    user : User = get_user_model().objects.get(pk=user_id)
+    return JsonResponse({'known_languages': user.known_languages, 'interested_topics': user.interested_topics}, status=200)
