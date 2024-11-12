@@ -8,6 +8,7 @@ import Feed from './Feed';
 import './App.css';
 import SearchResults from './SearchResults';
 import CodeExecution from './components/code-execution';
+import SurveyPage from './SurveyPage';
 
 
 const App = () => {
@@ -21,6 +22,7 @@ const App = () => {
         <Route path="/feed" element={<Feed />} />
         <Route path="/question" element={<CodeExecution />} />
         <Route path="/result/:wiki_id/:wiki_name" element={<SearchResults />} />
+        <Route path="/survey" element={<SurveyPage />} />
       </Routes>
     </Router>
   );
