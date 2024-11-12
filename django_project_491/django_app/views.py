@@ -11,7 +11,7 @@ import urllib.request
 import json
 from .models import Question, Comment
 from urllib.parse import quote
-from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
 from rest_framework.decorators import permission_classes, api_view
 from rest_framework.permissions import IsAuthenticated
 
@@ -60,7 +60,8 @@ def wiki_search(request, search_strings):
         return JsonResponse({'error': str(e)}, status=500)
 
 # Shows the resulting info of the chosen wiki item
-# @login_required
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def wiki_result(response, wiki_id):
     sparql = SPARQLWrapper("https://query.wikidata.org/sparql")
     
@@ -165,10 +166,13 @@ def wiki_result(response, wiki_id):
 
     return JsonResponse(final_response)
 
-
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def wikipedia_data_views(wiki_id):
     info_object = modify_data(wiki_id)
     return info_object
+
+
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -230,7 +234,6 @@ def login_user(request : HttpRequest) -> HttpResponse:
 
         # Authenticate the user
         user = authenticate(username=username, password=password)
-        print(user)
         if user is not None:
             # Authentication successful, log in the user
             login(request, user)
@@ -538,3 +541,20 @@ def get_user_preferred_languages(request):
     user_id = data.get('user_id')
     user : User = get_user_model().objects.get(pk=user_id)
     return JsonResponse({'known_languages': user.known_languages, 'interested_topics': user.interested_topics}, status=200)
+
+
+@api_view(['POST'])
+def logout_user(request: HttpRequest) -> HttpResponse:
+    try:
+        # Extract the refresh token from the request body
+        refresh_token = request.data.get("token")
+        if not refresh_token:
+            return JsonResponse({'error': 'Refresh token required'}, status=400)
+
+        # Create a RefreshToken object and blacklist it
+        token = RefreshToken(refresh_token)
+        token.blacklist()  # This invalidates the refresh token
+
+        return JsonResponse({'status': 'success', 'message': 'User logged out successfully'}, status=200)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)
