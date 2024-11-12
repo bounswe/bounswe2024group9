@@ -5,8 +5,5 @@ SPARQLWrapper==2.0.0
 django-cors-headers==4.0.0
 gunicorn==22.0.0
 pymysql==1.1.1
-rest_framework==3.15.2
-rest_framework_simplejwt==5.3.1
-
-
-
+djangorestframework==3.15.2
+djangorestframework-simplejw==5.3.1

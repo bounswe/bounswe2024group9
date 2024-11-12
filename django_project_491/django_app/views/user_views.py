@@ -3,7 +3,9 @@ from django.contrib.auth import login, authenticate, get_user_model
 from django.http import HttpRequest, HttpResponse, JsonResponse
 import json
 from django.views.decorators.csrf import csrf_exempt
-
+from rest_framework.decorators import permission_classes, api_view
+from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
+from rest_framework.permissions import IsAuthenticated
 
 @csrf_exempt
 def get_user_profile_by_username(request, username : str) -> JsonResponse:
@@ -215,3 +217,25 @@ def get_user_preferred_languages(request):
     user_id = data.get('user_id')
     user : User = get_user_model().objects.get(pk=user_id)
     return JsonResponse({'known_languages': user.known_languages, 'interested_topics': user.interested_topics}, status=200)
+
+@api_view(['POST'])
+def logout_user(request: HttpRequest) -> HttpResponse:
+    try:
+        # Extract the refresh token from the request body
+        refresh_token = request.data.get("token")
+        if not refresh_token:
+            return JsonResponse({'error': 'Refresh token required'}, status=400)
+
+        # Create a RefreshToken object and blacklist it
+        token = RefreshToken(refresh_token)
+        token.blacklist()  # This invalidates the refresh token
+
+        return JsonResponse({'status': 'success', 'message': 'User logged out successfully'}, status=200)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)
+    
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def check_token(request):
+    return JsonResponse({'status': 'Token is valid'}, status=200)
