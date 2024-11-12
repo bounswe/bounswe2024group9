@@ -428,6 +428,8 @@ def get_question_comments(request, question_id):
 # Will be removed in the final version.
 @csrf_exempt
 def post_sample_code(request):
+
+    
     data = json.loads(request.body)
 
     source_code = data.get('source_code', '')  # Get 'code' from the JSON body
@@ -444,6 +446,22 @@ def post_sample_code(request):
         return JsonResponse(result)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+    
+
+
+def add_interested_languages_for_a_user(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        user_id = request.user_id
+        user : User = get_user_model().objects.get(pk=user_id)
+    
+        user.interested_topics = data.get('interested_topics', [])
+        user.known_languages = data.get('known_languages', [])
+        user.save()
+        return JsonResponse({'success': 'Interested languages updated successfully'}, status=200)
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+
     
 @csrf_exempt
 def question_of_the_day(request):

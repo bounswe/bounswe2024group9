@@ -114,6 +114,9 @@ class User(AbstractBaseUser):
     userType = models.CharField(max_length=20, choices=[(tag.value, tag.value) for tag in UserType],
                                 default=UserType.USER.value)
     
+    interested_topics = models.JSONField(blank=True, default=list)  # Example: ['NLP', 'Computer Vision']
+    known_languages = models.JSONField(blank=True, default=list)  # Example: ['Python', 'Java']
+
     # Relationships
     comments = models.ManyToManyField('Comment', related_name='user_comments', blank=True)  # Keep this related_name
     bookmarks = models.JSONField(blank=True, default=list)  # Example: ['link1', 'link2']
