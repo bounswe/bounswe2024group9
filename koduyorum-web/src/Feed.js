@@ -134,8 +134,14 @@ function Feed() {
     };
 
     const fetchPosts = async () => {
+        const user_id = localStorage.getItem('user_id');
         try {
-            const response = await fetch('http://127.0.0.1:8000/random_questions/');
+            const response = await fetch(`${process.env.REACT_APP_API_URL}/specific_feed/${user_id}/`,{
+                  method: 'GET',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                });
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
@@ -149,7 +155,7 @@ function Feed() {
 
     const fetchSearchResults = async (query) => {
         try {
-            const response = await fetch(`http://127.0.0.1:8000/search/${encodeURIComponent(query)}`);
+            const response = await fetch(`${process.env.REACT_APP_API_URL}/${encodeURIComponent(query)}`);
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
@@ -164,7 +170,7 @@ function Feed() {
 
     const fetchQuestionOfTheDay = async () => {
         try {
-            const response = await fetch('http://127.0.0.1:8000/question_of_the_day'); //TODO: Change to actual API endpoint
+            const response = await fetch(`${process.env.REACT_APP_API_URL}/question_of_the_day`); //TODO: Change to actual API endpoint
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }

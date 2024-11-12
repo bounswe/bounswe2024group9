@@ -452,7 +452,6 @@ def post_sample_code(request):
 def add_interested_languages_for_a_user(request):
     if request.method == 'POST':
         data = json.loads(request.body)
-        print(data)
         user_id = data.get('user_id')
         user : User = get_user_model().objects.get(pk=user_id)
     
@@ -485,10 +484,9 @@ def question_of_the_day(request):
 
     return JsonResponse({'question': question_data}, safe=False)
 @csrf_exempt
-def list_questions_according_to_the_user(request):
+def list_questions_according_to_the_user(request, user_id : int):
     questions = []
-    
-    user_id = request.user_id
+
     user : User = get_user_model().objects.get(pk=user_id)
     known_languages = user.known_languages
     for language in known_languages:
@@ -496,9 +494,9 @@ def list_questions_according_to_the_user(request):
     
     interested_topics = user.interested_topics
     for topic in interested_topics:
-        questions += list(Question.objects.filter(tag=topic))
+        questions += list(Question.objects.filter(tags__contains=topic))
     
-    if questions.count() == 0:
+    if len(questions) == 0:
         questions = list(Question.objects.all())
     
     questions = questions[:10]
@@ -521,6 +519,7 @@ def list_questions_according_to_the_user(request):
 
 @csrf_exempt
 def get_user_preferred_languages(request):
-    user_id = request.user_id
+    data = json.loads(request.body)
+    user_id = data.get('user_id')
     user : User = get_user_model().objects.get(pk=user_id)
     return JsonResponse({'known_languages': user.known_languages, 'interested_topics': user.interested_topics}, status=200)

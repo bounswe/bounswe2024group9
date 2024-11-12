@@ -4,6 +4,7 @@ import './SurveyPage.css';
 const SurveyPage = () => {
   const [languages, setLanguages] = useState({});
   const [selectedLanguages, setSelectedLanguages] = useState([]);
+
   const [selectedInterests, setSelectedInterests] = useState([]);
   const [interestsOptions] = useState(['Machine Learning', 'Gaming', 'Computer Vision', 'NLP', 'Web Development', 'Data Science', 'Recursion']);
   const [loading, setLoading] = useState(false);
@@ -52,7 +53,6 @@ const handleSubmit = async (event) => {
 
     if (response.ok) {
       const result = await response.json();
-      alert(`Submission successful:`);
       window.location.href = '/feed';
     } else {
       alert('Submission failed');
@@ -82,7 +82,7 @@ const handleSubmit = async (event) => {
         <select
           onChange={(e) => toggleLanguage(e.target.value)}
           className="survey-select"
-          value="" 
+          value={selectedLanguages[0]}
         >
           <option value="">Select a language</option>
           
