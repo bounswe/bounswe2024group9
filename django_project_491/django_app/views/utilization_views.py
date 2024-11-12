@@ -16,6 +16,9 @@ from django.contrib.contenttypes.models import ContentType
 def wiki_search(request, search_strings):
     sparql = SPARQLWrapper("https://query.wikidata.org/sparql")
 
+    user_agent = "MyDjangoApp/1.0 (https://example.com/contact)" # manual contact to avoid wikidata
+    sparql.addCustomHttpHeader("User-Agent", user_agent)
+
     search_terms = search_strings.split()  # split into words
 
     # Generate SPARQL FILTER for each word in the search string
@@ -28,10 +31,8 @@ def wiki_search(request, search_strings):
         ?language wdt:P31 wd:Q9143.
         ?language rdfs:label ?languageLabel.
 
-        # Filter for language names containing any of the search terms
         FILTER({filter_conditions})
 
-        # Ensure that the label is in English
         FILTER(LANG(?languageLabel) = "en")
 
         SERVICE wikibase:label {{ 
@@ -45,14 +46,19 @@ def wiki_search(request, search_strings):
 
     sparql.setQuery(query)
     sparql.setReturnFormat(JSON)
-    results = sparql.query().convert()
-    print(results)
-    return JsonResponse(results)
+    try:
+        results = sparql.query().convert()
+        return JsonResponse(results)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
 
 
 # Shows the resulting info of the chosen wiki item
 def wiki_result(response, wiki_id):
     sparql = SPARQLWrapper("https://query.wikidata.org/sparql")
+
+    user_agent = "MyDjangoApp/1.0 (https://example.com/contact)" # manual contact to avoid wikidata
+    sparql.addCustomHttpHeader("User-Agent", user_agent)
 
     # First query to get the main language information
     query_main_info = f"""
