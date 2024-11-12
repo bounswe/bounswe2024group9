@@ -19,6 +19,7 @@ function Feed() {
     const [error, setError] = useState(null);
     const [infoData, setInfoData] = useState(null);
     const [activeTab, setActiveTab] = useState("info");
+    const [questionOfTheDay, setQuestionOfTheDay] = useState(null);
     const searchDisplayRef = useRef(null);
     const navigate = useNavigate();
     const location = useLocation();
@@ -160,10 +161,23 @@ function Feed() {
             return [];
         }
     }
-    
+
+    const fetchQuestionOfTheDay = async () => {
+        try {
+            const response = await fetch('http://127.0.0.1:8000/question_of_the_day'); //TODO: Change to actual API endpoint
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            const data = await response.json();
+            setQuestionOfTheDay(data.question); // Set the question data to state
+        } catch (error) {
+            console.error('Error fetching Question of the Day:', error.message);
+        }
+    };
   
     useEffect(() => {
         fetchPosts();
+        fetchQuestionOfTheDay();
     }, []);
 
     useEffect(() => {
@@ -197,6 +211,17 @@ function Feed() {
 
                 {/* Middle - Posts */}
                 <div className="posts-container">
+                    <h2 className="section-title">Question of the Day</h2>
+                    {/* Display Question of the Day */}
+                    {questionOfTheDay && (
+                        <div className="question-of-the-day">
+                            <h2>Question of the Day</h2>
+                            <h3>{questionOfTheDay.title}</h3>
+                            <p>{truncateText(questionOfTheDay.description, 100)}</p>
+                            <button onClick={() => navigate(`/question/${questionOfTheDay.id}`)}>View More</button>
+                        </div>
+                    )}
+                    <h2 className="section-title">Questions</h2>
                     <div className="filters">
                         <select className="filter-dropdown" value={filter} onChange={(e) => setFilter(e.target.value)}>
                             <option value="all">All Posts</option>
