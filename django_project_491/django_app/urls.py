@@ -18,5 +18,6 @@ urlpatterns = [
     path('random_questions/', random_questions, name='random_questions'),
     path('question/<int:question_id>/comments/', get_question_comments, name='get_question_comments'),
     path('code_execute/', post_sample_code, name='code_execute'), # for dynamic code execution
-    path('question_of_the_day', question_of_the_day, name= 'question_of_the_day')
+    path('question_of_the_day', question_of_the_day, name= 'question_of_the_day'),
+    path('interested_languages/', add_interested_languages_for_a_user, name='interested_languages'),
 ]

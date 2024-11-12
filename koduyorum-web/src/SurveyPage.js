@@ -30,14 +30,40 @@ const SurveyPage = () => {
     );
   };
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    setLoading(true);
-    setTimeout(() => {
-      alert(`Selected Languages: ${selectedLanguages.join(', ')}\nSelected Interests: ${selectedInterests.join(', ')}`);
-      setLoading(false);
-    }, 1000);
+const handleSubmit = async (event) => {
+  event.preventDefault();
+  setLoading(true);
+  const user_id = localStorage.getItem('user_id');
+
+  const data = {
+    known_languages: selectedLanguages,
+    interested_topics: selectedInterests,
+    user_id: user_id,
   };
+
+  try {
+    const response = await fetch(`${process.env.REACT_APP_API_URL}/interested_languages/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (response.ok) {
+      const result = await response.json();
+      alert(`Submission successful:`);
+      window.location.href = '/feed';
+    } else {
+      alert('Submission failed');
+    }
+  } catch (error) {
+    console.error('Error submitting data:', error);
+    alert('An error occurred during submission');
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleInterestChange = (event) => {
     const { value, checked } = event.target;

@@ -448,11 +448,12 @@ def post_sample_code(request):
         return JsonResponse({'error': str(e)}, status=500)
     
 
-
+@csrf_exempt
 def add_interested_languages_for_a_user(request):
     if request.method == 'POST':
         data = json.loads(request.body)
-        user_id = request.user_id
+        print(data)
+        user_id = data.get('user_id')
         user : User = get_user_model().objects.get(pk=user_id)
     
         user.interested_topics = data.get('interested_topics', [])
@@ -483,7 +484,7 @@ def question_of_the_day(request):
     }
 
     return JsonResponse({'question': question_data}, safe=False)
-
+@csrf_exempt
 def list_questions_according_to_the_user(request):
     questions = []
     
@@ -518,6 +519,7 @@ def list_questions_according_to_the_user(request):
 
     return JsonResponse({'questions': questions_data}, safe=False)
 
+@csrf_exempt
 def get_user_preferred_languages(request):
     user_id = request.user_id
     user : User = get_user_model().objects.get(pk=user_id)
