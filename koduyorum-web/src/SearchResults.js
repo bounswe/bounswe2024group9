@@ -149,10 +149,10 @@ const fetchSearchResults = async (query) => {
       }
 
       const infoData = await infoResponse.json();
-      const questionData = await questionResponse.json()['questions'];      
-
+      const questionData = await questionResponse.json();      
+      const questionsArray = questionData.questions;
       setInfoData(infoData || { mainInfo: [], instances: [], wikipedia: {} });
-      setQuestionData(questionData || []);
+      setQuestionData(questionsArray || []);
     } catch (err) {
       console.error("Error fetching search data:", err);
       setError("Failed to load search data.");
