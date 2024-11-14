@@ -89,6 +89,9 @@ const Signup = () => {
 
       if (response.ok) {
         setSuccess("Sign up successful. You can now log in.");
+        const data = await response.json();
+        localStorage.setItem('authToken', data['token']);
+        localStorage.setItem('user_id', data['user_id']);
         window.location.href = "/survey";
       } else {
         const data = await response.json();

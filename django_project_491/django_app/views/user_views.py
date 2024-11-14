@@ -114,8 +114,16 @@ def signup(request):
         user = User(username=username, email=email)
         user.set_password(password1)  # It will hash the password
         user.save()
+        # Authenticate the user
+        user = authenticate(username=username, password=password1)
+        if user is not None:
+            # Authentication successful, log in the user
+            login(request, user)
+            refresh = RefreshToken.for_user(user)
 
-        return JsonResponse({'success': 'User created successfully', 'user_id': user.pk, 'username': user.username}, status=201)
+            return JsonResponse({'success': 'User created and logged in successfully', 'user_id': user.pk, 'username': user.username, 'token': str(refresh.access_token)}, status=201)
+        else:
+            return JsonResponse({'error': 'User created but failed to authenticate'}, status=500)
 
     return JsonResponse({'error': 'Invalid request method'}, status=405)
 

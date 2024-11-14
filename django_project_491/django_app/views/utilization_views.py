@@ -165,8 +165,6 @@ def wikipedia_data_views(wiki_id):
 def get_run_coder_api_languages(request):
     languages = get_languages()
     
-    print(languages)
-
     if languages is not None:
         return JsonResponse({'languages': languages}, status=200)
     else:
@@ -346,7 +344,6 @@ def post_sample_code(request):
     language_id = data.get('language_id', 71)  # Default to Python
 
     result = run_code(source_code, language_id)
-    print(result)
 
     if result is None:
         return JsonResponse({'error': 'Error running code'}, status=500)
