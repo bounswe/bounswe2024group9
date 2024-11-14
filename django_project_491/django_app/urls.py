@@ -49,4 +49,5 @@ urlpatterns = [
     path('interested_languages/', user_views.add_interested_languages_for_a_user, name='interested_languages'),
     path('specific_feed/<int:user_id>/', question_views.list_questions_according_to_the_user, name='specific_feed'),
     path('question_of_the_day/', question_views.question_of_the_day, name='question_of_the_day'),
+    path('daily_question/', question_views.question_of_the_day, name='wiki_search'),
 ]

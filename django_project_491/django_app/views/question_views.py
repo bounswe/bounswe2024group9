@@ -275,7 +275,6 @@ def list_questions_by_hotness(request, page_number = 1):
     return JsonResponse({'questions': questions_data}, safe=False, status=200)
 
 
-@csrf_exempt
 def random_questions(request):
     # Retrieve 5 random questions
     questions = Question.objects.order_by('?')[:5]
@@ -293,7 +292,7 @@ def random_questions(request):
         'answered': question.answered,
         'topic': question.topic
     } for question in questions]
-
+    print(questions_data)
     return JsonResponse({'questions': questions_data}, safe=False)
 
 @csrf_exempt
