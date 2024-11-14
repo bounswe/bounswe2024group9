@@ -46,8 +46,8 @@
     <li>Clone the repository to your local machine.</li> 
     <pre><code>git clone https://github.com/bounswe/bounswe2024group9.git
 cd bounswe2024group9</code></pre>
-    <li>Create a .env file in the outermost scope and paste the following before saving.</li>
-    <pre><code>dAWS_PASSWORD=XXX
+    <li>Create a .env file in the outermost scope and add the following keys.</li>
+<pre><code>AWS_PASSWORD=XXX
 AWS_HOST=XXX
 JUDGE0_API_KEY=XXX
 DJANGO_SECRET_KEY=XXX

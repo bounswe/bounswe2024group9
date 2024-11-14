@@ -2,6 +2,7 @@ from django.urls import path
 from .views import *
 from django.contrib.auth.views import LoginView, LogoutView
 
+
 urlpatterns = [
     path('wikipedia/', wikipedia_data_views, name='wikipedia'),
     path('login/', login_user, name='login'),
@@ -18,4 +19,7 @@ urlpatterns = [
     path('random_questions/', random_questions, name='random_questions'),
     path('question/<int:question_id>/comments/', get_question_comments, name='get_question_comments'),
     path('code_execute/', post_sample_code, name='code_execute'), # for dynamic code execution
+    path('question_of_the_day', question_of_the_day, name= 'question_of_the_day'),
+    path('interested_languages/', add_interested_languages_for_a_user, name='interested_languages'),
+    path('specific_feed/<int:user_id>/',  list_questions_according_to_the_user, name='specific_feed'),
 ]

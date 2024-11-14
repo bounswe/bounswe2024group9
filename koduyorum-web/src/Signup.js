@@ -89,7 +89,7 @@ const Signup = () => {
 
       if (response.ok) {
         setSuccess("Sign up successful. You can now log in.");
-        window.location.href = "/login";
+        window.location.href = "/survey";
       } else {
         const data = await response.json();
         setError(data.error || "An error occurred while signing up. Please try again later.");
