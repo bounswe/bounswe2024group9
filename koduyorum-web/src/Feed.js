@@ -170,6 +170,7 @@ function Feed() {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
             const data = await response.json();
+            
             return data.results.bindings;
         } catch (error) {
             console.error('Error fetching search results:', error.message);
@@ -180,7 +181,15 @@ function Feed() {
 
     const fetchQuestionOfTheDay = async () => {
         try {
-            const response = await fetch(`${process.env.REACT_APP_API_URL}/daily_question`);
+            const response = await fetch(`${process.env.REACT_APP_API_URL}/question_of_the_day`,
+                {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + localStorage.getItem('authToken'),
+                    },
+                }
+            );
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }

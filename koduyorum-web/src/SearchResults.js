@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef  } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Navbar, LeftSidebar, RightSidebar } from './PageComponents'; 
+import { LoadingComponent }  from './LoadingPage'
 import './SearchResults.css';
 
 const SearchResults = () => {
@@ -160,13 +161,16 @@ const fetchSearchResults = async (query) => {
     }
   };
 
-  if (loading) return <div className="loading">Loading...</div>;
-
-  if (error) return <div className="error">{error}</div>;
-
   return (
-    <div className="feed-container">
-      {/* Navbar */}
+
+    <div className="feed">
+    {loading ? (
+      <LoadingComponent />
+    ) : error ? (
+      <div className="error">{error}</div>
+    ) : (
+      <div className="feed-container">
+    
       <Navbar
 			searchQuery={searchQuery}
 			handleSearchQueryChange={handleSearchQueryChange}
@@ -261,6 +265,8 @@ const fetchSearchResults = async (query) => {
         <RightSidebar />
       </div>
     </div>
+    )}
+  </div>
   );
 };
 

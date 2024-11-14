@@ -69,3 +69,22 @@
 .related-instances li {
     margin-bottom: 0.5rem;
 }
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh; /* Full viewport height */
+  text-align: center;
+}
+
+.loading {
+  font-size: 24px;
+  margin-bottom: 10px;
+}
+
+.loading-fact {
+  font-size: 16px;
+  color: #555;
+}
