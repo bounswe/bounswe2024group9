@@ -42,14 +42,11 @@ urlpatterns = [
 
     path('run_code/<str:type>/<int:id>', utilization_views.run_code_of_question_or_comment, name='run_code'),
 
-    # Newcomers from 'main' to the end:
-    path('create_comment/', comment_views.create_comment, name='create_comment'),
+
     path('list_questions/', question_views.list_questions_by_language, name='list_questions'),
     # path('run_code/', utilization_views.run_code_view, name='run_code'),
-    path('random_questions/', question_views.random_questions, name='random_questions'),
-    path('question/<int:question_id>/comments/', question_views.get_question_comments, name='get_question_comments'),
     path('code_execute/', utilization_views.post_sample_code, name='code_execute'),
-    path('question_of_the_day/', user_views.question_of_the_day, name='question_of_the_day'),
     path('interested_languages/', user_views.add_interested_languages_for_a_user, name='interested_languages'),
-    path('specific_feed/<int:user_id>/', user_views.list_questions_according_to_the_user, name='specific_feed'),
+    path('specific_feed/<int:user_id>/', question_views.list_questions_according_to_the_user, name='specific_feed'),
+    path('daily_question/', question_views.question_of_the_day, name='question_of_the_day'),
 ]

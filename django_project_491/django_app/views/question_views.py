@@ -2,6 +2,10 @@ from ..models import Question, Comment, UserType, User, VoteType
 from django.http import HttpRequest, HttpResponse, JsonResponse
 import json
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth import get_user_model
+from django.core.cache import cache
+from datetime import datetime
+from django.utils import timezone
 from ..Utils.utils import *
 from ..Utils.forms import *
 from typing import List
@@ -278,4 +282,91 @@ def random_questions(request):
         'topic': question.topic
     } for question in questions]
 
+    return JsonResponse({'questions': questions_data}, safe=False)
+
+@csrf_exempt
+def question_of_the_day(request):
+    today = timezone.now().date()
+    cache_key = f"question_of_the_day_{today}"
+    
+    # Check if there's a question already cached for today
+    question_data = cache.get(cache_key)
+    
+    if not question_data:
+        all_questions = list(Question.objects.all())
+        if not all_questions:
+            return JsonResponse({'error': 'No questions available'}, status=404)
+        
+        question = random.choice(all_questions)
+
+        question_data = {
+            'id': question._id,
+            'title': question.title,
+            'description': question.details,
+            'user_id': question.author.pk,
+            'likes': question.upvotes,
+            'comments_count': question.comments.count(),
+            'programmingLanguage': question.language,
+            'codeSnippet': question.code_snippet,
+            'tags': question.tags,
+            'answered': question.answered,
+            'topic': question.topic
+        }
+
+        today = timezone.localdate()  # This gives you a timezone-aware date object
+        midnight = datetime.combine(today, datetime.min.time(), tzinfo=timezone.get_current_timezone())
+        seconds_until_midnight = (midnight + timezone.timedelta(days=1) - timezone.now()).seconds
+        cache.set(cache_key, question_data, timeout=seconds_until_midnight)
+
+    return JsonResponse({'question': question_data}, safe=False)
+
+@csrf_exempt
+def list_questions_according_to_the_user(request, user_id : int):
+
+    unique_question_ids = set()
+    personalized_questions = []
+    user : User = get_user_model().objects.get(pk=user_id)
+
+    # Fetch questions based on known languages
+    for language in user.known_languages:
+        language_questions = list(Question.objects.filter(language=language))
+        for question in language_questions:
+            if question._id not in unique_question_ids:
+                personalized_questions.append(question)
+                unique_question_ids.add(question._id)
+                if len(personalized_questions) >= 10:
+                    break
+        if len(personalized_questions) >= 10:
+            break
+
+    if len(personalized_questions) < 10:
+        for topic in user.interested_topics:
+            topic_questions = list(Question.objects.filter(tags__contains=topic))
+            for question in topic_questions:
+                if question._id not in unique_question_ids:
+                    personalized_questions.append(question)
+                    unique_question_ids.add(question._id)
+                    if len(personalized_questions) >= 10:
+                        break
+            if len(personalized_questions) >= 10:
+                break
+
+    # If still less than 10 questions, fill with general questions
+    if len(personalized_questions) < 10:
+        general_questions = list(Question.objects.exclude(_id__in=unique_question_ids)[:10 - len(personalized_questions)])
+        personalized_questions.extend(general_questions)
+
+    questions_data = [{
+        'id': question._id,
+        'title': question.title,
+        'description': question.details,
+        'user_id': question.author.pk,
+        'likes': question.upvotes,
+        'comments_count': question.comments.count(),
+        'programmingLanguage': question.language,
+        'codeSnippet': question.code_snippet,
+        'tags': question.tags,
+        'answered': question.answered,
+        'topic': question.topic
+    } for question in personalized_questions]
     return JsonResponse({'questions': questions_data}, safe=False)

@@ -187,3 +187,10 @@ AUTH_USER_MODEL= 'django_app.User'  # Custom user model
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
 ]
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',  # Use a local memory cache for demonstration
+        'LOCATION': 'unique-snowflake',
+    }
+}
