@@ -96,9 +96,9 @@ function Feed() {
 
     const sortedPosts = filteredPosts.sort((a, b) => {
         if (sort === "newest") {
-            return new Date(b.createdAt) - new Date(a.createdAt);
+            return new Date(b.created_at) - new Date(a.created_at);
         } else if (sort === "popularity") {
-            return b.popularity - a.popularity;
+            return b.upvotes - a.upvotes;
         }
         return 0;
     });

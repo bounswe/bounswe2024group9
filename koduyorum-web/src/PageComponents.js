@@ -50,7 +50,7 @@ export const Navbar = ({
       <div className="navbar-left">
         <img
           id="bar_logo"
-          src="resources/icon2-transparent.png"
+          src="/resources/icon2-transparent.png"
           style={{ width: "75px", height: "auto", padding: "5px" }}
           alt="bar_logo"
           onClick={() => navigate('/feed')}
