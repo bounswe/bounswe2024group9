@@ -93,7 +93,7 @@ def signup(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
-            username = data.get('username')
+            username = data.get('username').strip().lower()
             email = data.get('email')
             password1 = data.get('password1')
             password2 = data.get('password2')
@@ -135,7 +135,7 @@ def login_user(request : HttpRequest) -> HttpResponse:
         try:
             # Parse the incoming JSON request body
             data = json.loads(request.body)
-            username = data.get('username')
+            username = data.get('username').strip().lower()
             password = data.get('password')
         except (KeyError, json.JSONDecodeError) as e:
             # Handle malformed data
