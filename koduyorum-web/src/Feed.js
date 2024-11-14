@@ -109,7 +109,7 @@ function Feed() {
 
     const fetchWikiIdAndName = async (tag) => {
       try {
-          const response = await fetch(`/django_app/search/${tag}`,
+          const response = await fetch(`${process.env.REACT_APP_API_URL}/search/${tag}`,
                 {
                     method: 'GET',
                     headers: {
@@ -164,7 +164,7 @@ function Feed() {
 
     const fetchSearchResults = async (query) => {
         try {
-            const response = await fetch(`${process.env.REACT_APP_API_URL}/${encodeURIComponent(query)}`);
+            const response = await fetch(`${process.env.REACT_APP_API_URL}/search/${encodeURIComponent(query)}`);
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
