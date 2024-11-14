@@ -103,7 +103,10 @@ def edit_question(request: HttpRequest, question_id: int) -> HttpResponse:
     if not question_id:
         return JsonResponse({'error': 'Comment ID parameter is required'}, status=400)
     
-    user_id = request.user.id
+    user_id = request.headers.get('User-ID', None)
+    if user_id is None:
+        return JsonResponse({'error': 'User ID parameter is required in the header'}, status=400)
+    
     if not user_id:
         return JsonResponse({'error': 'User ID parameter is required'}, status=400)
     
@@ -144,7 +147,10 @@ def delete_question(request: HttpRequest, question_id: int) -> HttpResponse:
     if not question_id:
         return JsonResponse({'error': 'Comment ID parameter is required'}, status=400)
     
-    user_id = request.user.id
+    user_id = request.headers.get('User-ID', None)
+    if user_id is None:
+        return JsonResponse({'error': 'User ID parameter is required in the header'}, status=400)
+    
     if not user_id:
         return JsonResponse({'error': 'User ID parameter is required'}, status=400)
     
@@ -171,11 +177,14 @@ def delete_question(request: HttpRequest, question_id: int) -> HttpResponse:
 def mark_as_answered(request, question_id : int) -> HttpResponse:
     if not question_id:
         return JsonResponse({'error': 'Question ID parameter is required'}, status=400)
-
+    
+    request_user_id = request.headers.get('User-ID', None)
+    if request_user_id is None:
+        return JsonResponse({'error': 'User ID parameter is required in the header'}, status=400)
 
     question = Question.objects.get(_id=question_id)
-
-    if question.author != request.user:
+    author : User = question.author
+    if author.user_id != request_user_id:
         return JsonResponse({'error': 'Only the owner of the question can mark it as answered'}, status=403)
     
     question.mark_as_answered()
@@ -191,7 +200,10 @@ def report_question(request, question_id : int) -> HttpResponse:
     
     question = Question.objects.get(_id=question_id)
     
-    user_id = request.user.id
+    user_id = request.headers.get('User-ID', None)
+    if user_id is None:
+        return JsonResponse({'error': 'User ID parameter is required in the header'}, status=400)
+    
     if not user_id:
         return JsonResponse({'error': 'User ID parameter is required'}, status=400)
     
@@ -322,7 +334,6 @@ def question_of_the_day(request):
 
 @csrf_exempt
 def list_questions_according_to_the_user(request, user_id : int):
-
     unique_question_ids = set()
     personalized_questions = []
     user : User = get_user_model().objects.get(pk=user_id)

@@ -55,7 +55,10 @@ def edit_comment(request: HttpRequest, comment_id:int) -> HttpResponse:
     if not comment_id:
         return JsonResponse({'error': 'Comment ID parameter is required'}, status=400)
     
-    user_id = request.user.id
+    user_id = request.headers.get('User-ID', None)
+    if user_id is None:
+        return JsonResponse({'error': 'User ID parameter is required in the header'}, status=400)
+    
     if not user_id:
         return JsonResponse({'error': 'User ID parameter is required'}, status=400)
     
@@ -89,7 +92,12 @@ def delete_comment(request: HttpRequest, comment_id : int) -> HttpResponse:
     if not comment_id:
         return JsonResponse({'error': 'Comment ID parameter is required'}, status=400)
     
-    user_id = request.user.id
+    user_id = request.headers.get('User-ID', None)
+    if user_id is None:
+        return JsonResponse({'error': 'User ID parameter is required in the header'}, status=400)
+    
+    user = User.objects.get(pk=user_id)
+
     if not user_id:
         return JsonResponse({'error': 'User ID parameter is required'}, status=400)
     
@@ -104,7 +112,6 @@ def delete_comment(request: HttpRequest, comment_id : int) -> HttpResponse:
 
         comment.delete()
 
-        user = request.user
         user.authored_comments.remove(comment)
 
     except Comment.DoesNotExist:
@@ -138,7 +145,10 @@ def mark_comment_as_answer(request: HttpRequest, comment_id : int) -> HttpRespon
     try:
         comment = Comment.objects.get(_id=comment_id)
         question : Question = Comment.question
-        user = request.user
+        user_id = request.headers.get('User-ID', None)
+        if user_id is None:
+            return JsonResponse({'error': 'User ID parameter is required in the header'}, status=400)
+        user = User.objects.get(pk=user_id)
 
         if user != question.author and user.userType != UserType.ADMIN:
             return JsonResponse({'error': 'Only the author of the question can mark a comment as the answer'}, status=403)

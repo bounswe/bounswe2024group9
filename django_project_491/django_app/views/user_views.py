@@ -27,7 +27,9 @@ def get_user_profile_by_username(request, username : str) -> JsonResponse:
 #TODO find what can be changed in the user profile.
 @csrf_exempt
 def edit_user_profile(request, will_be_edited_user_id : int) -> JsonResponse:
-    wants_to_edit_user_id = request.user.id
+    wants_to_edit_user_id = request.headers.get('User-ID', None)
+    if wants_to_edit_user_id is None:
+        return JsonResponse({'error': 'User ID parameter is required in the header'}, status=400)
 
     if not will_be_edited_user_id:
         return JsonResponse({'error': 'User ID parameter is required'}, status=400)
@@ -61,7 +63,10 @@ def edit_user_profile(request, will_be_edited_user_id : int) -> JsonResponse:
 
 @csrf_exempt
 def delete_user_profile(request, will_be_deleted_user_id : int) -> JsonResponse:
-    wants_to_delete_user_id = request.user.id
+
+    wants_to_delete_user_id = request.headers.get('User-ID', None)
+    if wants_to_delete_user_id is None:
+        return JsonResponse({'error': 'User ID parameter is required in the header'}, status=400)
 
     if not will_be_deleted_user_id:
         return JsonResponse({'error': 'User ID parameter is required'}, status=400)

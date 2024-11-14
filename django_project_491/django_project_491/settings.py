@@ -51,6 +51,16 @@ CORS_ALLOWED_ORIGINS = [
     "https://oyster-app-8k7np.ondigitalocean.app",  # Production frontend UR
 ]
 
+CORS_ALLOW_CREDENTIALS = True
+
+CORS_ALLOW_HEADERS = [
+    'content-type',
+    'authorization',
+    'x-csrftoken',
+    'x-requested-with',
+    'user-id', 
+]
+
 
 # Application definition
 

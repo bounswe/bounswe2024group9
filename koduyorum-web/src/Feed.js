@@ -149,6 +149,7 @@ function Feed() {
                   method: 'GET',
                   headers: {
                     'Content-Type': 'application/json',
+                    'User-ID': user_id,
                   },
                 });
             if (!response.ok) {
