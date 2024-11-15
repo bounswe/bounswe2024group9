@@ -20,6 +20,12 @@ def get_user_profile_by_username(request, username : str) -> JsonResponse:
         'questions': [question._id for question in user.questions.all()],
         'comments': [comment._id for comment in user.authored_comments.all()],
         'bookmarks': user.bookmarks,
+        'profile_pic': user.profile_pic,
+        'bio': user.bio,
+        'interested_topics': user.interested_topics,
+        'known_languages': user.known_languages,
+        'name': user.name,
+        'surname': user.surname
     }
     
     return JsonResponse({'user': user_data}, status=200)
@@ -37,6 +43,12 @@ def get_user_profile_by_id(request, user_id : int) -> JsonResponse:
         'questions': [question._id for question in user.questions.all()],
         'comments': [comment._id for comment in user.authored_comments.all()],
         'bookmarks': user.bookmarks,
+        'profile_pic': user.profile_pic,
+        'bio': user.bio,
+        'interested_topics': user.interested_topics,
+        'known_languages': user.known_languages,
+        'name': user.name,
+        'surname': user.surname
     }
     
     return JsonResponse({'user': user_data}, status=200)
@@ -217,3 +229,17 @@ def logout_user(request: HttpRequest) -> HttpResponse:
 @permission_classes([IsAuthenticated])
 def check_token(request):
     return JsonResponse({'status': 'Token is valid'}, status=200)
+
+@csrf_exempt
+def upload_profile_pic(request : HttpRequest) -> HttpResponse:
+    if request.method == 'POST':
+        user_id = request.headers.get('User-ID', None)
+        if user_id is None:
+            return JsonResponse({'error': 'User ID parameter is required in the header'}, status=400)
+        user : User = get_user_model().objects.get(pk=user_id)
+
+        profile_pic = request.FILES.get('profile_pic')
+        user.profile_pic = profile_pic
+        user.save()
+        return JsonResponse({'success': 'Profile picture uploaded successfully'}, status=200)
+    return JsonResponse({'error': 'Invalid request method'}, status=405)

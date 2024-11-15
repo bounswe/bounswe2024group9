@@ -133,7 +133,9 @@ class User(AbstractBaseUser):
     email = models.EmailField(max_length=255, unique=True)
     userType = models.CharField(max_length=20, choices=[(tag.value, tag.value) for tag in UserType],
                                 default=UserType.USER.value)
-    
+    name = models.CharField(max_length=30, blank=True, null=True)
+    surname = models.CharField(max_length=30, blank=True, null=True)
+
     profile_pic = models.ImageField(upload_to='profile_pics/', blank=True, null=True) # May be removed later
     bio = models.TextField(blank=True, null=True) # May be removed later
     interested_topics = models.JSONField(blank=True, default=list)  # Example: ['NLP', 'Computer Vision']

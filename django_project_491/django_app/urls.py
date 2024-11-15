@@ -18,7 +18,8 @@ urlpatterns = [
     path('delete_user_profile/<int:will_be_deleted_user_id>/', user_views.delete_user_profile, name='delete_user_profile'),
     path('logout/', user_views.logout_user, name='logout'),
     path('auth/check_token/', user_views.check_token, name='check_token'),
-    
+    path('upload-profile-pic/', user_views.upload_profile_pic, name='upload_profile_pic'),
+
     path('get_question/<int:question_id>/', question_views.get_question_details, name='get_question'),
     path('question/<int:question_id>/comments/', question_views.get_question_comments, name='get_question_comments'),
     path('create_question/', question_views.create_question, name='create_question'),
