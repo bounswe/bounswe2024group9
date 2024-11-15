@@ -1,105 +1,163 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from './hooks/AuthProvider';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Navbar } from './PageComponents';
 import './Profile.css';
 
 const Profile = () => {
-  const { user } = useAuth();
-  const [profileData, setProfileData] = useState({
-    name: user.name || '',
-    profilePicture: user.profilePicture || '',
-  });
+  const { username } = useParams(); // Extract username from the route
+  const navigate = useNavigate();
+  const [profileData, setProfileData] = useState(null);
   const [activeTab, setActiveTab] = useState('questions');
-  const [userPosts, setUserPosts] = useState([]);
-  const [userComments, setUserComments] = useState([]);
-  const [bookmarks, setBookmarks] = useState([]);
+  const [error, setError] = useState(null);
 
-  // Fetch user data for posts, comments, and bookmarks
+  // Fetch profile data
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchProfile = async () => {
       try {
-        const postsResponse = await fetch(`/api/user/${user.id}/posts`);
-        const commentsResponse = await fetch(`/api/user/${user.id}/comments`);
-        const bookmarksResponse = await fetch(`/api/user/${user.id}/bookmarks`);
-        
-        setUserPosts(await postsResponse.json());
-        setUserComments(await commentsResponse.json());
-        setBookmarks(await bookmarksResponse.json());
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/get_user_profile_by_username/${username}/`);
+        if (response.ok) {
+          const data = await response.json();
+          setProfileData(data.user);
+        } else {
+          console.error("Failed to fetch profile data");
+          setError("Failed to load profile data.");
+        }
       } catch (error) {
-        console.error("Error fetching user data:", error);
+        console.error("Error fetching profile data:", error);
+        setError("An error occurred while fetching profile data.");
       }
     };
-    fetchData();
-  }, [user.id]);
 
-  const handleTabSwitch = (tab) => setActiveTab(tab);
+    fetchProfile();
+  }, [username]);
 
-  const handleNameChange = () => {
-    // Logic for updating the user's name
-  };
-
+  // Handle profile picture upload
   const handleProfilePictureUpload = (event) => {
     const file = event.target.files[0];
     if (file) {
-      setProfileData({ ...profileData, profilePicture: URL.createObjectURL(file) });
-      // Logic to upload to server
+      const updatedProfile = {
+        ...profileData,
+        profilePicture: URL.createObjectURL(file),
+      };
+      setProfileData(updatedProfile);
+
+      // TODO: Add logic to upload the file to the server
     }
   };
 
-  const handleDeleteAccount = async () => {
-    // Logic to delete account
+  // Handle name change
+  const handleNameChange = async () => {
+    const newName = prompt("Enter your new name:");
+    if (newName) {
+      try {
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/edit_user_profile/${profileData.id}/`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: newName }),
+        });
+        if (response.ok) {
+          setProfileData((prevData) => ({ ...prevData, name: newName }));
+        } else {
+          console.error("Failed to update name");
+        }
+      } catch (error) {
+        console.error("Error updating name:", error);
+      }
+    }
   };
 
-  const handlePasswordUpdate = () => {
-    // Logic to send password update link to user's email
+  // Handle account deletion
+  const handleDeleteAccount = async () => {
+    if (window.confirm("Are you sure you want to delete your account? This action cannot be undone.")) {
+      try {
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/delete_user_profile/${profileData.id}/`, {
+          method: 'DELETE',
+        });
+        if (response.ok) {
+          localStorage.removeItem('authToken');
+          navigate('/signup'); // Redirect to signup after deletion
+        } else {
+          console.error("Failed to delete account");
+        }
+      } catch (error) {
+        console.error("Error deleting account:", error);
+      }
+    }
   };
+
+  // Handle password update
+  const handlePasswordUpdate = async () => {
+    // TODO: Implement password update logic
+    alert("A password update link has been sent to your email.");
+  };
+
+  if (error) {
+    return <div className="error-message">{error}</div>;
+  }
+
+  if (!profileData) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="profile-page">
       <Navbar />
-
       <div className="profile-header">
         <div className="profile-picture">
           <img src={profileData.profilePicture || 'defaultProfilePic.png'} alt="Profile" />
           <input type="file" onChange={handleProfilePictureUpload} />
         </div>
         <div className="profile-name">
-          <h2>{profileData.name}</h2>
+          <h2>{profileData.name || profileData.username}</h2>
           <button className="edit-button" onClick={handleNameChange}>Edit Name</button>
         </div>
       </div>
 
       <div className="profile-tabs">
-        <button className={`tab ${activeTab === 'questions' ? 'active' : ''}`} onClick={() => handleTabSwitch('questions')}>My Questions</button>
-        <button className={`tab ${activeTab === 'comments' ? 'active' : ''}`} onClick={() => handleTabSwitch('comments')}>My Comments</button>
-        <button className={`tab ${activeTab === 'bookmarks' ? 'active' : ''}`} onClick={() => handleTabSwitch('bookmarks')}>Bookmarks</button>
+        <button
+          className={`tab ${activeTab === 'questions' ? 'active' : ''}`}
+          onClick={() => setActiveTab('questions')}
+        >
+          My Questions
+        </button>
+        {/* <button
+          className={`tab ${activeTab === 'comments' ? 'active' : ''}`}
+          onClick={() => setActiveTab('comments')}
+        >
+          My Comments
+        </button> */}
+        <button
+          className={`tab ${activeTab === 'bookmarks' ? 'active' : ''}`}
+          onClick={() => setActiveTab('bookmarks')}
+        >
+          Bookmarks
+        </button>
       </div>
 
       <div className="profile-content">
         {activeTab === 'questions' && (
           <div className="content-list">
-            {userPosts.map((post) => (
-              <div key={post.id} className="content-item">
-                <h3>{post.title}</h3>
-                <p>{post.body}</p>
+            {profileData.questions.map((q) => (
+              <div key={q} className="content-item">
+                <h3>Question ID: {q}</h3>
               </div>
             ))}
           </div>
         )}
-        {activeTab === 'comments' && (
+        {/* {activeTab === 'comments' && (
           <div className="content-list">
-            {userComments.map((comment) => (
-              <div key={comment.id} className="content-item">
-                <p>{comment.body}</p>
+            {profileData.comments.map((c) => (
+              <div key={c} className="content-item">
+                <p>Comment ID: {c}</p>
               </div>
             ))}
           </div>
-        )}
+        )} */}
         {activeTab === 'bookmarks' && (
           <div className="content-list">
-            {bookmarks.map((bookmark) => (
-              <div key={bookmark.id} className="content-item">
-                <h3>{bookmark.title}</h3>
+            {profileData.bookmarks.map((b) => (
+              <div key={b} className="content-item">
+                <h3>Bookmark ID: {b}</h3>
               </div>
             ))}
           </div>
