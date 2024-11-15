@@ -18,7 +18,24 @@ def get_user_profile_by_username(request, username : str) -> JsonResponse:
         'username': user.username,
         'email': user.email,
         'questions': [question._id for question in user.questions.all()],
-        'comments': [comment._id for comment in user.comments.all()],
+        'comments': [comment._id for comment in user.authored_comments.all()],
+        'bookmarks': user.bookmarks,
+    }
+    
+    return JsonResponse({'user': user_data}, status=200)
+
+@csrf_exempt
+def get_user_profile_by_id(request, user_id : int) -> JsonResponse:
+    if not user_id:
+        return JsonResponse({'error': 'User ID parameter is required'}, status=400)
+    
+    user : User = get_user_model().objects.get(pk=user_id)
+    
+    user_data = {
+        'username': user.username,
+        'email': user.email,
+        'questions': [question._id for question in user.questions.all()],
+        'comments': [comment._id for comment in user.authored_comments.all()],
         'bookmarks': user.bookmarks,
     }
     
