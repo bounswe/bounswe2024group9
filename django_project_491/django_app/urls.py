@@ -27,11 +27,16 @@ urlpatterns = [
     path('delete_question/<int:question_id>/', question_views.delete_question, name='delete_question'),
     path('mark_as_answered/<int:question_id>/', question_views.mark_as_answered, name='mark_as_answered'), 
     path('report_question/<int:question_id>/', question_views.report_question, name='report_question'),
-    
+    path('bookmark_question/<int:question_id>/', question_views.bookmark_question, name='bookmark_question'),
+    path('remove_bookmark/<int:question_id>/', question_views.remove_bookmark, name='remove_bookmark'),
+
+
     path('list_questions_by_language/<str:language>/<int:page_number>', question_views.list_questions_by_language, name='list_questions'),
     path('list_questions_by_tags/<str:tags>/<int:page_number>/', question_views.list_questions_by_tags, name='list_questions_by_tags'),
     path('list_questions_by_hotness/<int:page_number>', question_views.list_questions_by_hotness, name='get_question_comments'),
     path('random_questions/', question_views.random_questions, name='random_questions'),
+
+
 
     path('upvote_object/<str:object_type>/<int:object_id>/', utilization_views.upvote_object, name='upvote_object'),
     path('downvote_object/<str:object_type>/<int:object_id>/', utilization_views.downvote_object, name='downvote_object'),
