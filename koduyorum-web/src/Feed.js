@@ -96,9 +96,9 @@ function Feed() {
 
     const sortedPosts = filteredPosts.sort((a, b) => {
         if (sort === "newest") {
-            return new Date(b.createdAt) - new Date(a.createdAt);
+            return new Date(b.created_at) - new Date(a.created_at);
         } else if (sort === "popularity") {
-            return b.popularity - a.popularity;
+            return b.upvotes - a.upvotes;
         }
         return 0;
     });
@@ -107,10 +107,19 @@ function Feed() {
         return text.length > length ? text.substring(0, length) + "..." : text;
     };
 
-    const fetchWikiIdAndName = async (string) => {
+    const fetchWikiIdAndName = async (tag) => {
       try {
-          const response = await fetch(`${process.env.REACT_APP_API_URL}/search/${encodeURIComponent(string)}`);
-          if (!response.ok) {
+          const response = await fetch(`${process.env.REACT_APP_API_URL}/search/${tag}`,
+                {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + localStorage.getItem('authToken'),
+                    },
+                }
+
+          );
+           if (!response.ok) {
               throw new Error('Network response was not ok');
           }
           const data = await response.json();
@@ -140,6 +149,7 @@ function Feed() {
                   method: 'GET',
                   headers: {
                     'Content-Type': 'application/json',
+                    'User-ID': user_id,
                   },
                 });
             if (!response.ok) {
@@ -155,11 +165,12 @@ function Feed() {
 
     const fetchSearchResults = async (query) => {
         try {
-            const response = await fetch(`${process.env.REACT_APP_API_URL}/${encodeURIComponent(query)}`);
+            const response = await fetch(`${process.env.REACT_APP_API_URL}/search/${encodeURIComponent(query)}`);
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
             const data = await response.json();
+            
             return data.results.bindings;
         } catch (error) {
             console.error('Error fetching search results:', error.message);
@@ -170,7 +181,8 @@ function Feed() {
 
     const fetchQuestionOfTheDay = async () => {
         try {
-            const response = await fetch(`${process.env.REACT_APP_API_URL}/question_of_the_day`);
+            const response = await fetch(`${process.env.REACT_APP_API_URL}/daily_question/`);
+
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
@@ -290,4 +302,34 @@ function Feed() {
 }
 
 export default Feed;
+
+export const fetchSearchResults = async (searchString) => {
+try {
+    console.log("Original search string:", searchString);
+
+    searchString = searchString.replace(/[^a-z0-9]/gi, '');
+
+    console.log("Alphanumeric search string:", searchString);
+
+    if (searchString === "") {
+        return [];
+    }
+
+    const response = await fetch(`${process.env.REACT_APP_API_URL}/django_app/search/${searchString}`,
+        {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + localStorage.getItem('authToken'),
+            },
+        }
+    );
+    const data = await response.json();
+    console.log(data.results.bindings);
+    return data.results.bindings;
+} catch (error) {
+    console.error("Error fetching search results:", error);
+    return []; // Return an empty array in case of error
+}
+};
 

@@ -15,69 +15,89 @@ class UserType(Enum):
     SUPER_USER = "super_user"
 
 
+class VoteType(Enum):
+    UPVOTE = "upvote"
+    DOWNVOTE = "downvote"
+
+
+class Comment_Vote(models.Model):
+    _id = models.AutoField(primary_key=True)
+    vote_type = models.CharField(max_length=20, choices=[(tag.value, tag.value) for tag in VoteType])
+    user = models.ForeignKey('User', on_delete=models.CASCADE, related_name='comment_votes')
+    comment = models.ForeignKey('Comment', on_delete=models.CASCADE, related_name='votes')
+
+    def __str__(self):
+        return f"{self.user.username} {self.vote_type}ed {self.comment.details}"
+    
+class Question_Vote(models.Model):
+    _id = models.AutoField(primary_key=True)
+    vote_type = models.CharField(max_length=20, choices=[(tag.value, tag.value) for tag in VoteType])
+    user = models.ForeignKey('User', on_delete=models.CASCADE, related_name='question_votes')
+    question = models.ForeignKey('Question', on_delete=models.CASCADE, related_name='votes')
+
+
+    def __str__(self):
+        return f"{self.user.username} {self.vote_type}ed {self.question.title}"
+
 class Comment(models.Model):
     _id = models.AutoField(primary_key=True)
     details = models.TextField()
     code_snippet = models.TextField()
     language_id = models.IntegerField(default=71)  # Language ID for Python
     upvotes = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    answer_of_the_question = models.BooleanField(default=False) # This is a flag to indicate if the comment is an answer to the question that it is associated with
+    question = models.ForeignKey('Question', on_delete=models.CASCADE, related_name='comments')  # New field linking a comment to a question
 
     # Link each comment to a user (author)
     author = models.ForeignKey('User', on_delete=models.CASCADE, related_name='authored_comments')  # Updated related_name
 
-    def run_snippet(self):
+    def run_snippet(self): # TODO
         result = run_code(self.code_snippet, self.language_id)
         outs = result['stdout'].split('\n')
         return outs
 
-    def upvote(self):
-        self.upvotes += 1
-        self.save()
+    # def upvote(self):
+    #     self.upvotes += 1
+    #     self.save()
 
-    def downvote(self):
-        self.upvotes -= 1
-        self.save()
-
-
+    # def downvote(self):
+    #     self.upvotes -= 1
+    #     self.save()
 
 class Question(models.Model):
     _id = models.AutoField(primary_key=True)
     title = models.CharField(max_length=200)
-    language = models.CharField(max_length=200)  # programmingLanguage field
-    language_id = models.IntegerField(default=71)  # Language ID for Python
+    language = models.CharField(max_length=200)  # programmingLanguage field like python
+    language_id = models.IntegerField(default=71)  # Language ID for Python like 71
     tags = models.JSONField(blank=True, default=list)  # Example: ['tag1', 'tag2']
     details = models.TextField()
     code_snippet = models.TextField()
-    comments = models.ManyToManyField('Comment', related_name='question_comments', blank=True)
+
     upvotes = models.IntegerField(default=0)
-    creationDate = models.DateTimeField(auto_now_add=True)
+    created_at  = models.DateTimeField(auto_now_add=True)
     topic = models.CharField(max_length=100, blank=True)
     answered = models.BooleanField(default=False)
-    
+    reported_by = models.ManyToManyField('User', related_name='reported_questions', blank=True)
+
     author = models.ForeignKey('User', on_delete=models.CASCADE, related_name='questions')
 
-    def run_snippet(self):
+    def run_snippet(self): # TODO
         result = run_code(self.code_snippet, self.language_id)
         outs = result['stdout'].split('\n')
         return outs
 
-    def add_comment(self, comment):
-        self.comments.add(comment)
-        self.save()
-
-    def upvote(self):
-        self.upvotes += 1
-        self.save()
-
-    def downvote(self):
-        self.upvotes -= 1
-        self.save()
-
-    def mark_as_answered(self):
+    def mark_as_answered(self): # TODO
         self.answered = True
         self.save()
 
+    # def upvote(self):
+    #     self.upvotes += 1
+    #     self.save()
 
+    # def downvote(self):
+    #     self.upvotes -= 1
+    #     self.save()
 
 
 class UserManager(BaseUserManager):
@@ -114,11 +134,12 @@ class User(AbstractBaseUser):
     userType = models.CharField(max_length=20, choices=[(tag.value, tag.value) for tag in UserType],
                                 default=UserType.USER.value)
     
+    profile_pic = models.ImageField(upload_to='profile_pics/', blank=True, null=True) # May be removed later
+    bio = models.TextField(blank=True, null=True) # May be removed later
     interested_topics = models.JSONField(blank=True, default=list)  # Example: ['NLP', 'Computer Vision']
     known_languages = models.JSONField(blank=True, default=list)  # Example: ['Python', 'Java']
 
     # Relationships
-    comments = models.ManyToManyField('Comment', related_name='user_comments', blank=True)  # Keep this related_name
     bookmarks = models.JSONField(blank=True, default=list)  # Example: ['link1', 'link2']
 
     objects = UserManager()
@@ -144,48 +165,18 @@ class User(AbstractBaseUser):
         return self.userType == UserType.ADMIN
 
     # ADDING BOOKMARK FUNCTIONALITY
-    def add_bookmark(self, link: str):
+    def add_bookmark(self, link: str): # TODO
         """Adds a bookmark to the user."""
         if link not in self.bookmarks:
             self.bookmarks.append(link)
             self.save()
 
-    def remove_bookmark(self, link: str):
+    def remove_bookmark(self, link: str): # TODO
         """Removes a bookmark from the user."""
         if link in self.bookmarks:
             self.bookmarks.remove(link)
             self.save()
 
-    def get_bookmarks(self) -> list:
+    def get_bookmarks(self) -> list: # TODO
         """Returns the user's bookmarks."""
         return self.bookmarks
-
-    # ADDING QUESTION FUNCTIONALITY
-    def add_question(self, question: Question):
-        """Associates a question with the user."""
-        self.questions.add(question)
-        self.save()
-
-    def remove_question(self, question: Question):
-        """Removes a question association from the user."""
-        self.questions.remove(question)
-        self.save()
-
-    def get_questions(self):
-        """Returns all questions associated with the user."""
-        return self.questions.all()
-
-    # ADDING COMMENT FUNCTIONALITY
-    def add_comment(self, comment: Comment):
-        """Associates a comment with the user."""
-        self.comments.add(comment)
-        self.save()
-
-    def remove_comment(self, comment: Comment):
-        """Removes a comment association from the user."""
-        self.comments.remove(comment)
-        self.save()
-
-    def get_comments(self):
-        """Returns all comments associated with the user."""
-        return self.comments.all()

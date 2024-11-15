@@ -81,16 +81,17 @@ body {
     display: flex;
     gap: 2rem;
     margin: 2rem;
+    justify-content: space-between; 
   }
   
   .tags-container, .contributors-container {
-    width: 20%;
-    background-color: white;
-    padding: 1rem;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  width: 15%;
+  background-color: white;
+  padding: 1rem;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   }
-  
+
   .tags-list, .contributors-list {
     list-style: none;
     padding: 0;
@@ -213,6 +214,7 @@ body {
     background-color: #e0f7fa;
     color: #0077b6;
     padding: 5px 10px;
+    margin-bottom: 10px;
     border-radius: 20px;
     font-size: 0.8rem;
     cursor: pointer;

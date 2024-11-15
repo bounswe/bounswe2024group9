@@ -49,13 +49,21 @@ export default function CodeExecution() {
   useEffect(() => {
     const fetchLanguages = async () => {
       try {
-        const response = await fetch(
-          `${process.env.REACT_APP_API_URL}/get_api_languages/`
-        ); // Adjust this URL if needed
+        const token = localStorage.getItem('authToken');
+        console.log(token);
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/get_api_languages/`,
+            {method : 'GET',
+
+              headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,  // Add the token here
+      }}
+            ); // Adjust this URL if needed
         const data = await response.json();
         setLanguages(data.languages); // Access the 'languages' key from the response
       } catch (error) {
-        console.error("Error fetching languages:", error);
+
+        console.error('Error fetching languages:', error);
       }
     };
 
@@ -68,20 +76,17 @@ export default function CodeExecution() {
     setLoading(true); // Set loading state while fetching the output
 
     try {
-      const response = await fetch(
-        `${process.env.REACT_APP_API_URL}/code_execute/`,
-        {
-          // Call your backend API
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ source_code: code, language_id: languageId }), // Send code and language ID as JSON
-        }
-      );
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/code_execute/`, {  // Call your backend API
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}` // Add the token here
+        },
+        body: JSON.stringify({ source_code: code, language_id: languageId }),  // Send code and language ID as JSON
+      });
+      const data = await response.json();  // Parse the JSON response
+      setOutput(data.stdout);  // Set the output from backend
 
-      const data = await response.json(); // Parse the JSON response
-      setOutput(data.stdout); // Set the output from backend
     } catch (error) {
       setOutput("Error: Could not execute the code."); // Handle errors
     } finally {

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef  } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Navbar, LeftSidebar, RightSidebar } from './PageComponents'; 
+import { LoadingComponent }  from './LoadingPage'
 import './SearchResults.css';
 
 const SearchResults = () => {
@@ -82,7 +83,7 @@ const handleSearchQueryChange = async (e) => {
 
 const fetchWikiIdAndName = async (string) => {
   try {
-      const response = await fetch(`http://127.0.0.1:8000/search/${encodeURIComponent(string)}`);
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/search/${encodeURIComponent(string)}`);
       if (!response.ok) {
           throw new Error('Network response was not ok');
       }
@@ -108,7 +109,7 @@ const handleTagClick = async (tag) => {
 
 const fetchPosts = async () => {
     try {
-        const response = await fetch('http://127.0.0.1:8000/random_questions/');
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/random_questions/`);
         if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
         }
@@ -122,7 +123,7 @@ const fetchPosts = async () => {
 
 const fetchSearchResults = async (query) => {
     try {
-        const response = await fetch(`http://127.0.0.1:8000/search/${encodeURIComponent(query)}`);
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/search/${encodeURIComponent(query)}`);
         if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
         }
@@ -140,18 +141,18 @@ const fetchSearchResults = async (query) => {
       setLoading(true);
       setError(null);
 
-      const infoResponse = await fetch(`http://127.0.0.1:8000/result/${encodeURIComponent(wikiId)}`);
-      const questionResponse = await fetch(`http://127.0.0.1:8000/list_questions/?language=${encodeURIComponent(wikiName)}`);
+      const infoResponse = await fetch(`${process.env.REACT_APP_API_URL}/result/${encodeURIComponent(wikiId)}`);
+      const questionResponse = await fetch(`${process.env.REACT_APP_API_URL}/list_questions_by_language/${encodeURIComponent(wikiName)}/1`);
 
       if (!infoResponse.ok || !questionResponse.ok) {
         throw new Error('Failed to load data');
       }
 
       const infoData = await infoResponse.json();
-      const questionData = await questionResponse.json();
-
+      const questionData = await questionResponse.json();      
+      const questionsArray = questionData.questions;
       setInfoData(infoData || { mainInfo: [], instances: [], wikipedia: {} });
-      setQuestionData(questionData || []);
+      setQuestionData(questionsArray || []);
     } catch (err) {
       console.error("Error fetching search data:", err);
       setError("Failed to load search data.");
@@ -160,13 +161,16 @@ const fetchSearchResults = async (query) => {
     }
   };
 
-  if (loading) return <div className="loading">Loading...</div>;
-
-  if (error) return <div className="error">{error}</div>;
-
   return (
-    <div className="feed-container">
-      {/* Navbar */}
+
+    <div className="feed">
+    {loading ? (
+      <LoadingComponent />
+    ) : error ? (
+      <div className="error">{error}</div>
+    ) : (
+      <div className="feed-container">
+    
       <Navbar
 			searchQuery={searchQuery}
 			handleSearchQueryChange={handleSearchQueryChange}
@@ -210,10 +214,14 @@ const fetchSearchResults = async (query) => {
               <h2 className="language-title">{wiki_name}</h2>
               {infoData.mainInfo.length > 0 && (
                 <div>
-                  <p><strong>Inception Date:</strong> {new Date(infoData.mainInfo[0].inceptionDate.value).toLocaleDateString() || "N/A"}</p>
-                  <p><strong>Website:</strong> <a href={infoData.mainInfo[0].website.value} target="_blank" rel="noopener noreferrer">{infoData.mainInfo[0].website.value}</a></p>
-                  <p><strong>Influenced By:</strong> {infoData.mainInfo[0].influencedByLabel.value}</p>
-                  <p><strong>Wikipedia Link:</strong> <a href={infoData.mainInfo[0].wikipediaLink.value} target="_blank" rel="noopener noreferrer">{infoData.mainInfo[0].wikipediaLink.value}</a></p>
+                  <p><strong>Inception Date:</strong> {new Date(infoData?.mainInfo?.[0]?.inceptionDate?.value).toLocaleDateString() || "N/A"}</p>
+                  <p><strong>Website:</strong> {infoData?.mainInfo?.[0]?.website?.value ? (
+                    <a href={infoData.mainInfo[0].website.value} target="_blank" rel="noopener noreferrer">{infoData.mainInfo[0].website.value}</a>
+                  ) : "N/A"}</p>
+                  <p><strong>Influenced By:</strong> {infoData?.mainInfo?.[0]?.influencedByLabel?.value ?? "N/A"}</p>
+                  <p><strong>Wikipedia Link:</strong> {infoData?.mainInfo?.[0]?.wikipediaLink?.value ? (
+                    <a href={infoData.mainInfo[0].wikipediaLink.value} target="_blank" rel="noopener noreferrer">{infoData.mainInfo[0].wikipediaLink.value}</a>
+                  ) : "N/A"}</p>
                 </div>
               )}
               {infoData.instances.length > 0 && (
@@ -257,6 +265,8 @@ const fetchSearchResults = async (query) => {
         <RightSidebar />
       </div>
     </div>
+    )}
+  </div>
   );
 };
 
