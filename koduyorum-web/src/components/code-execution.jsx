@@ -42,7 +42,7 @@ InputBlock.propTypes = {
 export default function CodeExecution() {
 
   const { question_id } = useParams(); // Extract the questionId from the URL
-  const [questionData, setQuestionData] = useState(null);
+  const [questionData, setQuestionData] = useState("");
 
   const [code, setCode] = useState(""); // State to store the user input (code)
   const [output, setOutput] = useState(""); // State to store the backend's response (output)
@@ -60,7 +60,9 @@ export default function CodeExecution() {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`,  // Add the token here
   }});
-      setQuestionData(response.data);
+      const data = await response.json();
+      console.log(data);
+      setQuestionData(data.question);
       setLoading(false);
     } catch (err) {
       setError(err.message);
@@ -120,31 +122,14 @@ export default function CodeExecution() {
     <div className="min-h-screen bg-gray-100 text-gray-900">
       <div className="container mx-auto p-4 max-w-4xl">
         <h1 className="text-2xl font-bold mb-4 text-gray-900">
-          Second Greatest and Second Lowest Number
+          {questionData.title}
         </h1>
 
         <div className="space-y-6">
           <InputBlock
             inputType="Question"
-            explanation="Hi, I am trying to compute the second smallest and second largest numbers from an array of numbers. I have written the following code, but it is not working as expected. Can you help me fix it?"
-            code={`function Second_Greatest_Lowest(arr_num) {
-  // Sort the array in ascending order using a custom comparison function
-  arr_num.sort(function(x, y) {
-    return x + y;
-  });
-
-  var uniqa = [arr_num[0]];
-  var result = [];
-
-  for (var j = 1; j < arr_num.length; j++) {
-    if (arr_num[j - 1] !== arr_num[j]) {
-      uniqa.push(arr_num[j]);
-    }
-  }
-  result.push(uniqa[1], uniqa[uniqa.length - 2]);
-  return result.join(',');
-}
-console.log(Second_Greatest_Lowest([1, 2, 3, 4, 5]));`}
+            explanation= {questionData.details}
+            code={questionData.code_snippet}
           />
         </div>
 
