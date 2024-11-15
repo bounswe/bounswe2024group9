@@ -181,7 +181,7 @@ function Feed() {
 
     const fetchQuestionOfTheDay = async () => {
         try {
-            const response = await fetch(`${process.env.REACT_APP_API_URL}/daily_question`);
+            const response = await fetch(`${process.env.REACT_APP_API_URL}/daily_question/`);
 
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
