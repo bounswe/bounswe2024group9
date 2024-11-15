@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
 import * as PropTypes from "prop-types";
 import { Separator } from "./ui/seperator";
 import SyntaxHighlighter from "react-syntax-highlighter";
@@ -39,34 +40,55 @@ InputBlock.propTypes = {
 };
 
 export default function CodeExecution() {
+
+  const { question_id } = useParams(); // Extract the questionId from the URL
+  const [questionData, setQuestionData] = useState(null);
+
   const [code, setCode] = useState(""); // State to store the user input (code)
   const [output, setOutput] = useState(""); // State to store the backend's response (output)
   const [loading, setLoading] = useState(false); // State to manage loading state
+  const [error, setError] = useState(null);
   const [languageId, setLanguageId] = useState(""); // State to store selected language ID
   const [languages, setLanguages] = useState({}); // State to store languages
 
+  const fetchQuestion = async () => {
+    try {
+      const token = localStorage.getItem('authToken');
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/get_question/${question_id}/`,
+        {method : 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,  // Add the token here
+  }});
+      setQuestionData(response.data);
+      setLoading(false);
+    } catch (err) {
+      setError(err.message);
+      setLoading(false);
+    }
+  };
+
+  const fetchLanguages = async () => {
+    try {
+      const token = localStorage.getItem('authToken');
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/get_api_languages/`,
+          {method : 'GET',
+
+            headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,  // Add the token here
+    }}
+          ); // Adjust this URL if needed
+      const data = await response.json();
+      setLanguages(data.languages); // Access the 'languages' key from the response
+    } catch (error) {
+
+      console.error('Error fetching languages:', error);
+    }
+  };
   // Fetch languages from the backend
   useEffect(() => {
-    const fetchLanguages = async () => {
-      try {
-        const token = localStorage.getItem('authToken');
-        console.log(token);
-        const response = await fetch(`${process.env.REACT_APP_API_URL}/get_api_languages/`,
-            {method : 'GET',
-
-              headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,  // Add the token here
-      }}
-            ); // Adjust this URL if needed
-        const data = await response.json();
-        setLanguages(data.languages); // Access the 'languages' key from the response
-      } catch (error) {
-
-        console.error('Error fetching languages:', error);
-      }
-    };
-
+    fetchQuestion();
     fetchLanguages();
   }, []);
 

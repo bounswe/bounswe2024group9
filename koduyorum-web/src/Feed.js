@@ -181,7 +181,7 @@ function Feed() {
 
     const fetchQuestionOfTheDay = async () => {
         try {
-            const response = await fetch(`${process.env.REACT_APP_API_URL}/daily_question`);
+            const response = await fetch(`${process.env.REACT_APP_API_URL}/daily_question/`);
 
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
@@ -261,7 +261,7 @@ function Feed() {
                     <div className="questions-list">
                         {sortedPosts.length > 0 ? (
                             sortedPosts.map((post) => (
-                                <PostPreview key={post.id} post={post} onClick={() => navigate(`/question`)} />
+                                <PostPreview key={post.id} post={post} onClick={() => navigate(`/question/${post.id}`)} />
                             ))
                         ) : (
                             <p className="empty-text">No questions found</p>
