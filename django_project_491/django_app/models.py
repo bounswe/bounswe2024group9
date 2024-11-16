@@ -133,14 +133,16 @@ class User(AbstractBaseUser):
     email = models.EmailField(max_length=255, unique=True)
     userType = models.CharField(max_length=20, choices=[(tag.value, tag.value) for tag in UserType],
                                 default=UserType.USER.value)
-    
-    profile_pic = models.ImageField(upload_to='profile_pics/', blank=True, null=True) # May be removed later
-    bio = models.TextField(blank=True, null=True) # May be removed later
+    name = models.CharField(max_length=30, blank=True, null=True)
+    surname = models.CharField(max_length=30, blank=True, null=True)
+
+    profile_pic = models.ImageField(upload_to='profile_pics/', blank=True, null=True) 
+    bio = models.TextField(blank=True, null=True) 
     interested_topics = models.JSONField(blank=True, default=list)  # Example: ['NLP', 'Computer Vision']
     known_languages = models.JSONField(blank=True, default=list)  # Example: ['Python', 'Java']
 
     # Relationships
-    bookmarks = models.JSONField(blank=True, default=list)  # Example: ['link1', 'link2']
+    bookmarks = models.ManyToManyField('Question', related_name='bookmarked_by', blank=True)
 
     objects = UserManager()
 
@@ -164,19 +166,3 @@ class User(AbstractBaseUser):
     def is_staff(self):  # 3/3 added because of my custom userType
         return self.userType == UserType.ADMIN
 
-    # ADDING BOOKMARK FUNCTIONALITY
-    def add_bookmark(self, link: str): # TODO
-        """Adds a bookmark to the user."""
-        if link not in self.bookmarks:
-            self.bookmarks.append(link)
-            self.save()
-
-    def remove_bookmark(self, link: str): # TODO
-        """Removes a bookmark from the user."""
-        if link in self.bookmarks:
-            self.bookmarks.remove(link)
-            self.save()
-
-    def get_bookmarks(self) -> list: # TODO
-        """Returns the user's bookmarks."""
-        return self.bookmarks
