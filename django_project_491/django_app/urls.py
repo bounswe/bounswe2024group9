@@ -21,7 +21,7 @@ urlpatterns = [
     
     path('get_question/<int:question_id>/', question_views.get_question_details, name='get_question'),
     path('question/<int:question_id>/comments/', question_views.get_question_comments, name='get_question_comments'),
-    path('create_question/', question_views.create_question, name='create_question'),
+    path('create_question/<int:user_id>/', question_views.create_question, name='create_question'),
     path('edit_question/<int:question_id>/', question_views.edit_question, name='edit_question'),
     path('delete_question/<int:question_id>/', question_views.delete_question, name='delete_question'),
     path('mark_as_answered/<int:question_id>/', question_views.mark_as_answered, name='mark_as_answered'), 

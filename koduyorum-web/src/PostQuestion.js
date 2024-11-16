@@ -49,9 +49,11 @@ function PostQuestion() {
         };
 
         try {
-            const response = await fetch(`${process.env.REACT_APP_API_URL}/create_question/`, {
+            const user_id = localStorage.getItem('user_id');
+            const response = await fetch(`${process.env.REACT_APP_API_URL}/create_question/${user_id}/`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json'
+                },
                 body: JSON.stringify(postData),
             });
 

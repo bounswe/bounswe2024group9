@@ -63,6 +63,7 @@ export default function CodeExecution() {
       const data = await response.json();
       console.log(data);
       setQuestionData(data.question);
+      setLanguageId(data.question.language_id);
       setLoading(false);
     } catch (err) {
       setError(err.message);
