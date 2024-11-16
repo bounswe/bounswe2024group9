@@ -371,7 +371,7 @@ def list_questions_according_to_the_user(request, user_id : int):
         'title': question.title,
         'description': question.details,
         'user_id': question.author.pk,
-        'likes': question.upvotes,
+        'upvotes': question.upvotes,
         'comments_count': question.comments.count(),
         'programmingLanguage': question.language,
         'codeSnippet': question.code_snippet,
@@ -380,3 +380,64 @@ def list_questions_according_to_the_user(request, user_id : int):
         'topic': question.topic
     } for question in personalized_questions]
     return JsonResponse({'questions': questions_data}, safe=False)
+
+
+def upvote_question(request: HttpRequest, question_id: int) -> HttpResponse:
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+    try:
+        question = Question.objects.get(_id=question_id)
+        
+        # # Check if the user has already upvoted
+        # user_id = request.headers.get('User-ID', None)
+        # if user_id:
+        #     user = User.objects.get(pk=user_id)
+        #     if question.votes.filter(user=user, vote_type=VoteType.UPVOTE.value).exists():
+        #         return JsonResponse({'error': 'User has already upvoted this question'}, status=400)
+
+        #     # Record the user's vote
+        #     question.votes.create(user=user, vote_type=VoteType.UPVOTE.value)
+
+        # Increment the upvote count
+        question.upvotes += 1
+        question.save()
+
+        return JsonResponse({'success': 'Question upvoted successfully', 'upvotes': question.upvotes}, status=200)
+
+    except Question.DoesNotExist:
+        return JsonResponse({'error': 'Question not found'}, status=404)
+    except User.DoesNotExist:
+        return JsonResponse({'error': 'User not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': f'An error occurred: {str(e)}'}, status=500)
+    
+def downvote_question(request: HttpRequest, question_id: int) -> HttpResponse:
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+    try:
+        question = Question.objects.get(_id=question_id)
+        
+        # # Check if the user has already downvoted
+        # user_id = request.headers.get('User-ID', None)
+        # if user_id:
+        #     user = User.objects.get(pk=user_id)
+        #     if question.votes.filter(user=user, vote_type=VoteType.DOWNVOTE.value).exists():
+        #         return JsonResponse({'error': 'User has already downvoted this question'}, status=400)
+
+        #     # Record the user's vote
+        #     question.votes.create(user=user, vote_type=VoteType.DOWNVOTE.value)
+
+        # Decrement the upvote count
+        question.upvotes -= 1
+        question.save()
+
+        return JsonResponse({'success': 'Question downvoted successfully', 'upvotes': question.upvotes}, status=200)
+
+    except Question.DoesNotExist:
+        return JsonResponse({'error': 'Question not found'}, status=404)
+    except User.DoesNotExist:
+        return JsonResponse({'error': 'User not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': f'An error occurred: {str(e)}'}, status=500)

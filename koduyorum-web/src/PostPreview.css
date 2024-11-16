@@ -73,3 +73,43 @@
     color: #888;
     margin-left: 4px;
 }
+
+/* Upvote Animation */
+@keyframes upvoteEffect {
+    0% {
+        transform: scale(1);
+        color: #888;
+    }
+    50% {
+        transform: scale(1.3);
+        color: green;
+    }
+    100% {
+        transform: scale(1);
+        color: #888;
+    }
+}
+
+.upvote-animate {
+    animation: upvoteEffect 0.5s ease-in-out;
+}
+
+/* Downvote Animation */
+@keyframes downvoteEffect {
+    0% {
+        transform: scale(1);
+        color: #888;
+    }
+    50% {
+        transform: scale(1.3);
+        color: red;
+    }
+    100% {
+        transform: scale(1);
+        color: #888;
+    }
+}
+
+.downvote-animate {
+    animation: downvoteEffect 0.5s ease-in-out;
+}

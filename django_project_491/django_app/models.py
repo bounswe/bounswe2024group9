@@ -140,7 +140,7 @@ class User(AbstractBaseUser):
     known_languages = models.JSONField(blank=True, default=list)  # Example: ['Python', 'Java']
 
     # Relationships
-    bookmarks = models.JSONField(blank=True, default=list)  # Example: ['link1', 'link2']
+    # bookmarks = models.JSONField(blank=True, default=list)  # Example: ['link1', 'link2']
 
     objects = UserManager()
 
