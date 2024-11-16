@@ -18,7 +18,7 @@ def get_user_profile_by_username(request, username : str) -> JsonResponse:
         'username': user.username,
         'email': user.email,
         'questions': [question._id for question in user.questions.all()],
-        'comments': [comment._id for comment in user.comments.all()],
+        'comments': [comment._id for comment in user.authored_comments.all()],
         'bookmarks': user.bookmarks,
     }
     

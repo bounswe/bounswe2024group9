@@ -12,7 +12,7 @@ from typing import List
 
 def get_question_details(request: HttpRequest, question_id: int) -> HttpResponse:
     try:
-        question = Question.objects.prefetch_related('comments', 'reported_by', 'votes__user').get(_id=question_id)
+        question : Question = Question.objects.prefetch_related('comments', 'reported_by', 'votes__user').get(_id=question_id)
 
         question_data = {
             'id': question._id,
