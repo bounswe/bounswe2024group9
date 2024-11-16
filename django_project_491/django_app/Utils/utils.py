@@ -11,7 +11,6 @@ JUDGE_API_KEY_POOL = os.environ.get('JUDGE0_API_KEY_POOL').split(',')
 JUDGE_API_URL = 'https://judge0-ce.p.rapidapi.com/submissions'
 
 UNSUCCESSFUL_KEYS = set()
-print(JUDGE_API_KEY_POOL)
 def modify_data(qid):
     # Wikidata API URL to fetch the Wikipedia title
     url = f"https://www.wikidata.org/w/api.php?action=wbgetentities&format=xml&props=sitelinks&ids={qid}&sitefilter=enwiki".format(

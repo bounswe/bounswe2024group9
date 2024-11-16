@@ -19,7 +19,7 @@ const ForgotPassword = () => {
     }
 
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/django_app/reset_password/`, { // TODO: Update the API URL
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/reset_password/`, { // TODO: Update the API URL
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -58,6 +58,7 @@ const ForgotPassword = () => {
             />
           </div>
           <button type="submit" className="login-button">Send Reset Link</button>
+          {message && <p>{message}</p>}
           <div className="signin-redirect">
             Want to login? <a href="/login">Click Here!</a>
         </div>

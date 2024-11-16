@@ -243,3 +243,61 @@ def upload_profile_pic(request : HttpRequest) -> HttpResponse:
         user.save()
         return JsonResponse({'success': 'Profile picture uploaded successfully'}, status=200)
     return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+from django.core.mail import send_mail
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes
+from django.utils.http import urlsafe_base64_decode
+from django.contrib.auth.hashers import make_password
+
+@csrf_exempt
+def reset_password_request(request : HttpRequest):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        email = data.get('email')
+
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            return JsonResponse({'error': 'No user found with this email.'}, status=404)
+
+        # Generate a password reset token and a link
+        token = default_token_generator.make_token(user)
+        uid = urlsafe_base64_encode(force_bytes(user.pk))
+        reset_link = f"{request.scheme}://{request.get_host()}/reset-password/{uid}/{token}/"
+
+        # Send the reset link via email
+        send_mail(
+            subject='Password Reset Request',
+            message=f'Click the link to reset your password: {reset_link}',
+            from_email='no-reply@example.com',
+            recipient_list=[user.email],
+            fail_silently=False,
+        )
+
+        return JsonResponse({'message': 'Password reset link sent to your email.'})
+
+    return JsonResponse({'error': 'Invalid request method.'}, status=400)
+
+
+def reset_password_view(request, uidb64, token):
+    try:
+        uid = urlsafe_base64_decode(uidb64).decode()
+        user = User.objects.get(pk=uid)
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        user = None
+
+    if user is not None and default_token_generator.check_token(user, token):
+        if request.method == 'POST':
+            new_password = request.POST.get('new_password')
+            confirm_password = request.POST.get('confirm_password')
+            
+            if new_password and new_password == confirm_password:
+                user.password = make_password(new_password)
+                user.save()
+                return JsonResponse({'message': 'Password has been reset successfully.'})
+            else:
+                return JsonResponse({'error': 'Passwords do not match or are invalid.'}, status=400)
+        
+    return JsonResponse({'error': 'Invalid or expired token.'}, status=400)

@@ -10,7 +10,7 @@ urlpatterns = [
     path('search/<str:search_strings>', utilization_views.wiki_search, name='wiki_search'),
     path('result/<str:wiki_id>', utilization_views.wiki_result, name='wiki_result'),
     path('get_api_languages/', utilization_views.get_run_coder_api_languages, name='get_run_coder_api_languages'),
-
+                                                                                    
     path('login/', user_views.login_user, name='login'),
     path('signup/', user_views.signup, name='signup'),
     path('get_user_profile_by_username/<str:username>/', user_views.get_user_profile_by_username, name='get_user_profile'),
@@ -19,7 +19,9 @@ urlpatterns = [
     path('logout/', user_views.logout_user, name='logout'),
     path('auth/check_token/', user_views.check_token, name='check_token'),
     path('upload-profile-pic/', user_views.upload_profile_pic, name='upload_profile_pic'),
+    path('reset_password/', user_views.reset_password_request, name='reset_password'),
 
+    
     path('get_question/<int:question_id>/', question_views.get_question_details, name='get_question'),
     path('question/<int:question_id>/comments/', question_views.get_question_comments, name='get_question_comments'),
     path('create_question/', question_views.create_question, name='create_question'),
