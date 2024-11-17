@@ -380,3 +380,41 @@ def list_questions_according_to_the_user(request, user_id : int):
         'topic': question.topic
     } for question in personalized_questions]
     return JsonResponse({'questions': questions_data}, safe=False)
+
+@csrf_exempt
+def bookmark_question(request: HttpRequest, question_id: int) -> HttpResponse:
+    if not question_id:
+        return JsonResponse({'error': 'Question ID parameter is required'}, status=400)
+    
+    user_id = request.headers.get('User-ID', None)
+    if user_id is None:
+        return JsonResponse({'error': 'User ID parameter is required in the header'}, status=400)
+    
+    if not user_id:
+        return JsonResponse({'error': 'User ID parameter is required'}, status=400)
+    
+    user = User.objects.get(pk=user_id)
+    question = Question.objects.get(_id=question_id)
+    
+    user.bookmarks.add(question)
+    
+    return JsonResponse({'success': 'Question bookmarked successfully'}, status=200)
+
+@csrf_exempt
+def remove_bookmark(request: HttpRequest, question_id: int) -> HttpResponse:
+    if not question_id:
+        return JsonResponse({'error': 'Question ID parameter is required'}, status=400)
+    
+    user_id = request.headers.get('User-ID', None)
+    if user_id is None:
+        return JsonResponse({'error': 'User ID parameter is required in the header'}, status=400)
+    
+    if not user_id:
+        return JsonResponse({'error': 'User ID parameter is required'}, status=400)
+    
+    user = User.objects.get(pk=user_id)
+    question = Question.objects.get(_id=question_id)
+    
+    user.bookmarks.remove(question)
+    
+    return JsonResponse({'success': 'Bookmark removed successfully'}, status=200)
