@@ -19,6 +19,8 @@ function Feed() {
     const [activeTab, setActiveTab] = useState("info");
     const [questionOfTheDay, setQuestionOfTheDay] = useState(null);
     const [loading, setLoading] = useState(true); // Adding a loading state
+    const [topContributors, setTopContributors] = useState([]); // Top Contributors state
+
     const searchDisplayRef = useRef(null);
     const navigate = useNavigate();
     const location = useLocation();
@@ -29,6 +31,7 @@ function Feed() {
             try {
                 await fetchPosts();
                 await fetchQuestionOfTheDay();
+                await fetchTopContributors();
             } catch (error) {
                 console.error("Error fetching initial data:", error);
             } finally {
@@ -73,6 +76,37 @@ function Feed() {
         }
     };
 
+    const fetchTopContributors = async () => {
+        try {
+            const response = await fetch(`${process.env.REACT_APP_API_URL}/get_top_five_contributors/`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            const data = await response.json();
+            setTopContributors(data.users || []);
+        } catch (error) {
+            console.error("Error fetching top contributors:", error.message);
+        }
+    };
+
+
+    useEffect(() => {
+        const fetchTopContributors = async () => {
+          try {
+            const response = await fetch(`${process.env.REACT_APP_API_URL}/get_top_five_contributors/`);
+            if (!response.ok) {
+              throw new Error('Failed to fetch contributors');
+            }
+            const data = await response.json();
+            setTopContributors(data.users || []);
+          } catch (error) {
+            console.error('Error fetching contributors:', error);
+          }
+        };
+    
+        fetchTopContributors();
+      }, []);
+      
     const filteredPosts = posts.filter((post) => 
         (filter === "all" || post.status === filter) &&
         (language === "all" || post.language === language) &&
@@ -154,7 +188,7 @@ function Feed() {
                         </div>
 
                         {/* Right Edge - Top Contributors */}
-                        <RightSidebar />
+                        <RightSidebar topContributors={topContributors} />
 
                         {/* Floating "Create Question" button */}
                         <button className="floating-button" onClick={() => navigate('/post_question')}>

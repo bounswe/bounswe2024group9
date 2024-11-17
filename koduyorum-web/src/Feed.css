@@ -323,3 +323,48 @@ body {
 .floating-button:hover {
   background-color: #005f8d;
 }
+
+/* Contributors container styles */
+.contributors-container {
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* List of contributors */
+.contributors-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* Individual contributor item */
+.contributor-item {
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background-color 0.2s, box-shadow 0.2s;
+}
+
+/* Hover effect to indicate interactivity */
+.contributor-item:hover {
+  background-color: #e6f7ff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Contributor name styling */
+.contributor-name {
+  font-weight: bold;
+  color: #007bff;
+}
+
+/* Contributor points styling */
+.contributor-points {
+  color: #555;
+}
