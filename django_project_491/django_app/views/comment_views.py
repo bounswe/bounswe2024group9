@@ -33,6 +33,7 @@ def create_comment(request: HttpRequest, question_id : int) -> HttpResponse:
             comment = Comment.objects.create(
                 details=comment_details,
                 code_snippet=code_snippet,
+                language=language,
                 language_id=language_id,
                 author=request.user,  # Associate the comment with the logged-in user
                 question=question # Associate the comment with the current question
