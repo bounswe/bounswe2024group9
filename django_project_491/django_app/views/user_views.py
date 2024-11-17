@@ -301,3 +301,28 @@ def reset_password_view(request, uidb64, token):
                 return JsonResponse({'error': 'Passwords do not match or are invalid.'}, status=400)
         
     return JsonResponse({'error': 'Invalid or expired token.'}, status=400)
+
+@csrf_exempt
+def list_most_contributed_five_person(request : HttpRequest) -> JsonResponse:
+    users = User.objects.all()
+
+    # Question 2 point, Comment 1 point, Answer 5 point
+    def calculate_contribution_points(user):
+        question_points = len(user.questions.all()) * 2
+        comment_points = sum(5 if comment.answer_of_the_question else 1 for comment in user.authored_comments.all())
+        return question_points + comment_points
+
+    users = sorted(users, key=calculate_contribution_points, reverse=True)
+    users = users[:5]
+    
+    user_data = []
+    for user in users:
+        user_data.append({
+            'username': user.username,
+            'email': user.email,
+            'name': user.name,
+            'surname': user.surname,
+            'contribution_points': calculate_contribution_points(user)  # Optionally include the contribution score
+        })
+    
+    return JsonResponse({'users': user_data}, status=200)
