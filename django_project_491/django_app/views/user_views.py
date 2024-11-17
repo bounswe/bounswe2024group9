@@ -241,7 +241,7 @@ def upload_profile_pic(request : HttpRequest) -> HttpResponse:
         profile_pic = request.FILES.get('profile_pic')
         user.profile_pic = profile_pic
         user.save()
-        return JsonResponse({'success': 'Profile picture uploaded successfully'}, status=200)
+        return JsonResponse({'success': 'Profile picture uploaded successfully', 'url': user.profile_pic.url}, status=200)
     return JsonResponse({'error': 'Invalid request method'}, status=405)
 
 from django.core.mail import send_mail
