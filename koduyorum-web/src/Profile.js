@@ -157,7 +157,7 @@ const Profile = () => {
       <div className="profile-header">
         <div className="profile-picture">
           <img
-            src={profileData.profilePicture || 'defaultProfilePic.png'}
+            src={profileData.profilePicture || '/resources/default-pp.jpeg'}
             alt="Profile"
           />
           {isOwner && <input type="file" onChange={handleProfilePictureUpload} />}
