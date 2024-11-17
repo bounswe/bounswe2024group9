@@ -66,11 +66,11 @@ const Profile = () => {
                     }
                 );
                 if (response.ok) {
-                    const updatedProfilePicture = `${process.env.REACT_APP_MEDIA_URL}/profile_pics/${file.name}`;
-                    console.log('Profile picture uploaded successfully, its path:', updatedProfilePicture);
+                    const data = await response.json();
+                    const updatedProfilePictureUrl = `${process.env.REACT_APP_API_URL}${data.url}`;
                     setProfileData((prevData) => ({
                         ...prevData,
-                        profilePicture: updatedProfilePicture,
+                        profilePicture: updatedProfilePictureUrl,
                     }));
                     alert('Profile picture updated successfully!');
                 } else {
