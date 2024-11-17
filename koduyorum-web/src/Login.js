@@ -58,7 +58,14 @@ export const Login = () => {
   };
 
   return (
-    <div className="wrapper_entrance">
+    <div className="wrapper_entrance"
+    style={{
+      background: `url('/resources/login-signup-bg.png')`,
+      backgroundSize: 'cover',
+      backgroundPosition: 'center bottom',
+      backgroundRepeat: 'no-repeat',
+    }}
+    >
       <div className="container_center">
         <h2>Sign In</h2>
         {/* Message for login required */}

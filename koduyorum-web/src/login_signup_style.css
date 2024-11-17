@@ -9,14 +9,16 @@ body {
 .wrapper_entrance {
   /* color: black; */
   font-family: Arial, sans-serif;
-  background-color: #f4f8fb;
-  background-size: 100% 100%;
+  background-size: cover; /* Ensures the image covers the entire area */
+  background-position: center bottom; /* Anchors the image to the bottom center */
+  background-repeat: no-repeat; /* Prevents tiling of the image */
   margin: 0;
   padding: 0;
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 100vh;
+  height: 100vh; /* Ensures the wrapper fills the viewport height */
+  min-height: 100vh; /* Ensures consistent behavior on small screens */
   
 }
 

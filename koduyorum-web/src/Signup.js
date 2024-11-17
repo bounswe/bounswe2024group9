@@ -52,7 +52,14 @@ const Signup = () => {
   };
 
   return (
-    <div className="wrapper_entrance">
+    <div className="wrapper_entrance"
+    style={{
+      background: `url('/resources/login-signup-bg.png')`,
+      backgroundSize: 'cover',
+      backgroundPosition: 'center bottom',
+      backgroundRepeat: 'no-repeat',
+    }}
+    >
       <div className="container_center">
         <h2>Sign Up</h2>
         {/* Success Message */}
