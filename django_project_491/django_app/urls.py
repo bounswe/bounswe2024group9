@@ -40,7 +40,7 @@ urlpatterns = [
     path('delete_comment/<int:comment_id>', comment_views.delete_comment, name='delete_comment'),
     path('mark_comment_as_answer/<int:comment_id>', comment_views.mark_comment_as_answer, name='mark_comment_as_answer'),
 
-    path('run_code/<str:type>/<int:id>', utilization_views.run_code_of_question_or_comment, name='run_code'),
+    path('run_code/<str:type>/<int:id>/', utilization_views.run_code_of_question_or_comment, name='run_code'),
 
 
     path('list_questions/', question_views.list_questions_by_language, name='list_questions'),

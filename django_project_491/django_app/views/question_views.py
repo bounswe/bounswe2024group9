@@ -53,7 +53,7 @@ def get_question_comments(request, question_id):
             'user': comment.author.username,
             'upvotes': comment.upvotes,
             'code_snippet': comment.code_snippet,
-            'language': comment.language,
+            'language': comment.language_id,
             'creationDate': comment.created_at.strftime('%Y-%m-%d %H:%M:%S'),
             'upvoted_by': [user.username for user in comment.votes.filter(vote_type=VoteType.UPVOTE.value)],
             'downvoted_by': [user.username for user in comment.votes.filter(vote_type=VoteType.DOWNVOTE.value)],

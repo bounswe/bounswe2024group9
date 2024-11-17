@@ -75,7 +75,7 @@ class Question(models.Model):
     code_snippet = models.TextField()
 
     upvotes = models.IntegerField(default=0)
-    created_at  = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True)
     topic = models.CharField(max_length=100, blank=True)
     answered = models.BooleanField(default=False)
     reported_by = models.ManyToManyField('User', related_name='reported_questions', blank=True)
@@ -84,6 +84,11 @@ class Question(models.Model):
 
     def run_snippet(self): # TODO
         result = run_code(self.code_snippet, self.language_id)
+        if result['stderr']:
+            return result['stderr']
+        if result['stdout']  is None:
+            return "NO OUTPUT for STDOUT";
+
         outs = result['stdout'].split('\n')
         return outs
 

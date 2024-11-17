@@ -157,7 +157,7 @@ from datetime import timedelta
 SIMPLE_JWT = {
     'USER_ID_FIELD': 'user_id',  # Specify custom primary key field
     'USER_ID_CLAIM': 'user_id',
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),  # Short-lived access token
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=59),  # Short-lived access token
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),    # Long-lived refresh token
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,  # Ensures tokens are blacklisted after rotation
