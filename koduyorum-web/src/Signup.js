@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import "./login_signup_style.css";
-// import { useAuth } from "./hooks/AuthProvider";
 
 const Signup = () => {
   const [email, setEmail] = useState("");
@@ -8,67 +7,14 @@ const Signup = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(null);
+  const [successMessage, setSuccessMessage] = useState(null); // State for success message
   const [error, setError] = useState(null);
   const [kvkk, setKvkk] = useState(false);
-  // const auth = useAuth();
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     setLoading(true);
     setError(null);
-
-    // if (password !== confirmPassword) {
-    //   setError("Password and confirm password do not match");
-    //   setLoading(false);
-    //   return;
-    // }
-
-    // // Block of meeting password requirements
-    // if (password.match(/\d+/) === null) {
-    //   setError("Password must contain at least one number.");
-    //   setLoading(false);
-    //   return;
-    // }
-    // if (password.match(/[A-Z]/) === null) {
-    //   setError("Password must contain at least one uppercase letter.");
-    //   setLoading(false);
-    //   return;
-    // }
-    // if (password.match(/[a-z]/) === null) {
-    //   setError("Password must contain at least one lowercase letter.");
-    //   setLoading(false);
-    //   return;
-    // }
-    // if (password.length < 8 || password.length > 16) {
-    //   setError("Password must be 8 to 16 characters long.");
-    //   setLoading(false);
-    //   return;
-    // }
-
-    // // valid email format
-    // if (
-    //   email.match(
-    //     /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-    //   ) === null
-    // ) {
-    //   setError("Please enter a valid email.");
-    //   setLoading(false);
-    //   return;
-    // }
-
-    // // username requirements
-    // if (!username.match(/^[0-9a-zA-Z]+$/)) {
-    //   setError("Username must only consist of alphanumerical characters.");
-    //   setLoading(false);
-    //   return;
-    // }
-
-    // if (username.length < 5 || username.length > 16) {
-    //   setError("Username must be 5 to 16 characters long.");
-    //   setLoading(false);
-    //   return;
-    // }
 
     try {
       const response = await fetch(
@@ -81,18 +27,18 @@ const Signup = () => {
           body: JSON.stringify({
             username,
             email,
-            password1:password,
-            password2:confirmPassword
+            password1: password,
+            password2: confirmPassword,
           }),
-          credentials: 'same-origin',
-      });
+          credentials: "same-origin",
+        }
+      );
 
       if (response.ok) {
-        setSuccess("Sign up successful. You can now log in.");
-        const data = await response.json();
-        localStorage.setItem('authToken', data['token']);
-        localStorage.setItem('user_id', data['user_id']);
-        window.location.href = "/survey";
+        setSuccessMessage("Sign up successful! Redirecting to the login page...");
+        setTimeout(() => {
+          window.location.href = "/login"; // Redirect after 2 seconds
+        }, 2000);
       } else {
         const data = await response.json();
         setError(data.error || "An error occurred while signing up. Please try again later.");
@@ -108,9 +54,10 @@ const Signup = () => {
   return (
     <div className="wrapper_entrance">
       <div className="container_center">
-        <h2>
-          Sign Up
-        </h2>
+        <h2>Sign Up</h2>
+        {/* Success Message */}
+        {successMessage && <div className="success-message">{successMessage}</div>}
+        {/* Error Message */}
         {error && <div className="error-message">{error}</div>}
         <form onSubmit={handleSubmit}>
           <div className="form-group">
