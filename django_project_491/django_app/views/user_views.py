@@ -6,6 +6,7 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import permission_classes, api_view
 from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
 from rest_framework.permissions import IsAuthenticated
+from django_ratelimit.decorators import ratelimit
 
 @csrf_exempt
 def get_user_profile_by_username(request, username : str) -> JsonResponse:
@@ -250,6 +251,8 @@ from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_decode
 from django.contrib.auth.hashers import make_password
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
 
 @csrf_exempt
 def reset_password_request(request : HttpRequest):
@@ -261,16 +264,23 @@ def reset_password_request(request : HttpRequest):
             user = User.objects.get(email=email)
         except User.DoesNotExist:
             return JsonResponse({'error': 'No user found with this email.'}, status=404)
+        
+
 
         # Generate a password reset token and a link
         token = default_token_generator.make_token(user)
         uid = urlsafe_base64_encode(force_bytes(user.pk))
-        reset_link = f"{request.scheme}://{request.get_host()}/reset-password/{uid}/{token}/"
+        reset_link = f"{request.scheme}://{request.get_host()}/reset_password/{uid}/{token}/"
+
+        # Render the email content using the template
+        html_message = render_to_string('password_reset_email.html', {'reset_link': reset_link})
+        plain_message = strip_tags(html_message)  # Strip HTML tags for plain text fallback
 
         # Send the reset link via email
         send_mail(
             subject='Password Reset Request',
-            message=f'Click the link to reset your password: {reset_link}',
+            message=plain_message, # Plain text version of the message
+            html_message=html_message,  # HTML version of the message
             from_email='no-reply@example.com',
             recipient_list=[user.email],
             fail_silently=False,
@@ -300,6 +310,9 @@ def reset_password_view(request, uidb64, token):
             else:
                 return JsonResponse({'error': 'Passwords do not match or are invalid.'}, status=400)
         
+        if request.method == 'GET':
+            return JsonResponse({'message': 'Please enter your new password.'})
+
     return JsonResponse({'error': 'Invalid or expired token.'}, status=400)
 
 @csrf_exempt
