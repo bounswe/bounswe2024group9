@@ -173,6 +173,11 @@ class User(AbstractBaseUser):
             'code_snippet': question.code_snippet,
             'upvotes': question.upvotes,
             'creationDate': question.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+            'answered': question.answered,
+            'author': question.author.username,
+            'reported_by': [user.username for user in question.reported_by.all()],
+            'upvoted_by': [vote.user.username for vote in question.votes.filter(vote_type=VoteType.UPVOTE.value)],
+            'downvoted_by': [vote.user.username for vote in question.votes.filter(vote_type=VoteType.DOWNVOTE.value)],            
         } for question in self.questions.all()]
 
     def get_comment_details(self):
@@ -184,8 +189,8 @@ class User(AbstractBaseUser):
             'code_snippet': comment.code_snippet,
             'language': comment.language,  
             'creationDate': comment.created_at.strftime('%Y-%m-%d %H:%M:%S'),
-            'upvoted_by': [user.username for user in comment.votes.filter(vote_type=VoteType.UPVOTE.value)],
-            'downvoted_by': [user.username for user in comment.votes.filter(vote_type=VoteType.DOWNVOTE.value)],
+            'upvoted_by': [vote.user.username for vote in comment.votes.filter(vote_type=VoteType.UPVOTE.value)],
+            'downvoted_by': [vote.user.username for vote in comment.votes.filter(vote_type=VoteType.DOWNVOTE.value)],
             'answer_of_the_question': comment.answer_of_the_question,
         } for comment in self.authored_comments.all()]
 
