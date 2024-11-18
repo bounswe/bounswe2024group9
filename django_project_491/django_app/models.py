@@ -58,13 +58,11 @@ class Comment(models.Model):
         outs = result['stdout'].split('\n')
         return outs
 
-    # def upvote(self):
-    #     self.upvotes += 1
-    #     self.save()
-
-    # def downvote(self):
-    #     self.upvotes -= 1
-    #     self.save()
+    def save(self, *args, **kwargs):
+        # Call the original save method
+        super().save(*args, **kwargs)
+        # Check and promote user after saving the comment
+        self.author.check_and_promote()
 
 class Question(models.Model):
     _id = models.AutoField(primary_key=True)
@@ -92,13 +90,11 @@ class Question(models.Model):
         self.answered = True
         self.save()
 
-    # def upvote(self):
-    #     self.upvotes += 1
-    #     self.save()
-
-    # def downvote(self):
-    #     self.upvotes -= 1
-    #     self.save()
+    def save(self, *args, **kwargs):
+        # Call the original save method
+        super().save(*args, **kwargs)
+        # Check and promote user after saving the question
+        self.author.check_and_promote()
 
 
 class UserManager(BaseUserManager):
@@ -204,3 +200,22 @@ class User(AbstractBaseUser):
             'upvotes': bookmark.upvotes,
             'creationDate': bookmark.created_at.strftime('%Y-%m-%d %H:%M:%S'),
         } for bookmark in self.bookmarks.all()]
+
+    def calculate_total_points(self):
+        question_points = self.questions.count() * 2
+        comment_points = sum(5 if comment.answer_of_the_question else 1 for comment in self.authored_comments.all())
+        return question_points + comment_points
+
+    def check_and_promote(self):
+        total_points = self.calculate_total_points()
+        promotion_threshold = 100  # A threshold to promote a user to a super user, or demote super user to a user
+
+        if total_points >= promotion_threshold and self.userType != UserType.SUPER_USER:
+            self.userType = UserType.SUPER_USER
+            self.save()
+        
+        elif total_points < promotion_threshold and self.userType == UserType.SUPER_USER:
+            self.userType = UserType.USER
+            self.save()
+        
+        return self.userType
