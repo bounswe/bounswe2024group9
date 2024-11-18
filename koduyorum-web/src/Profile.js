@@ -24,6 +24,11 @@ const Profile = () => {
                 if (response.ok) {
                     const data = await response.json();
                     setProfileData(data.user);
+                    const updatedProfilePictureUrl = `${process.env.REACT_APP_API_URL}${data.user['profile_pic']}`;
+                    setProfileData((prevData) => ({
+                        ...prevData,
+                        profilePicture: updatedProfilePictureUrl,
+                    }));
 
                     // Check ownership
                     const loggedInUsername = localStorage.getItem('username');
@@ -68,7 +73,9 @@ const Profile = () => {
                 if (response.ok) {
                     const data = await response.json();
                     const updatedProfilePictureUrl = `${process.env.REACT_APP_API_URL}${data.url}`;
+                    console.log('Updated profile picture URL:', updatedProfilePictureUrl);
                     setProfileData((prevData) => ({
+
                         ...prevData,
                         profilePicture: updatedProfilePictureUrl,
                     }));
@@ -157,105 +164,106 @@ const Profile = () => {
         }
     };
 
-    if (error) {
-        return <div className="error-message">{error}</div>;
-    }
 
-    if (loading) {
-        return <LoadingComponent />;
-    }
 
     return (
-        <div className="profile-page">
-            <Navbar />
-            <div className="profile-header">
-                <div className="profile-picture">
-                    <img
-                        src={profileData.profilePicture || '/resources/default-pp.jpeg'}
-                        alt="Profile"
-                    />
-                    {isOwner && (
-                        <>
-                            <div className="profile-picture-overlay">UPDATE</div>
-                            <input type="file" onChange={handleProfilePictureUpload} />
-                        </>
-                    )}
-                </div>
-                <div className="profile-name">
-                    <h2>{profileData.name || profileData.username}</h2>
-                    {isOwner && (
-                        <button className="edit-button" onClick={handleNameChange}>
-                            Edit Name
-                        </button>
-                    )}
-                </div>
-            </div>
-
-            <div className="profile-tabs">
-                <button
-                    className={`tab ${activeTab === 'questions' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('questions')}
-                >
-                    Questions
-                </button>
-                <button
-                    className={`tab ${activeTab === 'bookmarks' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('bookmarks')}
-                >
-                    Bookmarks
-                </button>
-            </div>
-
-            <div className="profile-content">
-                {activeTab === 'questions' && (
-                    <div className="content-list">
-                        {profileData.questions.map((q) => (
-                            <PostPreview
-                                key={q.id}
-                                post={{
-                                    post_id: q.id,
-                                    title: q.title,
-                                    description: q.details,
-                                    programmingLanguage: q.language,
-                                    topic: q.tags?.join(', '),
-                                    answered: q.answered,
-                                    likes: q.upvotes,
-                                    comments: q.comments?.length,
-                                }}
-                                onClick={() => navigate(`/question/${q.id}`)}
-                            />
-                        ))}
+        <div>
+        {loading ? (
+                <LoadingComponent /> // Show loading screen while data is being fetched
+            ) : (
+        
+            <div className="profile-page">
+                <Navbar />
+                <div className="profile-header">
+                    <div className="profile-picture">
+                        <img
+                            src={profileData.profilePicture || '/resources/default-pp.jpeg'}
+                            alt="Profile"
+                        />
+                        {isOwner && (
+                            <>
+                                <div className="profile-picture-overlay">UPDATE</div>
+                                <input type="file" onChange={handleProfilePictureUpload} />
+                            </>
+                        )}
                     </div>
-                )}
-                {activeTab === 'bookmarks' && (
-                    <div className="content-list">
-                        {profileData.bookmarks.map((b) => (
-                            <PostPreview
-                                key={b.id}
-                                post={{
-                                    post_id: b.id,
-                                    title: b.title,
-                                    description: b.details,
-                                    programmingLanguage: b.language,
-                                    topic: b.tags?.join(', '),
-                                    answered: b.answered,
-                                    likes: b.upvotes,
-                                    comments: b.comments?.length,
-                                }}
-                                onClick={() => navigate(`/question/${b.id}`)}
-                            />
-                        ))}
+                    <div className="profile-name">
+                        <h2>{profileData.name || profileData.username}</h2>
+                        {isOwner && (
+                            <button className="edit-button" onClick={handleNameChange}>
+                                Edit Name
+                            </button>
+                        )}
                     </div>
-                )}
-            </div>
+                </div>
 
-            {isOwner && (
-                <div className="account-actions">
-                    <button onClick={handlePasswordUpdate}>Update Password</button>
-                    <button onClick={handleDeleteAccount} className="delete-account">
-                        Delete Account
+                <div className="profile-tabs">
+                    <button
+                        className={`tab ${activeTab === 'questions' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('questions')}
+                    >
+                        Questions
+                    </button>
+                    <button
+                        className={`tab ${activeTab === 'bookmarks' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('bookmarks')}
+                    >
+                        Bookmarks
                     </button>
                 </div>
+
+                <div className="profile-content">
+                    {activeTab === 'questions' && (
+                        <div className="content-list">
+                            {profileData.questions.map((q) => (
+                                <PostPreview
+                                    key={q.id}
+                                    post={{
+                                        post_id: q.id,
+                                        title: q.title,
+                                        description: q.details,
+                                        programmingLanguage: q.language,
+                                        topic: q.tags?.join(', '),
+                                        answered: q.answered,
+                                        likes: q.upvotes,
+                                        comments: q.comments?.length,
+                                    }}
+                                    onClick={() => navigate(`/question/${q.id}`)}
+                                />
+                            ))}
+                        </div>
+                    )}
+                    {activeTab === 'bookmarks' && (
+                        <div className="content-list">
+                            {profileData.bookmarks.map((b) => (
+                                <PostPreview
+                                    key={b.id}
+                                    post={{
+                                        post_id: b.id,
+                                        title: b.title,
+                                        description: b.details,
+                                        programmingLanguage: b.language,
+                                        topic: b.tags?.join(', '),
+                                        answered: b.answered,
+                                        likes: b.upvotes,
+                                        comments: b.comments?.length,
+                                    }}
+                                    onClick={() => navigate(`/question/${b.id}`)}
+                                />
+                            ))}
+                        </div>
+                    )}
+                </div>
+                
+                {isOwner && (
+                    <div className="account-actions">
+                        <button onClick={handlePasswordUpdate}>Update Password</button>
+                        <button onClick={handleDeleteAccount} className="delete-account">
+                            Delete Account
+                        </button>
+                    </div>
+                )}
+            </div>
             )}
         </div>
     );

@@ -1,7 +1,7 @@
 from django.urls import path
 from .views import comment_views, question_views, user_views, utilization_views
-
-from django.contrib.auth.views import LogoutView
+from django.conf.urls.static import static
+from django.conf import settings
 
 urlpatterns = [
     path('home/', utilization_views.home, name='home'),
@@ -60,4 +60,4 @@ urlpatterns = [
     path('specific_feed/<int:user_id>/', question_views.list_questions_according_to_the_user, name='specific_feed'),
     path('question_of_the_day/', question_views.question_of_the_day, name='question_of_the_day'),
     path('daily_question/', question_views.question_of_the_day, name='wiki_search'),
-]
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
