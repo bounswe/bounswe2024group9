@@ -23,6 +23,7 @@ const PostPreview = ({ post, currentUser, onClick }) => {
     const [isDownvoting, setIsDownvoting] = useState(false);
     const [animateUpvote, setAnimateUpvote] = useState(false);
     const [animateDownvote, setAnimateDownvote] = useState(false);
+    const [upvote , setUpvote] = useState(upvotes);
 
 
     const handleUpvote = async (e) => {
@@ -33,11 +34,10 @@ const PostPreview = ({ post, currentUser, onClick }) => {
         setAnimateUpvote(true); // Trigger the animation
     
         setTimeout(() => setAnimateUpvote(false), 500); // Reset animation after 500ms
-        // TODO: delete
-        console.log("Upvoting post:", post);
+        
         try { 
             const response = await fetch(`${process.env.REACT_APP_API_URL}/upvote_object/question/${post.id}/`, {
-                method: 'POST',
+                method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
                     'User-ID': localStorage.getItem('user_id'),
@@ -46,10 +46,12 @@ const PostPreview = ({ post, currentUser, onClick }) => {
             });
     
             if (response.ok) {
+                setUpvote(upvote + 1);
                 const data = await response.json();
             }
         } catch (error) {
             console.error('Error upvoting:', error);
+            setUpvote(upvote - 1);
         } finally {
             setIsUpvoting(false);
         }
@@ -92,8 +94,12 @@ const PostPreview = ({ post, currentUser, onClick }) => {
             <h3 className="post-title">{title}</h3>
 
             <div className="labels-container">
-                <span className="label">{programmingLanguage}</span>
-                <span className="label">{topic}</span>
+                <div className="language">{programmingLanguage}</div>
+                <div className="tags">
+                    {tags.map((tag, index) => (
+                        <span key={index} className="label">{tag}</span>
+                    ))}
+                </div>
             </div>
 
             <p className="post-description">{description}</p>
@@ -104,7 +110,7 @@ const PostPreview = ({ post, currentUser, onClick }) => {
                     onClick={handleUpvote}
                 >
                     <FontAwesomeIcon icon={faThumbsUp} size="sm" color="#888" />
-                    <span className="footer-text">{upvotes} Upvotes</span>
+                    <span className="footer-text">{upvote} Upvotes</span>
                 </div>
                 <div
                     className={`footer-item ${animateDownvote ? 'downvote-animate' : ''}`}

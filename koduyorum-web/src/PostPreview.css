@@ -39,8 +39,27 @@
 
 .labels-container {
     display: flex;
-    gap: 5px;
-    margin-bottom: 8px;
+    flex-direction: column; 
+    gap: 8px; 
+}
+
+.language {
+    display: inline-block;
+    font-size: 12px;
+    color: #4e4d4d;
+    background-color: #f0f0f0;
+    border-radius: 12px;
+    padding: 5px 10px;
+    margin-bottom: 8px; 
+    text-align: center; 
+    white-space: nowrap;
+    width: fit-content;
+}
+
+.tags {
+    display: flex;
+    flex-wrap: wrap; 
+    gap: 8px;
 }
 
 .label {
