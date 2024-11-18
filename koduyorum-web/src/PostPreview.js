@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { useNavigate } from 'react-router-dom';
 import { faThumbsUp, faCommentDots, faThumbsDown } from '@fortawesome/free-solid-svg-icons';
 import './PostPreview.css';
 
@@ -24,7 +25,45 @@ const PostPreview = ({ post, currentUser, onClick }) => {
     const [animateUpvote, setAnimateUpvote] = useState(false);
     const [animateDownvote, setAnimateDownvote] = useState(false);
     const [upvote , setUpvote] = useState(upvotes);
+    const navigate = useNavigate();
 
+
+    const fetchWikiIdAndName = async (tag) => {
+        try {
+            const response = await fetch(`${process.env.REACT_APP_API_URL}/search/${tag}`,
+                  {
+                      method: 'GET',
+                      headers: {
+                          'Content-Type': 'application/json',
+                          'Authorization': 'Bearer ' + localStorage.getItem('authToken'),
+                      },
+                  }
+  
+            );
+             if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            const data = await response.json();
+            // Assuming the API returns an array of results and the first one is the most relevant
+            return [data.results.bindings[0]?.language?.value.split('/').pop(), data.results.bindings[0]?.languageLabel?.value]; // returns [wikiId, wikiName]
+        } catch (error) {
+            console.error("Error fetching wiki ID:", error);
+            return null;
+        }
+      };
+
+    const handleSearchResultClick = async (result) => {
+        const wikiIdName = await fetchWikiIdAndName(result.languageLabel.value);
+        const wikiId = wikiIdName[0];
+        const wikiName = wikiIdName[1];
+        console.log("Wiki ID and Name:", wikiId, wikiName);
+        if (wikiId) {
+            console.log("Navigating to:", `/result/${wikiId}/${encodeURIComponent(wikiName)}`);
+            navigate(`/result/${wikiId}/${encodeURIComponent(wikiName)}`);
+        } else {
+            console.error("No wiki ID found for search result:", result);
+        }
+    };
 
     const handleUpvote = async (e) => {
         e.stopPropagation();
@@ -94,7 +133,15 @@ const PostPreview = ({ post, currentUser, onClick }) => {
             <h3 className="post-title">{title}</h3>
 
             <div className="labels-container">
-                <div className="language">{programmingLanguage}</div>
+                <div className="language" onClick={(e) => {
+                        e.stopPropagation(); // Prevent the click event from propagating to the outer box
+                        handleSearchResultClick(
+                            { languageLabel: { value: programmingLanguage } },
+                            fetchWikiIdAndName,
+                            navigate
+                        );
+                    }
+                    }>{programmingLanguage}</div>
                 <div className="tags">
                     {tags.map((tag, index) => (
                         <span key={index} className="label">{tag}</span>
