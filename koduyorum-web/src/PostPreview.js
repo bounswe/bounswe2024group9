@@ -6,6 +6,7 @@ import './PostPreview.css';
 
 const PostPreview = ({ post, currentUser, onClick }) => {
     const {
+        id,
         title,
         description,
         user_id,
@@ -24,7 +25,6 @@ const PostPreview = ({ post, currentUser, onClick }) => {
     const [animateDownvote, setAnimateDownvote] = useState(false);
 
 
-    
     const handleUpvote = async (e) => {
         e.stopPropagation();
         if (isUpvoting) return;
@@ -33,13 +33,15 @@ const PostPreview = ({ post, currentUser, onClick }) => {
         setAnimateUpvote(true); // Trigger the animation
     
         setTimeout(() => setAnimateUpvote(false), 500); // Reset animation after 500ms
-    
-        try {
-            const response = await fetch(`${process.env.REACT_APP_API_URL}upvote_question/${post.id}`, {
+        // TODO: delete
+        console.log("Upvoting post:", post);
+        try { 
+            const response = await fetch(`${process.env.REACT_APP_API_URL}/upvote_object/question/${post.id}/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'User-ID': currentUser.id,
+                    'User-ID': localStorage.getItem('user_id'),
+                    'Authorization': 'Bearer ' + localStorage.getItem('authToken'),
                 },
             });
     
