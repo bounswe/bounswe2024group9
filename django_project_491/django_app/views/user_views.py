@@ -106,7 +106,7 @@ def delete_user_profile(request, will_be_deleted_user_id : int) -> JsonResponse:
 
     wants_to_delete_user: User = get_user_model().objects.get(pk=wants_to_delete_user_id)
     
-    if wants_to_delete_user.userType != UserType.ADMIN and wants_to_delete_user_id != will_be_deleted_user_id:
+    if (wants_to_delete_user.userType != UserType.ADMIN) and (int(wants_to_delete_user_id) != will_be_deleted_user_id):
         return JsonResponse({'error': 'Only admins and owner of the profiles can delete user profiles'}, status=403)
     
 

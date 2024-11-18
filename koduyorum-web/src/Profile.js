@@ -126,6 +126,7 @@ const Profile = () => {
                     }
                 );
                 if (response.ok) {
+                    alert('Account deleted successfully.');
                     localStorage.removeItem('authToken');
                     localStorage.removeItem('user_id');
                     localStorage.removeItem('username');
