@@ -104,9 +104,11 @@ def edit_question(request: HttpRequest, question_id: int) -> HttpResponse:
     if not question_id:
         return JsonResponse({'error': 'Comment ID parameter is required'}, status=400)
     
-    user_id = int(request.headers.get('User-ID', None))
+    user_id = request.headers.get('User-ID', None)
     if user_id is None:
         return JsonResponse({'error': 'User ID parameter is required in the header'}, status=400)
+    
+    user_id = int(user_id)
     
     if not user_id:
         return JsonResponse({'error': 'User ID parameter is required'}, status=400)
@@ -148,9 +150,11 @@ def delete_question(request: HttpRequest, question_id: int) -> HttpResponse:
     if not question_id:
         return JsonResponse({'error': 'Comment ID parameter is required'}, status=400)
     
-    user_id = int(request.headers.get('User-ID', None))
+    user_id = request.headers.get('User-ID', None)
     if user_id is None:
         return JsonResponse({'error': 'User ID parameter is required in the header'}, status=400)
+    
+    user_id = int(user_id)
     
     if not user_id:
         return JsonResponse({'error': 'User ID parameter is required'}, status=400)
@@ -179,9 +183,11 @@ def mark_as_answered(request, question_id : int) -> HttpResponse:
     if not question_id:
         return JsonResponse({'error': 'Question ID parameter is required'}, status=400)
     
-    request_user_id = int(request.headers.get('User-ID', None))
+    request_user_id = request.headers.get('User-ID', None)
     if request_user_id is None:
         return JsonResponse({'error': 'User ID parameter is required in the header'}, status=400)
+    
+    request_user_id = int(request_user_id)
 
     question = Question.objects.get(_id=question_id)
     author : User = question.author
@@ -201,9 +207,11 @@ def report_question(request, question_id : int) -> HttpResponse:
     
     question = Question.objects.get(_id=question_id)
     
-    user_id = int(request.headers.get('User-ID', None))
+    user_id = request.headers.get('User-ID', None)
     if user_id is None:
         return JsonResponse({'error': 'User ID parameter is required in the header'}, status=400)
+    
+    user_id = int(user_id)
     
     reporter_user = User.objects.get(pk=user_id)
 
@@ -384,9 +392,11 @@ def bookmark_question(request: HttpRequest, question_id: int) -> HttpResponse:
     if not question_id:
         return JsonResponse({'error': 'Question ID parameter is required'}, status=400)
     
-    user_id = int(request.headers.get('User-ID', None))
+    user_id = request.headers.get('User-ID', None)
     if user_id is None:
         return JsonResponse({'error': 'User ID parameter is required in the header'}, status=400)
+    
+    user_id = int(user_id)
     
     if not user_id:
         return JsonResponse({'error': 'User ID parameter is required'}, status=400)
@@ -403,9 +413,11 @@ def remove_bookmark(request: HttpRequest, question_id: int) -> HttpResponse:
     if not question_id:
         return JsonResponse({'error': 'Question ID parameter is required'}, status=400)
     
-    user_id = int(request.headers.get('User-ID', None))
+    user_id = request.headers.get('User-ID', None)
     if user_id is None:
         return JsonResponse({'error': 'User ID parameter is required in the header'}, status=400)
+    
+    user_id = int(user_id)
     
     if not user_id:
         return JsonResponse({'error': 'User ID parameter is required'}, status=400)

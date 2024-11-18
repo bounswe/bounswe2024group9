@@ -56,9 +56,11 @@ def edit_comment(request: HttpRequest, comment_id:int) -> HttpResponse:
     if not comment_id:
         return JsonResponse({'error': 'Comment ID parameter is required'}, status=400)
     
-    user_id = int(request.headers.get('User-ID', None))
+    user_id = request.headers.get('User-ID', None)
     if user_id is None:
         return JsonResponse({'error': 'User ID parameter is required in the header'}, status=400)
+
+    user_id = int(user_id)
     
     if not user_id:
         return JsonResponse({'error': 'User ID parameter is required'}, status=400)
@@ -89,18 +91,30 @@ def edit_comment(request: HttpRequest, comment_id:int) -> HttpResponse:
 
 
 @csrf_exempt
-def delete_comment(request: HttpRequest, comment_id : int) -> HttpResponse:
+def delete_comment(request: HttpRequest, comment_id: int) -> HttpResponse:
+    """
+    Deletes a comment with the given comment_id if the request is made by the comment owner or an admin.
+    Args:
+        request (HttpRequest): The HTTP request object containing headers and other request data.
+        comment_id (int): The ID of the comment to be deleted.
+    Returns:
+        HttpResponse: A JSON response indicating the result of the delete operation.
+            - 200 OK: If the comment is successfully deleted.
+            - 400 Bad Request: If the comment_id or user_id is not provided.
+            - 403 Forbidden: If the user is neither the owner of the comment nor an admin.
+            - 404 Not Found: If the comment does not exist.
+            - 500 Internal Server Error: If an unexpected error occurs during the delete operation.
+    """
     if not comment_id:
         return JsonResponse({'error': 'Comment ID parameter is required'}, status=400)
     
-    user_id = int(request.headers.get('User-ID', None))
+    user_id = request.headers.get('User-ID', None)
     if user_id is None:
         return JsonResponse({'error': 'User ID parameter is required in the header'}, status=400)
+
+    user_id = int(user_id)
     
     user = User.objects.get(pk=user_id)
-
-    if not user_id:
-        return JsonResponse({'error': 'User ID parameter is required'}, status=400)
     
     deletor_user = User.objects.get(pk=user_id)
 
@@ -146,9 +160,11 @@ def mark_comment_as_answer(request: HttpRequest, comment_id : int) -> HttpRespon
     try:
         comment = Comment.objects.get(_id=comment_id)
         question : Question = Comment.question
-        user_id = int(request.headers.get('User-ID', None))
+        user_id = request.headers.get('User-ID', None)
         if user_id is None:
             return JsonResponse({'error': 'User ID parameter is required in the header'}, status=400)
+
+        user_id = int(user_id)
         user = User.objects.get(pk=user_id)
 
         if user != question.author and user.userType != UserType.ADMIN:

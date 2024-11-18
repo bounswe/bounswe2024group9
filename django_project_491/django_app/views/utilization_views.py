@@ -189,9 +189,11 @@ def run_code_of_question_or_comment(request, type: str, id: int):
 def upvote_object(request, object_type: str, object_id: int):
     if not object_id:
         return JsonResponse({'error': 'Object ID parameter is required'}, status=400)
-    user_id = int(request.headers.get('User-ID', None))
+    user_id = request.headers.get('User-ID', None)
     if user_id is None:
         return JsonResponse({'error': 'User ID parameter is required in the header'}, status=400)
+    
+    user_id = int(user_id)
     user = User.objects.get(pk=user_id)
 
     # Handle upvote logic based on the object type
@@ -262,9 +264,11 @@ def downvote_object(request, object_type: str, object_id: int):
     if not object_id:
         return JsonResponse({'error': 'Object ID parameter is required'}, status=400)
     
-    user_id = int(request.headers.get('User-ID', None))
+    user_id = request.headers.get('User-ID', None)
     if user_id is None:
         return JsonResponse({'error': 'User ID parameter is required in the header'}, status=400)
+    
+    user_id = int(user_id)
     user = User.objects.get(pk=user_id) # Get the logged-in user
 
     # Handle downvote logic based on the object type

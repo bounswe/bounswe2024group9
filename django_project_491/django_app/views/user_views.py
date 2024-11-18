@@ -7,7 +7,14 @@ from rest_framework.decorators import permission_classes, api_view
 from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
 from rest_framework.permissions import IsAuthenticated
 from django_ratelimit.decorators import ratelimit
-
+from django.core.mail import send_mail
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes
+from django.utils.http import urlsafe_base64_decode
+from django.contrib.auth.hashers import make_password
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
 @csrf_exempt
 def get_user_profile_by_username(request, username : str) -> JsonResponse:
     if not username:
@@ -57,9 +64,10 @@ def get_user_profile_by_id(request, user_id : int) -> JsonResponse:
 #TODO find what can be changed in the user profile.
 @csrf_exempt
 def edit_user_profile(request, will_be_edited_user_id : int) -> JsonResponse:
-    wants_to_edit_user_id = int(request.headers.get('User-ID', None))
+    wants_to_edit_user_id = request.headers.get('User-ID', None)
     if wants_to_edit_user_id is None:
         return JsonResponse({'error': 'User ID parameter is required in the header'}, status=400)
+    wants_to_edit_user_id = int(wants_to_edit_user_id)
 
     if not will_be_edited_user_id:
         return JsonResponse({'error': 'User ID parameter is required'}, status=400)
@@ -94,15 +102,15 @@ def edit_user_profile(request, will_be_edited_user_id : int) -> JsonResponse:
 @csrf_exempt
 def delete_user_profile(request, will_be_deleted_user_id : int) -> JsonResponse:
 
-    wants_to_delete_user_id = int(request.headers.get('User-ID', None))
+    wants_to_delete_user_id = request.headers.get('User-ID', None)
     if wants_to_delete_user_id is None:
         return JsonResponse({'error': 'User ID parameter is required in the header'}, status=400)
+
+    wants_to_delete_user_id = int(wants_to_delete_user_id)
 
     if not will_be_deleted_user_id:
         return JsonResponse({'error': 'User ID parameter is required'}, status=400)
     
-    if not wants_to_delete_user_id:
-        return JsonResponse({'error': 'User ID parameter is required'}, status=403)
     
 
     wants_to_delete_user: User = get_user_model().objects.get(pk=wants_to_delete_user_id)
@@ -234,9 +242,11 @@ def check_token(request):
 @csrf_exempt
 def upload_profile_pic(request : HttpRequest) -> HttpResponse:
     if request.method == 'POST':
-        user_id = int(request.headers.get('User-ID', None))
+        user_id = request.headers.get('User-ID', None)
         if user_id is None:
             return JsonResponse({'error': 'User ID parameter is required in the header'}, status=400)
+        
+        user_id = int(user_id)
         user : User = get_user_model().objects.get(pk=user_id)
 
         profile_pic = request.FILES.get('profile_pic')
@@ -245,16 +255,10 @@ def upload_profile_pic(request : HttpRequest) -> HttpResponse:
         return JsonResponse({'success': 'Profile picture uploaded successfully', 'url': user.profile_pic.url}, status=200)
     return JsonResponse({'error': 'Invalid request method'}, status=405)
 
-from django.core.mail import send_mail
-from django.contrib.auth.tokens import default_token_generator
-from django.utils.http import urlsafe_base64_encode
-from django.utils.encoding import force_bytes
-from django.utils.http import urlsafe_base64_decode
-from django.contrib.auth.hashers import make_password
-from django.template.loader import render_to_string
-from django.utils.html import strip_tags
+
 
 @csrf_exempt
+@ratelimit(key='ip', rate='5/m', method='POST', block=True) # Rate limit to 5 requests per minute
 def reset_password_request(request : HttpRequest):
     if request.method == 'POST':
         data = json.loads(request.body)
@@ -264,8 +268,6 @@ def reset_password_request(request : HttpRequest):
             user = User.objects.get(email=email)
         except User.DoesNotExist:
             return JsonResponse({'error': 'No user found with this email.'}, status=404)
-        
-
 
         # Generate a password reset token and a link
         token = default_token_generator.make_token(user)
