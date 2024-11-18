@@ -1,4 +1,5 @@
 from ..models import Question, Comment, UserType, User, VoteType
+from django.db.models import Count
 from django.http import HttpRequest, HttpResponse, JsonResponse
 import json
 from django.views.decorators.csrf import csrf_exempt
@@ -203,9 +204,6 @@ def report_question(request, question_id : int) -> HttpResponse:
     user_id = int(request.headers.get('User-ID', None))
     if user_id is None:
         return JsonResponse({'error': 'User ID parameter is required in the header'}, status=400)
-    
-    if not user_id:
-        return JsonResponse({'error': 'User ID parameter is required'}, status=400)
     
     reporter_user = User.objects.get(pk=user_id)
 
@@ -418,3 +416,33 @@ def remove_bookmark(request: HttpRequest, question_id: int) -> HttpResponse:
     user.bookmarks.remove(question)
     
     return JsonResponse({'success': 'Bookmark removed successfully'}, status=200)
+
+@csrf_exempt
+def fetch_random_reported_question(request: HttpRequest) -> HttpResponse:
+    # Written in order to fetch all questions with non-empty reported_by field. Then we are selecting one of them randomly
+    reported_questions = Question.objects.annotate(num_reports=Count('reported_by')).filter(num_reports__gt=0)
+
+    if not reported_questions.exists():
+        return JsonResponse({'error': 'No reported questions found'}, status=404)
+    
+    question = random.choice(reported_questions)
+    
+    question_data = {
+        'id': question._id,
+        'title': question.title,
+        'language': question.language,
+        'tags': question.tags,
+        'details': question.details,
+        'code_snippet': question.code_snippet,
+        'upvote_count': question.upvotes,
+        'creationDate': question.created_at .strftime('%Y-%m-%d %H:%M:%S'),
+        'author' : question.author.username,
+        'comments_count': question.comments.count(),
+        'answered': question.answered,
+        'topic': question.topic,
+        'reported_by': [user.username for user in question.reported_by.all()],
+        'upvoted_by': [user.username for user in question.votes.filter(vote_type=VoteType.UPVOTE.value)],
+        'downvoted_by': [user.username for user in question.votes.filter(vote_type=VoteType.DOWNVOTE.value)]
+    }
+    
+    return JsonResponse({'question': question_data}, safe=False)
