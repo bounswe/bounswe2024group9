@@ -41,7 +41,6 @@ const PostPreview = ({ post, currentUser, onClick }) => {
                 headers: {
                     'Content-Type': 'application/json',
                     'User-ID': localStorage.getItem('user_id'),
-                    'Authorization': 'Bearer ' + localStorage.getItem('authToken'),
                 },
             });
     
