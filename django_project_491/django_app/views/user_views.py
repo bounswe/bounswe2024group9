@@ -56,7 +56,7 @@ def get_user_profile_by_id(request, user_id : int) -> JsonResponse:
 #TODO find what can be changed in the user profile.
 @csrf_exempt
 def edit_user_profile(request, will_be_edited_user_id : int) -> JsonResponse:
-    wants_to_edit_user_id = request.headers.get('User-ID', None)
+    wants_to_edit_user_id = int(request.headers.get('User-ID', None))
     if wants_to_edit_user_id is None:
         return JsonResponse({'error': 'User ID parameter is required in the header'}, status=400)
 
@@ -93,7 +93,7 @@ def edit_user_profile(request, will_be_edited_user_id : int) -> JsonResponse:
 @csrf_exempt
 def delete_user_profile(request, will_be_deleted_user_id : int) -> JsonResponse:
 
-    wants_to_delete_user_id = request.headers.get('User-ID', None)
+    wants_to_delete_user_id = int(request.headers.get('User-ID', None))
     if wants_to_delete_user_id is None:
         return JsonResponse({'error': 'User ID parameter is required in the header'}, status=400)
 
@@ -233,7 +233,7 @@ def check_token(request):
 @csrf_exempt
 def upload_profile_pic(request : HttpRequest) -> HttpResponse:
     if request.method == 'POST':
-        user_id = request.headers.get('User-ID', None)
+        user_id = int(request.headers.get('User-ID', None))
         if user_id is None:
             return JsonResponse({'error': 'User ID parameter is required in the header'}, status=400)
         user : User = get_user_model().objects.get(pk=user_id)
