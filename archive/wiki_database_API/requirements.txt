@@ -1,4 +1,4 @@
-Django==5.0.4
+Django==5.0.9
 SPARQLWrapper==2.0.0
 python-decouple==3.8
 gunicorn==22.0.0
