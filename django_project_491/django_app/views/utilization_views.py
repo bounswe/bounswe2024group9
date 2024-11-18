@@ -29,7 +29,7 @@ def wiki_search(request, search_strings):
     SELECT DISTINCT ?language ?languageLabel
     WHERE {{
     # Limit to specific instance types
-    VALUES ?instanceType {{ wd:Q9143 wd:Q66747126 wd:Q28455561 wd:Q899523 wd:Q1268980 wd:Q21562092 wd:Q211496}}
+    VALUES ?instanceType {{ wd:Q9143 wd:Q66747126 wd:Q28455561 wd:Q899523 wd:Q1268980 wd:Q21562092 wd:Q211496 wd:Q12772052}}
     
     # Filter by instance type
     ?language wdt:P31 ?instanceType.
