@@ -307,3 +307,14 @@ const fetchSearchResults = async (query) => {
 };
 
 export default SearchResults;
+
+export const handleRelatedInstanceClick = async (instance) => {
+  const wikiIdAndName = await fetchWikiIdAndName(instance.relatedLanguageLabel);
+  const wikiId = wikiIdAndName[0];
+  const wikiName = wikiIdAndName[1];
+  if (wikiId) {
+    navigate(`/result/${wikiId}/${encodeURIComponent(wikiName)}`);
+  } else {
+    console.error('No wiki ID found for related instance:', instance);
+  }
+};
