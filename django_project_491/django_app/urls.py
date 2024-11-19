@@ -13,6 +13,7 @@ urlpatterns = [
                                                                                     
     path('login/', user_views.login_user, name='login'),
     path('signup/', user_views.signup, name='signup'),
+    path('user_profile_by_id/<int:user_id>/', user_views.get_user_profile_by_id, name='user_profile_by_id'),
     path('get_user_profile_by_username/<str:username>/', user_views.get_user_profile_by_username, name='get_user_profile'),
     path('edit_user_profile/<int:will_be_edited_user_id>/', user_views.edit_user_profile, name='edit_user_profile'),
     path('delete_user_profile/<int:will_be_deleted_user_id>/', user_views.delete_user_profile, name='delete_user_profile'),
@@ -21,6 +22,7 @@ urlpatterns = [
     path('upload-profile-pic/', user_views.upload_profile_pic, name='upload_profile_pic'),
     path('reset_password/', user_views.reset_password_request, name='reset_password'),
     path('reset_password/<str:uidb64>/<str:token>/', user_views.reset_password_view, name='reset_password'),
+    path('interested_languages/', user_views.add_interested_languages_for_a_user, name='interested_languages'),
 
     path('get_top_five_contributors/', user_views.list_most_contributed_five_person, name='get_top_five_contributors'),
     
@@ -52,11 +54,10 @@ urlpatterns = [
 
     path('run_code/<str:type>/<int:id>', utilization_views.run_code_of_question_or_comment, name='run_code'),
 
-
     path('list_questions/', question_views.list_questions_by_language, name='list_questions'),
     # path('run_code/', utilization_views.run_code_view, name='run_code'),
     path('code_execute/', utilization_views.post_sample_code, name='code_execute'),
-    path('interested_languages/', user_views.add_interested_languages_for_a_user, name='interested_languages'),
+    
     path('specific_feed/<int:user_id>/', question_views.list_questions_according_to_the_user, name='specific_feed'),
     path('question_of_the_day/', question_views.question_of_the_day, name='question_of_the_day'),
     path('daily_question/', question_views.question_of_the_day, name='wiki_search'),
