@@ -136,6 +136,17 @@ const fetchSearchResults = async (query) => {
     }
 }
 
+  const handleRelatedInstanceClick = async (instance) => {
+    const wikiIdAndName = await fetchWikiIdAndName(instance.relatedLanguageLabel);
+    const wikiId = wikiIdAndName[0];
+    const wikiName = wikiIdAndName[1];
+    if (wikiId) {
+      navigate(`/result/${wikiId}/${encodeURIComponent(wikiName)}`);
+    } else {
+      console.error("No wiki ID found for related instance:", instance);
+    }
+  };
+
   const fetchSearchData = async ([wikiId, wikiName]) => {
     try {
       setLoading(true);
@@ -244,14 +255,21 @@ const fetchSearchResults = async (query) => {
               )}
               {infoData.instances.length > 0 && (
                 <div>
-                  <h3>Related Instances</h3>
+                  <h3><strong>Related Instances</strong></h3>
                   <ul className="related-instances">
                     {infoData.instances.map((instance, index) => (
                       <li key={index}>
                         <strong>{instance.instanceLabel}:</strong>
                         <ul>
                           {instance.relatedLanguages.map((lang, i) => (
-                            <li key={i}>{lang.relatedLanguageLabel}</li>
+                            <li key={i}>
+                              <button
+                                className="related-instance-link"
+                                onClick={() => handleRelatedInstanceClick(lang)}
+                              >
+                                {lang.relatedLanguageLabel}
+                              </button>
+                            </li>
                           ))}
                         </ul>
                       </li>
