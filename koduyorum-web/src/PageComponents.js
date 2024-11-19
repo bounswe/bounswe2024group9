@@ -1,5 +1,5 @@
-// components.js
-import React from 'react';
+// PageComponents.js
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Feed.css';
 
@@ -10,23 +10,22 @@ const LogoutButton = () => {
   // Function to handle logout
   const handleLogout = () => {
     // Remove the token from localStorage (or sessionStorage, or state)
-      const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem('authToken');
 
-      fetch(`${process.env.REACT_APP_API_URL}/logout/`, {
-              method: 'POST',
-              body: JSON.stringify({token}),
+    fetch(`${process.env.REACT_APP_API_URL}/logout/`, {
+      method: 'POST',
+              body: JSON.stringify({ token }),
           }
 
       )
-          .then(() => {
+      .then(() => {
               // Redirect to login after logging out
-              localStorage.removeItem('authToken');
-              navigate('/login');
-          })
-          .catch((error) => {
-              console.error('Logout failed:', error);
-          });
-      // Optionally call the server's logout endpoint
+        localStorage.removeItem('authToken');
+        navigate('/login');
+      })
+      .catch((error) => {
+        console.error('Logout failed:', error);
+      });
   };
 
   return <button className="nav-link" onClick={handleLogout}>Log Out</button>;
@@ -44,6 +43,23 @@ export const Navbar = ({
   handleSearchResultClick,
 }) => {
   const navigate = useNavigate();
+  const [username, setUsername] = useState(null);
+
+  const handleProfileClick = async () => {
+    try {
+      const storedUsername = localStorage.getItem('username');
+      
+      if (storedUsername) {
+        setUsername(storedUsername);
+        console.log("Navigating to profile for username:", storedUsername);
+        navigate(`/profile/${storedUsername}`);
+      } else {
+        console.error("No username found in local storage");
+      }
+    } catch (error) {
+      console.error("Error navigating to profile:", error);
+    }
+  };
 
   return (
     <div className="navbar">
@@ -56,7 +72,7 @@ export const Navbar = ({
           onClick={() => navigate('/feed')}
         />
         <button className="nav-link" onClick={() => navigate('/feed')}>Home</button>
-        <button className="nav-link" onClick={() => navigate('/profile')}>Profile</button>
+        <button className="nav-link" onClick={handleProfileClick}>Profile</button>
       </div>
 
       {/* Search Input and Dropdown Container */}
@@ -98,6 +114,7 @@ export const Navbar = ({
     </div>
   );
 };
+
 
 // LeftSidebar Component
 export const LeftSidebar = ({ tags, handleTagClick }) => (

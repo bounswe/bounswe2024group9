@@ -41,6 +41,7 @@ export const Login = () => {
         const data = await response.json();
         localStorage.setItem('authToken', data['token']);
         localStorage.setItem('user_id', data['user_id']);
+        localStorage.setItem('username', username);
         window.location.href = '/feed';
       } else {
         const data = await response.json();

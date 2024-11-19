@@ -31,8 +31,8 @@ def get_question_details(request: HttpRequest, question_id: int) -> HttpResponse
             'answered': question.answered,
             'topic': question.topic,
             'reported_by': [user.username for user in question.reported_by.all()],
-            'upvoted_by':  [],#[user.username for user in question.votes.filter(vote_type=VoteType.UPVOTE.value)],
-            'downvoted_by': []#[user.username for user in question.votes.filter(vote_type=VoteType.DOWNVOTE.value)]
+            'upvoted_by': [vote.user.username for vote in question.votes.filter(vote_type=VoteType.UPVOTE.value)],
+            'downvoted_by': [vote.user.username for vote in question.votes.filter(vote_type=VoteType.DOWNVOTE.value)]
         }
 
         return JsonResponse({'question': question_data}, status=200)
@@ -55,9 +55,9 @@ def get_question_comments(request, question_id):
             'code_snippet': comment.code_snippet,
             'language': comment.language_id,
             'creationDate': comment.created_at.strftime('%Y-%m-%d %H:%M:%S'),
-            'upvoted_by': [user.username for user in comment.votes.filter(vote_type=VoteType.UPVOTE.value)],
-            'downvoted_by': [user.username for user in comment.votes.filter(vote_type=VoteType.DOWNVOTE.value)],
-            'answer_of_the_question': comment.answer_of_the_question
+            'answer_of_the_question': comment.answer_of_the_question,
+            'upvoted_by': [vote.user.username for vote in comment.votes.filter(vote_type=VoteType.UPVOTE.value)],
+            'downvoted_by': [vote.user.username for vote in comment.votes.filter(vote_type=VoteType.DOWNVOTE.value)]
         } for comment in comments]
 
         return JsonResponse({'comments': comments_data}, status=200)
@@ -236,8 +236,8 @@ def list_questions_by_language(request, language: str, page_number=1) -> HttpRes
         'tags': question.tags,
         'details': question.details,
         'code_snippet': question.code_snippet,
-        'upvotes': question.upvotes,
-        'creationDate': question.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+        'likes': question.upvotes,
+        'creationDate': question.created_at .strftime('%Y-%m-%d %H:%M:%S'),
     } for question in questions]
 
     return JsonResponse({'questions': questions_data}, safe=False, status=200)
@@ -384,12 +384,13 @@ def list_questions_according_to_the_user(request, user_id: int):
         'title': question.title,
         'description': question.details,
         'user_id': question.author.pk,
-        'likes': question.upvotes,
+        'upvotes': question.upvotes,
         'comments_count': question.comments.count(),
         'programmingLanguage': question.language,
         'codeSnippet': question.code_snippet,
         'tags': question.tags,
         'answered': question.answered,
-        'topic': question.topic
+        'topic': question.topic,
+        'author': question.author.username
     } for question in personalized_questions]
     return JsonResponse({'questions': questions_data}, safe=False)
