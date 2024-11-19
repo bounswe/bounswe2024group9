@@ -1,9 +1,15 @@
 import json
-from django.test import TestCase
+from django.test import TestCase, Client
 from .Utils.utils import run_code
 from .views.utilization_views import wiki_result, wiki_search
 from django.utils import timezone
 from .models import User, Comment, Question, Comment_Vote, Question_Vote, UserType, VoteType
+from datetime import timedelta
+from rest_framework.test import APITestCase
+from rest_framework import status
+from django.contrib.auth import get_user_model
+from rest_framework_simplejwt.tokens import RefreshToken
+
 
 from django.urls import reverse
 
@@ -298,3 +304,184 @@ class VoteModelTest(TestCase):
         self.assertIn(self.user.username, vote_str)
         self.assertIn(self.vote.vote_type, vote_str)
         self.assertIn(self.question.title, vote_str)
+
+class UserModelTest(TestCase):
+
+    def setUp(self):
+        self.username = 'testuser'
+        self.password = 'testpassword123'
+        self.email = 'testuser@example.com'
+        self.user = get_user_model().objects.create_user(
+            username=self.username,
+            email=self.email,
+            password=self.password
+        )
+
+    def test_user_creation(self):
+        """Test that the user is created correctly."""
+        user = self.user
+        self.assertEqual(user.username, self.username)
+        self.assertEqual(user.email, self.email)
+        self.assertTrue(user.check_password(self.password))
+        self.assertFalse(user.is_superuser)
+        self.assertFalse(user.is_staff)
+
+    def test_user_type_default(self):
+        """Test that the default user type is 'USER'."""
+        user = self.user
+        self.assertEqual(user.userType, UserType.USER)  # Compare enum members
+
+    def test_user_str_method(self):
+        """Test the __str__ method of the User model."""
+        user = self.user
+        self.assertEqual(str(user), self.username)
+
+    def test_check_and_promote(self):
+        """Test that the user promotion logic works."""
+        user = self.user
+        # Before promotion
+        self.assertEqual(user.userType, UserType.USER)  # Compare enum members
+        
+        # Simulate enough points for promotion
+        user.calculate_total_points = lambda: 150  # Simulate enough points
+        user.check_and_promote()
+        self.assertEqual(user.userType, UserType.SUPER_USER)  # Compare enum members
+        
+        # Simulate losing points for demotion
+        user.calculate_total_points = lambda: 50  # Simulate low points
+        user.check_and_promote()
+        self.assertEqual(user.userType, UserType.USER)  # Compare enum members
+
+class UserViewsTest(TestCase):
+
+    def setUp(self):
+        self.username = 'testuser'
+        self.password = 'testpassword123'
+        self.email = 'testuser@example.com'
+        self.user = get_user_model().objects.create_user(
+            username=self.username,
+            email=self.email,
+            password=self.password
+        )
+        self.admin = get_user_model().objects.create_superuser(
+            username='admin',
+            email='admin@example.com',
+            password='adminpassword123'
+        )
+        self.client = self.client  # Django's test client for making requests
+
+    def test_get_user_profile_by_username(self):
+        """Test retrieving user profile by username."""
+        url = reverse('get_user_profile_by_username', args=[self.username])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn('user', response.json())
+        self.assertEqual(response.json()['user']['username'], self.username)
+
+    def test_get_user_profile_by_id(self):
+        """Test retrieving user profile by user ID."""
+        url = reverse('user_profile_by_id', args=[self.user.pk])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.json()['user']['username'], self.username)
+
+#     def test_edit_user_profile(self):
+#         """Test editing user profile."""
+#         url = reverse('edit_user_profile', args=[self.user.pk])
+#         self.client.login(username=self.username, password=self.password)
+#         data = {
+#             'username': 'newusername',
+#             'email': 'newemail@example.com',
+#             'bio': 'Updated bio'
+#         }
+#         response = self.client.post(url, json.dumps(data), content_type="application/json")
+#         self.assertEqual(response.status_code, status.HTTP_200_OK)
+#         self.user.refresh_from_db()
+#         self.assertEqual(self.user.username, 'newusername')
+#         self.assertEqual(self.user.email, 'newemail@example.com')
+
+#     def test_delete_user_profile(self):
+#         """Test deleting user profile."""
+#         url = reverse('delete_user_profile', args=[self.user.pk])
+#         self.client.login(username=self.username, password=self.password)
+#         response = self.client.delete(url)
+#         self.assertEqual(response.status_code, status.HTTP_200_OK)
+#         with self.assertRaises(get_user_model().DoesNotExist):
+#             self.user.refresh_from_db()  # Ensure user is deleted
+
+    # def test_signup(self):
+    #     """Test user signup."""
+    #     url = reverse('signup')
+    #     data = {
+    #         'username': 'newuser',
+    #         'email': 'newuser@example.com',
+    #         'password1': 'newpassword123',
+    #         'password2': 'newpassword123'
+    #     }
+    #     response = self.client.post(url, json.dumps(data), content_type="application/json")
+    #     self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+    #     self.assertIn('token', response.json())  # Check that JWT token is returned
+
+#     def test_login_user(self):
+#         """Test user login."""
+#         url = reverse('login')
+#         data = {
+#             'username': self.username,
+#             'password': self.password
+#         }
+#         response = self.client.post(url, json.dumps(data), content_type="application/json")
+#         self.assertEqual(response.status_code, status.HTTP_200_OK)
+#         self.assertIn('token', response.json())  # Check for the JWT token in response
+
+    def test_add_interested_languages_for_a_user(self):
+        """Test updating user's interested languages."""
+        url = reverse('interested_languages')
+        data = {
+            'user_id': self.user.pk,
+            'interested_topics': ['Python', 'Django'],
+            'known_languages': ['English', 'Spanish']
+        }
+        response = self.client.post(url, json.dumps(data), content_type="application/json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.interested_topics, ['Python', 'Django'])
+        self.assertEqual(self.user.known_languages, ['English', 'Spanish'])
+
+#     def test_logout_user(self):
+#         """Test user logout."""
+#         url = reverse('logout')
+#         # Get JWT token for login
+#         refresh = RefreshToken.for_user(self.user)
+#         data = {'token': str(refresh.access_token)}
+#         response = self.client.post(url, data, content_type="application/json")
+#         self.assertEqual(response.status_code, status.HTTP_200_OK)
+#         self.assertIn('status', response.json())
+#         self.assertEqual(response.json()['status'], 'success')
+
+#     def test_reset_password_request(self):
+#         """Test requesting a password reset link."""
+#         url = reverse('reset_password')
+#         data = {'email': self.email}
+#         response = self.client.post(url, json.dumps(data), content_type="application/json")
+#         self.assertEqual(response.status_code, status.HTTP_200_OK)
+#         self.assertIn('message', response.json())
+
+    # def test_reset_password_view(self):
+    #     """Test resetting password with a valid token."""
+    #     token = 'fake-token'
+    #     uidb64 = 'fake-uid'
+    #     url = reverse('reset_password', args=[uidb64, token])
+    #     data = {
+    #         'new_password': 'newpassword123',
+    #         'confirm_password': 'newpassword123'
+    #     }
+    #     response = self.client.post(url, data)
+    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+#     def test_list_most_contributed_five_person(self):
+#         """Test listing the top 5 users by contributions."""
+#         url = reverse('get_top_five_contributors')
+#         response = self.client.get(url)
+#         self.assertEqual(response.status_code, status.HTTP_200_OK)
+#         self.assertIn('users', response.json())
+#         self.assertEqual(len(response.json()['users']), 5)

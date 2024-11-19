@@ -101,7 +101,7 @@ class Question(models.Model):
 
 
 class UserManager(BaseUserManager):
-    def create_user(self, username, email, password=None, userType: UserType = UserType.USER):
+    def create_user(self, username, email, password=None, userType: UserType = UserType.USER, **extra_fields):
         if not email:
             raise ValueError("Users must have an email address")
         if not username:
@@ -109,22 +109,16 @@ class UserManager(BaseUserManager):
         if not password:
             raise ValueError("Users must have a password")
 
-        user: User = self.model(
-            email=self.normalize_email(email),
-            username=username,
-            userType=userType
-        )
+        email = self.normalize_email(email)
+        user = self.model(username=username, email=email, userType=userType, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, username: str, email: str, password: str = None):
-        return self.create_user(
-            username=username,
-            email=email,
-            password=password,
-            userType=UserType.ADMIN
-        )
+    def create_superuser(self, username: str, email: str, password: str = None, userType: UserType = UserType.ADMIN, **extra_fields):
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_superuser', True)  # Ensure is_superuser is set
+        return self.create_user(username, email, password, userType=userType, **extra_fields)
 
 
 class User(AbstractBaseUser):
@@ -144,10 +138,14 @@ class User(AbstractBaseUser):
     # Relationships
     bookmarks = models.ManyToManyField('Question', related_name='bookmarked_by', blank=True)
 
+    is_active = models.BooleanField(default=True)
+    is_staff = models.BooleanField(default=False)
+    is_superuser = models.BooleanField(default=False)
+
     objects = UserManager()
 
-    USERNAME_FIELD = 'username'
-    REQUIRED_FIELDS = ['email']
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['username', 'userType']
 
     def __str__(self):
         return self.username
@@ -161,10 +159,6 @@ class User(AbstractBaseUser):
         if self.userType == UserType.ADMIN:
             return True
         return False
-
-    @property
-    def is_staff(self):  # 3/3 added because of my custom userType
-        return self.userType == UserType.ADMIN
 
     def get_question_details(self):
         return [{
@@ -227,3 +221,4 @@ class User(AbstractBaseUser):
             self.save()
         
         return self.userType
+    
