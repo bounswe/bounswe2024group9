@@ -23,12 +23,16 @@ const Profile = () => {
                 );
                 if (response.ok) {
                     const data = await response.json();
+                    
                     setProfileData(data.user);
-                    const updatedProfilePictureUrl = `${process.env.REACT_APP_API_URL}${data.user['profile_pic']}`;
-                    setProfileData((prevData) => ({
-                        ...prevData,
-                        profilePicture: updatedProfilePictureUrl,
-                    }));
+                    if (data.user['profile_pic'] != null) {    
+                      const updatedProfilePictureUrl = `${process.env.REACT_APP_API_URL}${data.user['profile_pic']}`;
+                      console.log(data.user['profile_pic'])
+                      setProfileData((prevData) => ({
+                          ...prevData,
+                          profilePicture: updatedProfilePictureUrl,
+                      }));
+                    }
 
                     // Check ownership
                     const loggedInUsername = localStorage.getItem('username');
@@ -177,7 +181,7 @@ const Profile = () => {
                 <div className="profile-header">
                     <div className="profile-picture">
                         <img
-                            src={profileData.profilePicture || '/resources/default-pp.jpeg'}
+                            src={profileData.profilePicture || `/resources/default-pp.jpeg`}
                             alt="Profile"
                         />
                         {isOwner && (
