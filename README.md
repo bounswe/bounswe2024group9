@@ -2,7 +2,7 @@
 💭 Hi! This is Group9 of Cmpe451. We are passionate computer engineer students gathered to create a sustainable working environment for complete project design of our future products. You can visit <a href = "https://github.com/bounswe/bounswe2024group9/wiki" target = "_blank">our Wiki web page</a> to get to know us!
 <br>
 <hr>
-<h3> 🚀  Who are we? </h3> 
+<h3> 🚀  Who are we, the Group 9? </h3> 
 <table>
   <tr>
     <td align = "center">
