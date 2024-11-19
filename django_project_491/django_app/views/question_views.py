@@ -1,4 +1,5 @@
 from ..models import Question, Comment, UserType, User, VoteType
+from django.db.models import Count
 from django.http import HttpRequest, HttpResponse, JsonResponse
 import json
 from django.views.decorators.csrf import csrf_exempt
@@ -59,9 +60,9 @@ def get_question_details(request: HttpRequest, question_id: int) -> HttpResponse
             'answered': question.answered,
             'topic': question.topic,
             'reported_by': [user.username for user in question.reported_by.all()],
-            'upvoted_by': [user.username for user in question.votes.filter(vote_type=VoteType.UPVOTE.value)],
-            'downvoted_by': [user.username for user in question.votes.filter(vote_type=VoteType.DOWNVOTE.value)]
-        }
+            'upvoted_by': [vote.user.username for vote in question.votes.filter(vote_type=VoteType.UPVOTE.value)],
+            'downvoted_by': [vote.user.username for vote in question.votes.filter(vote_type=VoteType.DOWNVOTE.value)]
+        }            
 
         return JsonResponse({'question': question_data}, status=200)
 
@@ -101,8 +102,8 @@ def get_question_comments(request, question_id):
             'code_snippet': comment.code_snippet,
             'language': comment.language,
             'creationDate': comment.created_at.strftime('%Y-%m-%d %H:%M:%S'),
-            'upvoted_by': [user.username for user in comment.votes.filter(vote_type=VoteType.UPVOTE.value)],
-            'downvoted_by': [user.username for user in comment.votes.filter(vote_type=VoteType.DOWNVOTE.value)],
+            'upvoted_by': [vote.user.username for vote in comment.votes.filter(vote_type=VoteType.UPVOTE.value)],
+            'downvoted_by': [vote.user.username for vote in comment.votes.filter(vote_type=VoteType.DOWNVOTE.value)],
             'answer_of_the_question': comment.answer_of_the_question
         } for comment in comments]
 
@@ -289,6 +290,8 @@ def mark_as_answered(request, question_id : int) -> HttpResponse:
     request_user_id = request.headers.get('User-ID', None)
     if request_user_id is None:
         return JsonResponse({'error': 'User ID parameter is required in the header'}, status=400)
+    
+    request_user_id = int(request_user_id)
 
     question = Question.objects.get(_id=question_id)
     author : User = question.author
@@ -326,8 +329,7 @@ def report_question(request, question_id : int) -> HttpResponse:
     if user_id is None:
         return JsonResponse({'error': 'User ID parameter is required in the header'}, status=400)
     
-    if not user_id:
-        return JsonResponse({'error': 'User ID parameter is required'}, status=400)
+    user_id = int(user_id)
     
     reporter_user = User.objects.get(pk=user_id)
 

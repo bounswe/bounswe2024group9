@@ -117,6 +117,7 @@ def edit_user_profile(request, will_be_edited_user_id : int) -> JsonResponse:
     wants_to_edit_user_id = request.headers.get('User-ID', None)
     if wants_to_edit_user_id is None:
         return JsonResponse({'error': 'User ID parameter is required in the header'}, status=400)
+    wants_to_edit_user_id = int(wants_to_edit_user_id)
 
     if not will_be_edited_user_id:
         return JsonResponse({'error': 'User ID parameter is required'}, status=400)
@@ -167,16 +168,16 @@ def delete_user_profile(request, will_be_deleted_user_id: int) -> JsonResponse:
     if wants_to_delete_user_id is None:
         return JsonResponse({'error': 'User ID parameter is required in the header'}, status=400)
 
+    wants_to_delete_user_id = int(wants_to_delete_user_id)
+
     if not will_be_deleted_user_id:
         return JsonResponse({'error': 'User ID parameter is required'}, status=400)
     
-    if not wants_to_delete_user_id:
-        return JsonResponse({'error': 'User ID parameter is required'}, status=403)
     
 
     wants_to_delete_user: User = get_user_model().objects.get(pk=wants_to_delete_user_id)
     
-    if wants_to_delete_user.userType != UserType.ADMIN and wants_to_delete_user_id != will_be_deleted_user_id:
+    if (wants_to_delete_user.userType != UserType.ADMIN) and (int(wants_to_delete_user_id) != will_be_deleted_user_id):
         return JsonResponse({'error': 'Only admins and owner of the profiles can delete user profiles'}, status=403)
     
 
