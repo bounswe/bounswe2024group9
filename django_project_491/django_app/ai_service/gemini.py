@@ -2,7 +2,6 @@ import random
 import google.generativeai as genai
 
 from configs import GeminiConfigs
-from schemas import PromptSchema
 from prompt import PromptService
 import json
 from abc import ABC
@@ -18,13 +17,15 @@ class GeminiService(ABC):
             safety_settings=GeminiConfigs.SAFETY_SETTINGS,
         )
 
+    def refresh_api_key(self) -> None:
+        self.api_key = random.choice(GeminiConfigs.API_KEY_POOL)
+
     def response_as_json(self, response: str) -> dict:
         clean_response = response.replace("`", "").replace("json", "").replace("JSON", "")
         return json.loads(clean_response)
 
-    def generate_content(self, prompt: PromptSchema) -> dict:
-        prompts_as_text = [msg.content for msg in prompt] 
-        response = self.model.generate_content(prompts_as_text)  
-        print(response.text)
+    def ask(self, prompt: list[str]) -> dict:
+        formatted_prompt = [f"{role}: {content}" for role, content in prompt]
+        response = self.model.generate_content(formatted_prompt)  
         return self.response_as_json(response.text)
 
