@@ -107,30 +107,6 @@ function Feed() {
         return text.length > length ? text.substring(0, length) + "..." : text;
     };
 
-    const fetchWikiIdAndName = async (tag) => {
-      try {
-          const response = await fetch(`${process.env.REACT_APP_API_URL}/search/${tag}`,
-                {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + localStorage.getItem('authToken'),
-                    },
-                }
-
-          );
-           if (!response.ok) {
-              throw new Error('Network response was not ok');
-          }
-          const data = await response.json();
-          // Assuming the API returns an array of results and the first one is the most relevant
-          return [data.results.bindings[0]?.language?.value.split('/').pop(), data.results.bindings[0]?.languageLabel?.value]; // returns [wikiId, wikiName]
-      } catch (error) {
-          console.error("Error fetching wiki ID:", error);
-          return null;
-      }
-    };
-
     const handleTagClick = async (tag) => {
         const wikiIdAndName = await fetchWikiIdAndName(tag);
         const wikiId = wikiIdAndName[0];
@@ -333,3 +309,26 @@ try {
 }
 };
 
+export const fetchWikiIdAndName = async (tag) => {
+    try {
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/search/${tag}`,
+              {
+                  method: 'GET',
+                  headers: {
+                      'Content-Type': 'application/json',
+                      'Authorization': 'Bearer ' + localStorage.getItem('authToken'),
+                  },
+              }
+
+        );
+         if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        const data = await response.json();
+        // Assuming the API returns an array of results and the first one is the most relevant
+        return [data.results.bindings[0]?.language?.value.split('/').pop(), data.results.bindings[0]?.languageLabel?.value]; // returns [wikiId, wikiName]
+    } catch (error) {
+        console.error("Error fetching wiki ID:", error);
+        return null;
+    }
+  };

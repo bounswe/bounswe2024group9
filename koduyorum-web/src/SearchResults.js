@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef  } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Navbar, LeftSidebar, RightSidebar } from './PageComponents'; 
 import { LoadingComponent }  from './LoadingPage'
+import { fetchWikiIdAndName } from './Feed'; 
 import './SearchResults.css';
 
 const SearchResults = () => {
@@ -136,17 +137,6 @@ const fetchSearchResults = async (query) => {
     }
 }
 
-  const handleRelatedInstanceClick = async (instance) => {
-    const wikiIdAndName = await fetchWikiIdAndName(instance.relatedLanguageLabel);
-    const wikiId = wikiIdAndName[0];
-    const wikiName = wikiIdAndName[1];
-    if (wikiId) {
-      navigate(`/result/${wikiId}/${encodeURIComponent(wikiName)}`);
-    } else {
-      console.error("No wiki ID found for related instance:", instance);
-    }
-  };
-
   const fetchSearchData = async ([wikiId, wikiName]) => {
     try {
       setLoading(true);
@@ -255,6 +245,7 @@ const fetchSearchResults = async (query) => {
               )}
               {infoData.instances.length > 0 && (
                 <div>
+                  <br></br>
                   <h3><strong>Related Instances</strong></h3>
                   <ul className="related-instances">
                     {infoData.instances.map((instance, index) => (
@@ -265,12 +256,13 @@ const fetchSearchResults = async (query) => {
                             <li key={i}>
                               <button
                                 className="related-instance-link"
-                                onClick={() => handleRelatedInstanceClick(lang)}
+                                onClick={() => handleRelatedInstanceClick(lang, navigate)}
                               >
                                 {lang.relatedLanguageLabel}
                               </button>
                             </li>
                           ))}
+                          <br></br>
                         </ul>
                       </li>
                     ))}
@@ -307,14 +299,13 @@ const fetchSearchResults = async (query) => {
 };
 
 export default SearchResults;
-
-export const handleRelatedInstanceClick = async (instance) => {
+export const handleRelatedInstanceClick = async (instance, navigate) => {
   const wikiIdAndName = await fetchWikiIdAndName(instance.relatedLanguageLabel);
   const wikiId = wikiIdAndName[0];
   const wikiName = wikiIdAndName[1];
   if (wikiId) {
     navigate(`/result/${wikiId}/${encodeURIComponent(wikiName)}`);
   } else {
-    console.error('No wiki ID found for related instance:', instance);
+    console.error("No wiki ID found for related instance:", instance);
   }
 };

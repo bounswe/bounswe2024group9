@@ -101,8 +101,7 @@ a:hover {
 .related-instance-link {
   background: none;
   border: none;
-  color: #38b6ff;
-  text-decoration: underline;
+  color: #007bff;
   cursor: pointer;
   font-size: 1rem;
   padding: 0;
@@ -110,5 +109,6 @@ a:hover {
 
 .related-instance-link:hover {
   color: #007bff;
-  text-decoration: none;
+  text-decoration: underline;
+
 }
