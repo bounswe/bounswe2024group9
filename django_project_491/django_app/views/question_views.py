@@ -377,6 +377,7 @@ def list_questions_according_to_the_user(request, user_id : int):
         'codeSnippet': question.code_snippet,
         'tags': question.tags,
         'answered': question.answered,
-        'topic': question.topic
+        'topic': question.topic,
+        'author': question.author.username
     } for question in personalized_questions]
     return JsonResponse({'questions': questions_data}, safe=False)
