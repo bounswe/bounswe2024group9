@@ -81,6 +81,9 @@ class Question(models.Model):
 
     author = models.ForeignKey('User', on_delete=models.CASCADE, related_name='questions')
 
+    def __str__(self):
+        return self.title
+    
     def run_snippet(self): # TODO
         result = run_code(self.code_snippet, self.language_id)
         outs = result['stdout'].split('\n')
