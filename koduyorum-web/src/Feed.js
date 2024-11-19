@@ -86,8 +86,10 @@ function Feed() {
 	// --------------------------------
 
     const filteredPosts = posts.filter((post) => 
-        (filter === "all" || post.status === filter) &&
-        (language === "all" || post.language === language) &&
+		(filter === "all" || 
+			(filter === "answered" && post.answered === true) || 
+			(filter === "unanswered" && post.answered === false)) &&
+            (language === "all" || post.programmingLanguage.toLowerCase() === language.toLowerCase()) &&
         (
             post.title?.toLowerCase().includes(searchQuery.toLowerCase()) || 
             post.preview?.toLowerCase().includes(searchQuery.toLowerCase())
