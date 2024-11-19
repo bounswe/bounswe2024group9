@@ -5,6 +5,8 @@ import { Separator } from "./ui/seperator";
 import SyntaxHighlighter from "react-syntax-highlighter";
 import { docco } from "react-syntax-highlighter/dist/esm/styles/hljs";
 import language from "react-syntax-highlighter/dist/esm/languages/hljs/1c";
+import PostComment from "../PostComment";
+
 
 function InputBlock(props) {
 
@@ -314,6 +316,12 @@ export default function CodeExecution() {
             ) : (
               <p className="text-gray-600">No comments available.</p>
             )}
+            <button className="floating-button" onClick={() => {}}>
+              +
+            </button>
+            <PostComment
+             question_id = {question_id} 
+             />
           </div>
 
           <div className="my-8">
