@@ -201,20 +201,22 @@ const Profile = () => {
                     </div>
                 </div>
 
-                <div className="profile-tabs">
-                    <button
-                        className={`tab ${activeTab === 'questions' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('questions')}
-                    >
-                        Questions
-                    </button>
-                    <button
-                        className={`tab ${activeTab === 'bookmarks' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('bookmarks')}
-                    >
-                        Bookmarks
-                    </button>
-                </div>
+                {isOwner && (
+                  <div className="profile-tabs">
+                      <button
+                          className={`tab ${activeTab === 'questions' ? 'active' : ''}`}
+                          onClick={() => setActiveTab('questions')}
+                      >
+                          Questions
+                      </button>
+                      <button
+                          className={`tab ${activeTab === 'bookmarks' ? 'active' : ''}`}
+                          onClick={() => setActiveTab('bookmarks')}
+                      >
+                          Bookmarks
+                      </button>
+                  </div>
+                )}
 
                 <div className="profile-content">
                     {activeTab === 'questions' && (
