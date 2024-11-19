@@ -214,14 +214,32 @@ const fetchSearchResults = async (query) => {
               <h2 className="language-title">{wiki_name}</h2>
               {infoData.mainInfo.length > 0 && (
                 <div>
-                  <p><strong>Inception Date:</strong> {new Date(infoData?.mainInfo?.[0]?.inceptionDate?.value).toLocaleDateString() || "N/A"}</p>
-                  <p><strong>Website:</strong> {infoData?.mainInfo?.[0]?.website?.value ? (
-                    <a href={infoData.mainInfo[0].website.value} target="_blank" rel="noopener noreferrer">{infoData.mainInfo[0].website.value}</a>
-                  ) : "N/A"}</p>
-                  <p><strong>Influenced By:</strong> {infoData?.mainInfo?.[0]?.influencedByLabel?.value ?? "N/A"}</p>
-                  <p><strong>Wikipedia Link:</strong> {infoData?.mainInfo?.[0]?.wikipediaLink?.value ? (
-                    <a href={infoData.mainInfo[0].wikipediaLink.value} target="_blank" rel="noopener noreferrer">{infoData.mainInfo[0].wikipediaLink.value}</a>
-                  ) : "N/A"}</p>
+                  {infoData?.mainInfo?.[0]?.inceptionDate?.value && (
+                    <p>
+                      <strong>Inception Date:</strong> {new Date(infoData.mainInfo[0].inceptionDate.value).toLocaleDateString()}
+                    </p>
+                  )}
+                  {infoData?.mainInfo?.[0]?.website?.value && (
+                    <p>
+                      <strong>Website:</strong>{' '}
+                      <a href={infoData.mainInfo[0].website.value} target="_blank" rel="noopener noreferrer">
+                        {infoData.mainInfo[0].website.value}
+                      </a>
+                    </p>
+                  )}
+                  {infoData?.mainInfo?.[0]?.influencedByLabel?.value && (
+                    <p>
+                      <strong>Influenced By:</strong> {infoData.mainInfo[0].influencedByLabel.value}
+                    </p>
+                  )}
+                  {infoData?.mainInfo?.[0]?.wikipediaLink?.value && (
+                    <p>
+                      <strong>Wikipedia Link:</strong>{' '}
+                      <a href={infoData.mainInfo[0].wikipediaLink.value} target="_blank" rel="noopener noreferrer">
+                        {infoData.mainInfo[0].wikipediaLink.value}
+                      </a>
+                    </p>
+                  )}
                 </div>
               )}
               {infoData.instances.length > 0 && (
