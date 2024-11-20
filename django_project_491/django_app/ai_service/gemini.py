@@ -17,7 +17,7 @@ class GeminiService(ABC):
         )
 
     def refresh_api_key(self) -> None:
-        self.api_key = random.choice(GeminiConfigs.API_KEY_POOL)
+        self.api_key = random.choice(GeminiConfigs.GEMINI_AI_KEY_POOL)
 
     def response_as_json(self, response: str) -> dict:
         clean_response = response.replace("`", "").replace("json", "").replace("JSON", "")

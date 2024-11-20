@@ -3,8 +3,11 @@ import random
 
 
 class GeminiConfigs:
-    API_KEY_POOL = os.environ.get("API_KEY_POOL").split(",")
-    API_KEY = random.choice(API_KEY_POOL)
+    try:
+        GEMINI_AI_KEY_POOL = os.environ.get("GEMINI_AI_KEY_POOL").split(",")
+    except:
+        raise Exception("GEMINI_AI_KEY_POOL environment variable is not set")
+    API_KEY = random.choice(GEMINI_AI_KEY_POOL)
     
     GENERATION_CONFIG = {
         "temperature": 0.9,
