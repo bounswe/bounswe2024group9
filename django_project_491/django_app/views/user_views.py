@@ -431,7 +431,7 @@ def upload_profile_pic(request : HttpRequest) -> HttpResponse:
 
 
 @csrf_exempt
-@ratelimit(key='ip', rate='5/m', method='POST', block=True) # Rate limit to 5 requests per minute
+# @ratelimit(key='ip', rate='5/m', method='POST', block=True) # For now do not use this decorator
 def reset_password_request(request : HttpRequest):
     """
     Handles password reset requests.
