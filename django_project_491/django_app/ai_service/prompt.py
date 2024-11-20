@@ -1,7 +1,6 @@
-from langchain_core.prompts import ChatPromptTemplate
 from pathlib import Path
 import os
-import json
+
 class PromptService:
     # PROMPT_FILE_PATH = "prompts"
     BASE_DIR = Path(__file__).resolve().parent.parent
