@@ -62,6 +62,9 @@ function Feed() {
         console.log("Wiki ID and Name:", wikiId, wikiName);
         if (wikiId) {
             console.log("Navigating to:", `/result/${wikiId}/${encodeURIComponent(wikiName)}`);
+            setSearched(false);
+            setSearchQuery("");
+            setSearchResults([]); 
             navigate(`/result/${wikiId}/${encodeURIComponent(wikiName)}`);
         } else {
             console.error("No wiki ID found for search result:", result);
