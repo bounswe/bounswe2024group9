@@ -19,8 +19,8 @@ urlpatterns = [
     path('logout/', user_views.logout_user, name='logout'),
     path('auth/check_token/', user_views.check_token, name='check_token'),
     path('upload-profile-pic/', user_views.upload_profile_pic, name='upload_profile_pic'),
-    path('reset_password/', user_views.reset_password_request, name='reset_password'),
-    path('reset_password/<str:uidb64>/<str:token>/', user_views.reset_password_view, name='reset_password'),
+    path('reset_password/', user_views.reset_password_request_mail, name='reset_password'),
+    path('reset_password/<str:uidb64>/<str:token>/', user_views.reset_password, name='reset_password'),
 
     path('get_top_five_contributors/', user_views.list_most_contributed_five_person, name='get_top_five_contributors'),
     

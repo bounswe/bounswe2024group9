@@ -15,6 +15,7 @@ from django.utils.http import urlsafe_base64_decode
 from django.contrib.auth.hashers import make_password
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
+import os 
 
 @csrf_exempt
 def get_user_profile_by_username(request, username : str) -> JsonResponse:
@@ -432,7 +433,7 @@ def upload_profile_pic(request : HttpRequest) -> HttpResponse:
 
 @csrf_exempt
 # @ratelimit(key='ip', rate='5/m', method='POST', block=True) # For now do not use this decorator
-def reset_password_request(request : HttpRequest):
+def reset_password_request_mail(request : HttpRequest):
     """
     Handles password reset requests.
 
@@ -466,7 +467,9 @@ def reset_password_request(request : HttpRequest):
         # Generate a password reset token and a link
         token = default_token_generator.make_token(user)
         uid = urlsafe_base64_encode(force_bytes(user.pk))
-        reset_link = f"{request.scheme}://{request.get_host()}/reset_password/{uid}/{token}/"
+        frontend_url = os.getenv('REACT_APP_FRONTEND_URL', 'http://localhost:3000')
+
+        reset_link = f"{request.scheme}://{frontend_url}/reset_password/{uid}/{token}/"
 
         # Render the email content using the template
         html_message = render_to_string('password_reset_email.html', {'reset_link': reset_link})
@@ -486,8 +489,8 @@ def reset_password_request(request : HttpRequest):
 
     return JsonResponse({'error': 'Invalid request method.'}, status=400)
 
-
-def reset_password_view(request, uidb64, token):
+@csrf_exempt
+def reset_password(request, uidb64, token):
     """
     Handle the password reset process for a user.
     This view verifies the provided token and user ID, and if valid, allows the user to reset their password.
@@ -499,7 +502,7 @@ def reset_password_view(request, uidb64, token):
         JsonResponse: A JSON response indicating the result of the password reset process.
             - If the token and user ID are valid and the request method is POST with matching passwords,
               returns a success message.
-            - If the request method is GET, returns a message prompting the user to enter a new password. It needs to be changed in order to return a something like a form.
+            - If the request method is GET, redirects the user to the password reset form.
             - If the passwords do not match or are invalid, returns an error message with status 400.
             - If the token is invalid or expired, returns an error message with status 400.
     """
@@ -511,8 +514,9 @@ def reset_password_view(request, uidb64, token):
 
     if user is not None and default_token_generator.check_token(user, token):
         if request.method == 'POST':
-            new_password = request.POST.get('new_password')
-            confirm_password = request.POST.get('confirm_password')
+            data = json.loads(request.body) 
+            new_password = data.get('new_password')
+            confirm_password = data.get('confirm_password')
             
             if new_password and new_password == confirm_password:
                 user.password = make_password(new_password)
@@ -522,7 +526,7 @@ def reset_password_view(request, uidb64, token):
                 return JsonResponse({'error': 'Passwords do not match or are invalid.'}, status=400)
         
         if request.method == 'GET':
-            return JsonResponse({'message': 'Please enter your new password.'})
+            return JsonResponse({'message': 'Redirect to password reset form', 'uid': uidb64, 'token': token})
 
     return JsonResponse({'error': 'Invalid or expired token.'}, status=400)
 
