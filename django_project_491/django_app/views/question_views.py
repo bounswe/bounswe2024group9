@@ -9,6 +9,7 @@ from datetime import datetime
 from django.utils import timezone
 from ..Utils.utils import *
 from ..Utils.forms import *
+from ..ai_service.control_question_quality import QuestionQualityController
 from typing import List
 
 def get_question_details(request: HttpRequest, question_id: int) -> HttpResponse:
@@ -143,9 +144,20 @@ def create_question(request: HttpRequest) -> HttpResponse:
             Lang2ID = get_languages() 
             language_id = Lang2ID.get(language, None)
 
+            user = User.objects.get(pk=request.headers.get('User-ID', None))
+
+
             if language_id is None:
                 return JsonResponse({'error': 'Invalid language'}, status=400)
-        
+            
+            try:
+                question_controller = QuestionQualityController()
+                is_valid_question = question_controller.is_valid_question(data)
+                if(not is_valid_question):
+                    return JsonResponse({'error': 'Question is not valid'}, status=400)
+            except Exception as e:
+                print(e)
+
             question = Question.objects.create(
                 title=title,
                 language=language,
@@ -153,10 +165,10 @@ def create_question(request: HttpRequest) -> HttpResponse:
                 details=details,
                 code_snippet=code_snippet,
                 tags=tags,
-                author=request.user
+                author=user
             )
             
-            user = request.user
+            user = user
             user.questions.add(question)   
 
             return JsonResponse({'success': 'Question created successfully', 'question_id': question._id}, status=201)
@@ -270,20 +282,19 @@ def delete_question(request: HttpRequest, question_id: int) -> HttpResponse:
 
 @csrf_exempt
 def mark_as_answered(request, question_id : int) -> HttpResponse:
-    def mark_as_answered(request, question_id: int) -> HttpResponse:
-        """
-        Marks a question as answered.
-        Args:
-            request (HttpRequest): The HTTP request object containing headers and other request data.
-            question_id (int): The ID of the question to be marked as answered.
-        Returns:
-            HttpResponse: A JSON response indicating the success or failure of the operation.
-                - 200: If the question is successfully marked as answered.
-                - 400: If the question ID or User ID is missing.
-                - 403: If the request user is not the author of the question.
-        Raises:
-            Question.DoesNotExist: If the question with the given ID does not exist.
-        """
+    """
+    Marks a question as answered.
+    Args:
+        request (HttpRequest): The HTTP request object containing headers and other request data.
+        question_id (int): The ID of the question to be marked as answered.
+    Returns:
+        HttpResponse: A JSON response indicating the success or failure of the operation.
+            - 200: If the question is successfully marked as answered.
+            - 400: If the question ID or User ID is missing.
+            - 403: If the request user is not the author of the question.
+    Raises:
+        Question.DoesNotExist: If the question with the given ID does not exist.
+    """
     if not question_id:
         return JsonResponse({'error': 'Question ID parameter is required'}, status=400)
     
@@ -306,20 +317,19 @@ def mark_as_answered(request, question_id : int) -> HttpResponse:
 # TODO: FIND OUT WHAT TO DO WITH REPORTED QUESTIONS
 @csrf_exempt
 def report_question(request, question_id : int) -> HttpResponse:    
-    def report_question(request, question_id: int) -> HttpResponse:
-        """
-        Report a question by a user.
-        This view handles the reporting of a question by a user. It requires the question ID as a URL parameter
-        and the user ID in the request headers.
-        Args:
-            request (HttpRequest): The HTTP request object.
-            question_id (int): The ID of the question to be reported.
-        Returns:
-            HttpResponse: A JSON response indicating success or failure of the operation.
-        Raises:
-            JsonResponse: If the question ID is not provided, returns a JSON response with an error message and status 400.
-            JsonResponse: If the user ID is not provided in the headers, returns a JSON response with an error message and status 400.
-        """
+    """
+    Report a question by a user.
+    This view handles the reporting of a question by a user. It requires the question ID as a URL parameter
+    and the user ID in the request headers.
+    Args:
+        request (HttpRequest): The HTTP request object.
+        question_id (int): The ID of the question to be reported.
+    Returns:
+        HttpResponse: A JSON response indicating success or failure of the operation.
+    Raises:
+        JsonResponse: If the question ID is not provided, returns a JSON response with an error message and status 400.
+        JsonResponse: If the user ID is not provided in the headers, returns a JSON response with an error message and status 400.
+    """
     if not question_id:
         return JsonResponse({'error': 'Question ID parameter is required'}, status=400)
     
