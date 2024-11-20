@@ -62,6 +62,9 @@ function Feed() {
         console.log("Wiki ID and Name:", wikiId, wikiName);
         if (wikiId) {
             console.log("Navigating to:", `/result/${wikiId}/${encodeURIComponent(wikiName)}`);
+            setSearched(false);
+            setSearchQuery("");
+            setSearchResults([]); 
             navigate(`/result/${wikiId}/${encodeURIComponent(wikiName)}`);
         } else {
             console.error("No wiki ID found for search result:", result);
@@ -105,30 +108,6 @@ function Feed() {
 
     const truncateText = (text, length) => {
         return text.length > length ? text.substring(0, length) + "..." : text;
-    };
-
-    const fetchWikiIdAndName = async (tag) => {
-      try {
-          const response = await fetch(`${process.env.REACT_APP_API_URL}/search/${tag}`,
-                {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + localStorage.getItem('authToken'),
-                    },
-                }
-
-          );
-           if (!response.ok) {
-              throw new Error('Network response was not ok');
-          }
-          const data = await response.json();
-          // Assuming the API returns an array of results and the first one is the most relevant
-          return [data.results.bindings[0]?.language?.value.split('/').pop(), data.results.bindings[0]?.languageLabel?.value]; // returns [wikiId, wikiName]
-      } catch (error) {
-          console.error("Error fetching wiki ID:", error);
-          return null;
-      }
     };
 
     const handleTagClick = async (tag) => {
@@ -333,3 +312,26 @@ try {
 }
 };
 
+export const fetchWikiIdAndName = async (tag) => {
+    try {
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/search/${tag}`,
+              {
+                  method: 'GET',
+                  headers: {
+                      'Content-Type': 'application/json',
+                      'Authorization': 'Bearer ' + localStorage.getItem('authToken'),
+                  },
+              }
+
+        );
+         if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        const data = await response.json();
+        // Assuming the API returns an array of results and the first one is the most relevant
+        return [data.results.bindings[0]?.language?.value.split('/').pop(), data.results.bindings[0]?.languageLabel?.value]; // returns [wikiId, wikiName]
+    } catch (error) {
+        console.error("Error fetching wiki ID:", error);
+        return null;
+    }
+  };
