@@ -8,7 +8,24 @@ from ..Utils.forms import *
 
 
 @csrf_exempt
-def create_comment(request: HttpRequest, question_id : int) -> HttpResponse:
+def create_comment(request: HttpRequest, question_id: int) -> HttpResponse:
+    """
+    Handle the creation of a new comment for a specific question.
+
+    Args:
+        request (HttpRequest): The HTTP request object containing the POST data.
+        question_id (int): The ID of the question to which the comment will be associated.
+
+    Returns:
+        HttpResponse: A JSON response indicating the success or failure of the comment creation process.
+
+    Raises:
+        JsonResponse: Returns a JSON response with an error message and appropriate HTTP status code in case of:
+            - Question not found (404)
+            - Invalid language (400)
+            - Malformed data (400)
+            - Invalid request method (405)
+    """
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
@@ -52,7 +69,20 @@ def create_comment(request: HttpRequest, question_id : int) -> HttpResponse:
 
 
 @csrf_exempt
-def edit_comment(request: HttpRequest, comment_id:int) -> HttpResponse:
+def edit_comment(request: HttpRequest, comment_id: int) -> HttpResponse:
+    """
+    Edit an existing comment.
+    Args:
+        request (HttpRequest): The HTTP request object containing headers and body data.
+        comment_id (int): The ID of the comment to be edited.
+    Returns:
+        HttpResponse: A JSON response indicating the result of the operation.
+    Raises:
+        JsonResponse: Various JSON responses with appropriate status codes:
+            - 400 if the comment ID or user ID is missing or malformed data is provided.
+            - 403 if the user is not authorized to edit the comment.
+            - 404 if the comment does not exist.
+    """
     if not comment_id:
         return JsonResponse({'error': 'Comment ID parameter is required'}, status=400)
     
