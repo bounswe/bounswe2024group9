@@ -272,8 +272,7 @@ def delete_question(request: HttpRequest, question_id: int) -> HttpResponse:
 
         question.delete()
 
-        user = request.user
-        user.questions.remove(question)
+        deletor_user.questions.remove(question)
 
     except Question.DoesNotExist:
         return JsonResponse({'error': 'Question not found'}, status=404)

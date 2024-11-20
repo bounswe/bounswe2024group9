@@ -45,6 +45,14 @@ def create_comment(request: HttpRequest, question_id: int) -> HttpResponse:
 
             if language_id is None:
                 return JsonResponse({'error': 'Invalid language'}, status=400)
+            
+            user_id = request.headers.get('User-ID', None)
+            if user_id is None:
+                return JsonResponse({'error': 'User ID parameter is required in the header'}, status=400)
+
+            user_id = int(user_id)
+            user = User.objects.get(pk=user_id)
+
 
             # Create a new comment
             comment = Comment.objects.create(
@@ -52,11 +60,11 @@ def create_comment(request: HttpRequest, question_id: int) -> HttpResponse:
                 code_snippet=code_snippet,
                 language=language,
                 language_id=language_id,
-                author=request.user,  # Associate the comment with the logged-in user
+                author=user,  # Associate the comment with the logged-in user
                 question=question # Associate the comment with the current question
             )
 
-            user = request.user
+            user = user
             user.authored_comments.add(comment)
 
 
@@ -92,8 +100,6 @@ def edit_comment(request: HttpRequest, comment_id: int) -> HttpResponse:
 
     user_id = int(user_id)
     
-    if not user_id:
-        return JsonResponse({'error': 'User ID parameter is required'}, status=400)
     
     editor_user = User.objects.get(pk=user_id)
 
