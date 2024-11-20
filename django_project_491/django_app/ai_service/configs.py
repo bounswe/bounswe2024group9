@@ -1,8 +1,7 @@
 import os
 import random
-from dotenv import load_dotenv
-load_dotenv()
-print(os.environ.get("API_KEY_POOL"))
+
+
 class GeminiConfigs:
     API_KEY_POOL = os.environ.get("API_KEY_POOL").split(",")
     API_KEY = random.choice(API_KEY_POOL)

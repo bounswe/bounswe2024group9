@@ -1,6 +1,4 @@
-import traceback
-
-from prompt import PromptService
+from .prompt import PromptService
 
 
 class QuestionQualityController():

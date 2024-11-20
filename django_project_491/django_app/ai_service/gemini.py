@@ -2,7 +2,6 @@ import random
 import google.generativeai as genai
 
 from configs import GeminiConfigs
-from prompt import PromptService
 import json
 from abc import ABC
 
