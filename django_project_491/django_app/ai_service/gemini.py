@@ -1,7 +1,7 @@
 import random
 import google.generativeai as genai
 
-from configs import GeminiConfigs
+from .configs import GeminiConfigs
 import json
 from abc import ABC
 

@@ -1,10 +1,10 @@
 from .prompt import PromptService
-
+from .gemini import GeminiService
 
 class QuestionQualityController():
     
-    def __init__(self, llm_service):
-        self.llm_service = llm_service
+    def __init__(self):
+        self.llm_service = GeminiService()
         
     def is_valid_question(self, question_json) -> bool:
         try:

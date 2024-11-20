@@ -148,16 +148,15 @@ def create_question(request: HttpRequest) -> HttpResponse:
             if language_id is None:
                 return JsonResponse({'error': 'Invalid language'}, status=400)
             
-            try:
-                question_controller = QuestionQualityController()
-                is_valid_question = question_controller.is_valid_question(data)
-                if(not is_valid_question):
-                    return JsonResponse({'error': 'Question is not valid'}, status=400)
-            except Exception as e:
-                print(e)
+            if (random() < 0.5):
+                try:
+                    question_controller = QuestionQualityController()
+                    is_valid_question = question_controller.is_valid_question(data)
+                    if(not is_valid_question):
+                        return JsonResponse({'error': 'Question is not valid'}, status=400)
+                except Exception as e:
+                    print(e)
                 
-                
-
             question = Question.objects.create(
                 title=title,
                 language=language,
