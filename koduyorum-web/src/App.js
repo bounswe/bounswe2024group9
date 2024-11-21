@@ -28,7 +28,7 @@ const App = () => {
         <Route path="/survey" element={<SurveyPage />} />
         <Route path="/post_question" element={<AuthWrapper><PostQuestion /></AuthWrapper>} />
         <Route path="/profile/:username" element={<AuthWrapper><Profile /></AuthWrapper>} />
-        <Route path="/reset_password/:uid/:token" element={<ResetPassword /> }/>
+        {/* <Route path="/reset_password/:uid/:token" element={<ResetPassword /> }/> */}
       </Routes>
     </Router>
   );
