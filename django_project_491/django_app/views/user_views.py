@@ -15,7 +15,8 @@ from django.utils.http import urlsafe_base64_decode
 from django.contrib.auth.hashers import make_password
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
-import os 
+import os
+from .utilization_views import wiki_search
 
 @csrf_exempt
 def get_user_profile_by_username(request, username : str) -> JsonResponse:
@@ -564,3 +565,66 @@ def list_most_contributed_five_person(request: HttpRequest) -> JsonResponse:
         })
     
     return JsonResponse({'users': user_data}, status=200)
+
+@csrf_exempt
+def multi_search(request):
+    if request.method == 'GET':
+        query = request.GET.get('query', '').strip().lower()
+        if not query:
+            return JsonResponse({'error': 'Search query is required'}, status=400)
+
+        results = {
+            'wiki_results': [],
+            'tag_results': [],
+            'language_results': []
+        }
+
+        # Wiki Search
+        try:
+            wiki_response = wiki_search(request, query)  # Call the wiki_search function
+            if isinstance(wiki_response, JsonResponse):
+                wiki_data = json.loads(wiki_response.content)
+                if 'results' in wiki_data:
+                    results['wiki_results'] = [
+                        {
+                            'label': binding['languageLabel']['value'],
+                            'url': binding['language']['value']
+                        }
+                        for binding in wiki_data['results']['bindings']
+                    ]
+        except Exception as e:
+            print(f"Wiki search error: {e}")
+
+        # Tag-based search
+        try:
+            tag_questions = Question.objects.filter(tags__icontains=query).distinct()
+            results['tag_results'] = [
+                {
+                    'id': question._id,
+                    'title': question.title,
+                    'details': question.details,
+                    'tags': question.tags
+                }
+                for question in tag_questions
+            ]
+        except Exception as e:
+            print(f"Tag search error: {e}")
+
+        # Language-based search
+        try:
+            language_questions = Question.objects.filter(language__icontains=query).distinct()
+            results['language_results'] = [
+                {
+                    'id': question._id,
+                    'title': question.title,
+                    'details': question.details,
+                    'language': question.language
+                }
+                for question in language_questions
+            ]
+        except Exception as e:
+            print(f"Language search error: {e}")
+
+        return JsonResponse(results, status=200)
+
+    return JsonResponse({'error': 'Invalid request method'}, status=405)

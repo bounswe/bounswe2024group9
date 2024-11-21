@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
-import Icon from 'react-native-vector-icons/Ionicons';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import { useNavigation } from '@react-navigation/native';
 
 const QuestionCard = ({ post, currentUser, onPress }) => {
     const {
@@ -9,14 +10,45 @@ const QuestionCard = ({ post, currentUser, onPress }) => {
         description,
         user_id,
         likes: initialLikes,
-        comments: initialComments,
         programmingLanguage,
-        topic,
         answered,
     } = post;
 
     const [likes, setLikes] = useState(initialLikes);
-    const [comments, setComments] = useState(initialComments);
+    const [hasUpvoted, setHasUpvoted] = useState(false);
+    const [hasDownvoted, setHasDownvoted] = useState(false);
+
+    const navigation = useNavigation();
+
+    const handleUpvote = () => {
+        if (hasUpvoted) {
+            setLikes(likes - 1);
+            setHasUpvoted(false);
+        } else {
+            setLikes(hasDownvoted ? likes + 2 : likes + 1);
+            setHasUpvoted(true);
+            setHasDownvoted(false);
+        }
+    };
+
+    const handleDownvote = () => {
+        if (hasDownvoted) {
+            setLikes(likes + 1);
+            setHasDownvoted(false);
+        } else {
+            setLikes(hasUpvoted ? likes - 2 : likes - 1);
+            setHasDownvoted(true);
+            setHasUpvoted(false);
+        }
+    };
+
+    // Navigate to a new page when a label is clicked
+    const handleLabelClick = (labelType, labelValue) => {
+        navigation.navigate('LabelDetails', {
+            labelType,
+            labelValue,
+        });
+    };
 
     return (
         <TouchableOpacity style={styles.card} onPress={() => onPress(post)}>
@@ -33,21 +65,29 @@ const QuestionCard = ({ post, currentUser, onPress }) => {
             <Text style={styles.title}>{title}</Text>
 
             <View style={styles.labelsContainer}>
-                <Text style={styles.label}>{programmingLanguage}</Text>
-                <Text style={styles.label}>{topic}</Text>
+                <TouchableOpacity onPress={() => handleLabelClick('Programming Language', programmingLanguage)}>
+                    <Text style={styles.label}>{programmingLanguage}</Text>
+                </TouchableOpacity>
             </View>
 
             <Text style={styles.description}>{description}</Text>
 
             <View style={styles.footer}>
-                <View style={styles.footerItem}>
-                    <Icon name="thumbs-up-outline" size={14} color="#888" />
-                    <Text style={styles.footerText}>{likes} Likes</Text>
-                </View>
-                <View style={styles.footerItem}>
-                    <Icon name="chatbubble-outline" size={14} color="#888" />
-                    <Text style={styles.footerText}>{comments} Comments</Text>
-                </View>
+                <TouchableOpacity style={styles.footerItem} onPress={handleUpvote}>
+                    <MaterialIcons
+                        name="arrow-upward"
+                        size={24}
+                        color={hasUpvoted ? '#007bff' : '#888'}
+                    />
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.footerItem} onPress={handleDownvote}>
+                    <MaterialIcons
+                        name="arrow-downward"
+                        size={24}
+                        color={hasDownvoted ? '#dc3545' : '#888'}
+                    />
+                </TouchableOpacity>
+                <Text style={styles.footerText}>{likes} Likes</Text>
             </View>
         </TouchableOpacity>
     );
@@ -90,17 +130,15 @@ const styles = StyleSheet.create({
     },
     footer: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
+        alignItems: 'center',
         marginTop: 10,
     },
     footerItem: {
-        flexDirection: 'row',
-        alignItems: 'center',
+        marginRight: 15,
     },
     footerText: {
         fontSize: 12,
         color: '#888',
-        marginLeft: 4,
     },
     answeredLabel: {
         position: 'absolute',

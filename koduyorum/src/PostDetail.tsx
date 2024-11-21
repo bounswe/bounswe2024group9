@@ -13,6 +13,8 @@ const PostDetail = ({ route }) => {
     const [availableLanguages, setAvailableLanguages] = useState([]);
     const [selectedLanguage, setSelectedLanguage] = useState('');
     const [codeOutput, setCodeOutput] = useState('');
+    const [upvotes, setUpvotes] = useState(post.upvotes); // Track upvote count
+    const [isAnswered, setIsAnswered] = useState(post.answered); // Track answered state
 
     useEffect(() => {
         const fetchComments = async () => {
@@ -33,11 +35,10 @@ const PostDetail = ({ route }) => {
         fetchComments();
     }, [post.id]);
 
-
     useEffect(() => {
         const fetchLanguages = async () => {
             try {
-                const response = await fetch('localhost/get_api_languages/');
+                const response = await fetch('http://10.0.2.2:8000/get_api_languages/');
                 const data = await response.json();
                 const languageNames = Object.keys(data.languages);
                 setAvailableLanguages(languageNames);
@@ -49,6 +50,84 @@ const PostDetail = ({ route }) => {
         fetchLanguages();
     }, []);
 
+    const handleUpvote = async () => {
+        try {
+            const response = await fetch(
+                `http://10.0.2.2:8000/upvote_object/question/${post.id}/`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'User-ID': user_id, // Pass user ID in headers
+                    },
+                }
+            );
+
+            if (response.ok) {
+                setUpvotes(upvotes + 1); // Increment upvote count
+                Alert.alert('Success', 'Question upvoted successfully');
+            } else {
+                const data = await response.json();
+                Alert.alert('Error', data.error || 'Failed to upvote');
+            }
+        } catch (error) {
+            console.error('Error upvoting:', error);
+            Alert.alert('Error', 'Failed to upvote');
+        }
+    };
+
+    const handleDownvote = async () => {
+        try {
+            const response = await fetch(
+                `http://10.0.2.2:8000/downvote_object/question/${post.id}/`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'User-ID': user_id, // Pass user ID in headers
+                    },
+                }
+            );
+
+            if (response.ok) {
+                setUpvotes(upvotes - 1); // Decrement upvote count
+                Alert.alert('Success', 'Question downvoted successfully');
+            } else {
+                const data = await response.json();
+                Alert.alert('Error', data.error || 'Failed to downvote');
+            }
+        } catch (error) {
+            console.error('Error downvoting:', error);
+            Alert.alert('Error', 'Failed to downvote');
+        }
+    };
+
+    const handleMarkAsAnswered = async () => {
+        try {
+            const response = await fetch(
+                `http://10.0.2.2:8000/mark_as_answered/${post.id}/`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'User-ID': user_id, // Pass user ID in headers
+                    },
+                }
+            );
+
+            if (response.ok) {
+                setIsAnswered(true); // Update local state
+                Alert.alert('Success', 'Question marked as answered');
+            } else {
+                const data = await response.json();
+                Alert.alert('Error', data.error || 'Failed to mark as answered');
+            }
+        } catch (error) {
+            console.error('Error marking as answered:', error);
+            Alert.alert('Error', 'Failed to mark as answered');
+        }
+    };
+
     const handleAddComment = async () => {
         if (newComment.trim() === '' || selectedLanguage === '') {
             Alert.alert('Comment, language, and code snippet cannot be empty');
@@ -58,7 +137,7 @@ const PostDetail = ({ route }) => {
         const newCommentObj = {
             question_id: post.id,
             details: newComment,
-            code_snippet: codeSnippet,  // Include code snippet in the request
+            code_snippet: codeSnippet, // Include code snippet in the request
             language: selectedLanguage,
             user_id: user_id,
         };
@@ -75,9 +154,17 @@ const PostDetail = ({ route }) => {
             const data = await response.json();
 
             if (response.status === 201) {
-                setComments([...comments, { comment_id: data.comment_id, details: newComment, code_snippet: codeSnippet, user: username }]);
+                setComments([
+                    ...comments,
+                    {
+                        comment_id: data.comment_id,
+                        details: newComment,
+                        code_snippet: codeSnippet,
+                        user: username,
+                    },
+                ]);
                 setNewComment('');
-                setCodeSnippet('');  // Clear code snippet input
+                setCodeSnippet(''); // Clear code snippet input
             } else {
                 Alert.alert('Error', data.error || 'Failed to add comment');
             }
@@ -110,10 +197,7 @@ const PostDetail = ({ route }) => {
                 <Text style={styles.commentText}>{comment.details}</Text>
 
                 {comment.code_snippet ? (
-                    <SyntaxHighlighter
-                        language={selectedLanguage || 'javascript'}
-                        style={atomOneDark}
-                    >
+                    <SyntaxHighlighter language={selectedLanguage || 'javascript'} style={atomOneDark}>
                         {comment.code_snippet}
                     </SyntaxHighlighter>
                 ) : null}
@@ -132,6 +216,23 @@ const PostDetail = ({ route }) => {
                     {post.codeSnippet}
                 </SyntaxHighlighter>
             </View>
+
+            {/* Upvote and Downvote Buttons */}
+            <View style={styles.voteContainer}>
+                <TouchableOpacity style={styles.voteButton} onPress={handleUpvote}>
+                    <Text style={styles.voteButtonText}>Upvote ({upvotes})</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.voteButton} onPress={handleDownvote}>
+                    <Text style={styles.voteButtonText}>Downvote</Text>
+                </TouchableOpacity>
+            </View>
+
+            {/* Mark as Answered Button */}
+            {!isAnswered && post.user_id === user_id && (
+                <TouchableOpacity style={styles.answeredButton} onPress={handleMarkAsAnswered}>
+                    <Text style={styles.answeredButtonText}>Mark as Answered</Text>
+                </TouchableOpacity>
+            )}
 
             {/* Run Code Button */}
             <TouchableOpacity style={styles.runButton} onPress={handleRunCode}>
@@ -230,6 +331,23 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         fontSize: 16,
     },
+    voteContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: 20,
+    },
+    voteButton: {
+        backgroundColor: '#00BFFF',
+        borderRadius: 5,
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        alignItems: 'center',
+    },
+    voteButtonText: {
+        color: 'white',
+        fontWeight: 'bold',
+        fontSize: 16,
+    },
     outputContainer: {
         backgroundColor: '#e1e1e1',
         padding: 10,
@@ -298,6 +416,19 @@ const styles = StyleSheet.create({
         marginVertical: 20,
         height: 50,
         width: '100%',
+    },
+    answeredButton: {
+        backgroundColor: '#FF4500',
+        borderRadius: 5,
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        alignItems: 'center',
+        marginVertical: 10,
+    },
+    answeredButtonText: {
+        color: 'white',
+        fontWeight: 'bold',
+        fontSize: 16,
     },
 });
 

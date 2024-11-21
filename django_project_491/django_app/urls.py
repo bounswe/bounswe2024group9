@@ -60,4 +60,8 @@ urlpatterns = [
     path('specific_feed/<int:user_id>/', question_views.list_questions_according_to_the_user, name='specific_feed'),
     path('question_of_the_day/', question_views.question_of_the_day, name='question_of_the_day'),
     path('daily_question/', question_views.question_of_the_day, name='wiki_search'),
+    path('multi_search/', user_views.multi_search, name='multi_search'),
+    path('get_user_profile_by_id/<int:user_id>/', user_views.get_user_profile_by_id, name='get_user_profile_by_id'),
+
+    
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
