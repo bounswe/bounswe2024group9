@@ -203,7 +203,7 @@ function Feed() {
                 return [];
             }
 
-            const response = await fetch(`${process.env.REACT_APP_API_URL}/django_app/search/${query}`,
+            const response = await fetch(`${process.env.REACT_APP_API_URL}/search/${query}`,
                 {
                     method: 'GET',
                     headers: {
