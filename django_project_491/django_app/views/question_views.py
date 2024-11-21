@@ -67,13 +67,14 @@ def get_question_comments(request, question_id):
 
 
 @csrf_exempt
-def create_question(request: HttpRequest, user_id) -> HttpResponse:
+def create_question(request: HttpRequest) -> HttpResponse:
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
             title = data.get('title')
             language = data.get('language')
             details = data.get('details')
+            user_id = request.headers.get('User-ID', None)
             code_snippet = data.get('code_snippet', '')  # There may not be a code snippet
             tags = data.get('tags', [])  # There may not be any tags
 
