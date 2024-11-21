@@ -1,9 +1,9 @@
 import json
 from django.test import TestCase
 from .Utils.utils import run_code
-from .views import wiki_result, wiki_search
+from .views.utilization_views import wiki_result, wiki_search
 from .models import User
-
+from django.urls import reverse
 
 # class TestRunCode(TestCase):
 #     # def setUp(self):
@@ -33,71 +33,91 @@ from .models import User
 #     #     self.assertEqual(response.status_code, 302)  # Redirect to login page
 #
 
+
 class TestSearchResult(TestCase):
-    # def setUp(self):
-    #     # Create a sample user for testing
-    #     self.user = User.objects.create_user(
-    #         username='testuser',
-    #         email="test",
-    #         password='testpassword'
-    #     )
-    #     self.factory = RequestFactory()
+    def setUp(self):
+        # Create a test user
+        self.user = User.objects.create_user(
+            username='testuser',
+            email='test@example.com',
+            password='testpassword'
+        )
+        self.client.login(username='testuser', password='testpassword')  # Log in the test user
 
-        # test that the wiki_search returns correct labels even for multi-word strings
-    def test_search_valid(self):
+    def test_wiki_search_found(self):
+            search_strings = 'Python Java' # Valid search string
 
-        # @login_required decorator requires a request object with a user attribute
-        # self.client.login(username='testuser', email='test', password='testpassword')
-        # request = self.factory.get('/result/1')
-        # request.user = self.user
+            url = reverse('wiki_search', kwargs={'search_strings': search_strings})
+            response = self.client.get(url)
 
-        request = None
+            self.assertEqual(response.status_code, 200)
+            response_json = response.json()
+            self.assertGreater(len(response_json['results']), 0)
+            self.assertIn('Python', [page['languageLabel']['value'] for page in response_json['results']['bindings']])
+            self.assertIn('Java', [page['languageLabel']['value'] for page in response_json['results']['bindings']])
 
-        response = wiki_search(request, "Python Java")
-        response_dict = json.loads(response.content)
-        bindings = response_dict['results']['bindings']
-        language_labels = [binding['languageLabel']['value'] for binding in bindings]
-        self.assertTrue("Python 3" in language_labels)
-        self.assertTrue("Java 21" in language_labels)
-
-    # test that an invalid search does not crash and returns just empty bindings
     def test_search_invalid(self):
-        # @login_required decorator requires a request object with a user attribute
-        # self.client.login(username='testuser', email='test', password='testpassword')
-        # request = self.factory.get('/result/1')
-        # request.user = self.user
+        search_strings = 'this_is_not_a_language_1234' # Invalid search string
 
-        request = None
+        url = reverse('wiki_search', kwargs={'search_strings': search_strings})
+        response = self.client.get(url)
 
-        response = wiki_search(request, "this_is_not_a_language_1234@#")
-        response_dict = json.loads(response.content)
-        self.assertTrue(response_dict['results']['bindings'] == [])  # empty bindings response expected
+        self.assertEqual(response.status_code, 200)
+        response_json = response.json()
+        self.assertTrue(response_json['results']['bindings'] == [])  # Empty bindings response expected
 
-    # test the output of the wiki_result with a valid input
     def test_result_valid(self):
-        # @login_required decorator requires a request object with a user attribute
-        # self.client.login(username='testuser', email='test', password='testpassword')
-        # request = self.factory.get('/result/1')
-        # request.user = self.user
+        wiki_id = "Q15777" # C programming language
 
-        request = None
+        url = reverse('wiki_result', kwargs={'wiki_id': wiki_id})
+        response = self.client.get(url)
 
-        response = wiki_result(request, "Q15777")  # C programming language
-        response_dict = json.loads(response.content)
-        self.assertTrue(response_dict['mainInfo'][0]['languageLabel']['value'] == 'C')
-        self.assertTrue(response_dict['mainInfo'][0]['website']['value'] == 'https://www.iso.org/standard/74528.html')
-        self.assertTrue(response_dict['wikipedia']['title'] == 'C (programming language)')
+        self.assertEqual(response.status_code, 200)
+        response_json = response.json()
+        self.assertTrue(response_json['mainInfo'][0]['languageLabel']['value'] == 'C')
+        self.assertTrue(response_json['mainInfo'][0]['website']['value'] == 'https://www.iso.org/standard/74528.html')
+        self.assertTrue(response_json['wikipedia']['title'] == 'C (programming language)')
 
     def test_result_invalid(self):
-        # @login_required decorator requires a request object with a user attribute
-        # self.client.login(username='testuser', email='test', password='testpassword')
-        # request = self.factory.get('/result/1')
-        # request.user = self.user
+        wiki_id = "Qabc" # Invalid programming language
 
-        request = None
+        url = reverse('wiki_result', kwargs={'wiki_id': wiki_id})
+        response = self.client.get(url)
 
-        response = wiki_result(request, "Qabc")  # invalid wiki id
-        response_dict = json.loads(response.content)
-        self.assertTrue(response_dict['mainInfo'] == [])
-        self.assertTrue(response_dict['wikipedia'] == [])
-        self.assertTrue(response_dict['instances'] == [])
+        self.assertEqual(response.status_code, 200)
+        response_json = response.json()
+        self.assertTrue(response_json['mainInfo'] == [])
+        self.assertTrue(response_json['wikipedia'] == [])
+        self.assertTrue(response_json['instances'] == [])
+
+class CodeExecutionTests(TestCase):
+    def setUp(self):
+        # Create a test user
+        self.user = User.objects.create_user(
+            username='testuser', 
+            email='test@example.com', 
+            password='testpassword'
+        )
+    def test_post_sample_code(self):
+        # Log in with the test user
+        self.client.login(username='testuser', password='testpassword')
+
+        # Define source code and language ID for Python
+        source_code = 'print("Hello, World!")'
+        language_id = 71  # ID for Python 3.8 in Judge0
+
+        # Send a POST request to post_sample_code endpoint
+        response = self.client.post(
+            reverse('code_execute'),  
+            data=json.dumps({
+                'source_code': source_code,
+                'language_id': language_id
+            }),
+            content_type='application/json'
+        )
+
+        # Validate response status and content
+        self.assertEqual(response.status_code, 200)
+        response_json = response.json()
+        self.assertIn('stdout', response_json)
+        self.assertTrue(response_json['stdout'].startswith('Hello, World!'))

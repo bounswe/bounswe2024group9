@@ -60,6 +60,7 @@ body {
     border: 1px solid #ccc;
     border-radius: 5px 0 0 5px;
     box-sizing: border-box;
+    color: #333;
   }
 
   .search-button {
@@ -78,17 +79,19 @@ body {
   
   .feed-content {
     display: flex;
+    gap: 2rem;
     margin: 2rem;
+    justify-content: space-between; 
   }
   
   .tags-container, .contributors-container {
-    width: 20%;
-    background-color: white;
-    padding: 1rem;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  width: 15%;
+  background-color: white;
+  padding: 1rem;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   }
-  
+
   .tags-list, .contributors-list {
     list-style: none;
     padding: 0;
@@ -211,6 +214,7 @@ body {
     background-color: #e0f7fa;
     color: #0077b6;
     padding: 5px 10px;
+    margin-bottom: 10px;
     border-radius: 20px;
     font-size: 0.8rem;
     cursor: pointer;
@@ -220,3 +224,147 @@ body {
   .tag-link:hover {
       background-color: #b2ebf2;
   }
+
+  .search-container {
+    position: relative;
+    display: inline-block;
+    width: 50%; /* Ensures it aligns with the search input width */
+}
+
+  /* Search Suggestions Dropdown */
+.search-suggestions { /* Added styles for suggestions dropdown */
+  position: absolute;
+  top: 100%; /* Aligns dropdown to the bottom of the search input */
+  left: 0;
+  width: 50%; /* Matches width of search input */
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 0 0 5px 5px;
+  max-height: 200px;
+  overflow-y: auto;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+}
+
+.search-suggestion { /* Styling for individual suggestion */
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  color: #0077b6;
+  transition: background-color 0.3s;
+}
+
+.search-suggestion:hover {
+  background-color: #f0f8ff;
+}
+
+/* Question of the Day Styling */
+.question-of-the-day {
+  background-color: #ffe0b3;
+  padding: 1.5rem;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.question-of-the-day h2 {
+  color: #d35400;
+  font-size: 1.8rem;
+  margin-bottom: 0.5rem;
+}
+
+.question-of-the-day h3 {
+  color: #333;
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.question-of-the-day p {
+  color: #555;
+  font-size: 1rem;
+  margin-bottom: 1rem;
+}
+
+.question-of-the-day button {
+  background-color: #d35400;
+  color: white;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.question-of-the-day button:hover {
+  background-color: #e67e22;
+}
+
+/* Floating button for creating a new question */
+.floating-button {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 50px;
+  height: 50px;
+  background-color: #0077b6;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  font-size: 2rem;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.3s ease;
+}
+
+.floating-button:hover {
+  background-color: #005f8d;
+}
+
+/* Contributors container styles */
+.contributors-container {
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* List of contributors */
+.contributors-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* Individual contributor item */
+.contributor-item {
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background-color 0.2s, box-shadow 0.2s;
+}
+
+/* Hover effect to indicate interactivity */
+.contributor-item:hover {
+  background-color: #e6f7ff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Contributor name styling */
+.contributor-name {
+  font-weight: bold;
+  color: #007bff;
+}
+
+/* Contributor points styling */
+.contributor-points {
+  color: #555;
+}
