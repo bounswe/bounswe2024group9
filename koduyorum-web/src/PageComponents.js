@@ -1,5 +1,4 @@
-// components.js
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Feed.css';
 
@@ -7,26 +6,20 @@ import './Feed.css';
 const LogoutButton = () => {
   const navigate = useNavigate();
 
-  // Function to handle logout
   const handleLogout = () => {
-    // Remove the token from localStorage (or sessionStorage, or state)
-      const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem('authToken');
 
-      fetch(`${process.env.REACT_APP_API_URL}/logout/`, {
-              method: 'POST',
-              body: JSON.stringify({token}),
-          }
-
-      )
-          .then(() => {
-              // Redirect to login after logging out
-              localStorage.removeItem('authToken');
-              navigate('/login');
-          })
-          .catch((error) => {
-              console.error('Logout failed:', error);
-          });
-      // Optionally call the server's logout endpoint
+    fetch(`${process.env.REACT_APP_API_URL}/logout/`, {
+      method: 'POST',
+      body: JSON.stringify({ token }),
+    })
+      .then(() => {
+        localStorage.removeItem('authToken');
+        navigate('/login');
+      })
+      .catch((error) => {
+        console.error('Logout failed:', error);
+      });
   };
 
   return <button className="nav-link" onClick={handleLogout}>Log Out</button>;
@@ -44,6 +37,18 @@ export const Navbar = ({
   handleSearchResultClick,
 }) => {
   const navigate = useNavigate();
+  const [username, setUsername] = useState(null);
+
+  const handleProfileClick = () => {
+    const storedUsername = localStorage.getItem('username');
+
+    if (storedUsername) {
+      setUsername(storedUsername);
+      navigate(`/profile/${storedUsername}`);
+    } else {
+      console.error("No username found in local storage");
+    }
+  };
 
   return (
     <div className="navbar">
@@ -56,10 +61,9 @@ export const Navbar = ({
           onClick={() => navigate('/feed')}
         />
         <button className="nav-link" onClick={() => navigate('/feed')}>Home</button>
-        <button className="nav-link" onClick={() => navigate('/profile')}>Profile</button>
+        <button className="nav-link" onClick={handleProfileClick}>Profile</button>
       </div>
 
-      {/* Search Input and Dropdown Container */}
       <div className="search-container">
         <input
           type="search"
@@ -73,7 +77,6 @@ export const Navbar = ({
         />
         <button className="search-button" onClick={handleSearch}>Search</button>
 
-        {/* Suggestions Dropdown */}
         {searched && searchResults.length > 0 && (
           <div className="search-suggestions">
             {isLoading ? (
@@ -93,7 +96,6 @@ export const Navbar = ({
         )}
       </div>
 
-      {/* Log out Button */}
       <LogoutButton />
     </div>
   );
@@ -121,13 +123,36 @@ export const LeftSidebar = ({ tags, handleTagClick }) => (
 );
 
 // RightSidebar Component
-export const RightSidebar = () => (
-  <div className="contributors-container">
-    <h3 className="section-title">Top Contributors</h3>
-    <ul className="contributors-list">
-      <li>John Doe</li>
-      <li>Jane Smith</li>
-      <li>Bob Johnson</li>
-    </ul>
-  </div>
-);
+export const RightSidebar = ({ topContributors }) => {
+  const navigate = useNavigate();
+
+  const handleContributorClick = (username) => {
+    navigate(`/profile/${username}`);
+  };
+
+  return (
+    <div className="contributors-container">
+      <h3 className="section-title">Top Contributors</h3>
+      <ul className="contributors-list">
+        {topContributors && topContributors.length > 0 ? (
+          topContributors.map((contributor, index) => (
+            <li
+              key={index}
+              className="contributor-item"
+              onClick={() => handleContributorClick(contributor.username)}
+            >
+              <span className="contributor-name">
+                {contributor.name || contributor.username}
+              </span>
+              <span className="contributor-points">
+                {contributor.contribution_points} points
+              </span>
+            </li>
+          ))
+        ) : (
+          <li>No contributors found</li>
+        )}
+      </ul>
+    </div>
+  );
+};
