@@ -234,7 +234,7 @@ class Annotation(models.Model):
     annotation_ending_point = models.IntegerField(default=0)
     annotation_date = models.DateTimeField(auto_now_add=True)
     author = models.ForeignKey('User', on_delete=models.CASCADE, related_name='annotations')
-    annotation_comments = models.ForeignKey(
+    parent_annotation = models.ForeignKey(
         'self',
         on_delete=models.CASCADE,
         related_name='child_annotations',
