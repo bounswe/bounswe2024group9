@@ -12,7 +12,7 @@ import SurveyPage from './SurveyPage';
 import PostQuestion from './PostQuestion';
 import AuthWrapper from './AuthWrapper';
 import Profile from './Profile';
-import ResetPassword from './ResetPassword';
+// import ResetPassword from './ResetPassword';
 
 const App = () => {
   return (
