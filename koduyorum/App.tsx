@@ -7,6 +7,7 @@ import QuestionList from './src/QuestionList.tsx';
 import PostDetail from './src/PostDetail';
 import WikiResultDetail from './src/WikiResultDetail';
 import CreateQuestion from './src/CreateQuestion'; 
+import LabelDetailsScreen from './src/LabelDetailScreen.tsx';
 import InterestPage from './src/InterestPage.tsx';
 import ProfilePage from './src/ProfilePage.tsx';
 
@@ -44,6 +45,11 @@ const App = () => {
         <Stack.Screen 
           name="CreateQuestion" 
           component={CreateQuestion} 
+          options={{ headerShown: false, gestureEnabled: false }}
+        />
+        <Stack.Screen 
+          name="LabelDetails" 
+          component={LabelDetailsScreen}
           options={{ headerShown: false, gestureEnabled: false }}
         />
         <Stack.Screen 
