@@ -52,8 +52,13 @@ class Comment(models.Model):
     # Link each comment to a user (author)
     author = models.ForeignKey('User', on_delete=models.CASCADE, related_name='authored_comments')  # Updated related_name
 
-    def run_snippet(self): # TODO
+    def run_snippet(self):
         result = run_code(self.code_snippet, self.language_id)
+        if result['stderr']:
+            return result['stderr']
+        if result['stdout']  is None:
+            return "NO OUTPUT for STDOUT"
+
         outs = result['stdout'].split('\n')
         return outs
 
