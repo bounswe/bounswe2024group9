@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "./hooks/AuthProvider";
 import { Navbar, LeftSidebar, RightSidebar } from './PageComponents'; 
@@ -25,6 +25,7 @@ function Feed() {
     const [questionOfTheDay, setQuestionOfTheDay] = useState(null);
     const [loading, setLoading] = useState(true); // Adding a loading state
     const [topContributors, setTopContributors] = useState([]); // Top Contributors state
+    const hasFetchedData = useRef(false);
 
     const searchDisplayRef = useRef(null);
     const navigate = useNavigate();
@@ -99,18 +100,49 @@ function Feed() {
     };
 
     // Fetch Functions
-    const fetchInitialData = async () => {
+    // const fetchInitialData = async () => {
+    //     setLoading(true);
+    //     try {
+    //         await fetchPosts();
+    //         await fetchQuestionOfTheDay();
+    //         await fetchTopContributors();
+    //     } catch (error) {
+    //         console.error("Error fetching initial data:", error);
+    //     } finally {
+    //         setLoading(false);
+    //     }
+    // };
+
+    const fetchInitialData = useCallback(async () => {
+        const user_id = localStorage.getItem('user_id');
         setLoading(true);
         try {
-            await fetchPosts();
-            await fetchQuestionOfTheDay();
-            await fetchTopContributors();
+            const response = await fetch(`${process.env.REACT_APP_API_URL}/fetch_feed_at_once/${user_id}/`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            const data = await response.json();
+            setPosts(data.personalized_questions);
+            setQuestionOfTheDay(data.question_of_the_day);
+            setTopContributors(data.top_contributors);
         } catch (error) {
             console.error("Error fetching initial data:", error);
         } finally {
             setLoading(false);
         }
-    };
+    }, []);
+
+    useEffect(() => {
+        if (!hasFetchedData.current) {
+          fetchInitialData();
+          hasFetchedData.current = true;
+        }
+      }, []);
 
     const fetchPosts = async () => {
         const user_id = localStorage.getItem('user_id');
@@ -193,11 +225,6 @@ function Feed() {
         }
     };
 
-
-    // useEffect Hooks
-    useEffect(() => {
-        fetchInitialData();
-    }, []);
 
     useEffect(() => {
         if (searched) {
