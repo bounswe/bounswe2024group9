@@ -25,6 +25,7 @@ const QuestionList = () => {
     const [filteredQuestions, setFilteredQuestions] = useState([]);
     const [isSearching, setIsSearching] = useState(false);
     const [isPanelOpen, setIsPanelOpen] = useState(false);
+    const [profilePic, setProfilePic] = useState(null); // Added to store profile picture
 
     const translateX = useRef(new Animated.Value(0)).current;
     const panelWidth = 200; // Width of the profile panel
@@ -81,6 +82,21 @@ const QuestionList = () => {
             Alert.alert('Error', 'Failed to load feed');
         }
     };
+
+    // Fetch user profile to get profile picture
+    const fetchProfile = async () => {
+        try {
+            const response = await fetch(`http://10.0.2.2:8000/get_user_profile_by_id/${user_id}/`);
+            const data = await response.json();
+            setProfilePic(data.user.profile_pic || null);
+        } catch (error) {
+            console.error('Error fetching profile:', error);
+        }
+    };
+
+    useEffect(() => {
+        fetchProfile();
+    }, [user_id]);
 
     // Fetch feed when the screen comes into focus
     useFocusEffect(
@@ -204,18 +220,31 @@ const QuestionList = () => {
                     },
                 ]}
             >
-                <View style={styles.profileContent}>
-                    <TouchableOpacity
-                        style={styles.profileTouchable}
-                        onPress={() => navigation.navigate('ProfilePage', { username, user_id })}
-                    >
-                        <Image
-                            source={{ uri: 'https://via.placeholder.com/50' }} // Replace with actual profile image or placeholder
-                            style={styles.profileIcon}
-                        />
-                        <Text style={styles.username}>{username}</Text>
-                    </TouchableOpacity>
-                </View>
+            <View style={styles.profileContent}>
+                <TouchableOpacity
+                    style={styles.profileTouchable}
+                    onPress={() => navigation.navigate('ProfilePage', { username, user_id })}
+                >
+                    <Image
+                        source={
+                            profilePic
+                                ? { uri: profilePic }
+                                : require('../assets/pp.jpg') // Default profile picture
+                        }
+                        style={styles.profileIcon}
+                    />
+                    <Text style={styles.username}>{username}</Text>
+                </TouchableOpacity>
+
+                {/* Navigate to Top Contributors */}
+                <TouchableOpacity
+                    style={styles.contributorsButton}
+                    onPress={() => navigation.navigate('TopContributors')}
+                >
+                    <Text style={styles.contributorsText}>Top Contributors</Text>
+                </TouchableOpacity>
+            </View>
+
             </Animated.View>
         </View>
     );

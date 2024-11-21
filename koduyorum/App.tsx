@@ -10,6 +10,7 @@ import CreateQuestion from './src/CreateQuestion';
 import LabelDetailsScreen from './src/LabelDetailScreen.tsx';
 import InterestPage from './src/InterestPage.tsx';
 import ProfilePage from './src/ProfilePage.tsx';
+import TopContributorsPage from './src/TopContributorsPage.tsx';
 
 const Stack = createStackNavigator();
 
@@ -62,7 +63,11 @@ const App = () => {
           component={ProfilePage}
           options={{ headerShown: false, gestureEnabled: false }}
         />
-
+        <Stack.Screen 
+          name="TopContributors" 
+          component={TopContributorsPage}
+          options={{ headerShown: false, gestureEnabled: false }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );
