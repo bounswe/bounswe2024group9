@@ -318,18 +318,18 @@ class UserModelTest(TestCase):
             password=self.password
         )
 
-def test_user_creation(self):
-    """Test that the user is created correctly."""
-    user = self.user
-    self.assertEqual(user.username, self.username)
-    self.assertEqual(user.email, self.email)
-    self.assertTrue(user.check_password(self.password))
-    
-    # Check that the default userType is 'USER'
-    self.assertEqual(user.userType, UserType.USER.value)
-    
-    # Ensure the user is not an admin (based on userType)
-    self.assertNotEqual(user.userType, UserType.ADMIN.value)
+    def test_user_creation(self):
+        """Test that the user is created correctly."""
+        user = self.user
+        self.assertEqual(user.username, self.username)
+        self.assertEqual(user.email, self.email)
+        self.assertTrue(user.check_password(self.password))
+        
+        # Check that the default userType is 'USER'
+        self.assertEqual(user.userType.value, "user")  # Compare with the string 'user'
+        
+        # Ensure the user is not an admin (based on userType)
+        self.assertNotEqual(user.userType.value, "admin")  # Compare with the string 'admin'
 
 
     def test_user_type_default(self):
@@ -415,18 +415,18 @@ class UserViewsTest(TestCase):
 #         with self.assertRaises(get_user_model().DoesNotExist):
 #             self.user.refresh_from_db()  # Ensure user is deleted
 
-    # def test_signup(self):
-    #     """Test user signup."""
-    #     url = reverse('signup')
-    #     data = {
-    #         'username': 'newuser',
-    #         'email': 'newuser@example.com',
-    #         'password1': 'newpassword123',
-    #         'password2': 'newpassword123'
-    #     }
-    #     response = self.client.post(url, json.dumps(data), content_type="application/json")
-    #     self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-    #     self.assertIn('token', response.json())  # Check that JWT token is returned
+#     def test_signup(self):
+#         """Test user signup."""
+#         url = reverse('signup')
+#         data = {
+#             'username': 'newuser',
+#             'email': 'newuser@example.com',
+#             'password1': 'newpassword123',
+#             'password2': 'newpassword123'
+#         }
+#         response = self.client.post(url, json.dumps(data), content_type="application/json")
+#         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+#         self.assertIn('token', response.json())  # Check that JWT token is returned
 
 #     def test_login_user(self):
 #         """Test user login."""
@@ -472,17 +472,17 @@ class UserViewsTest(TestCase):
 #         self.assertEqual(response.status_code, status.HTTP_200_OK)
 #         self.assertIn('message', response.json())
 
-    # def test_reset_password_view(self):
-    #     """Test resetting password with a valid token."""
-    #     token = 'fake-token'
-    #     uidb64 = 'fake-uid'
-    #     url = reverse('reset_password', args=[uidb64, token])
-    #     data = {
-    #         'new_password': 'newpassword123',
-    #         'confirm_password': 'newpassword123'
-    #     }
-    #     response = self.client.post(url, data)
-    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
+#     def test_reset_password_view(self):
+#         """Test resetting password with a valid token."""
+#         token = 'fake-token'
+#         uidb64 = 'fake-uid'
+#         url = reverse('reset_password', args=[uidb64, token])
+#         data = {
+#             'new_password': 'newpassword123',
+#             'confirm_password': 'newpassword123'
+#         }
+#         response = self.client.post(url, data)
+#         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
 #     def test_list_most_contributed_five_person(self):
 #         """Test listing the top 5 users by contributions."""
