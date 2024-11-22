@@ -391,53 +391,53 @@ class UserViewsTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()['user']['username'], self.username)
 
-#     def test_edit_user_profile(self):
-#         """Test editing user profile."""
-#         url = reverse('edit_user_profile', args=[self.user.pk])
-#         self.client.login(username=self.username, password=self.password)
-#         data = {
-#             'username': 'newusername',
-#             'email': 'newemail@example.com',
-#             'bio': 'Updated bio'
-#         }
-#         response = self.client.post(url, json.dumps(data), content_type="application/json")
-#         self.assertEqual(response.status_code, status.HTTP_200_OK)
-#         self.user.refresh_from_db()
-#         self.assertEqual(self.user.username, 'newusername')
-#         self.assertEqual(self.user.email, 'newemail@example.com')
+    # def test_edit_user_profile(self):
+    #     """Test editing user profile."""
+    #     url = reverse('edit_user_profile', args=[self.user.pk])
+    #     self.client.login(username=self.username, password=self.password)
+    #     data = {
+    #         'username': 'newusername',
+    #         'email': 'newemail@example.com',
+    #         'bio': 'Updated bio'
+    #     }
+    #     response = self.client.post(url, json.dumps(data), content_type="application/json")
+    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
+    #     self.user.refresh_from_db()
+    #     self.assertEqual(self.user.username, 'newusername')
+    #     self.assertEqual(self.user.email, 'newemail@example.com')
 
-#     def test_delete_user_profile(self):
-#         """Test deleting user profile."""
-#         url = reverse('delete_user_profile', args=[self.user.pk])
-#         self.client.login(username=self.username, password=self.password)
-#         response = self.client.delete(url)
-#         self.assertEqual(response.status_code, status.HTTP_200_OK)
-#         with self.assertRaises(get_user_model().DoesNotExist):
-#             self.user.refresh_from_db()  # Ensure user is deleted
+    # def test_delete_user_profile(self):
+    #     """Test deleting user profile."""
+    #     url = reverse('delete_user_profile', args=[self.user.pk])
+    #     self.client.login(username=self.username, password=self.password)
+    #     response = self.client.delete(url)
+    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
+    #     with self.assertRaises(get_user_model().DoesNotExist):
+    #         self.user.refresh_from_db()  # Ensure user is deleted
 
-#     def test_signup(self):
-#         """Test user signup."""
-#         url = reverse('signup')
-#         data = {
-#             'username': 'newuser',
-#             'email': 'newuser@example.com',
-#             'password1': 'newpassword123',
-#             'password2': 'newpassword123'
-#         }
-#         response = self.client.post(url, json.dumps(data), content_type="application/json")
-#         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-#         self.assertIn('token', response.json())  # Check that JWT token is returned
+    def test_signup(self):
+        """Test user signup."""
+        url = reverse('signup')
+        data = {
+            'username': 'newuser',
+            'email': 'newuser@example.com',
+            'password1': 'newpassword123',
+            'password2': 'newpassword123'
+        }
+        response = self.client.post(url, json.dumps(data), content_type="application/json")
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertIn('token', response.json())  # Check that JWT token is returned
 
-#     def test_login_user(self):
-#         """Test user login."""
-#         url = reverse('login')
-#         data = {
-#             'username': self.username,
-#             'password': self.password
-#         }
-#         response = self.client.post(url, json.dumps(data), content_type="application/json")
-#         self.assertEqual(response.status_code, status.HTTP_200_OK)
-#         self.assertIn('token', response.json())  # Check for the JWT token in response
+    def test_login_user(self):
+        """Test user login."""
+        url = reverse('login')
+        data = {
+            'username': self.username,
+            'password': self.password
+        }
+        response = self.client.post(url, json.dumps(data), content_type="application/json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn('token', response.json())  # Check for the JWT token in response
 
     def test_add_interested_languages_for_a_user(self):
         """Test updating user's interested languages."""
@@ -453,41 +453,41 @@ class UserViewsTest(TestCase):
         self.assertEqual(self.user.interested_topics, ['Python', 'Django'])
         self.assertEqual(self.user.known_languages, ['English', 'Spanish'])
 
-#     def test_logout_user(self):
-#         """Test user logout."""
-#         url = reverse('logout')
-#         # Get JWT token for login
-#         refresh = RefreshToken.for_user(self.user)
-#         data = {'token': str(refresh.access_token)}
-#         response = self.client.post(url, data, content_type="application/json")
-#         self.assertEqual(response.status_code, status.HTTP_200_OK)
-#         self.assertIn('status', response.json())
-#         self.assertEqual(response.json()['status'], 'success')
+    # def test_logout_user(self):
+    #     """Test user logout."""
+    #     url = reverse('logout')
+    #     # Get JWT token for login
+    #     refresh = RefreshToken.for_user(self.user)
+    #     data = {'token': str(refresh.access_token)}
+    #     response = self.client.post(url, data, content_type="application/json")
+    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
+    #     self.assertIn('status', response.json())
+    #     self.assertEqual(response.json()['status'], 'success')
 
-#     def test_reset_password_request(self):
-#         """Test requesting a password reset link."""
-#         url = reverse('reset_password')
-#         data = {'email': self.email}
-#         response = self.client.post(url, json.dumps(data), content_type="application/json")
-#         self.assertEqual(response.status_code, status.HTTP_200_OK)
-#         self.assertIn('message', response.json())
+    def test_reset_password_request(self):
+        """Test requesting a password reset link."""
+        url = reverse('reset_password')
+        data = {'email': self.email}
+        response = self.client.post(url, json.dumps(data), content_type="application/json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn('message', response.json())
 
-#     def test_reset_password_view(self):
-#         """Test resetting password with a valid token."""
-#         token = 'fake-token'
-#         uidb64 = 'fake-uid'
-#         url = reverse('reset_password', args=[uidb64, token])
-#         data = {
-#             'new_password': 'newpassword123',
-#             'confirm_password': 'newpassword123'
-#         }
-#         response = self.client.post(url, data)
-#         self.assertEqual(response.status_code, status.HTTP_200_OK)
+    # def test_reset_password_view(self):
+    #     """Test resetting password with a valid token."""
+    #     token = 'fake-token'
+    #     uidb64 = 'fake-uid'
+    #     url = reverse('reset_password', args=[uidb64, token])
+    #     data = {
+    #         'new_password': 'newpassword123',
+    #         'confirm_password': 'newpassword123'
+    #     }
+    #     response = self.client.post(url, data)
+    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-#     def test_list_most_contributed_five_person(self):
-#         """Test listing the top 5 users by contributions."""
-#         url = reverse('get_top_five_contributors')
-#         response = self.client.get(url)
-#         self.assertEqual(response.status_code, status.HTTP_200_OK)
-#         self.assertIn('users', response.json())
-#         self.assertEqual(len(response.json()['users']), 5)
+    # def test_list_most_contributed_five_person(self):
+    #     """Test listing the top 5 users by contributions."""
+    #     url = reverse('get_top_five_contributors')
+    #     response = self.client.get(url)
+    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
+    #     self.assertIn('users', response.json())
+    #     self.assertEqual(len(response.json()['users']), 5)
