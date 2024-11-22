@@ -22,7 +22,7 @@ urlpatterns = [
     path('upload-profile-pic/', user_views.upload_profile_pic, name='upload_profile_pic'),
     path('reset_password/', user_views.reset_password_request_mail, name='reset_password'),
     path('reset_password/<str:uidb64>/<str:token>/', user_views.reset_password, name='reset_password'),
-
+    path('interested_languages/', user_views.add_interested_languages_for_a_user, name='interested_languages'),
     path('get_top_five_contributors/', user_views.list_most_contributed_five_person, name='get_top_five_contributors'),
     
     path('get_question/<int:question_id>/', question_views.get_question_details, name='get_question'),

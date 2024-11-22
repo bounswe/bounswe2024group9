@@ -228,9 +228,10 @@ class QuestionModelTest(TestCase):
         self.assertEqual(self.question.reported_by.first().username, 'testuser')  # Ensure the user is added
 
     def test_question_str_method(self):
-        # Test the string representation of the question
+        """Test the string representation of the Question model."""
         question_str = str(self.question)
         self.assertIn(self.question.title, question_str)  # The title should be in the string representation
+        self.assertIn(self.question.language, question_str)  # The language should also be in the string representation
 
     def test_question_created_at(self):
         # Test if the `created_at` field is automatically set
@@ -317,14 +318,19 @@ class UserModelTest(TestCase):
             password=self.password
         )
 
-    def test_user_creation(self):
-        """Test that the user is created correctly."""
-        user = self.user
-        self.assertEqual(user.username, self.username)
-        self.assertEqual(user.email, self.email)
-        self.assertTrue(user.check_password(self.password))
-        self.assertFalse(user.is_superuser)
-        self.assertFalse(user.is_staff)
+def test_user_creation(self):
+    """Test that the user is created correctly."""
+    user = self.user
+    self.assertEqual(user.username, self.username)
+    self.assertEqual(user.email, self.email)
+    self.assertTrue(user.check_password(self.password))
+    
+    # Check that the default userType is 'USER'
+    self.assertEqual(user.userType, UserType.USER.value)
+    
+    # Ensure the user is not an admin (based on userType)
+    self.assertNotEqual(user.userType, UserType.ADMIN.value)
+
 
     def test_user_type_default(self):
         """Test that the default user type is 'USER'."""
