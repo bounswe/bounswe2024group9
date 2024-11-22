@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import "./login_signup_style.css"; 
-import { useAuth } from "./hooks/AuthProvider";
 import { useLocation } from 'react-router-dom';
 
 export const Login = () => {
@@ -8,16 +7,16 @@ export const Login = () => {
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState(null); // State for storing error messages
-  const [showLoginMessage, setShowLoginMessage] = useState(false); // State for controlling the visibility of the login message
+  const [successMessage, setSuccessMessage] = useState(null); // State for storing success message
   const [loading, setLoading] = useState(false); // State for controlling the loading indicator
 
-  // const auth = useAuth();
   const location = useLocation();
   const fromPrivate = location.state?.from === 'private';
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    setShowLoginMessage(false); // Hide the login message when the form is submitted
+    setError(null);
+    setSuccessMessage(null); // Reset success message
     setLoading(true); // Show loading indicator
 
     try {
@@ -29,20 +28,22 @@ export const Login = () => {
         body: JSON.stringify({
           username,
           password,
-          //remember: rememberMe ? 'on' : '',
         }),
         credentials: 'same-origin',
       });
 
-      
       if (response.ok) {
         setError(null);
-        // auth.login();
         const data = await response.json();
         localStorage.setItem('authToken', data['token']);
         localStorage.setItem('user_id', data['user_id']);
         localStorage.setItem('username', username);
-        window.location.href = '/feed';
+
+        // Display success message
+        setSuccessMessage("Login successful! Logging you in...");
+        setTimeout(() => {
+          window.location.href = '/feed'; // Redirect to feed after a short delay
+        }, 2000);
       } else {
         const data = await response.json();
         // Display error message if login failed
@@ -56,25 +57,27 @@ export const Login = () => {
     }
   };
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowLoginMessage(true); // Show the message after 0.5 seconds
-    }, 800);
-
-    return () => clearTimeout(timer); // Clear the timer if the component is unmounted
-  }, []);
-
   return (
-    <div className="wrapper_entrance">
+    <div className="wrapper_entrance"
+    style={{
+      background: `url('/resources/login-signup-bg.png')`,
+      backgroundSize: 'cover',
+      backgroundPosition: 'center bottom',
+      backgroundRepeat: 'no-repeat',
+    }}
+    >
       <div className="container_center">
-        <h2>Sign In
-        </h2>
-        <div className="error-message" id="not_logged_in">
-          {fromPrivate && showLoginMessage && <p>Please log in to continue.</p>}
-        </div>
-        <div className="error-message">
-          {error && <p>{error}</p>}
-        </div>
+        <h2>Sign In</h2>
+        {/* Message for login required */}
+        {fromPrivate && (
+          <div className="info-message">
+            <p>Please log in to continue.</p>
+          </div>
+        )}
+        {/* Display error or success messages */}
+        {error && <div className="error-message"><p>{error}</p></div>}
+        {successMessage && <div className="success-message"><p>{successMessage}</p></div>}
+
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label htmlFor="username">Username:</label>
@@ -111,9 +114,9 @@ export const Login = () => {
           </div>
           {loading ? (
             <button type="submit" className="login-button loading" disabled>Loading...</button>
-            ) : (
+          ) : (
             <button type="submit" className="login-button">Login</button>
-            )}
+          )}
         </form>
         <div className="signup-redirect">
           Don't have an account? <a href="/signup">Sign up now</a>

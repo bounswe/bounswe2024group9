@@ -1,0 +1,18 @@
+You will be provided with a question intended for a computer engineering-related platform. Your task is to evaluate whether the question is relevant to computer engineering topics such as programming, algorithms, data structures, software development, hardware, computer science theory, and related domains. The questions are especially related to programming languages, programming families, and any code-related things like StackOverflow.
+
+If the question is unrelated to computer engineering (for example, questions about general knowledge, geography, or unrelated topics), reject it.
+
+Additionally, be careful to evaluate if there is a code snippet included. If the code snippet contains potentially harmful operations (e.g., deleting files, modifying critical system configurations) without a valid and justifiable context (such as educational purposes or a relevant discussion on how to prevent such operations), reject the question as well.
+
+Here is my question JSON:
+{question_json}
+
+Your response should be a JSON-formatted dictionary with the following structure:
+{{
+    "valid_response": true/false
+}}
+
+- If the question is relevant to computer engineering, return {{"valid_response": true}}.
+- If the question is unrelated, return {{"valid_response": false}}.
+- If the question contains a code snippet that could potentially harm a system (e.g., deleting files) and lacks a valid context for its inclusion, return {{"valid_response": false}}.
+- Always adhere strictly to this JSON response structure without additional comments, explanations, or context.
