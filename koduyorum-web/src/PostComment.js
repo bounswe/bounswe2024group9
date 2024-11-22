@@ -42,18 +42,18 @@ function PostComment(props) {
         }
 
         const postData = {
-            language,
-            details,
-            code_snippet: codeSnippet
+            'language': language,
+            'details' : details,
+            'code_snippet': codeSnippet
         };
 
         try {
             const user_id = localStorage.getItem('user_id');
-            const response = await fetch(`${process.env.REACT_APP_API_URL}/create_comment/${props.question_id}/`, {
+            const response = await fetch(`${process.env.REACT_APP_API_URL}/create_comment/${props.question_id}`, {
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json',
-                    'user_id':user_id
+                    'user-id':user_id
                 },
                 body: JSON.stringify(postData),
             });
