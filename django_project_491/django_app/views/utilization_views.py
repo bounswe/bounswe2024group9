@@ -246,7 +246,7 @@ def run_code_of_question_or_comment(request, type: str, id: int):
     return JsonResponse({'output': outs})
 
 
-
+@csrf_exempt
 def upvote_object(request, object_type: str, object_id: int):
     """
     Handles the upvoting of a specified object (question or comment) by a user.
@@ -283,7 +283,7 @@ def upvote_object(request, object_type: str, object_id: int):
         existing_vote = Question_Vote.objects.filter(user=user, question=question).first()
         if existing_vote:
             if existing_vote.vote_type == VoteType.UPVOTE.value:
-                return JsonResponse({'error': 'You have already upvoted this question'}, status=400)
+                return JsonResponse({'error': 'You have already upvoted this question'}, status=409)
             else:
                 # Change existing downvote to upvote 
                 existing_vote.vote_type = VoteType.UPVOTE.value
@@ -312,7 +312,7 @@ def upvote_object(request, object_type: str, object_id: int):
         existing_vote = Comment_Vote.objects.filter(user=user, comment=comment).first()
         if existing_vote:
             if existing_vote.vote_type == VoteType.UPVOTE.value:
-                return JsonResponse({'error': 'You have already upvoted this comment'}, status=400)
+                return JsonResponse({'error': 'You have already upvoted this comment'}, status=409)
             else:
                 # Change existing downvote to upvote
                 existing_vote.vote_type = VoteType.UPVOTE.value
