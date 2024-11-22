@@ -13,6 +13,9 @@ const Profile = () => {
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(true);
     const [isOwner, setIsOwner] = useState(false);
+    const [isEditPopupOpen, setEditPopupOpen] = useState(false); // To toggle edit popup
+    const [editData, setEditData] = useState({}); // For editing profile fields
+    const [successMessage, setSuccessMessage] = useState(""); // To show success messages
 
     useEffect(() => {
         const fetchProfile = async () => {
@@ -23,12 +26,16 @@ const Profile = () => {
                 );
                 if (response.ok) {
                     const data = await response.json();
+                    
                     setProfileData(data.user);
-                    const updatedProfilePictureUrl = `${process.env.REACT_APP_API_URL}${data.user['profile_pic']}`;
-                    setProfileData((prevData) => ({
-                        ...prevData,
-                        profilePicture: updatedProfilePictureUrl,
-                    }));
+                    if (data.user['profile_pic'] != null) {    
+                      const updatedProfilePictureUrl = `${process.env.REACT_APP_API_URL}${data.user['profile_pic']}`;
+                      console.log(data.user['profile_pic'])
+                      setProfileData((prevData) => ({
+                          ...prevData,
+                          profilePicture: updatedProfilePictureUrl,
+                      }));
+                    }
 
                     // Check ownership
                     const loggedInUsername = localStorage.getItem('username');
@@ -91,30 +98,63 @@ const Profile = () => {
         }
     };
 
-    const handleNameChange = async () => {
-        const newName = prompt('Enter your new name:');
-        if (newName) {
-            try {
-                const response = await fetch(
-                    `${process.env.REACT_APP_API_URL}/edit_user_profile/${profileData.id}/`,
-                    {
-                        method: 'PUT',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'User-ID': profileData.id,
-                        },
-                        body: JSON.stringify({ name: newName }),
-                    }
-                );
-                if (response.ok) {
-                    setProfileData((prevData) => ({ ...prevData, name: newName }));
-                } else {
-                    console.error('Failed to update name');
-                }
-            } catch (error) {
-                console.error('Error updating name:', error);
-            }
+    // Handle opening the edit popup
+  const openEditPopup = () => {
+    setEditData({
+      username: profileData.username,
+      email: profileData.email,
+      bio: profileData.bio || "",
+    });
+    setEditPopupOpen(true);
+  };
+
+  // Handle closing the edit popup
+  const closeEditPopup = () => {
+    setEditPopupOpen(false);
+    setError("");
+    setSuccessMessage("");
+  };
+
+  // Handle editing profile
+  const handleEditSubmit = async (event) => {
+    event.preventDefault();
+
+    const userId = localStorage.getItem('user_id');
+    if (!userId) {
+      console.error('User ID is undefined in localStorage');
+      setError("Unable to update profile. Please try again later.");
+      return;
+    }
+
+    try {
+      const response = await fetch(
+          `${process.env.REACT_APP_API_URL}/edit_user_profile/${userId}/`,
+          {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'User-ID': userId,
+            },
+            body: JSON.stringify(editData),
+          }
+        );
+
+        if (response.ok) {
+          const updatedProfile = await response.json();
+          setProfileData((prevData) => ({
+            ...prevData,
+            ...editData,
+          }));
+          setSuccessMessage("Profile updated successfully!");
+          setTimeout(closeEditPopup, 2000); // Automatically close popup after success
+        } else {
+          const data = await response.json();
+          setError(data.error || "Failed to update profile. Please try again.");
         }
+      } catch (error) {
+        console.error('Error updating profile:', error);
+        setError("An error occurred while updating your profile.");
+      }
     };
 
     const handleDeleteAccount = async () => {
@@ -177,7 +217,7 @@ const Profile = () => {
                 <div className="profile-header">
                     <div className="profile-picture">
                         <img
-                            src={profileData.profilePicture || '/resources/default-pp.jpeg'}
+                            src={profileData.profilePicture || `/resources/default-pp.jpeg`}
                             alt="Profile"
                         />
                         {isOwner && (
@@ -188,29 +228,32 @@ const Profile = () => {
                         )}
                     </div>
                     <div className="profile-name">
-                        <h2>{profileData.name || profileData.username}</h2>
+                        <h1>{profileData.username}</h1>
+                        <p className="bio">{profileData.bio || "No bio provided."}</p>
                         {isOwner && (
-                            <button className="edit-button" onClick={handleNameChange}>
-                                Edit Name
+                            <button className="edit-button" onClick={openEditPopup}>
+                                Edit Profile
                             </button>
                         )}
                     </div>
                 </div>
 
-                <div className="profile-tabs">
-                    <button
-                        className={`tab ${activeTab === 'questions' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('questions')}
-                    >
-                        Questions
-                    </button>
-                    <button
-                        className={`tab ${activeTab === 'bookmarks' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('bookmarks')}
-                    >
-                        Bookmarks
-                    </button>
-                </div>
+                {isOwner && (
+                  <div className="profile-tabs">
+                      <button
+                          className={`tab ${activeTab === 'questions' ? 'active' : ''}`}
+                          onClick={() => setActiveTab('questions')}
+                      >
+                          Questions
+                      </button>
+                      <button
+                          className={`tab ${activeTab === 'bookmarks' ? 'active' : ''}`}
+                          onClick={() => setActiveTab('bookmarks')}
+                      >
+                          Bookmarks
+                      </button>
+                  </div>
+                )}
 
                 <div className="profile-content">
                     {activeTab === 'questions' && (
@@ -257,11 +300,52 @@ const Profile = () => {
                 
                 {isOwner && (
                     <div className="account-actions">
-                        <button onClick={handlePasswordUpdate}>Update Password</button>
+                        <button className="edit-button" onClick={handlePasswordUpdate}>Update Password</button>
                         <button onClick={handleDeleteAccount} className="delete-account">
                             Delete Account
                         </button>
                     </div>
+                )}
+
+                {isEditPopupOpen && (
+                  <div className="edit-popup">
+                    <div className="popup-content">
+                      <h3>Edit Profile</h3>
+                      {error && <p className="error-message">{error}</p>}
+                      {successMessage && <p className="success-message">{successMessage}</p>}
+                      <form onSubmit={handleEditSubmit}>
+                        <div className="form-group">
+                          <label>Username:</label>
+                          <input
+                            type="text"
+                            value={editData.username}
+                            onChange={(e) => setEditData({ ...editData, username: e.target.value })}
+                            required
+                          />
+                        </div>
+                        <div className="form-group">
+                          <label>Email:</label>
+                          <input
+                            type="email"
+                            value={editData.email}
+                            onChange={(e) => setEditData({ ...editData, email: e.target.value })}
+                            required
+                          />
+                        </div>
+                        <div className="form-group">
+                          <label>Bio:</label>
+                          <textarea
+                            value={editData.bio}
+                            onChange={(e) => setEditData({ ...editData, bio: e.target.value })}
+                          />
+                        </div>
+                        <button type="submit" className="save-button">Save Changes</button>
+                        <button type="button" className="cancel-button" onClick={closeEditPopup}>
+                          Cancel
+                        </button>
+                      </form>
+                    </div>
+                  </div>
                 )}
             </div>
             )}

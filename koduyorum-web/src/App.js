@@ -12,7 +12,7 @@ import SurveyPage from './SurveyPage';
 import PostQuestion from './PostQuestion';
 import AuthWrapper from './AuthWrapper';
 import Profile from './Profile';
-
+// import ResetPassword from './ResetPassword';
 
 const App = () => {
   return (
@@ -28,6 +28,7 @@ const App = () => {
         <Route path="/survey" element={<SurveyPage />} />
         <Route path="/post_question" element={<AuthWrapper><PostQuestion /></AuthWrapper>} />
         <Route path="/profile/:username" element={<AuthWrapper><Profile /></AuthWrapper>} />
+        {/* <Route path="/reset_password/:uid/:token" element={<ResetPassword /> }/> */}
       </Routes>
     </Router>
   );
