@@ -101,20 +101,6 @@ def get_user_profile_by_id(request, user_id : int) -> JsonResponse:
 #TODO find what can be changed in the user profile.
 @csrf_exempt
 def edit_user_profile(request, will_be_edited_user_id : int) -> JsonResponse:
-    def edit_user_profile(request, will_be_edited_user_id: int) -> JsonResponse:
-        """
-        Edits the user profile based on the provided user ID and request data.
-        Args:
-            request: The HTTP request object containing headers and body data.
-            will_be_edited_user_id (int): The ID of the user whose profile will be edited.
-        Returns:
-            JsonResponse: A JSON response indicating the success or failure of the profile update.
-        Raises:
-            JsonResponse: If the 'User-ID' header is missing or invalid, or if the user does not have permission to edit the profile.
-        Notes:
-            - Only admins and the owner of the profile can edit user profiles.
-            - The request body should contain the fields to be updated (e.g., 'username', 'email', 'bio', 'profile_pic').
-        """
     wants_to_edit_user_id = request.headers.get('User-ID', None)
     if wants_to_edit_user_id is None:
         return JsonResponse({'error': 'User ID parameter is required in the header'}, status=400)
@@ -285,12 +271,12 @@ def login_user(request : HttpRequest) -> HttpResponse:
             return JsonResponse({'error': 'Malformed data, error: ' + str(e)}, status=400)
 
         # Authenticate the user
-        user = authenticate(username=username, password=password)
+        user : User = authenticate(username=username, password=password)
         if user is not None:
             # Authentication successful, log in the user
             login(request, user)
             refresh = RefreshToken.for_user(user)
-            return JsonResponse({'status': 'success', 'user_id': user.pk, 'token': str(refresh.access_token)}, status=200)
+            return JsonResponse({'status': 'success', 'user_id': user.pk, 'token': str(refresh.access_token), 'user_type' : user.userType}, status=200)
         else:
             # Authentication failed, log the failed attempt and return an error
             print("Failed login attempt for username:", username)
