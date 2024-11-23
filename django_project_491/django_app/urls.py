@@ -24,6 +24,8 @@ urlpatterns = [
 
     path('get_top_five_contributors/', user_views.list_most_contributed_five_person, name='get_top_five_contributors'),
     
+    path('fetch_feed_at_once/<int:user_id>/', question_views.fetch_all_at_once, name='get_user_profile'),
+
     path('get_question/<int:question_id>/', question_views.get_question_details, name='get_question'),
     path('question/<int:question_id>/comments/', question_views.get_question_comments, name='get_question_comments'),
     path('create_question/', question_views.create_question, name='create_question'),
@@ -50,7 +52,7 @@ urlpatterns = [
     path('delete_comment/<int:comment_id>', comment_views.delete_comment, name='delete_comment'),
     path('mark_comment_as_answer/<int:comment_id>', comment_views.mark_comment_as_answer, name='mark_comment_as_answer'),
 
-    path('run_code/<str:type>/<int:id>', utilization_views.run_code_of_question_or_comment, name='run_code'),
+    path('run_code/<str:type>/<int:id>/', utilization_views.run_code_of_question_or_comment, name='run_code'),
 
 
     path('list_questions/', question_views.list_questions_by_language, name='list_questions'),

@@ -38,6 +38,7 @@ export const Login = () => {
         localStorage.setItem('authToken', data['token']);
         localStorage.setItem('user_id', data['user_id']);
         localStorage.setItem('username', username);
+        localStorage.setItem('user_type', data['user_type']);
 
         // Display success message
         setSuccessMessage("Login successful! Logging you in...");
