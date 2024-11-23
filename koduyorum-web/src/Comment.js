@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { Navigate, useParams } from "react-router-dom";
 import * as PropTypes from "prop-types";
 import SyntaxHighlighter from "react-syntax-highlighter";
 import { docco } from "react-syntax-highlighter/dist/esm/styles/hljs";
+import { faThumbsUp, faCommentDots, faThumbsDown } from '@fortawesome/free-solid-svg-icons';
+import './QuestionDetail.css';
 
 function Comment(props) {
 
     const [votes, setVotes] = useState(props.initialVotes);
-    const [isOwner] = useState(props.author| "" );
+    const [isQuestionOwner] = useState(true);
+    const [isCommentOwner] = useState(true);
     const [isAnswer] = useState(props.answer_of_the_question | false);
   
     // Vote handlers
@@ -54,7 +57,48 @@ function Comment(props) {
         console.error('Error upvoting:', error);
       }
     };
+    const handleEditComment = async () => {
+      const token = localStorage.getItem('authToken');
+      try {
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/downvote_object/comment/${props.comment_id}/`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'User-ID': localStorage.getItem('user_id'),
+            'Authorization': `Bearer ${token}`
+          },
+        });
   
+        if (response.ok) {
+          
+          const data = await response.json();
+          setVotes(data.success);
+        }
+      } catch (error) {
+        console.error('Error upvoting:', error);
+      }
+    };
+    const handleDeleteComment = async () => {
+      const token = localStorage.getItem('authToken');
+      try {
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/delete_comment/${props.comment_id}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'User-ID': localStorage.getItem('user_id'),
+            'Authorization': `Bearer ${token}`
+          },
+        });
+  
+        if (response.ok) {
+          
+          const data = await response.json();
+          Navigate(`/question/${props.question_id}`);
+        }
+      } catch (error) {
+        console.error('Error upvoting:', error);
+      }
+    };
     return (
         <div className="p-4 border border-gray-300 rounded">
             <h3 className="font-semibold text-gray-700">Answer {props.number}</h3>
@@ -79,15 +123,30 @@ function Comment(props) {
                     >
                         Downvote
                     </button>
+            {isCommentOwner && (<>
+              <button
+                className="px-4 py-2 bg-yellow-500 text-white text-sm font-semibold rounded hover:bg-yellow-600"
+                onClick={handleEditComment}
+              >
+                Edit Comment
+              </button>
+              <button
+                className="px-4 py-2 bg-red-500 text-white text-sm font-semibold rounded hover:bg-red-600"
+                onClick={handleDeleteComment}
+              >
+                Delete Comment
+              </button>
+            </>
+            )}
                 </div>
+                <p className="username ">@{props.author}</p>
             </div>
-            <p className="text-sm text-blue-300 text-right ">By {props.author}</p>
         </div>
     );
   }
   
   Comment.propTypes = {
-    comment_id : PropTypes.number,
+    question_id : PropTypes.number,
     language: PropTypes.string,
     code: PropTypes.string,
     explanation: PropTypes.string,

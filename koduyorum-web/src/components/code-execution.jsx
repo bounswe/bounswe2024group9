@@ -151,7 +151,7 @@ export default function CodeExecution() {
 
         <div className="space-y-6">
 
-          {questionData.upvote_count && (<QuestionDetail
+          <QuestionDetail
             inputType="Question"
             explanation={questionData.details}
             code={questionData.code_snippet}
@@ -161,7 +161,7 @@ export default function CodeExecution() {
             initialVotes={questionData.upvote_count}
             question_id={question_id}
 
-          />)}
+          />
           {questionData.code_snippet && (
             <button
               className="bg-blue-600 text-white px-4 py-2 mt-4"
@@ -185,7 +185,7 @@ export default function CodeExecution() {
               commentData.map((comment, index) => (
                 <React.Fragment key={index}>
                   <Comment
-                    inputType="Answer"
+                    question_id={question_id}
                     number={index + 1}
                     explanation={comment.details}
                     code={comment.code_snippet}

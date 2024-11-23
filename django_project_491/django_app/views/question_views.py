@@ -242,7 +242,6 @@ def edit_question(request: HttpRequest, question_id: int) -> HttpResponse:
     except Exception as e:
         return JsonResponse({'error': f'An error occurred: {str(e)}'}, status=500)
 
-
 @csrf_exempt
 def delete_question(request: HttpRequest, question_id: int) -> HttpResponse:
     """
@@ -271,14 +270,15 @@ def delete_question(request: HttpRequest, question_id: int) -> HttpResponse:
 
     try:
         question = Question.objects.get(_id=question_id)
-        question_owner_user_id = question.author.id
+        question_owner_user_id = question.author.user_id
 
-        if deletor_user.id != question_owner_user_id and deletor_user.userType != UserType.ADMIN:
+        if deletor_user.user_id != question_owner_user_id and deletor_user.userType != UserType.ADMIN:
             return JsonResponse({'error': 'Only admins and owner of the questions can delete questions'}, status=403)
 
         question.delete()
+        return JsonResponse({'success': 'Question Deleted Successfully'}, status=200)
 
-        deletor_user.questions.remove(question)
+        #deletor_user.questions.remove(question)
 
     except Question.DoesNotExist:
         return JsonResponse({'error': 'Question not found'}, status=404)
