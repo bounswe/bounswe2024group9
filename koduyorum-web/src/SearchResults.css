@@ -50,7 +50,9 @@
    
 }
 .info-container {
-    margin: 0;
+    margin: 0 auto;
+    width: 70%; 
+    padding: 1rem; 
   }
 
 .language-title {

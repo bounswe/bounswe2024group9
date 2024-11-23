@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Navbar, LeftSidebar, RightSidebar } from './PageComponents'; 
 import { LoadingComponent }  from './LoadingPage'
 import './SearchResults.css';
+import PostPreview from "./PostPreview";
 
 const SearchResults = () => {
   const [activeTab, setActiveTab] = useState('info');
@@ -211,7 +212,7 @@ const fetchSearchResults = async (query) => {
       </div>
           {activeTab === 'info' ? (
             <div className="info-box">
-              <h2 className="language-title">{wiki_name}</h2>
+              <h2  style={{paddingBottom: '0.5rem', borderBottom: '1px solid #ccc' }}className="language-title">{wiki_name}</h2>
               {infoData.mainInfo.length > 0 && (
                 <div>
                   <p><strong>Inception Date:</strong> {new Date(infoData?.mainInfo?.[0]?.inceptionDate?.value).toLocaleDateString() || "N/A"}</p>
@@ -248,16 +249,15 @@ const fetchSearchResults = async (query) => {
               )}
             </div>
           ) : (
-            <div>
-              <h2>{questionData.length} Questions</h2>
-              {questionData.map((question, index) => (
-                <div key={index} className="post-card">
-                  <h3>{question.title}</h3>
-                  <p>{question.summary}</p>
-                  <p><strong>Status:</strong> {question.status}</p>
-                  <p><strong>Date:</strong> {question.date}</p>
-                </div>
-              ))}
+            <div className="questions-list">
+              <h2 style={{ marginBottom: '1rem', paddingBottom: '0.5rem', borderBottom: '1px solid #ccc', fontSize: '1.5rem' }}>{questionData.length} Questions</h2>
+              {questionData.length > 0 ? (
+                questionData.map((question) => (
+                  <PostPreview key={question.id} post={question} onClick={() => navigate(`/question/${question.id}`)} />
+                ))
+              ) : (
+                <p>No questions found</p>
+              )}
             </div>
           )}
         </div>

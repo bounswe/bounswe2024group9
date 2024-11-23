@@ -224,11 +224,12 @@ def list_questions_by_language(request, language: str, page_number = 1) -> HttpR
     questions_data = [{
         'id': question._id,
         'title': question.title,
-        'language': question.language,
+        'programmingLanguage': question.language,
         'tags': question.tags,
         'details': question.details,
         'code_snippet': question.code_snippet,
-        'likes': question.upvotes,
+        'upvotes': question.upvotes,
+        'author': question.author.username,
         'creationDate': question.created_at .strftime('%Y-%m-%d %H:%M:%S'),
     } for question in questions]
     
