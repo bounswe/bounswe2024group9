@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef  } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Navbar, LeftSidebar, RightSidebar } from './PageComponents'; 
 import { LoadingComponent }  from './LoadingPage'
+import { fetchWikiIdAndName } from './Feed'; 
 import './SearchResults.css';
 import PostPreview from "./PostPreview";
 
@@ -58,6 +59,9 @@ const handleSearchResultClick = async (result) => {
     console.log("Wiki ID and Name:", wikiId, wikiName);
     if (wikiId) {
         console.log("Navigating to:", `/result/${wikiId}/${encodeURIComponent(wikiName)}`);
+        setSearched(false);
+        setSearchQuery("");
+        setSearchResults([]); 
         navigate(`/result/${wikiId}/${encodeURIComponent(wikiName)}`);
     } else {
         console.error("No wiki ID found for search result:", result);
@@ -215,27 +219,54 @@ const fetchSearchResults = async (query) => {
               <h2  style={{paddingBottom: '0.5rem', borderBottom: '1px solid #ccc' }}className="language-title">{wiki_name}</h2>
               {infoData.mainInfo.length > 0 && (
                 <div>
-                  <p><strong>Inception Date:</strong> {new Date(infoData?.mainInfo?.[0]?.inceptionDate?.value).toLocaleDateString() || "N/A"}</p>
-                  <p><strong>Website:</strong> {infoData?.mainInfo?.[0]?.website?.value ? (
-                    <a href={infoData.mainInfo[0].website.value} target="_blank" rel="noopener noreferrer">{infoData.mainInfo[0].website.value}</a>
-                  ) : "N/A"}</p>
-                  <p><strong>Influenced By:</strong> {infoData?.mainInfo?.[0]?.influencedByLabel?.value ?? "N/A"}</p>
-                  <p><strong>Wikipedia Link:</strong> {infoData?.mainInfo?.[0]?.wikipediaLink?.value ? (
-                    <a href={infoData.mainInfo[0].wikipediaLink.value} target="_blank" rel="noopener noreferrer">{infoData.mainInfo[0].wikipediaLink.value}</a>
-                  ) : "N/A"}</p>
+                  {infoData?.mainInfo?.[0]?.inceptionDate?.value && (
+                    <p>
+                      <strong>Inception Date:</strong> {new Date(infoData.mainInfo[0].inceptionDate.value).toLocaleDateString()}
+                    </p>
+                  )}
+                  {infoData?.mainInfo?.[0]?.website?.value && (
+                    <p>
+                      <strong>Website:</strong>{' '}
+                      <a href={infoData.mainInfo[0].website.value} target="_blank" rel="noopener noreferrer">
+                        {infoData.mainInfo[0].website.value}
+                      </a>
+                    </p>
+                  )}
+                  {infoData?.mainInfo?.[0]?.influencedByLabel?.value && (
+                    <p>
+                      <strong>Influenced By:</strong> {infoData.mainInfo[0].influencedByLabel.value}
+                    </p>
+                  )}
+                  {infoData?.mainInfo?.[0]?.wikipediaLink?.value && (
+                    <p>
+                      <strong>Wikipedia Link:</strong>{' '}
+                      <a href={infoData.mainInfo[0].wikipediaLink.value} target="_blank" rel="noopener noreferrer">
+                        {infoData.mainInfo[0].wikipediaLink.value}
+                      </a>
+                    </p>
+                  )}
                 </div>
               )}
               {infoData.instances.length > 0 && (
                 <div>
-                  <h3>Related Instances</h3>
+                  <br></br>
+                  <h3><strong>Related Instances</strong></h3>
                   <ul className="related-instances">
                     {infoData.instances.map((instance, index) => (
                       <li key={index}>
                         <strong>{instance.instanceLabel}:</strong>
                         <ul>
                           {instance.relatedLanguages.map((lang, i) => (
-                            <li key={i}>{lang.relatedLanguageLabel}</li>
+                            <li key={i}>
+                              <button
+                                className="related-instance-link"
+                                onClick={() => handleRelatedInstanceClick(lang, navigate)}
+                              >
+                                {lang.relatedLanguageLabel}
+                              </button>
+                            </li>
                           ))}
+                          <br></br>
                         </ul>
                       </li>
                     ))}
@@ -271,3 +302,13 @@ const fetchSearchResults = async (query) => {
 };
 
 export default SearchResults;
+export const handleRelatedInstanceClick = async (instance, navigate) => {
+  const wikiIdAndName = await fetchWikiIdAndName(instance.relatedLanguageLabel);
+  const wikiId = wikiIdAndName[0];
+  const wikiName = wikiIdAndName[1];
+  if (wikiId) {
+    navigate(`/result/${wikiId}/${encodeURIComponent(wikiName)}`);
+  } else {
+    console.error("No wiki ID found for related instance:", instance);
+  }
+};

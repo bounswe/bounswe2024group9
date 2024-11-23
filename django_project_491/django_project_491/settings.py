@@ -157,7 +157,7 @@ from datetime import timedelta
 SIMPLE_JWT = {
     'USER_ID_FIELD': 'user_id',  # Specify custom primary key field
     'USER_ID_CLAIM': 'user_id',
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),  # Short-lived access token
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=59),  # Short-lived access token
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),    # Long-lived refresh token
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,  # Ensures tokens are blacklisted after rotation
@@ -204,3 +204,12 @@ CACHES = {
         'LOCATION': 'unique-snowflake',
     }
 }
+
+
+# Email settings
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'  
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
+EMAIL_PORT = 465  
+EMAIL_USE_SSL = True  
