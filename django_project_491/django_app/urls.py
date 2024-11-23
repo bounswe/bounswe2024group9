@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import comment_views, question_views, user_views, utilization_views
+from .views import comment_views, question_views, user_views, utilization_views, annotation_views
 from django.conf.urls.static import static
 from django.conf import settings
 
@@ -62,6 +62,13 @@ urlpatterns = [
     path('specific_feed/<int:user_id>/', question_views.list_questions_according_to_the_user, name='specific_feed'),
     path('question_of_the_day/', question_views.question_of_the_day, name='question_of_the_day'),
     path('daily_question/', question_views.question_of_the_day, name='wiki_search'),
+
+
+    path('create_annotation/', annotation_views.create_annotation, name='create_annotation'),
+    path('delete_annotation/<int:annotation_id>/', annotation_views.delete_annotation, name='delete_annotation'),
+    path('edit_annotation/<int:annotation_id>/', annotation_views.edit_annotation, name='edit_annotation'),
+    path('get_annotations_by_language/<int:language_qid>/', annotation_views.get_annotations_by_language, name='get_annotations_by_language'),
+    path('annotations/all/', annotation_views.get_all_annotations, name='get_all_annotations'),
     path('multi_search/', user_views.multi_search, name='multi_search'),
     path('get_user_profile_by_id/<int:user_id>/', user_views.get_user_profile_by_id, name='get_user_profile_by_id'),
 
