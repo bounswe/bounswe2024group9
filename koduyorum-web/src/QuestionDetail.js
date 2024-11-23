@@ -3,14 +3,19 @@ import { useParams } from "react-router-dom";
 import * as PropTypes from "prop-types";
 import SyntaxHighlighter from "react-syntax-highlighter";
 import { docco } from "react-syntax-highlighter/dist/esm/styles/hljs";
+import { faThumbsUp, faCommentDots, faThumbsDown } from '@fortawesome/free-solid-svg-icons';
+import './QuestionDetail.css';
 
 function QuestionDetail(props) {
 
     const [votes, setVotes] = useState(props.initialVotes);
     const [isOwner] = useState(props.author| "" );
-  
+    //Todo implement ownership logic for enabling buttons
+
+    const [isAnswered] = useState(false);
+    //Todo implement logic for answering question
+
     // Vote handlers
-  
     const handlePostUpvote = async () => {
       const token = localStorage.getItem('authToken');
       try {
@@ -56,10 +61,16 @@ function QuestionDetail(props) {
   
     return (
       <div className="p-4 border border-gray-300 rounded">
-  
+        <div className={`status-label ${isAnswered ? 'answered' : 'unanswered'}`}>
+                    {isAnswered ? 'Answered' : 'Unanswered'}
+                </div>
+            <div className="flex flex-wrap gap-2 mt-1">
+                
+            </div>
+
+               
         {props.language && (
           <div className="mt-3">
-            <p className="text-sm font-medium text-gray-500">Language:</p>
             <div className="flex flex-wrap gap-2 mt-1">
               <span
                 className="bg-green-100 text-green-800 text-xs font-semibold px-2 py-1 rounded"
@@ -72,7 +83,6 @@ function QuestionDetail(props) {
         )}
         {props.tags && (
           <div className="mt-3">
-            <p className="text-sm font-medium text-gray-500">Tags:</p>
             <div className="flex flex-wrap gap-2 mt-1">
               {props.tags.map((tag, index) => (
                 <span
@@ -108,10 +118,11 @@ function QuestionDetail(props) {
                   Downvote
                 </button>
               </div>
+              <p className="username ">@{props.author}</p>
             </div>
           </>
         }
-        <p className="text-sm text-blue-300 text-right ">By {props.author}</p>
+        
       </div>
     );
   }
