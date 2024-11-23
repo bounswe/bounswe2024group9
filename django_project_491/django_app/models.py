@@ -77,10 +77,8 @@ class Question(models.Model):
     tags = models.JSONField(blank=True, default=list)  # Example: ['tag1', 'tag2']
     details = models.TextField()
     code_snippet = models.TextField()
-
     upvotes = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
-    topic = models.CharField(max_length=100, blank=True)
     answered = models.BooleanField(default=False)
     reported_by = models.ManyToManyField('User', related_name='reported_questions', blank=True)
 

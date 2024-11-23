@@ -61,7 +61,6 @@ def get_question_details(request: HttpRequest, question_id: int) -> HttpResponse
             'author': question.author.username,
             'comments_count': question.comments.count(),
             'answered': question.answered,
-            'topic': question.topic,
             'reported_by': [user.username for user in question.reported_by.all()],
             'upvoted_by': [vote.user.username for vote in question.votes.filter(vote_type=VoteType.UPVOTE.value)],
             'downvoted_by': [vote.user.username for vote in question.votes.filter(vote_type=VoteType.DOWNVOTE.value)]
@@ -471,7 +470,6 @@ def random_questions(request):
         'codeSnippet': question.code_snippet,
         'tags': question.tags,
         'answered': question.answered,
-        'topic': question.topic
     } for question in questions]
     print(questions_data)
     return JsonResponse({'questions': questions_data}, safe=False)
@@ -518,7 +516,6 @@ def question_of_the_day(request):
             'codeSnippet': question.code_snippet,
             'tags': question.tags,
             'answered': question.answered,
-            'topic': question.topic
         }
 
         today = timezone.localdate()  # This gives you a timezone-aware date object
@@ -734,7 +731,6 @@ def fetch_random_reported_question(request: HttpRequest) -> HttpResponse:
         'author' : question.author.username,
         'comments_count': question.comments.count(),
         'answered': question.answered,
-        'topic': question.topic,
         'reported_by': [user.username for user in question.reported_by.all()],
         'upvoted_by': [vote.user.username for vote in question.votes.filter(vote_type=VoteType.UPVOTE.value)],
         'downvoted_by': [vote.user.username for vote in question.votes.filter(vote_type=VoteType.DOWNVOTE.value)],   
