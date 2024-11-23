@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Navigate, useParams } from "react-router-dom";
+import { useNavigate } from 'react-router-dom';
 import * as PropTypes from "prop-types";
 import SyntaxHighlighter from "react-syntax-highlighter";
 import { docco } from "react-syntax-highlighter/dist/esm/styles/hljs";
@@ -10,6 +11,7 @@ function QuestionDetail(props) {
 
     const [votes, setVotes] = useState(props.initialVotes);
     const [isOwner] = useState(true);
+    const navigate = useNavigate();
     //Todo implement ownership logic for enabling buttons
 
     const [isAnswered] = useState(false);
@@ -94,7 +96,7 @@ function QuestionDetail(props) {
           if (response.ok) {
             
             const data = await response.json();
-            Navigate(`/feed`);
+            navigate(`/feed`);
           }
         } catch (error) {
           console.error('Error deleting:', error);

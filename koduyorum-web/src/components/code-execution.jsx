@@ -113,6 +113,7 @@ export default function CodeExecution() {
     fetchQuestion();
     fetchComments();
     fetchLanguages();
+    
   }, []);
 
   // Function to handle form submission and send the code to the backend
@@ -192,6 +193,7 @@ export default function CodeExecution() {
                     author={comment.user}
                     initialVotes={comment.upvotes}
                     comment_id={comment.comment_id}
+                    answer_of_the_question = {comment.answer_of_the_question}
                   />
                   {comment.code_snippet && (
                     <button
