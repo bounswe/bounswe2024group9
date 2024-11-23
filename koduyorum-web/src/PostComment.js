@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './PostQuestion.css';
+import * as PropTypes from "prop-types";
+import './PostComment.css';
 
-function PostQuestion() {
-    const [title, setTitle] = useState('');
+function PostComment(props) {
     const [details, setDetails] = useState('');
     const [codeSnippet, setCodeSnippet] = useState('');
     const [language, setLanguage] = useState('');
-    const [tags, setTags] = useState('');
     const [availableLanguages, setAvailableLanguages] = useState([]); // Ensure it's initialized as an array
     const navigate = useNavigate();
-
+    PostComment.propTypes = {
+        question_id: PropTypes.number
+    }
     // Fetch available languages from backend
     useEffect(() => {
         const fetchLanguages = async () => {
@@ -33,58 +34,50 @@ function PostQuestion() {
         fetchLanguages();
     }, []);
 
-    // Submit question to backend
+    // Submit comment to backend
     const handleSubmit = async () => {
-        if (!title || !details || !language) {
+        if (!details || !language) {
             alert('All fields are required!');
             return;
         }
 
         const postData = {
-            title,
-            language,
-            details,
-            code_snippet: codeSnippet,
-            tags: tags.split(',').map(tag => tag.trim())
+            'language': language,
+            'details' : details,
+            'code_snippet': codeSnippet
         };
 
         try {
             const user_id = localStorage.getItem('user_id');
-            const response = await fetch(`${process.env.REACT_APP_API_URL}/create_question/`, {
+            const response = await fetch(`${process.env.REACT_APP_API_URL}/create_comment/${props.question_id}`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json',
-                    'USER-ID': user_id,
-
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'user-id':user_id
                 },
                 body: JSON.stringify(postData),
             });
 
             if (response.ok) {
-                alert('Question created successfully!');
-                navigate('/feed');
+                alert('Comment created successfully!');
+                navigate('question/'+ props.question_id);
             } else {
                 const data = await response.json();
-                alert(data.error || 'Failed to create question');
+                alert(data.error || 'Failed to create comment');
             }
         } catch (error) {
-            alert('Failed to create question');
+            alert('Failed to create comment');
             console.error('Error:', error);
         }
     };
 
     return (
-        <div className="post-question-container">
-            <h2>Create New Question</h2>
+        <div className="post-comment-container">
+            <h2>Create New Comment</h2>
 
-            <input
-                className="post-question-input"
-                type="text"
-                placeholder="Title"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-            />
+            
 
-            <div className="post-question-language">
+            <div className="post-comment-language">
                 <label>Select Language:</label>
                 <select
                     value={language}
@@ -98,32 +91,24 @@ function PostQuestion() {
             </div>
 
             <textarea
-                className="post-question-textarea"
+                className="post-comment-textarea"
                 placeholder="Details"
                 value={details}
                 onChange={(e) => setDetails(e.target.value)}
             />
 
             <textarea
-                className="post-question-textarea code-snippet"
+                className="post-comment-textarea code-snippet"
                 placeholder="Code Snippet (optional)"
                 value={codeSnippet}
                 onChange={(e) => setCodeSnippet(e.target.value)}
             />
 
-            <input
-                className="post-question-input"
-                type="text"
-                placeholder="Tags (comma-separated)"
-                value={tags}
-                onChange={(e) => setTags(e.target.value)}
-            />
-
-            <button className="post-question-submit" onClick={handleSubmit}>
-                Submit Question
+            <button className="post-comment-submit" onClick={handleSubmit}>
+                Submit Comment
             </button>
         </div>
     );
 }
 
-export default PostQuestion;
+export default PostComment;
