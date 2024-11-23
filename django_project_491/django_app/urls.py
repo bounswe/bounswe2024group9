@@ -32,15 +32,15 @@ urlpatterns = [
     path('create_question/', question_views.create_question, name='create_question'),
     path('edit_question/<int:question_id>/', question_views.edit_question, name='edit_question'),
     path('delete_question/<int:question_id>/', question_views.delete_question, name='delete_question'),
-    path('mark_as_answered/<int:question_id>/', question_views.mark_as_answered, name='mark_as_answered'), 
+    path('mark_as_answered/<int:question_id>/', question_views.mark_as_answered, name='mark_as_answered'),
     path('report_question/<int:question_id>/', question_views.report_question, name='report_question'),
     path('bookmark_question/<int:question_id>/', question_views.bookmark_question, name='bookmark_question'),
     path('remove_bookmark/<int:question_id>/', question_views.remove_bookmark, name='remove_bookmark'),
-    path('get_random_reported_question/', question_views.fetch_random_reported_question, name='ger_random_reported_question'),
+    path('get_random_reported_question/', question_views.fetch_random_reported_question, name='get_random_reported_question'),
 
-    path('list_questions_by_language/<str:language>/<int:page_number>', question_views.list_questions_by_language, name='list_questions'),
+    path('list_questions_by_language/<str:language>/<int:page_number>', question_views.list_questions_by_language, name='list_questions_by_language'),
     path('list_questions_by_tags/<str:tags>/<int:page_number>/', question_views.list_questions_by_tags, name='list_questions_by_tags'),
-    path('list_questions_by_hotness/<int:page_number>', question_views.list_questions_by_hotness, name='get_question_comments'),
+    path('list_questions_by_hotness/<int:page_number>', question_views.list_questions_by_hotness, name='list_questions_by_hotness'),
     path('random_questions/', question_views.random_questions, name='random_questions'),
 
 

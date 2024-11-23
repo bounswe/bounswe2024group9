@@ -138,6 +138,7 @@ class Question(models.Model):
         self.author.check_and_promote()
 
 
+
 class UserManager(BaseUserManager):
     def create_user(self, username, email, password=None, userType: UserType = UserType.USER):
         if not email:
@@ -265,4 +266,3 @@ class User(AbstractBaseUser):
             self.save()
         
         return self.userType
-    

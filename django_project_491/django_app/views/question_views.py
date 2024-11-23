@@ -154,12 +154,14 @@ def create_question(request: HttpRequest) -> HttpResponse:
 
 
             if language_id is None:
+                print("Invalid language")
                 return JsonResponse({'error': 'Invalid language'}, status=400)
             
             try:
                 question_controller = QuestionQualityController()
                 is_valid_question = question_controller.is_valid_question(data)
                 if(not is_valid_question):
+                    print("Question is not valid")
                     return JsonResponse({'error': 'Question is not valid'}, status=400)
             except Exception as e:
                 print(e)
@@ -212,13 +214,13 @@ def edit_question(request: HttpRequest, question_id: int) -> HttpResponse:
     
     user_id = int(user_id)
     
-    editor_user = User.objects.get(pk=user_id)
+    editor_user = User.objects.get(user_id=user_id)
 
     try:
         question = Question.objects.get(_id=question_id)
-        question_owner_user_id = question.author.id
+        question_owner_user_id = question.author.user_id
 
-        if editor_user.id != question_owner_user_id and editor_user.userType != UserType.ADMIN:
+        if editor_user.user_id != question_owner_user_id and editor_user.userType != UserType.ADMIN:
             return JsonResponse({'error': 'Only admins and owner of the questions can edit questions'}, status=403)
 
         data = json.loads(request.body)
@@ -233,6 +235,8 @@ def edit_question(request: HttpRequest, question_id: int) -> HttpResponse:
         question.tags = data.get('tags', question.tags)
         question.save()
 
+        return JsonResponse({'success': 'Question edited successfully'}, status=200)
+
     except Question.DoesNotExist:
         return JsonResponse({'error': 'Question not found'}, status=404)
 
@@ -241,6 +245,7 @@ def edit_question(request: HttpRequest, question_id: int) -> HttpResponse:
         return JsonResponse({'error': f'Malformed data: {str(e)}'}, status=400)
 
     except Exception as e:
+        print(e)
         return JsonResponse({'error': f'An error occurred: {str(e)}'}, status=500)
 
 
@@ -268,22 +273,23 @@ def delete_question(request: HttpRequest, question_id: int) -> HttpResponse:
     
     user_id = int(user_id)
     
-    deletor_user = User.objects.get(pk=user_id)
+    deletor_user = User.objects.get(user_id=user_id)
 
     try:
         question = Question.objects.get(_id=question_id)
-        question_owner_user_id = question.author.id
+        question_owner_user_id = question.author.user_id
 
-        if deletor_user.id != question_owner_user_id and deletor_user.userType != UserType.ADMIN:
+        if deletor_user.user_id != question_owner_user_id and deletor_user.userType != UserType.ADMIN:
             return JsonResponse({'error': 'Only admins and owner of the questions can delete questions'}, status=403)
 
         question.delete()
 
-        deletor_user.questions.remove(question)
+        return JsonResponse({'success': 'Question deleted successfully'}, status=200)
 
     except Question.DoesNotExist:
         return JsonResponse({'error': 'Question not found'}, status=404)
     except Exception as e:
+        print(e)
         return JsonResponse({'error': f'An error occurred: {str(e)}'}, status=500)
 
 
