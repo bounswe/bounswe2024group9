@@ -11,13 +11,94 @@ import PostComment from "../PostComment";
 function InputBlock(props) {
 
   const [votes, setVotes] = useState(props.initialVotes);
+  const [isOwner] = useState(props.author| "" );
 
   // Vote handlers
 
-  const handlePostUpvote = () => setVotes(votes + 1);
-  const handlePostDownvote = () => setVotes(votes - 1);
-  const handleCommentUpvote = () => setVotes(votes + 1);
-  const handleCommentDownvote = () => setVotes(votes - 1);
+  const handlePostUpvote = async () => {
+    const token = localStorage.getItem('authToken');
+    try {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/upvote_object/question/${props.question_id}/`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'User-ID': localStorage.getItem('user_id'),
+          'Authorization': `Bearer ${token}`
+        },
+      });
+
+      if (response.ok) {
+        
+        const data = await response.json();
+        setVotes(data.success);
+      }
+    } catch (error) {
+      console.error('Error upvoting:', error);
+    }
+  };
+  const handlePostDownvote = async () => {
+    const token = localStorage.getItem('authToken');
+    try {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/downvote_object/question/${props.question_id}/`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'User-ID': localStorage.getItem('user_id'),
+          'Authorization': `Bearer ${token}`
+        },
+      });
+
+      if (response.ok) {
+        
+        const data = await response.json();
+        setVotes(data.success);
+      }
+    } catch (error) {
+      console.error('Error downvoting:', error);
+    }
+  };
+  const handleCommentUpvote = async () => {
+    const token = localStorage.getItem('authToken');
+    try {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/upvote_object/comment/${props.comment_id}/`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'User-ID': localStorage.getItem('user_id'),
+          'Authorization': `Bearer ${token}`
+        },
+      });
+
+      if (response.ok) {
+        
+        const data = await response.json();
+        setVotes(data.success);
+      }
+    } catch (error) {
+      console.error('Error upvoting:', error);
+    }
+  };
+  const handleCommentDownvote = async () => {
+    const token = localStorage.getItem('authToken');
+    try {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/downvote_object/comment/${props.comment_id}/`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'User-ID': localStorage.getItem('user_id'),
+          'Authorization': `Bearer ${token}`
+        },
+      });
+
+      if (response.ok) {
+        
+        const data = await response.json();
+        setVotes(data.success);
+      }
+    } catch (error) {
+      console.error('Error upvoting:', error);
+    }
+  };
 
   return (
     <div className="p-4 border border-gray-300 rounded">
@@ -118,7 +199,10 @@ InputBlock.propTypes = {
   inputType: PropTypes.string.isRequired,
   explanation: PropTypes.string,
   number: PropTypes.number,
-  initialVotes: PropTypes.number
+  initialVotes: PropTypes.number,
+  question_id : PropTypes.number,
+  comment_id : PropTypes.number,
+  author : PropTypes.string
 };
 
 export default function CodeExecution() {
@@ -271,6 +355,7 @@ export default function CodeExecution() {
             language={questionData.language}
             tags={questionData.tags}
             initialVotes={questionData.upvote_count}
+            question_id={question_id}
 
           />)}
           {questionData.code_snippet && (
@@ -302,6 +387,7 @@ export default function CodeExecution() {
                     code={comment.code_snippet}
                     author={comment.user}
                     initialVotes={comment.upvotes}
+                    comment_id={comment.comment_id}
                   />
                   {comment.code_snippet && (
                     <button
