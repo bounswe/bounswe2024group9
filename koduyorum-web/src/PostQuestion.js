@@ -11,6 +11,8 @@ function PostQuestion() {
     const [availableLanguages, setAvailableLanguages] = useState([]); // Ensure it's initialized as an array
     const navigate = useNavigate();
 
+
+
     // Fetch available languages from backend
     useEffect(() => {
         const fetchLanguages = async () => {
@@ -39,25 +41,26 @@ function PostQuestion() {
             alert('All fields are required!');
             return;
         }
-
+        const user_id = localStorage.getItem('user_id');
+        console.log('User ID:', user_id);
         const postData = {
             title,
             language,
             details,
             code_snippet: codeSnippet,
-            tags: tags.split(',').map(tag => tag.trim())
+            tags: tags.split(',').map(tag => tag.trim()),
         };
 
         try {
-            const user_id = localStorage.getItem('user_id');
             const response = await fetch(`${process.env.REACT_APP_API_URL}/create_question/`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json',
-                    'USER-ID': user_id,
-
+                headers: { 'Content-Type': 'application/json' ,
+                    'User-ID': user_id
                 },
                 body: JSON.stringify(postData),
             });
+
+            console.log('Response:', response);
 
             if (response.ok) {
                 alert('Question created successfully!');
