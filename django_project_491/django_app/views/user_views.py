@@ -276,7 +276,7 @@ def login_user(request : HttpRequest) -> HttpResponse:
             # Authentication successful, log in the user
             login(request, user)
             refresh = RefreshToken.for_user(user)
-            return JsonResponse({'status': 'success', 'user_id': user.pk, 'token': str(refresh.access_token), 'user_type' : user.userType.value}, status=200)
+            return JsonResponse({'status': 'success', 'user_id': user.pk, 'token': str(refresh.access_token), 'user_type' : user.userType}, status=200)
         else:
             # Authentication failed, log the failed attempt and return an error
             print("Failed login attempt for username:", username)
