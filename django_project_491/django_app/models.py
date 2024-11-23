@@ -9,6 +9,26 @@ from .Utils.utils import *
 # python manage.py makemigrations
 # python manage.py migrate
 
+def check_status(status):
+    status_list = [
+    "In Queue",
+    "Processing",
+    "Accepted",
+    "Wrong Answer",
+    "Time Limit Exceeded",
+    "Compilation Error",
+    "Runtime Error (SIGSEGV)",
+    "Runtime Error (SIGXFSZ)",
+    "Runtime Error (SIGFPE)",
+    "Runtime Error (SIGABRT)",
+    "Runtime Error (NZEC)",
+    "Runtime Error (Other)",
+    "Internal Error",
+    "Exec Format Error"
+    ]
+
+    return status_list[status["id"]-1]
+
 class UserType(Enum):
     ADMIN = "admin"
     USER = "user"
@@ -43,6 +63,7 @@ class Comment(models.Model):
     _id = models.AutoField(primary_key=True)
     details = models.TextField()
     code_snippet = models.TextField()
+    language = models.CharField(max_length=200)  # programmingLanguage field like python
     language_id = models.IntegerField(default=71)  # Language ID for Python
     upvotes = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -52,18 +73,25 @@ class Comment(models.Model):
     # Link each comment to a user (author)
     author = models.ForeignKey('User', on_delete=models.CASCADE, related_name='authored_comments')  # Updated related_name
 
-    def run_snippet(self): # TODO
+    def run_snippet(self):
         result = run_code(self.code_snippet, self.language_id)
-        outs = result['stdout'].split('\n')
-        return outs
+        if result['stderr']:
+            return [result['stderr']]
 
-    # def upvote(self):
-    #     self.upvotes += 1
-    #     self.save()
+        elif result['status']['id'] != 3 and result['status']['id'] != 4:
+            return [check_status(result['status'])]
 
-    # def downvote(self):
-    #     self.upvotes -= 1
-    #     self.save()
+        elif result['stdout'] is None:
+            return ["NO OUTPUT for STDOUT"]
+
+        else:
+            return result['stdout'].split('\n')
+
+    def save(self, *args, **kwargs):
+        # Call the original save method
+        super().save(*args, **kwargs)
+        # Check and promote user after saving the comment
+        self.author.check_and_promote()
 
 class Question(models.Model):
     _id = models.AutoField(primary_key=True)
@@ -75,7 +103,7 @@ class Question(models.Model):
     code_snippet = models.TextField()
 
     upvotes = models.IntegerField(default=0)
-    created_at  = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True)
     topic = models.CharField(max_length=100, blank=True)
     answered = models.BooleanField(default=False)
     reported_by = models.ManyToManyField('User', related_name='reported_questions', blank=True)
@@ -84,20 +112,27 @@ class Question(models.Model):
 
     def run_snippet(self): # TODO
         result = run_code(self.code_snippet, self.language_id)
-        outs = result['stdout'].split('\n')
-        return outs
+        if result['stderr']:
+            return [result['stderr']]
+
+        elif result['status']['id'] != 3 and result['status']['id'] != 4:
+            return [check_status(result['status'])]
+
+        elif result['stdout'] is None:
+            return ["NO OUTPUT for STDOUT"]
+
+        else:
+            return result['stdout'].split('\n')
 
     def mark_as_answered(self): # TODO
         self.answered = True
         self.save()
 
-    # def upvote(self):
-    #     self.upvotes += 1
-    #     self.save()
-
-    # def downvote(self):
-    #     self.upvotes -= 1
-    #     self.save()
+    def save(self, *args, **kwargs):
+        # Call the original save method
+        super().save(*args, **kwargs)
+        # Check and promote user after saving the question
+        self.author.check_and_promote()
 
 
 class UserManager(BaseUserManager):
@@ -166,3 +201,64 @@ class User(AbstractBaseUser):
     def is_staff(self):  # 3/3 added because of my custom userType
         return self.userType == UserType.ADMIN
 
+    def get_question_details(self):
+        return [{
+            'id': question._id,
+            'title': question.title,
+            'language': question.language,
+            'tags': question.tags,
+            'details': question.details,
+            'code_snippet': question.code_snippet,
+            'upvotes': question.upvotes,
+            'creationDate': question.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+            'answered': question.answered,
+            'author': question.author.username,
+            'reported_by': [user.username for user in question.reported_by.all()],
+            'upvoted_by': [vote.user.username for vote in question.votes.filter(vote_type=VoteType.UPVOTE.value)],
+            'downvoted_by': [vote.user.username for vote in question.votes.filter(vote_type=VoteType.DOWNVOTE.value)],            
+        } for question in self.questions.all()]
+
+    def get_comment_details(self):
+        return [{
+            'comment_id': comment._id,
+            'details': comment.details,
+            'user': comment.author.username,
+            'upvotes': comment.upvotes,
+            'code_snippet': comment.code_snippet,
+            'language': comment.language,  
+            'creationDate': comment.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+            'upvoted_by': [vote.user.username for vote in comment.votes.filter(vote_type=VoteType.UPVOTE.value)],
+            'downvoted_by': [vote.user.username for vote in comment.votes.filter(vote_type=VoteType.DOWNVOTE.value)],
+            'answer_of_the_question': comment.answer_of_the_question,
+        } for comment in self.authored_comments.all()]
+
+    def get_bookmark_details(self):
+        return [{
+            'id': bookmark._id,
+            'title': bookmark.title,
+            'language': bookmark.language,
+            'tags': bookmark.tags,
+            'details': bookmark.details,
+            'code_snippet': bookmark.code_snippet,
+            'upvotes': bookmark.upvotes,
+            'creationDate': bookmark.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+        } for bookmark in self.bookmarks.all()]
+
+    def calculate_total_points(self):
+        question_points = self.questions.count() * 2
+        comment_points = sum(5 if comment.answer_of_the_question else 1 for comment in self.authored_comments.all())
+        return question_points + comment_points
+
+    def check_and_promote(self):
+        total_points = self.calculate_total_points()
+        promotion_threshold = 100  # A threshold to promote a user to a super user, or demote super user to a user
+
+        if total_points >= promotion_threshold and self.userType != UserType.SUPER_USER:
+            self.userType = UserType.SUPER_USER
+            self.save()
+        
+        elif total_points < promotion_threshold and self.userType == UserType.SUPER_USER:
+            self.userType = UserType.USER
+            self.save()
+        
+        return self.userType
