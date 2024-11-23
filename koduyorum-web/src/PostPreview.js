@@ -125,7 +125,7 @@ const PostPreview = ({ post, currentUser, onClick }) => {
         setTimeout(() => setAnimateDownvote(false), 500); // Reset animation after 500ms
     
         try {
-            const response = await fetch(`${process.env.REACT_APP_API_URL}downvote_question/${post.id}`, {
+            const response = await fetch(`${process.env.REACT_APP_API_URL}/downvote_question/${post.id}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -165,6 +165,7 @@ const PostPreview = ({ post, currentUser, onClick }) => {
                     }>{programmingLanguage}</div>
                 <div className="tags">
                     {tags.map((tag, index) => (
+                        console.log("Tag:", tag),   
                         <span key={index} className="label">{tag}</span>
                     ))}
                 </div>
