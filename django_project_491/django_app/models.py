@@ -43,6 +43,7 @@ class Comment(models.Model):
     _id = models.AutoField(primary_key=True)
     details = models.TextField()
     code_snippet = models.TextField()
+    language = models.CharField(max_length=200)  # programmingLanguage field like python
     language_id = models.IntegerField(default=71)  # Language ID for Python
     upvotes = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -166,3 +167,45 @@ class User(AbstractBaseUser):
     def is_staff(self):  # 3/3 added because of my custom userType
         return self.userType == UserType.ADMIN
 
+    def get_question_details(self):
+        return [{
+            'id': question._id,
+            'title': question.title,
+            'language': question.language,
+            'tags': question.tags,
+            'details': question.details,
+            'code_snippet': question.code_snippet,
+            'upvotes': question.upvotes,
+            'creationDate': question.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+            'answered': question.answered,
+            'author': question.author.username,
+            'reported_by': [user.username for user in question.reported_by.all()],
+            'upvoted_by': [vote.user.username for vote in question.votes.filter(vote_type=VoteType.UPVOTE.value)],
+            'downvoted_by': [vote.user.username for vote in question.votes.filter(vote_type=VoteType.DOWNVOTE.value)],            
+        } for question in self.questions.all()]
+
+    def get_comment_details(self):
+        return [{
+            'comment_id': comment._id,
+            'details': comment.details,
+            'user': comment.author.username,
+            'upvotes': comment.upvotes,
+            'code_snippet': comment.code_snippet,
+            'language': comment.language,  
+            'creationDate': comment.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+            'upvoted_by': [vote.user.username for vote in comment.votes.filter(vote_type=VoteType.UPVOTE.value)],
+            'downvoted_by': [vote.user.username for vote in comment.votes.filter(vote_type=VoteType.DOWNVOTE.value)],
+            'answer_of_the_question': comment.answer_of_the_question,
+        } for comment in self.authored_comments.all()]
+
+    def get_bookmark_details(self):
+        return [{
+            'id': bookmark._id,
+            'title': bookmark.title,
+            'language': bookmark.language,
+            'tags': bookmark.tags,
+            'details': bookmark.details,
+            'code_snippet': bookmark.code_snippet,
+            'upvotes': bookmark.upvotes,
+            'creationDate': bookmark.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+        } for bookmark in self.bookmarks.all()]

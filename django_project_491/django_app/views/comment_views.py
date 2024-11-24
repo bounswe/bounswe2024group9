@@ -33,6 +33,7 @@ def create_comment(request: HttpRequest, question_id : int) -> HttpResponse:
             comment = Comment.objects.create(
                 details=comment_details,
                 code_snippet=code_snippet,
+                language=language,
                 language_id=language_id,
                 author=request.user,  # Associate the comment with the logged-in user
                 question=question # Associate the comment with the current question
@@ -55,7 +56,7 @@ def edit_comment(request: HttpRequest, comment_id:int) -> HttpResponse:
     if not comment_id:
         return JsonResponse({'error': 'Comment ID parameter is required'}, status=400)
     
-    user_id = request.headers.get('User-ID', None)
+    user_id = int(request.headers.get('User-ID', None))
     if user_id is None:
         return JsonResponse({'error': 'User ID parameter is required in the header'}, status=400)
     
@@ -92,7 +93,7 @@ def delete_comment(request: HttpRequest, comment_id : int) -> HttpResponse:
     if not comment_id:
         return JsonResponse({'error': 'Comment ID parameter is required'}, status=400)
     
-    user_id = request.headers.get('User-ID', None)
+    user_id = int(request.headers.get('User-ID', None))
     if user_id is None:
         return JsonResponse({'error': 'User ID parameter is required in the header'}, status=400)
     
@@ -145,7 +146,7 @@ def mark_comment_as_answer(request: HttpRequest, comment_id : int) -> HttpRespon
     try:
         comment = Comment.objects.get(_id=comment_id)
         question : Question = Comment.question
-        user_id = request.headers.get('User-ID', None)
+        user_id = int(request.headers.get('User-ID', None))
         if user_id is None:
             return JsonResponse({'error': 'User ID parameter is required in the header'}, status=400)
         user = User.objects.get(pk=user_id)

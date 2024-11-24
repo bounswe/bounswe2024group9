@@ -11,6 +11,7 @@ import CodeExecution from './components/code-execution';
 import SurveyPage from './SurveyPage';
 import PostQuestion from './PostQuestion';
 import AuthWrapper from './AuthWrapper';
+import Profile from './Profile';
 
 
 const App = () => {
@@ -26,6 +27,7 @@ const App = () => {
         <Route path="/result/:wiki_id/:wiki_name" element={<AuthWrapper><SearchResults /></AuthWrapper>} />
         <Route path="/survey" element={<SurveyPage />} />
         <Route path="/post_question" element={<AuthWrapper><PostQuestion /></AuthWrapper>} />
+        <Route path="/profile/:username" element={<AuthWrapper><Profile /></AuthWrapper>} />
       </Routes>
     </Router>
   );
