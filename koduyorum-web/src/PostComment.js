@@ -60,6 +60,7 @@ function PostComment(props) {
 
             if (response.ok) {
                 alert('Comment created successfully!');
+                props.fetchComments();
             } else {
                 const data = await response.json();
                 alert(data.error || 'Failed to create comment');

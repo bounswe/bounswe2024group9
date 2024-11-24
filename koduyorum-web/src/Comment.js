@@ -95,7 +95,7 @@ function Comment(props) {
       if (response.ok) {
 
         const data = await response.json();
-        navigate(`/question/${props.question_id}`);
+        props.fetchComments();
       }
     } catch (error) {
       console.error('Error upvoting:', error);
