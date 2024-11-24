@@ -4,6 +4,7 @@ import { Navbar, LeftSidebar, RightSidebar } from './PageComponents';
 import { LoadingComponent }  from './LoadingPage'
 import { fetchWikiIdAndName } from './Feed'; 
 import './SearchResults.css';
+import Annotation from './Annotation';
 
 const SearchResults = () => {
   const [activeTab, setActiveTab] = useState('info');
@@ -17,6 +18,11 @@ const SearchResults = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [posts, setPosts] = useState([]);
   const searchDisplayRef = useRef(null);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedText, setSelectedText] = useState('');
+  const [startIndex, setStartIndex] = useState(null);
+  const [endIndex, setEndIndex] = useState(null);
+
 
   const { wiki_id, wiki_name} = useParams(); // Get wiki_id from the URL
   const navigate = useNavigate();
@@ -165,6 +171,18 @@ const fetchSearchResults = async (query) => {
     }
   };
 
+  const handleTextSelection = () => {
+    const selection = window.getSelection();
+    // TODO implement index logic
+    if (selection && selection.toString().trim() !== '') {
+      console.log('Selected text:', selection.toString());
+      setSelectedText(selection.toString());
+      setModalVisible(true);
+    } else {
+      console.log('No text selected');
+    }
+  };
+
   return (
 
     <div className="feed">
@@ -214,7 +232,15 @@ const fetchSearchResults = async (query) => {
           </button>
       </div>
           {activeTab === 'info' ? (
-            <div className="info-box">
+            <div>
+              <Annotation
+              visible={modalVisible}
+              selectedText={selectedText}
+              language_id={wiki_id}
+              onClose={() => setModalVisible(false)}
+            />
+            <div className="info-box" onMouseDown={handleTextSelection}>
+              
               <h2 className="language-title">{wiki_name}</h2>
               {infoData.mainInfo.length > 0 && (
                 <div>
@@ -278,7 +304,7 @@ const fetchSearchResults = async (query) => {
                 </div>
               )}
             </div>
-          ) : (
+            </div>) : (
             <div>
               <h2>{questionData.length} Questions</h2>
               {questionData.map((question, index) => (
@@ -296,6 +322,7 @@ const fetchSearchResults = async (query) => {
         <RightSidebar />
       </div>
     </div>
+    
     )}
   </div>
   );
