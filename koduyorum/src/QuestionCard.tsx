@@ -11,6 +11,7 @@ const QuestionCard = ({ post, currentUser, onPress }) => {
         user_id,
         likes: initialLikes,
         programmingLanguage,
+        tags,
         answered,
     } = post;
 

@@ -64,13 +64,13 @@ const PostDetail = ({ route }) => {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'User-ID': user_id, // Pass user ID in headers
+                        'User-ID': user_id,
                     },
                 }
             );
 
             if (response.ok) {
-                setUpvotes(upvotes + 1); // Increment upvote count
+                setUpvotes(upvotes + 1);
                 Alert.alert('Success', 'Question upvoted successfully');
             } else {
                 const data = await response.json();

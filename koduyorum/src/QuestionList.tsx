@@ -25,7 +25,8 @@ const QuestionList = () => {
     const [filteredQuestions, setFilteredQuestions] = useState([]);
     const [isSearching, setIsSearching] = useState(false);
     const [isPanelOpen, setIsPanelOpen] = useState(false);
-    const [profilePic, setProfilePic] = useState(null); // Added to store profile picture
+    const [profilePic, setProfilePic] = useState(null); // Store profile picture
+    const [questionCount, setQuestionCount] = useState(0); // Store number of questions shared
 
     const translateX = useRef(new Animated.Value(0)).current;
     const panelWidth = 200; // Width of the profile panel
@@ -83,12 +84,13 @@ const QuestionList = () => {
         }
     };
 
-    // Fetch user profile to get profile picture
+    // Fetch user profile to get profile picture and question count
     const fetchProfile = async () => {
         try {
             const response = await fetch(`http://10.0.2.2:8000/get_user_profile_by_id/${user_id}/`);
             const data = await response.json();
             setProfilePic(data.user.profile_pic || null);
+            setQuestionCount(data.user.questions.length || 0);
         } catch (error) {
             console.error('Error fetching profile:', error);
         }
@@ -151,6 +153,13 @@ const QuestionList = () => {
 
     const handleCreateQuestion = () => {
         navigation.navigate('CreateQuestion', { username, user_id });
+    };
+
+    const handleExitApp = () => {
+        Alert.alert('Exit', 'Are you sure you want to exit?', [
+            { text: 'Cancel', style: 'cancel' },
+            { text: 'Yes', onPress: () => console.log('App exited') }, // Replace with actual exit logic if needed
+        ]);
     };
 
     const renderFeedItem = ({ item }: any) => (
@@ -229,14 +238,14 @@ const QuestionList = () => {
                         source={
                             profilePic
                                 ? { uri: profilePic }
-                                : require('../assets/pp.jpg') // Default profile picture
+                                : require('../assets/pp.jpg')
                         }
                         style={styles.profileIcon}
                     />
-                    <Text style={styles.username}>{username}</Text>
-                </TouchableOpacity>
+                     <Text style={styles.username}>@{username}</Text>
 
-                {/* Navigate to Top Contributors */}
+                </TouchableOpacity>
+                <Text style={styles.questionCount}>{questionCount} Questions Shared</Text>
                 <TouchableOpacity
                     style={styles.contributorsButton}
                     onPress={() => navigation.navigate('TopContributors')}
@@ -304,25 +313,54 @@ const styles = StyleSheet.create({
         borderLeftWidth: 1,
         borderColor: '#ccc',
         alignItems: 'center',
-        justifyContent: 'center',
+        paddingTop: 20,
     },
     profileContent: {
         alignItems: 'center',
     },
     profileIcon: {
-        width: 50,
-        height: 50,
-        borderRadius: 25,
+        width: 80,
+        height: 80,
+        borderRadius: 40,
         marginBottom: 10,
     },
     username: {
         fontSize: 16,
         fontWeight: 'bold',
         color: '#000',
+        marginBottom: 5,
     },
-    profileTouchable: {
+    questionCount: {
+        fontSize: 14,
+        color: '#555',
+        marginBottom: 20,
+    },
+    contributorsButton: {
+        width: '90%',
+        padding: 10,
+        backgroundColor: '#007bff',
+        borderRadius: 8,
         alignItems: 'center',
-        justifyContent: 'center',
+        marginBottom: 20,
+    },
+    contributorsText: {
+        color: '#fff',
+        fontWeight: 'bold',
+        fontSize: 16,
+    },
+    exitButton: {
+        position: 'absolute',
+        bottom: 20,
+        width: '90%',
+        padding: 10,
+        backgroundColor: '#dc3545',
+        borderRadius: 8,
+        alignItems: 'center',
+    },
+    exitText: {
+        color: '#fff',
+        fontWeight: 'bold',
+        fontSize: 16,
     },
     createButton: {
         position: 'absolute',
