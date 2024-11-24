@@ -1,4 +1,4 @@
-from ..models import Question, Comment, UserType, User, VoteType
+from ..models import Question, Comment, UserType, User, VoteType,Question_Vote
 from django.db.models import Count, Q, F
 from django.http import HttpRequest, HttpResponse, JsonResponse
 import json
@@ -12,6 +12,30 @@ from ..Utils.forms import *
 from ..ai_service.control_question_quality import QuestionQualityController
 from typing import List
 from concurrent.futures import ThreadPoolExecutor
+from django.core.cache import cache
+from functools import wraps
+
+def invalidate_user_cache(cache_key_prefix='feed_user'):
+    """
+    A decorator to invalidate the cache for a given user_id.
+    """
+    def decorator(func):
+        @wraps(func)
+        def wrapper(request, *args, **kwargs):
+            user_id = request.headers.get('User-ID')
+
+            if user_id:
+                # Invalidate the user's cache
+                cache_key = f"{cache_key_prefix}_{user_id}"
+                cache.delete(cache_key)
+
+            # Call the original function
+            response = func(request, *args, **kwargs)
+
+            return response
+
+        return wrapper
+    return decorator
 
 def get_question_details(request: HttpRequest, question_id: int) -> HttpResponse:
     """
@@ -52,12 +76,13 @@ def get_question_details(request: HttpRequest, question_id: int) -> HttpResponse
             'id': question._id,
             'title': question.title,
             'language': question.language,
+            'language_id': question.language_id,
             'tags': question.tags,
             'details': question.details,
             'code_snippet': question.code_snippet,
             'upvote_count': question.upvotes,
-            'creationDate': question.created_at .strftime('%Y-%m-%d %H:%M:%S'),
-            'author' : question.author.username,
+            'creationDate': question.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+            'author': question.author.username,
             'comments_count': question.comments.count(),
             'answered': question.answered,
             'topic': question.topic,
@@ -70,6 +95,7 @@ def get_question_details(request: HttpRequest, question_id: int) -> HttpResponse
 
     except Question.DoesNotExist:
         return JsonResponse({'error': 'Question not found'}, status=404)
+
 
 @csrf_exempt
 def get_question_comments(request, question_id):
@@ -94,7 +120,7 @@ def get_question_comments(request, question_id):
     """
     try:
         question = Question.objects.get(_id=question_id)
-        comments : List[Comment] = question.comments.all()
+        comments: List[Comment] = question.comments.all()
 
         comments_data = [{
             'comment_id': comment._id,
@@ -102,7 +128,7 @@ def get_question_comments(request, question_id):
             'user': comment.author.username,
             'upvotes': comment.upvotes,
             'code_snippet': comment.code_snippet,
-            'language': comment.language,
+            'language': comment.language_id,
             'creationDate': comment.created_at.strftime('%Y-%m-%d %H:%M:%S'),
             'upvoted_by': [vote.user.username for vote in comment.votes.filter(vote_type=VoteType.UPVOTE.value)],
             'downvoted_by': [vote.user.username for vote in comment.votes.filter(vote_type=VoteType.DOWNVOTE.value)],
@@ -110,11 +136,12 @@ def get_question_comments(request, question_id):
         } for comment in comments]
 
         return JsonResponse({'comments': comments_data}, status=200)
-    
+
     except Question.DoesNotExist:
         return JsonResponse({'error': 'Question not found'}, status=404)
 
 @csrf_exempt  
+@invalidate_user_cache()
 def create_question(request: HttpRequest) -> HttpResponse:
     """
     Handle the creation of a new question.
@@ -139,10 +166,12 @@ def create_question(request: HttpRequest) -> HttpResponse:
             title = data.get('title')
             language = data.get('language')
             details = data.get('details')
+            user_id = request.headers.get('User-ID', None)
             code_snippet = data.get('code_snippet', '')  # There may not be a code snippet
             tags = data.get('tags', [])  # There may not be any tags
 
-            Lang2ID = get_languages() 
+            user = User.objects.get(pk=user_id)
+            Lang2ID = get_languages()
             language_id = Lang2ID.get(language, None)
 
             user = User.objects.get(pk=request.headers.get('User-ID', None))
@@ -162,7 +191,7 @@ def create_question(request: HttpRequest) -> HttpResponse:
             question = Question.objects.create(
                 title=title,
                 language=language,
-                language_id=language_id, 
+                language_id=language_id,
                 details=details,
                 code_snippet=code_snippet,
                 tags=tags,
@@ -178,6 +207,7 @@ def create_question(request: HttpRequest) -> HttpResponse:
             return JsonResponse({'error': f'Malformed data: {str(e)}'}, status=400)
 
     return JsonResponse({'error': 'Invalid request method'}, status=405)
+
 
 @csrf_exempt
 def edit_question(request: HttpRequest, question_id: int) -> HttpResponse:
@@ -199,7 +229,7 @@ def edit_question(request: HttpRequest, question_id: int) -> HttpResponse:
     """
     if not question_id:
         return JsonResponse({'error': 'Comment ID parameter is required'}, status=400)
-    
+
     user_id = request.headers.get('User-ID', None)
     if user_id is None:
         return JsonResponse({'error': 'User ID parameter is required in the header'}, status=400)
@@ -210,14 +240,13 @@ def edit_question(request: HttpRequest, question_id: int) -> HttpResponse:
 
     try:
         question = Question.objects.get(_id=question_id)
-        question_owner_user_id = question.author.id
+        question_owner_user_id = question.author.user_id
 
-        if editor_user.id != question_owner_user_id and editor_user.userType != UserType.ADMIN:
+        if editor_user.user_id != question_owner_user_id and editor_user.userType != UserType.ADMIN:
             return JsonResponse({'error': 'Only admins and owner of the questions can edit questions'}, status=403)
 
-        
         data = json.loads(request.body)
-        Lang2ID = get_languages() 
+        Lang2ID = get_languages()
 
         question.title = data.get('title', question.title)
         language = data.get('language', question.language)
@@ -225,9 +254,12 @@ def edit_question(request: HttpRequest, question_id: int) -> HttpResponse:
         question.language_id = Lang2ID.get(language)
         question.details = data.get('details', question.details)
         question.code_snippet = data.get('code_snippet', question.code_snippet)
+        print(data.get('code_snippet'))
+        print(question.code_snippet)
         question.tags = data.get('tags', question.tags)
         question.save()
-
+        return JsonResponse({'success': 'Question edited successfully'}, status=200)
+        
     except Question.DoesNotExist:
         return JsonResponse({'error': 'Question not found'}, status=404)
 
@@ -238,7 +270,9 @@ def edit_question(request: HttpRequest, question_id: int) -> HttpResponse:
     except Exception as e:
         return JsonResponse({'error': f'An error occurred: {str(e)}'}, status=500)
 
+
 @csrf_exempt
+@invalidate_user_cache()
 def delete_question(request: HttpRequest, question_id: int) -> HttpResponse:
     """
     Deletes a question based on the provided question ID.
@@ -255,7 +289,7 @@ def delete_question(request: HttpRequest, question_id: int) -> HttpResponse:
     """
     if not question_id:
         return JsonResponse({'error': 'Comment ID parameter is required'}, status=400)
-    
+
     user_id = request.headers.get('User-ID', None)
     if user_id is None:
         return JsonResponse({'error': 'User ID parameter is required in the header'}, status=400)
@@ -266,21 +300,24 @@ def delete_question(request: HttpRequest, question_id: int) -> HttpResponse:
 
     try:
         question = Question.objects.get(_id=question_id)
-        question_owner_user_id = question.author.id
+        question_owner_user_id = question.author.user_id
 
-        if deletor_user.id != question_owner_user_id and deletor_user.userType != UserType.ADMIN:
+        if deletor_user.user_id != question_owner_user_id and deletor_user.userType != UserType.ADMIN:
             return JsonResponse({'error': 'Only admins and owner of the questions can delete questions'}, status=403)
 
         question.delete()
+        return JsonResponse({'success': 'Question Deleted Successfully'}, status=200)
 
-        deletor_user.questions.remove(question)
+        #deletor_user.questions.remove(question)
 
     except Question.DoesNotExist:
         return JsonResponse({'error': 'Question not found'}, status=404)
     except Exception as e:
         return JsonResponse({'error': f'An error occurred: {str(e)}'}, status=500)
 
+
 @csrf_exempt
+@invalidate_user_cache()
 def mark_as_answered(request, question_id : int) -> HttpResponse:
     """
     Marks a question as answered.
@@ -297,7 +334,7 @@ def mark_as_answered(request, question_id : int) -> HttpResponse:
     """
     if not question_id:
         return JsonResponse({'error': 'Question ID parameter is required'}, status=400)
-    
+
     request_user_id = request.headers.get('User-ID', None)
     if request_user_id is None:
         return JsonResponse({'error': 'User ID parameter is required in the header'}, status=400)
@@ -305,12 +342,12 @@ def mark_as_answered(request, question_id : int) -> HttpResponse:
     request_user_id = int(request_user_id)
 
     question = Question.objects.get(_id=question_id)
-    author : User = question.author
+    author: User = question.author
     if author.user_id != request_user_id:
         return JsonResponse({'error': 'Only the owner of the question can mark it as answered'}, status=403)
     
     question.mark_as_answered()
-    
+
     return JsonResponse({'success': 'Question marked as answered successfully'}, status=200)
 
 
@@ -332,9 +369,9 @@ def report_question(request, question_id : int) -> HttpResponse:
     """
     if not question_id:
         return JsonResponse({'error': 'Question ID parameter is required'}, status=400)
-    
+
     question = Question.objects.get(_id=question_id)
-    
+
     user_id = request.headers.get('User-ID', None)
     if user_id is None:
         return JsonResponse({'error': 'User ID parameter is required in the header'}, status=400)
@@ -345,8 +382,9 @@ def report_question(request, question_id : int) -> HttpResponse:
 
     question.reported_by.add(reporter_user)
     question.save()
-    
+
     return JsonResponse({'success': 'Question reported successfully'}, status=200)
+
 
 @csrf_exempt
 def list_questions_by_language(request, language: str, page_number = 1) -> HttpResponse:    
@@ -362,21 +400,23 @@ def list_questions_by_language(request, language: str, page_number = 1) -> HttpR
     """
     if not language:
         return JsonResponse({'error': 'Language parameter is required'}, status=400)
-    
+
     questions = Question.objects.filter(language__iexact=language)[10 * (page_number - 1): 10 * page_number]
-    
+
     questions_data = [{
         'id': question._id,
         'title': question.title,
-        'language': question.language,
+        'programmingLanguage': question.language,
         'tags': question.tags,
         'details': question.details,
         'code_snippet': question.code_snippet,
         'upvotes': question.upvotes,
+        'author': question.author.username,
         'creationDate': question.created_at .strftime('%Y-%m-%d %H:%M:%S'),
     } for question in questions]
-    
+
     return JsonResponse({'questions': questions_data}, safe=False, status=200)
+
 
 @csrf_exempt
 def list_questions_by_tags(request, tags: str, page_number=1) -> HttpResponse:
@@ -393,7 +433,7 @@ def list_questions_by_tags(request, tags: str, page_number=1) -> HttpResponse:
     """
     if not tags:
         return JsonResponse({'error': 'Tags parameter is required'}, status=400)
-    
+
     # Convert the tags string to a list
     tags_list = tags.split(',')
 
@@ -407,10 +447,11 @@ def list_questions_by_tags(request, tags: str, page_number=1) -> HttpResponse:
         'details': question.details,
         'code_snippet': question.code_snippet,
         'upvotes': question.upvotes,
-        'creationDate': question.created_at .strftime('%Y-%m-%d %H:%M:%S'),
+        'creationDate': question.created_at.strftime('%Y-%m-%d %H:%M:%S'),
     } for question in questions]
 
     return JsonResponse({'questions': questions_data}, safe=False, status=200)
+
 
 @csrf_exempt
 def list_questions_by_hotness(request, page_number=1):
@@ -432,7 +473,7 @@ def list_questions_by_hotness(request, page_number=1):
             - creationDate (str): The creation date of the question in 'YYYY-MM-DD HH:MM:SS' format.
     """
     questions = Question.objects.order_by('-upvotes')[10 * (page_number - 1): 10 * page_number]
-    
+
     questions_data = [{
         'id': question._id,
         'title': question.title,
@@ -441,7 +482,7 @@ def list_questions_by_hotness(request, page_number=1):
         'details': question.details,
         'code_snippet': question.code_snippet,
         'upvotes': question.upvotes,
-        'creationDate': question.created_at .strftime('%Y-%m-%d %H:%M:%S'),
+        'creationDate': question.created_at.strftime('%Y-%m-%d %H:%M:%S'),
     } for question in questions]
 
     return JsonResponse({'questions': questions_data}, safe=False, status=200)
@@ -467,6 +508,7 @@ def random_questions(request):
     print(questions_data)
     return JsonResponse({'questions': questions_data}, safe=False)
 
+
 @csrf_exempt
 def question_of_the_day(request):
     """
@@ -486,15 +528,15 @@ def question_of_the_day(request):
     """
     today = timezone.now().date()
     cache_key = f"question_of_the_day_{today}"
-    
+
     # Check if there's a question already cached for today
     question_data = cache.get(cache_key)
-    
+
     if not question_data:
         all_questions = list(Question.objects.all())
         if not all_questions:
             return JsonResponse({'error': 'No questions available'}, status=404)
-        
+
         question = random.choice(all_questions)
 
         question_data = {
@@ -517,6 +559,7 @@ def question_of_the_day(request):
         cache.set(cache_key, question_data, timeout=seconds_until_midnight)
 
     return JsonResponse({'question': question_data}, safe=False)
+
 
 @csrf_exempt
 def list_questions_according_to_the_user(request, user_id: int):
@@ -552,7 +595,7 @@ def list_questions_according_to_the_user(request, user_id: int):
     """
     unique_question_ids = set()
     personalized_questions = []
-    user : User = get_user_model().objects.get(pk=user_id)
+    user: User = get_user_model().objects.get(pk=user_id)
 
     # Fetch questions based on known languages
     for language in user.known_languages:
@@ -580,7 +623,8 @@ def list_questions_according_to_the_user(request, user_id: int):
 
     # If still less than 10 questions, fill with general questions
     if len(personalized_questions) < 10:
-        general_questions = list(Question.objects.exclude(_id__in=unique_question_ids)[:10 - len(personalized_questions)])
+        general_questions = list(
+            Question.objects.exclude(_id__in=unique_question_ids)[:10 - len(personalized_questions)])
         personalized_questions.extend(general_questions)
 
     questions_data = [{
@@ -588,13 +632,14 @@ def list_questions_according_to_the_user(request, user_id: int):
         'title': question.title,
         'description': question.details,
         'user_id': question.author.pk,
-        'likes': question.upvotes,
+        'upvotes': question.upvotes,
         'comments_count': question.comments.count(),
         'programmingLanguage': question.language,
         'codeSnippet': question.code_snippet,
         'tags': question.tags,
         'answered': question.answered,
-        'topic': question.topic
+        'topic': question.topic,
+        'author': question.author.username
     } for question in personalized_questions]
     return JsonResponse({'questions': questions_data}, safe=False)
 
@@ -731,27 +776,35 @@ def fetch_random_reported_question(request: HttpRequest) -> HttpResponse:
 
 @csrf_exempt
 def fetch_all_at_once(request, user_id: int):
+    import time
+    time_start = time.time()
+    cache_key = f"feed_user_{user_id}"
+    
+    feed_data = cache.get(cache_key)
+    if feed_data:
+        return JsonResponse(feed_data, safe=False)
 
-    # import time
-    # time_start = time.time()
     def get_questions_for_user(user_id):
         user = get_user_model().objects.get(pk=user_id)
-        unique_question_ids = set()
+        user_votes = Question_Vote.objects.filter(user_id=user_id).values('question_id', 'vote_type')
+        user_votes_dict = {vote['question_id']: vote['vote_type'] for vote in user_votes}
+        
+        questions = (
+            Question.objects.filter(
+                Q(language__in=user.known_languages) | Q(tags__overlap=user.interested_topics)
+            )
+            .distinct()[:10]
+        )
 
-        questions = Question.objects.filter(
-            Q(language__in=user.known_languages) | Q(tags__overlap=user.interested_topics)
-        ).exclude(_id__in=unique_question_ids)[:10]
-
-        # Fallback to general questions if less than 10
         if len(questions) < 10:
             general_questions = Question.objects.exclude(
-                _id__in=unique_question_ids
+                pk__in=[q.pk for q in questions]
             ).order_by('?')[:10 - len(questions)]
             questions = list(questions) + list(general_questions)
 
         return [
             {
-                'id': q._id,
+                'id': q.pk,
                 'title': q.title,
                 'description': q.details,
                 'user_id': q.author.pk,
@@ -762,20 +815,19 @@ def fetch_all_at_once(request, user_id: int):
                 'tags': q.tags,
                 'answered': q.answered,
                 'topic': q.topic,
+                'is_upvoted': user_votes_dict.get(q.pk) == VoteType.UPVOTE.value,
+                'is_downvoted': user_votes_dict.get(q.pk) == VoteType.DOWNVOTE.value,
             }
             for q in questions
         ]
-
 
     def get_question_of_the_day():
         today = timezone.now().date()
         cache_key = f"question_of_the_day_{today}"
 
-        # Use cached data if available
         question_data = cache.get(cache_key)
         if not question_data:
             question = Question.objects.order_by('?').first()
-
             if not question:
                 return {'error': 'No questions available'}
 
@@ -820,6 +872,7 @@ def fetch_all_at_once(request, user_id: int):
             for user in contributors
         ]
 
+    # Fetch the data concurrently
     with ThreadPoolExecutor() as executor:
         future_questions = executor.submit(get_questions_for_user, user_id)
         future_question_of_the_day = executor.submit(get_question_of_the_day)
@@ -829,9 +882,15 @@ def fetch_all_at_once(request, user_id: int):
         question_of_the_day = future_question_of_the_day.result()
         top_contributors = future_top_contributors.result()
 
-    # print(f"Time taken: {time.time() - time_start:.2f} seconds")
-    return JsonResponse({
+    # Combine all data
+    feed_data = {
         'personalized_questions': questions,
         'question_of_the_day': question_of_the_day,
         'top_contributors': top_contributors
-    }, safe=False)
+    }
+
+    # Cache the feed data for a specified amount of time
+    cache.set(cache_key, feed_data, timeout=3600)  # Cache for 1 hour (3600 seconds)
+
+    print(f"Time taken: {time.time() - time_start:.2f} seconds")
+    return JsonResponse(feed_data, safe=False)

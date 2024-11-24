@@ -23,7 +23,7 @@ const App = () => {
         <Route path="/login" element={<Login />} />
         <Route path="/forgot" element={<ForgotPassword />} />
         <Route path="/feed" element={<AuthWrapper><Feed /></AuthWrapper>} />
-        <Route path="/question" element={<AuthWrapper><CodeExecution /></AuthWrapper>} />
+        <Route path="/question/:question_id" element={<AuthWrapper><CodeExecution /></AuthWrapper>} />
         <Route path="/result/:wiki_id/:wiki_name" element={<AuthWrapper><SearchResults /></AuthWrapper>} />
         <Route path="/survey" element={<SurveyPage />} />
         <Route path="/post_question" element={<AuthWrapper><PostQuestion /></AuthWrapper>} />
