@@ -160,13 +160,14 @@ export default function CodeExecution() {
 
   // TODO Now there is only one output box, we need to create a separate output box for each code execution
   // TODO Need to check if the comment and the question has code_snippet, if there is not there shouldnt be a run code button
-  return (<div classname="flex column">
+  return (<div>
     
     {isloading ? (
     <LoadingComponent /> // Show loading screen while data is being fetched
 ) : (
     
     <div className="min-h-screen bg-gray-100 text-gray-900">
+      <Navbar />
       <div className="container mx-auto p-4 max-w-4xl">
         <h1 className="text-2xl font-bold mb-4 text-gray-900">
           {questionData.title}
