@@ -6,6 +6,7 @@ import SyntaxHighlighter from "react-syntax-highlighter";
 import { docco } from "react-syntax-highlighter/dist/esm/styles/hljs";
 import language from "react-syntax-highlighter/dist/esm/languages/hljs/1c";
 import { Navbar, LeftSidebar, RightSidebar } from '../PageComponents'; 
+import { LoadingComponent } from '../LoadingPage';
 import PostComment from "../PostComment";
 import QuestionDetail from "../QuestionDetail";
 import Comment from "../Comment";
@@ -21,6 +22,8 @@ export default function CodeExecution() {
 
   const [code, setCode] = useState(""); // State to store the user input (code)
   const [output, setOutput] = useState(""); // State to store the backend's response (output)
+  const [isloading, setIsLoading] = useState(true); // State to manage opening page
+
   const [loading, setLoading] = useState(false); // State to manage loading state
   const [error, setError] = useState(null);
   const [languageId, setLanguageId] = useState(""); // State to store selected language ID
@@ -39,7 +42,6 @@ export default function CodeExecution() {
         });
       const data = await response.json();
       setQuestionData(data.question);
-      console.log(questionData.author);
       setLanguageId(data.question.language_id);
       setLoading(false);
     } catch (err) {
@@ -112,12 +114,23 @@ export default function CodeExecution() {
       console.error('Error fetching languages:', error);
     }
   };
+  const fetchInitialData = async () => {
+    setIsLoading(true);
+    try {
+      await fetchQuestion();
+      await fetchComments();
+      await fetchLanguages();
+    } catch (error) {
+        console.error("Error fetching initial data:", error);
+    } finally {
+        setIsLoading(false);
+    }
+  }
   // Fetch languages from the backend
   useEffect(() => {
-    fetchQuestion();
-    fetchComments();
-    fetchLanguages();
-    
+
+    fetchInitialData();   
+
   }, []);
 
   // Function to handle form submission and send the code to the backend
@@ -147,8 +160,12 @@ export default function CodeExecution() {
 
   // TODO Now there is only one output box, we need to create a separate output box for each code execution
   // TODO Need to check if the comment and the question has code_snippet, if there is not there shouldnt be a run code button
-  return (
-    <>
+  return (<div classname="flex column">
+    
+    {isloading ? (
+    <LoadingComponent /> // Show loading screen while data is being fetched
+) : (
+    
     <div className="min-h-screen bg-gray-100 text-gray-900">
       <div className="container mx-auto p-4 max-w-4xl">
         <h1 className="text-2xl font-bold mb-4 text-gray-900">
@@ -267,6 +284,8 @@ export default function CodeExecution() {
         </div>
       </div>
     </div>
-    </>
+    
+)}
+</div>
   );
 }
