@@ -14,31 +14,8 @@ function QuestionDetail(props) {
     const navigate = useNavigate();
     //Todo implement ownership logic for enabling buttons
 
-    const [isAnswered,setAnswered] = useState(false);
+    const [isAnswered,setAnswered] = useState(props.isAnswered);
 
-    const fetchAnswerStatus = async () => {
-        try {
-          const token = localStorage.getItem('authToken');
-          const response = await fetch(`${process.env.REACT_APP_API_URL}/question/${props.question_id}/comments/`,
-            {
-              method: 'GET',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`,  // Add the token here
-              }
-            });
-          const data = await response.json();
-          setAnswered(data.comments.some(c => c.answer_of_the_question));
-        
-        } catch (err) {
-          
-        }
-      };
-    useEffect(() => {
-        fetchAnswerStatus();        
-      }, []);
-    
-    
     // Vote handlers
     const handlePostUpvote = async () => {
       const token = localStorage.getItem('authToken');

@@ -63,6 +63,7 @@ export default function CodeExecution() {
         });
       const data = await response.json();
       setCommentData(data.comments);
+      setAnswered(data.comments.some(c => c.answer_of_the_question));
       setLoading(false);
 
 
