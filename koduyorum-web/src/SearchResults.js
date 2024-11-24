@@ -173,13 +173,21 @@ const fetchSearchResults = async (query) => {
 
   const handleTextSelection = () => {
     const selection = window.getSelection();
-    // TODO implement index logic
-    if (selection && selection.toString().trim() !== '') {
+    if (selection && selection.rangeCount > 0 && selection.toString().trim() !== '') {
+      const range = selection.getRangeAt(0); // Get the selected range
+  
+      const startOffset = range.startOffset; // Start of the selection in the container
+      const endOffset = range.endOffset; // End of the selection in the container
+  
       console.log('Selected text:', selection.toString());
+      console.log('Start offset:', startOffset, 'End offset:', endOffset);
+  
       setSelectedText(selection.toString());
+      setStartIndex(startOffset);
+      setEndIndex(endOffset);
       setModalVisible(true);
     } else {
-      console.log('No text selected');
+      console.log('No text selected.');
     }
   };
 
@@ -234,12 +242,14 @@ const fetchSearchResults = async (query) => {
           {activeTab === 'info' ? (
             <div>
               <Annotation
-              visible={modalVisible}
-              selectedText={selectedText}
-              language_id={wiki_id}
-              onClose={() => setModalVisible(false)}
-            />
-            <div className="info-box" onMouseDown={handleTextSelection}>
+                visible={modalVisible}
+                selectedText={selectedText}
+                startIndex={startIndex}
+                endIndex={endIndex}
+                language_id={wiki_id}
+                onClose={() => setModalVisible(false)}
+              />
+            <div className="info-box" onMouseUp={handleTextSelection}>
               
               <h2 className="language-title">{wiki_name}</h2>
               {infoData.mainInfo.length > 0 && (

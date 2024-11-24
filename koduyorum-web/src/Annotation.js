@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-const Annotation = ({ visible, selectedText, language_id, onClose }) => {
+const Annotation = ({ visible, selectedText, startIndex, endIndex, language_id, onClose }) => {
   const [annotationText, setAnnotationText] = useState('');
 
   if (!visible) {
@@ -18,9 +18,9 @@ const Annotation = ({ visible, selectedText, language_id, onClose }) => {
 
         const annotationData = {
             text: annotationText,
-            language_qid: 28865, //language_id, //TODO
-            annotation_starting_point:1, // selectedText, //TODO
-            annotation_ending_point:3, // selectedText, //TODO
+            language_qid: language_id.replace(/^Q/, ''), // Removes the 'Q' at the beginning
+            annotation_starting_point:startIndex, 
+            annotation_ending_point:endIndex,
             type: 'annotation',
         };
 
