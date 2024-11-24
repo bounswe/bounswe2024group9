@@ -182,8 +182,7 @@ const fetchSearchResults = async (query) => {
     let lastIndex = 0;
   
     annotations.forEach((annotation) => {
-      const { annotation_starting_point, annotation_ending_point, text: annotationText } = annotation;
-  
+      const { annotation_starting_point, annotation_ending_point, text: annotationText , annotation_id: annotationId} = annotation;
       // Add text before the annotation
       if (lastIndex < annotation_starting_point) {
         annotatedText.push(text.slice(lastIndex, annotation_starting_point));
@@ -195,6 +194,12 @@ const fetchSearchResults = async (query) => {
           <em>{text.slice(annotation_starting_point, annotation_ending_point)}</em>
           <div className="annotation-tooltip">
             {annotationText}  {/* This will show the annotation text */}
+            <button
+              className="delete-icon"
+              onClick={() => handleDeleteAnnotation(annotationId)} // Replace annotationId with the actual ID
+            >
+              🗑️
+            </button>
           </div>
         </span>
       );
@@ -210,6 +215,32 @@ const fetchSearchResults = async (query) => {
   
     return annotatedText;
   };  
+
+  const handleDeleteAnnotation = async (annotationId) => {
+    try {
+      const userId = localStorage.getItem('user_id');
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/delete_annotation/${annotationId}/`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'User-ID': userId,
+        },
+      });
+
+      if (response.ok) {
+        alert('Annotation deleted successfully.');
+        // Optional: Trigger a re-fetch of annotations or update state to reflect the deletion
+      } else {
+        const errorData = await response.json();
+        console.error('Error deleting annotation:', errorData);
+        alert('Failed to delete annotation.');
+      }
+    } catch (error) {
+      console.error('Error during annotation deletion:', error);
+      alert('An unexpected error occurred.');
+    }
+  };
+  
 
   const handleTextSelection = (e) => {
     const selection = window.getSelection();

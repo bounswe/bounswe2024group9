@@ -24,4 +24,17 @@
   .annotation:hover .annotation-tooltip {
     opacity: 1;
   }
+  .delete-icon {
+    background: none;
+    border: none;
+    color: #ffffff; /* White color to match the tooltip */
+    font-size: 16px; /* Adjust icon size */
+    cursor: pointer;
+    margin-left: 8px; /* Space between text and icon */
+    padding: 4px;
+    transition: color 0.3s ease;
+  }
   
+  .delete-icon:hover {
+    color: #ff4444; /* Highlight the icon in red on hover */
+  }
