@@ -1,13 +1,37 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Select from 'react-select';
 import './PostQuestion.css';
+
+const predefinedTags = [
+    'Machine Learning',
+    'Web Development',
+    'Data Science',
+    'Mobile Development',
+    'DevOps',
+    'Cloud Computing',
+    'Cyber Security',
+    'IoT',
+    'Blockchain',
+    'Artificial Intelligence',
+    'Networking',
+    'Operating Systems',
+    'Database Management',
+    'Algorithms',
+    'Data Structures',
+    'Testing',
+    'Agile',
+    'Design',
+    'Career',
+    'Other',
+];
 
 function PostQuestion() {
     const [title, setTitle] = useState('');
     const [details, setDetails] = useState('');
     const [codeSnippet, setCodeSnippet] = useState('');
     const [language, setLanguage] = useState('');
-    const [tags, setTags] = useState('');
+    const [tags, setTags] = useState([]);
     const [availableLanguages, setAvailableLanguages] = useState([]); // Ensure it's initialized as an array
     const navigate = useNavigate();
 
@@ -41,14 +65,14 @@ function PostQuestion() {
             alert('All fields are required!');
             return;
         }
+        console.log('Tags:', tags);
         const user_id = localStorage.getItem('user_id');
-        console.log('User ID:', user_id);
         const postData = {
             title,
             language,
             details,
             code_snippet: codeSnippet,
-            tags: tags.split(',').map(tag => tag.trim()),
+            tags: tags,
         };
 
         try {
@@ -113,15 +137,13 @@ function PostQuestion() {
                 value={codeSnippet}
                 onChange={(e) => setCodeSnippet(e.target.value)}
             />
-
-            <input
-                className="post-question-input"
-                type="text"
-                placeholder="Tags (comma-separated)"
-                value={tags}
-                onChange={(e) => setTags(e.target.value)}
+            <Select
+                isMulti
+                options={predefinedTags.map(tag => ({ value: tag, label: tag }))}
+                value={tags.map(tag => ({ value: tag, label: tag }))}
+                onChange={(selectedOptions) => setTags(selectedOptions.map(option => option.value))}
+                placeholder="Select Tags"
             />
-
             <button className="post-question-submit" onClick={handleSubmit}>
                 Submit Question
             </button>
