@@ -143,7 +143,7 @@ const PostDetail = ({ route }) => {
         const newCommentObj = {
             question_id: post.id,
             details: newComment,
-            code_snippet: codeSnippet, // Include code snippet in the request
+            code_snippet: codeSnippet,
             language: selectedLanguage,
             user_id: user_id,
         };
@@ -234,10 +234,10 @@ const PostDetail = ({ route }) => {
     
         const selectedText =
             selectedAnnotationTarget === 'description'
-                ? post.description.split(' ').slice(startIndex, endIndex + 1).join(' ')
+                ? (post.description || '').split(' ').slice(startIndex, endIndex + 1).join(' ')
                 : selectedAnnotationTarget === 'codeSnippet'
-                ? post.codeSnippet.split(' ').slice(startIndex, endIndex + 1).join(' ')
-                : comments[selectedAnnotationTarget].details
+                ? (post.codeSnippet || '').split(' ').slice(startIndex, endIndex + 1).join(' ')
+                : (comments[selectedAnnotationTarget]?.details || '')
                       .split(' ')
                       .slice(startIndex, endIndex + 1)
                       .join(' ');
@@ -281,9 +281,14 @@ const PostDetail = ({ route }) => {
         }
     };
     
+    
 
     const renderAnnotatedText = (text, target) => {
-        const words = text.split(' ');
+        if (!text) {
+            return <Text style={styles.description}>No text available</Text>;
+        }
+    
+        const words = text.split(' '); // Safe to call `split` since `text` is validated
         return (
             <Text style={styles.description}>
                 {words.map((word, index) => (
@@ -326,8 +331,7 @@ const PostDetail = ({ route }) => {
                     language={post.programmingLanguage}
                     style={atomOneDark}
                 >
-                    {/* Generate the annotated code string */}
-                    {post.codeSnippet
+                    {(post.codeSnippet || '')
                         .split(' ')
                         .map((word, index) => {
                             // Check if this word is part of an annotation

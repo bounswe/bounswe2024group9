@@ -4,11 +4,11 @@ import {
     Text,
     Image,
     StyleSheet,
-    TouchableOpacity,
-    Alert,
     FlatList,
     ActivityIndicator,
+    Alert,
 } from 'react-native';
+import QuestionCard from './QuestionCard';
 import { useNavigation } from '@react-navigation/native';
 
 const ProfilePage = ({ route }) => {
@@ -38,7 +38,7 @@ const ProfilePage = ({ route }) => {
     }, [user_id]);
 
     const handlePostPress = (post) => {
-        navigation.navigate('PostDetail', { post });
+        navigation.navigate('PostDetail', { post, user_id, username });
     };
 
     if (loading) {
@@ -57,13 +57,6 @@ const ProfilePage = ({ route }) => {
         );
     }
 
-    const renderPost = ({ item }) => (
-        <TouchableOpacity style={styles.postContainer} onPress={() => handlePostPress(item)}>
-            <Text style={styles.postTitle}>{item.title}</Text>
-            <Text style={styles.postDetails}>{item.details}</Text>
-        </TouchableOpacity>
-    );
-
     return (
         <View style={styles.container}>
             {/* Profile Section */}
@@ -80,17 +73,33 @@ const ProfilePage = ({ route }) => {
                 <Text style={styles.bio}>{profile.bio || 'No bio available'}</Text>
             </View>
 
-            {/* User Posts */}
-            <View style={styles.postsSection}>
-                <Text style={styles.sectionTitle}>User Posts</Text>
+            <View style={styles.questionsSection}>
+                <Text style={styles.sectionTitle}>User Questions</Text>
                 {profile.questions && profile.questions.length > 0 ? (
                     <FlatList
                         data={profile.questions}
                         keyExtractor={(item) => item.id.toString()}
-                        renderItem={renderPost}
+                        renderItem={({ item }) => (
+                            <QuestionCard
+                            post={{
+                                id: item.id,
+                                title: item.title,
+                                description: item.details,
+                                codeSnippet: item.code_snippet,
+                                user_id: item.author,
+                                likes: item.upvotes,
+                                programmingLanguage: item.language,
+                                tags: item.tags,
+                                answered: item.answered,
+                            }}
+                                currentUser={user_id}
+                                onPress={handlePostPress}
+                            />
+                        )}
                     />
+
                 ) : (
-                    <Text style={styles.noPostsText}>No posts available.</Text>
+                    <Text style={styles.noQuestionsText}>No questions available.</Text>
                 )}
             </View>
         </View>
@@ -138,7 +147,7 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         marginTop: 5,
     },
-    postsSection: {
+    questionsSection: {
         flex: 1,
         padding: 10,
     },
@@ -147,23 +156,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         marginBottom: 10,
     },
-    postContainer: {
-        padding: 10,
-        backgroundColor: '#fff',
-        borderRadius: 8,
-        marginBottom: 10,
-        borderWidth: 1,
-        borderColor: '#ccc',
-    },
-    postTitle: {
-        fontSize: 16,
-        fontWeight: 'bold',
-    },
-    postDetails: {
-        fontSize: 14,
-        color: '#555',
-    },
-    noPostsText: {
+    noQuestionsText: {
         textAlign: 'center',
         marginTop: 20,
         color: '#888',
