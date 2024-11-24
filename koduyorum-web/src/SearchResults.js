@@ -4,7 +4,8 @@ import { Navbar, LeftSidebar, RightSidebar } from './PageComponents';
 import { LoadingComponent }  from './LoadingPage'
 import { fetchWikiIdAndName } from './Feed'; 
 import './SearchResults.css';
-import Annotation from './Annotation';
+import CreateAnnotation from './CreateAnnotation';
+import './Annotation.css'
 
 const SearchResults = () => {
   const [activeTab, setActiveTab] = useState('info');
@@ -22,6 +23,8 @@ const SearchResults = () => {
   const [selectedText, setSelectedText] = useState('');
   const [startIndex, setStartIndex] = useState(null);
   const [endIndex, setEndIndex] = useState(null);
+  const [annotationData, setAnnotationData] = useState([]);
+  const [modalPosition, setModalPosition] = useState({ top: 0, left: 0 });
 
 
   const { wiki_id, wiki_name} = useParams(); // Get wiki_id from the URL
@@ -153,6 +156,7 @@ const fetchSearchResults = async (query) => {
 
       const infoResponse = await fetch(`${process.env.REACT_APP_API_URL}/result/${encodeURIComponent(wikiId)}`);
       const questionResponse = await fetch(`${process.env.REACT_APP_API_URL}/list_questions_by_language/${encodeURIComponent(wikiName)}/1`);
+      const annotationResponse = await fetch(`${process.env.REACT_APP_API_URL}/get_annotations_by_language_id/${wikiId.slice(1)}/`);
 
       if (!infoResponse.ok || !questionResponse.ok) {
         throw new Error('Failed to load data');
@@ -160,9 +164,11 @@ const fetchSearchResults = async (query) => {
 
       const infoData = await infoResponse.json();
       const questionData = await questionResponse.json();      
+      const annotationData = await annotationResponse.json();
       const questionsArray = questionData.questions;
       setInfoData(infoData || { mainInfo: [], instances: [], wikipedia: {} });
       setQuestionData(questionsArray || []);
+      setAnnotationData(annotationData.data || []);
     } catch (err) {
       console.error("Error fetching search data:", err);
       setError("Failed to load search data.");
@@ -171,7 +177,41 @@ const fetchSearchResults = async (query) => {
     }
   };
 
-  const handleTextSelection = () => {
+  const addAnnotations = (text, annotations) => {
+    let annotatedText = [];
+    let lastIndex = 0;
+  
+    annotations.forEach((annotation) => {
+      const { annotation_starting_point, annotation_ending_point, text: annotationText } = annotation;
+  
+      // Add text before the annotation
+      if (lastIndex < annotation_starting_point) {
+        annotatedText.push(text.slice(lastIndex, annotation_starting_point));
+      }
+  
+      // Add annotated text with tooltip
+      annotatedText.push(
+        <span className="annotation" key={annotation_starting_point}>
+          <em>{text.slice(annotation_starting_point, annotation_ending_point)}</em>
+          <div className="annotation-tooltip">
+            {annotationText}  {/* This will show the annotation text */}
+          </div>
+        </span>
+      );
+  
+      // Update the lastIndex to the end of the annotation
+      lastIndex = annotation_ending_point;
+    });
+  
+    // Add the remaining text after the last annotation
+    if (lastIndex < text.length) {
+      annotatedText.push(text.slice(lastIndex));
+    }
+  
+    return annotatedText;
+  };  
+
+  const handleTextSelection = (e) => {
     const selection = window.getSelection();
     if (selection && selection.rangeCount > 0 && selection.toString().trim() !== '') {
       const range = selection.getRangeAt(0); // Get the selected range
@@ -179,16 +219,37 @@ const fetchSearchResults = async (query) => {
       const startOffset = range.startOffset; // Start of the selection in the container
       const endOffset = range.endOffset; // End of the selection in the container
   
-      console.log('Selected text:', selection.toString());
-      console.log('Start offset:', startOffset, 'End offset:', endOffset);
-  
+      const mouseX = e.clientX;
+      const mouseY = e.clientY;
+
       setSelectedText(selection.toString());
       setStartIndex(startOffset);
       setEndIndex(endOffset);
       setModalVisible(true);
+      setModalPosition({ top: mouseY, left: mouseX });
     } else {
       console.log('No text selected.');
     }
+  };
+
+  const renderAnnotatedText = (textData) => {
+    const { text, annotation, start, end } = textData;
+  
+    // Split the text into parts (before annotation, annotation, and after annotation)
+    const beforeAnnotation = text.slice(0, start);
+    const annotatedPart = text.slice(start, end);
+    const afterAnnotation = text.slice(end);
+  
+    // Return JSX elements with annotations applied
+    return (
+      <>
+        {beforeAnnotation}
+        <span className="annotation" title={annotation}>
+          <em>{annotatedPart}</em>
+        </span>
+        {afterAnnotation}
+      </>
+    );
   };
 
   return (
@@ -241,7 +302,7 @@ const fetchSearchResults = async (query) => {
       </div>
           {activeTab === 'info' ? (
             <div>
-              <Annotation
+              <CreateAnnotation
                 visible={modalVisible}
                 selectedText={selectedText}
                 startIndex={startIndex}
@@ -249,7 +310,7 @@ const fetchSearchResults = async (query) => {
                 language_id={wiki_id}
                 onClose={() => setModalVisible(false)}
               />
-            <div className="info-box" onMouseUp={handleTextSelection}>
+            <div className="info-box" onMouseUp={(e) => handleTextSelection(e)}>
               
               <h2 className="language-title">{wiki_name}</h2>
               {infoData.mainInfo.length > 0 && (
@@ -310,7 +371,7 @@ const fetchSearchResults = async (query) => {
               )}
               {infoData.wikipedia && (
                 <div>
-                  <p>{infoData.wikipedia.info}</p>
+                {addAnnotations(infoData.wikipedia.info, annotationData)}
                 </div>
               )}
             </div>

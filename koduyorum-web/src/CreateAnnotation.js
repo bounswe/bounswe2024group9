@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-const Annotation = ({ visible, selectedText, startIndex, endIndex, language_id, onClose }) => {
+const CreateAnnotation = ({ visible, selectedText, startIndex, endIndex, language_id, onClose }) => {
   const [annotationText, setAnnotationText] = useState('');
 
   if (!visible) {
@@ -123,4 +123,4 @@ const Annotation = ({ visible, selectedText, startIndex, endIndex, language_id, 
   );
 };
 
-export default Annotation;
+export default CreateAnnotation;

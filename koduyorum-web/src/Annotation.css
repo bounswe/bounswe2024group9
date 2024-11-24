@@ -1,0 +1,27 @@
+.annotation {
+    position: relative;
+    cursor: pointer;
+    font-style: italic;
+    color: darkcyan; /* Example: Tomato color */
+  }
+  
+  .annotation-tooltip {
+    position: absolute;
+    top: 120%;
+    left: 20%;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 5px;
+    border-radius: 3px;
+    font-size: 12px;
+    max-width: 200px;
+    white-space: nowrap;
+    z-index: 10;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  
+  .annotation:hover .annotation-tooltip {
+    opacity: 1;
+  }
+  
