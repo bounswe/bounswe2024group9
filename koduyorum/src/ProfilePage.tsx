@@ -85,7 +85,6 @@ const ProfilePage = ({ route }) => {
                                 id: item.id,
                                 title: item.title,
                                 description: item.details,
-                                codeSnippet: item.code_snippet,
                                 user_id: item.author,
                                 likes: item.upvotes,
                                 programmingLanguage: item.language,

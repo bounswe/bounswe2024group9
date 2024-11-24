@@ -141,18 +141,17 @@ const PostDetail = ({ route }) => {
         }
 
         const newCommentObj = {
-            question_id: post.id,
             details: newComment,
             code_snippet: codeSnippet,
             language: selectedLanguage,
-            user_id: user_id,
         };
 
         try {
-            const response = await fetch('https://clownfish-app-brdp5.ondigitalocean.app/create_comment/', {
+            const response = await fetch(`http://10.0.2.2:8000/create_comment/${post.id}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'User-ID': user_id,
                 },
                 body: JSON.stringify(newCommentObj),
             });
