@@ -165,7 +165,6 @@ const PostPreview = ({ post, currentUser, onClick }) => {
                     }>{programmingLanguage}</div>
                 <div className="tags">
                     {tags.map((tag, index) => (
-                        console.log("Tag:", tag),   
                         <span key={index} className="label">{tag}</span>
                     ))}
                 </div>
