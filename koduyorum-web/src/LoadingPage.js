@@ -256,8 +256,9 @@ export const LoadingComponent = () => {
   }, []);
 
   useEffect(() => {
-    // Update the loading text with the appropriate number of "o"s
-    setLoadingText(`L${"o".repeat(oCount)}ading...`);
+    // Update the loading text with the appropriate number of dots
+    const newLoadingText = `Loading${".".repeat(oCount % 3 + 1)}`;
+    setLoadingText(newLoadingText);
   }, [oCount]);
 
   return (

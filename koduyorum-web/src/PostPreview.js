@@ -28,13 +28,16 @@ const PostPreview = ({ post, currentUser, onClick }) => {
         description,
         user_id,
         upvotes,
+        downvotes,
         comments_count,
         programmingLanguage,
         codeSnippet,
         tags,
         topic,
         answered,
-        author
+        author,
+        isUpvoted,
+        isDownvoted,
     } = post;
 
     const [isUpvoting, setIsUpvoting] = useState(false);
@@ -122,7 +125,7 @@ const PostPreview = ({ post, currentUser, onClick }) => {
         setTimeout(() => setAnimateDownvote(false), 500); // Reset animation after 500ms
     
         try {
-            const response = await fetch(`${process.env.REACT_APP_API_URL}downvote_question/${post.id}`, {
+            const response = await fetch(`${process.env.REACT_APP_API_URL}/downvote_question/${post.id}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -171,17 +174,17 @@ const PostPreview = ({ post, currentUser, onClick }) => {
 
             <div className="post-footer">
                 <div
-                    className={`footer-item ${animateUpvote ? 'upvote-animate' : ''}`}
+                    className={`footer-item ${animateUpvote ? 'upvote-animate' : ''} ${isUpvoted ? 'upvoted' : ''}`}
                     onClick={handleUpvote}
                 >
-                    <FontAwesomeIcon icon={faThumbsUp} size="sm" color="#888" />
+                    <FontAwesomeIcon icon={faThumbsUp} size="sm"  />
                     <span className="footer-text">{upvote} Upvotes</span>
                 </div>
                 <div
                     className={`footer-item ${animateDownvote ? 'downvote-animate' : ''}`}
                     onClick={handleDownvote}
                 >
-                    <FontAwesomeIcon icon={faThumbsDown} size="sm" color="#888" />
+                    <FontAwesomeIcon icon={faThumbsDown} size="sm" />
                     <span className="footer-text">{upvotes} Downvotes</span>
                 </div>
                 <div className="footer-item">
