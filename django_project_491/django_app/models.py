@@ -127,7 +127,7 @@ class Question(models.Model):
         else:
             return result['stdout'].split('\n')
 
-    def mark_as_answered(self): # TODO
+    def mark_as_answered(self, comment_id): # TODO
         self.answered = True
         self.save()
 

@@ -23,6 +23,7 @@ urlpatterns = [
     path('reset_password/', user_views.reset_password_request_mail, name='reset_password'),
     path('reset_password/<str:uidb64>/<str:token>/', user_views.reset_password, name='reset_password'),
     path('interested_languages/', user_views.add_interested_languages_for_a_user, name='interested_languages'),
+    path('preferred_languages/', user_views.get_user_preferred_languages, name='preferred_languages'),
     path('get_top_five_contributors/', user_views.list_most_contributed_five_person, name='get_top_five_contributors'),
     
     path('fetch_feed_at_once/<int:user_id>/', question_views.fetch_all_at_once, name='get_user_profile'),

@@ -105,9 +105,9 @@ def edit_comment(request: HttpRequest, comment_id: int) -> HttpResponse:
 
     try:
         comment = Comment.objects.get(_id=comment_id)
-        comment_owner_user_id = comment.author.id
+        comment_owner_user_id = comment.author.user_id
 
-        if editor_user.id != comment_owner_user_id and editor_user.userType != UserType.ADMIN:
+        if editor_user.user_id != comment_owner_user_id and editor_user.userType != UserType.ADMIN:
             return JsonResponse({'error': 'Only admins and owner of the comments can edit comments'}, status=403)
 
         
@@ -124,6 +124,8 @@ def edit_comment(request: HttpRequest, comment_id: int) -> HttpResponse:
 
     except (KeyError, json.JSONDecodeError) as e:
         return JsonResponse({'error': f'Malformed data: {str(e)}'}, status=400)
+
+    return JsonResponse({'success': 'Comment updated successfully'}, status=200)
 
 
 @csrf_exempt
@@ -156,19 +158,20 @@ def delete_comment(request: HttpRequest, comment_id: int) -> HttpResponse:
 
     try:
         comment = Comment.objects.get(_id=comment_id)
-        comment_owner_user_id = comment.author.id
+        comment_owner_user_id = comment.author.user_id
 
-        if deletor_user.id != comment_owner_user_id and deletor_user.userType != UserType.ADMIN:
+        if deletor_user.user_id != comment_owner_user_id and deletor_user.userType != UserType.ADMIN:
             return JsonResponse({'error': 'Only admins and owner of the comments can delete comments'}, status=403)
 
         comment.delete()
-
-        user.authored_comments.remove(comment)
 
     except Comment.DoesNotExist:
         return JsonResponse({'error': 'Comment not found'}, status=404)
     except Exception as e:
         return JsonResponse({'error': f'An error occurred: {str(e)}'}, status=500)
+    
+    return JsonResponse({'success': f'Comment {comment_id} is deleted'}, status=200)
+
 
 @csrf_exempt
 def mark_comment_as_answer(request: HttpRequest, comment_id : int) -> HttpResponse:
@@ -195,7 +198,7 @@ def mark_comment_as_answer(request: HttpRequest, comment_id : int) -> HttpRespon
 
     try:
         comment = Comment.objects.get(_id=comment_id)
-        question : Question = Comment.question
+        question = comment.question
         user_id = request.headers.get('User-ID', None)
         if user_id is None:
             return JsonResponse({'error': 'User ID parameter is required in the header'}, status=400)
