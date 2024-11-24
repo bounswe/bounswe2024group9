@@ -1,15 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-    View,
-    Text,
-    StyleSheet,
-    ScrollView,
-    TouchableOpacity,
-    TextInput,
-    Alert,
-    Modal,
-    Pressable,
-} from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Alert, Modal } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import SyntaxHighlighter from 'react-native-syntax-highlighter';
 import { atomOneDark } from 'react-native-syntax-highlighter';
@@ -23,15 +13,14 @@ const PostDetail = ({ route }) => {
     const [availableLanguages, setAvailableLanguages] = useState([]);
     const [selectedLanguage, setSelectedLanguage] = useState('');
     const [codeOutput, setCodeOutput] = useState('');
+    const [annotations, setAnnotations] = useState([]);
+    const [startIndex, setStartIndex] = useState(null);
     const [upvotes, setUpvotes] = useState(post.upvotes);
     const [isAnswered, setIsAnswered] = useState(post.answered);
-    const [annotations, setAnnotations] = useState([]);
-    const [textAnnotations, setTextAnnotations] = useState({});
+    const [endIndex, setEndIndex] = useState(null);
     const [annotationModalVisible, setAnnotationModalVisible] = useState(false);
     const [annotationText, setAnnotationText] = useState('');
-    const [selectedText, setSelectedText] = useState('');
-    const [startIndex, setStartIndex] = useState(null);
-    const [endIndex, setEndIndex] = useState(null);
+    const [selectedAnnotationTarget, setSelectedAnnotationTarget] = useState(null); // Target for annotation
 
     useEffect(() => {
         const fetchComments = async () => {
@@ -49,35 +38,8 @@ const PostDetail = ({ route }) => {
             }
         };
 
-        const fetchAnnotations = async () => {
-            try {
-                const response = await fetch(
-                    `http://10.0.2.2:8000/get_annotations_by_language/${post.language_id}/`
-                );
-                const data = await response.json();
-                if (response.status === 200) {
-                    setAnnotations(data.data);
-                    const textAnnotationMap = {};
-                    data.data.forEach((annotation) => {
-                        const targetText = annotation.annotation_starting_point;
-                        if (!textAnnotationMap[targetText]) {
-                            textAnnotationMap[targetText] = 1;
-                        } else {
-                            textAnnotationMap[targetText] += 1;
-                        }
-                    });
-                    setTextAnnotations(textAnnotationMap);
-                } else {
-                    console.error('Error fetching annotations:', data.error);
-                }
-            } catch (error) {
-                console.error('Error fetching annotations:', error);
-            }
-        };
-
         fetchComments();
-        fetchAnnotations();
-    }, [post.id, post.language_id]);
+    }, [post.id]);
 
     useEffect(() => {
         const fetchLanguages = async () => {
@@ -94,154 +56,6 @@ const PostDetail = ({ route }) => {
         fetchLanguages();
     }, []);
 
-    const handleTextSelection = (text) => {
-        setSelectedText(text);
-        setAnnotationModalVisible(true);
-    };
-
-    const handleWordPress = (index) => {
-        if (startIndex === null) {
-            setStartIndex(index);
-            setEndIndex(index);
-        } else if (index < startIndex) {
-            setStartIndex(index);
-        } else {
-            setEndIndex(index);
-            setAnnotationModalVisible(true);
-        }
-    };
-    
-
-    const handleAddAnnotation = async () => {
-        if (!selectedText || !annotationText) {
-            Alert.alert('Error', 'Both selected text and annotation text are required.');
-            return;
-        }
-
-        try {
-            const annotationData = {
-                text: annotationText,
-                language_qid: post.language_id,
-                annotation_starting_point: selectedText,
-                annotation_ending_point: selectedText,
-                type: 'annotation',
-            };
-
-            const response = await fetch('http://10.0.2.2:8000/create_annotation/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'User-ID': user_id,
-                },
-                body: JSON.stringify(annotationData),
-            });
-
-            if (response.status === 201) {
-                Alert.alert('Success', 'Annotation added successfully');
-                setAnnotationModalVisible(false);
-                setAnnotationText('');
-
-                const updatedTextAnnotations = { ...textAnnotations };
-                if (!updatedTextAnnotations[selectedText]) {
-                    updatedTextAnnotations[selectedText] = 1;
-                } else {
-                    updatedTextAnnotations[selectedText] += 1;
-                }
-                setTextAnnotations(updatedTextAnnotations);
-            } else {
-                const data = await response.json();
-                Alert.alert('Error', data.error || 'Failed to add annotation');
-            }
-        } catch (error) {
-            console.error('Error adding annotation:', error);
-            Alert.alert('Error', 'Failed to add annotation');
-        }
-    };
-    const handleAddAnnotationForSelection = async () => {
-        if (startIndex === null || endIndex === null || !annotationText) {
-            Alert.alert('Error', 'Please select text and add annotation text.');
-            return;
-        }
-    
-        const selectedWords = post.description.split(' ').slice(startIndex, endIndex + 1).join(' ');
-        setSelectedText(selectedWords);
-    
-        try {
-            const annotationData = {
-                text: annotationText,
-                language_qid: post.language_id,
-                annotation_starting_point: selectedWords,
-                annotation_ending_point: selectedWords,
-                type: 'annotation',
-            };
-    
-            const response = await fetch('http://10.0.2.2:8000/create_annotation/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'User-ID': user_id,
-                },
-                body: JSON.stringify(annotationData),
-            });
-    
-            if (response.status === 201) {
-                Alert.alert('Success', 'Annotation added successfully');
-                setAnnotationModalVisible(false);
-                setAnnotationText('');
-    
-                const updatedTextAnnotations = { ...textAnnotations };
-                if (!updatedTextAnnotations[selectedWords]) {
-                    updatedTextAnnotations[selectedWords] = 1;
-                } else {
-                    updatedTextAnnotations[selectedWords] += 1;
-                }
-                setTextAnnotations(updatedTextAnnotations);
-    
-                // Reset selection
-                setStartIndex(null);
-                setEndIndex(null);
-            } else {
-                const data = await response.json();
-                Alert.alert('Error', data.error || 'Failed to add annotation');
-            }
-        } catch (error) {
-            console.error('Error adding annotation:', error);
-            Alert.alert('Error', 'Failed to add annotation');
-        }
-    };
-    
-
-    const renderAnnotatedText = (text) => {
-        const words = text.split(' ');
-        return (
-            <Text style={styles.descriptionText}>
-                {words.map((word, index) => (
-                    <Text key={index}>
-                        <Pressable
-                            onPress={() => handleWordPress(index)}
-                            style={[
-                                styles.wordContainer,
-                                index >= startIndex && index <= endIndex && styles.selectedWord,
-                            ]}
-                        >
-                            <Text style={styles.textWord}>
-                                {word}
-                                {textAnnotations[word] && (
-                                    <Text style={styles.annotationCount}>
-                                        [{textAnnotations[word]}]
-                                    </Text>
-                                )}
-                            </Text>
-                        </Pressable>
-                        <Text>{' '}</Text> {/* Add a space between words */}
-                    </Text>
-                ))}
-            </Text>
-        );
-    };
-    
-    
-
     const handleUpvote = async () => {
         try {
             const response = await fetch(
@@ -250,13 +64,13 @@ const PostDetail = ({ route }) => {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'User-ID': user_id,
+                        'User-ID': user_id, // Pass user ID in headers
                     },
                 }
             );
 
             if (response.ok) {
-                setUpvotes(upvotes + 1);
+                setUpvotes(upvotes + 1); // Increment upvote count
                 Alert.alert('Success', 'Question upvoted successfully');
             } else {
                 const data = await response.json();
@@ -276,13 +90,13 @@ const PostDetail = ({ route }) => {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'User-ID': user_id,
+                        'User-ID': user_id, // Pass user ID in headers
                     },
                 }
             );
 
             if (response.ok) {
-                setUpvotes(upvotes - 1);
+                setUpvotes(upvotes - 1); // Decrement upvote count
                 Alert.alert('Success', 'Question downvoted successfully');
             } else {
                 const data = await response.json();
@@ -294,33 +108,259 @@ const PostDetail = ({ route }) => {
         }
     };
 
+    const handleMarkAsAnswered = async () => {
+        try {
+            const response = await fetch(
+                `http://10.0.2.2:8000/mark_as_answered/${post.id}/`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'User-ID': user_id, // Pass user ID in headers
+                    },
+                }
+            );
+
+            if (response.ok) {
+                setIsAnswered(true); // Update local state
+                Alert.alert('Success', 'Question marked as answered');
+            } else {
+                const data = await response.json();
+                Alert.alert('Error', data.error || 'Failed to mark as answered');
+            }
+        } catch (error) {
+            console.error('Error marking as answered:', error);
+            Alert.alert('Error', 'Failed to mark as answered');
+        }
+    };
+
+    const handleAddComment = async () => {
+        if (newComment.trim() === '' || selectedLanguage === '') {
+            Alert.alert('Comment, language, and code snippet cannot be empty');
+            return;
+        }
+
+        const newCommentObj = {
+            question_id: post.id,
+            details: newComment,
+            code_snippet: codeSnippet, // Include code snippet in the request
+            language: selectedLanguage,
+            user_id: user_id,
+        };
+
+        try {
+            const response = await fetch('https://clownfish-app-brdp5.ondigitalocean.app/create_comment/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(newCommentObj),
+            });
+
+            const data = await response.json();
+
+            if (response.status === 201) {
+                setComments([
+                    ...comments,
+                    {
+                        comment_id: data.comment_id,
+                        details: newComment,
+                        code_snippet: codeSnippet,
+                        user: username,
+                    },
+                ]);
+                setNewComment('');
+                setCodeSnippet(''); // Clear code snippet input
+            } else {
+                Alert.alert('Error', data.error || 'Failed to add comment');
+            }
+        } catch (error) {
+            console.error('Error adding comment:', error);
+            Alert.alert('Error', 'Failed to add comment');
+        }
+    };
+
+    const handleRunCode = async () => {
+        try {
+            const response = await fetch(`http://10.0.2.2:8000/run_code_of_question_or_comment/question/${post.id}/`);
+            const data = await response.json();
+    
+            if (response.status === 200) {
+                setCodeOutput(data.output); // Set the output in state
+            } else {
+                Alert.alert('Error', data.error || 'Failed to run code');
+            }
+        } catch (error) {
+            console.error('Error running code:', error);
+            Alert.alert('Error', 'Failed to run code');
+        }
+    };
+    
+
     const renderComments = () => {
         return comments.map((comment, index) => (
             <View key={index} style={styles.comment}>
                 <Text style={styles.commentUser}>{comment.user}:</Text>
-                <Text style={styles.commentText}>{comment.details}</Text>
-
+                {renderAnnotatedText(comment.details, index)}
                 {comment.code_snippet ? (
                     <SyntaxHighlighter language={selectedLanguage || 'javascript'} style={atomOneDark}>
-                        {comment.code_snippet}
+                        {renderAnnotatedText(comment.code_snippet, `codeComment-${index}`)}
                     </SyntaxHighlighter>
                 ) : null}
             </View>
         ));
     };
+    
 
+    const handleWordPress = (index, target) => {
+        setSelectedAnnotationTarget(target);
+        if (startIndex === null) {
+            setStartIndex(index);
+            setEndIndex(index);
+        } else if (index < startIndex) {
+            setStartIndex(index);
+        } else {
+            setEndIndex(index);
+            setAnnotationModalVisible(true);
+        }
+    };
+    
+
+    const handleAddAnnotation = async () => {
+        if (startIndex === null || endIndex === null || !annotationText.trim()) {
+            Alert.alert('Error', 'Please select text and add annotation text.');
+            return;
+        }
+    
+        const selectedText =
+            selectedAnnotationTarget === 'description'
+                ? post.description.split(' ').slice(startIndex, endIndex + 1).join(' ')
+                : selectedAnnotationTarget === 'codeSnippet'
+                ? post.codeSnippet.split(' ').slice(startIndex, endIndex + 1).join(' ')
+                : comments[selectedAnnotationTarget].details
+                      .split(' ')
+                      .slice(startIndex, endIndex + 1)
+                      .join(' ');
+    
+        try {
+            const annotationData = {
+                text: annotationText,
+                target: selectedAnnotationTarget,
+                language_qid: post.language_id,
+                annotation_starting_point: selectedText,
+                annotation_ending_point: selectedText,
+                type: 'annotation',
+            };
+    
+            const response = await fetch('http://10.0.2.2:8000/create_annotation/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'User-ID': user_id,
+                },
+                body: JSON.stringify(annotationData),
+            });
+    
+            if (response.status === 201) {
+                Alert.alert('Success', 'Annotation added successfully');
+                setAnnotations([
+                    ...annotations,
+                    { startIndex, endIndex, text: annotationText, target: selectedAnnotationTarget },
+                ]);
+                setAnnotationModalVisible(false);
+                setAnnotationText('');
+                setStartIndex(null);
+                setEndIndex(null);
+            } else {
+                const data = await response.json();
+                Alert.alert('Error', data.error || 'Failed to add annotation');
+            }
+        } catch (error) {
+            console.error('Error adding annotation:', error);
+            Alert.alert('Error', 'Failed to add annotation');
+        }
+    };
+    
+
+    const renderAnnotatedText = (text, target) => {
+        const words = text.split(' ');
+        return (
+            <Text style={styles.description}>
+                {words.map((word, index) => (
+                    <Text key={index} onPress={() => handleWordPress(index, target)}>
+                        <Text
+                            style={[
+                                styles.textWord,
+                                index >= startIndex &&
+                                    index <= endIndex &&
+                                    selectedAnnotationTarget === target &&
+                                    styles.selectedWord,
+                                annotations.some(
+                                    (annotation) =>
+                                        index >= annotation.startIndex &&
+                                        index <= annotation.endIndex &&
+                                        annotation.target === target
+                                ) && styles.annotatedWord,
+                            ]}
+                        >
+                            {word}
+                        </Text>
+                        <Text> </Text>
+                    </Text>
+                ))}
+            </Text>
+        );
+    };
+
+    
     return (
         <ScrollView contentContainerStyle={styles.container}>
             <Text style={styles.title}>{post.title}</Text>
-            <Text style={styles.description}>{renderAnnotatedText(post.description)}</Text>
-
+    
+            {/* Render Annotated Description */}
+            {renderAnnotatedText(post.description, 'description')}
+    
             <View style={styles.codeContainer}>
                 <Text style={styles.codeTitle}>Code Snippet:</Text>
-                <SyntaxHighlighter language={post.programmingLanguage} style={atomOneDark}>
-                    {post.codeSnippet}
+                <SyntaxHighlighter
+                    language={post.programmingLanguage}
+                    style={atomOneDark}
+                >
+                    {/* Generate the annotated code string */}
+                    {post.codeSnippet
+                        .split(' ')
+                        .map((word, index) => {
+                            // Check if this word is part of an annotation
+                            const isAnnotated = annotations.some(
+                                (annotation) =>
+                                    index >= annotation.startIndex &&
+                                    index <= annotation.endIndex &&
+                                    annotation.target === 'codeSnippet'
+                            );
+
+                            // Highlight the selected word visually (optional)
+                            if (
+                                index >= startIndex &&
+                                index <= endIndex &&
+                                selectedAnnotationTarget === 'codeSnippet'
+                            ) {
+                                return `<span style="background-color: yellow">${word}</span>`;
+                            }
+
+                            // Italicize annotated words
+                            if (isAnnotated) {
+                                return `<i>${word}</i>`;
+                            }
+
+                            return word;
+                        })
+                        .join(' ')}
                 </SyntaxHighlighter>
             </View>
 
+
+    
+            {/* Upvote and Downvote Buttons */}
             <View style={styles.voteContainer}>
                 <TouchableOpacity style={styles.voteButton} onPress={handleUpvote}>
                     <Text style={styles.voteButtonText}>Upvote ({upvotes})</Text>
@@ -329,20 +369,90 @@ const PostDetail = ({ route }) => {
                     <Text style={styles.voteButtonText}>Downvote</Text>
                 </TouchableOpacity>
             </View>
-
+    
+            {/* Mark as Answered Button */}
+            {!isAnswered && post.user_id === user_id && (
+                <TouchableOpacity style={styles.answeredButton} onPress={handleMarkAsAnswered}>
+                    <Text style={styles.answeredButtonText}>Mark as Answered</Text>
+                </TouchableOpacity>
+            )}
+    
+            {/* Run Code Button */}
+            <TouchableOpacity style={styles.runButton} onPress={handleRunCode}>
+                <Text style={styles.runButtonText}>Run Code</Text>
+            </TouchableOpacity>
+    
+            {/* Display Code Output */}
+            {codeOutput ? (
+                <View style={styles.outputContainer}>
+                    <Text style={styles.outputTitle}>Output:</Text>
+                    <Text style={styles.outputText}>{codeOutput}</Text>
+                </View>
+            ) : null}
+    
             <View style={styles.commentsContainer}>
                 <Text style={styles.commentHeader}>Comments:</Text>
-                {renderComments()}
+                {/* Render Annotated Comments */}
+                {comments.map((comment, index) => (
+                    <View key={index} style={styles.comment}>
+                        <Text style={styles.commentUser}>{comment.user}:</Text>
+                        {renderAnnotatedText(comment.details, `comment-${index}`)}
+                        {comment.code_snippet ? (
+                            <SyntaxHighlighter language={selectedLanguage || 'javascript'} style={atomOneDark}>
+                                {comment.code_snippet}
+                            </SyntaxHighlighter>
+                        ) : null}
+                    </View>
+                ))}
             </View>
-
+    
+            {/* Language Picker */}
+            <Picker
+                selectedValue={selectedLanguage}
+                onValueChange={(itemValue) => setSelectedLanguage(itemValue)}
+                style={styles.picker}
+            >
+                <Picker.Item label="Select a language" value="" />
+                {availableLanguages.map((language, index) => (
+                    <Picker.Item key={index} label={language} value={language} />
+                ))}
+            </Picker>
+    
+            {/* Input for comment details */}
+            <TextInput
+                style={styles.input}
+                placeholder="Add a comment..."
+                value={newComment}
+                onChangeText={setNewComment}
+            />
+    
+            {/* Input for code snippet */}
+            <TextInput
+                style={styles.codeInput}
+                placeholder="Add a code snippet..."
+                value={codeSnippet}
+                onChangeText={setCodeSnippet}
+                multiline={true}
+            />
+    
+            <TouchableOpacity style={styles.addButton} onPress={handleAddComment}>
+                <Text style={styles.addButtonText}>Submit Comment</Text>
+            </TouchableOpacity>
+    
+            {/* Annotation Modal */}
             <Modal visible={annotationModalVisible} animationType="slide" transparent>
                 <View style={styles.modalContainer}>
                     <View style={styles.modalContent}>
                         <Text style={styles.modalTitle}>Add Annotation</Text>
-                        <Text style={styles.modalSelectedText}>
-                            {startIndex !== null && endIndex !== null
-                                ? post.description.split(' ').slice(startIndex, endIndex + 1).join(' ')
-                                : 'No text selected'}
+                        {/* Display the selected text */}
+                        <Text style={styles.selectedText}>
+                            {selectedAnnotationTarget === 'description' && post.description.split(' ').slice(startIndex, endIndex + 1).join(' ')}
+                            {selectedAnnotationTarget === 'codeSnippet' && post.codeSnippet.split(' ').slice(startIndex, endIndex + 1).join(' ')}
+                            {selectedAnnotationTarget?.startsWith('comment-') && 
+                                comments[parseInt(selectedAnnotationTarget.split('-')[1])].details
+                                    .split(' ')
+                                    .slice(startIndex, endIndex + 1)
+                                    .join(' ')}
                         </Text>
                         <TextInput
                             style={styles.input}
@@ -350,11 +460,8 @@ const PostDetail = ({ route }) => {
                             value={annotationText}
                             onChangeText={setAnnotationText}
                         />
-                        <TouchableOpacity
-                            style={styles.addButton}
-                            onPress={handleAddAnnotationForSelection}
-                        >
-                            <Text style={styles.addButtonText}>Submit Annotation</Text>
+                        <TouchableOpacity style={styles.addButton} onPress={handleAddAnnotation}>
+                            <Text style={styles.addButtonText}>Submit</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
                             style={styles.cancelButton}
@@ -362,6 +469,7 @@ const PostDetail = ({ route }) => {
                                 setAnnotationModalVisible(false);
                                 setStartIndex(null);
                                 setEndIndex(null);
+                                setAnnotationText('');
                             }}
                         >
                             <Text style={styles.cancelButtonText}>Cancel</Text>
@@ -369,7 +477,6 @@ const PostDetail = ({ route }) => {
                     </View>
                 </View>
             </Modal>
-
         </ScrollView>
     );
 };
@@ -390,11 +497,75 @@ const styles = StyleSheet.create({
         color: '#333',
         marginBottom: 20,
     },
+    textWord: {
+        fontSize: 16,
+    },
+    selectedWord: {
+        backgroundColor: 'yellow',
+    },
+    annotatedWord: {
+        backgroundColor: '#FFD700',
+    },
+    codeInput: {
+        borderWidth: 1,
+        borderColor: '#ccc',
+        borderRadius: 5,
+        padding: 10,
+        marginVertical: 10,
+        backgroundColor: '#fff',
+        fontFamily: 'monospace',
+    },
     codeContainer: {
         backgroundColor: '#f1f1f1',
         borderRadius: 8,
         padding: 15,
         marginBottom: 20,
+    },
+    voteContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: 20,
+    },
+    voteButton: {
+        backgroundColor: '#00BFFF',
+        borderRadius: 5,
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        alignItems: 'center',
+    },
+    voteButtonText: {
+        color: 'white',
+        fontWeight: 'bold',
+        fontSize: 16,
+    },
+    runButton: {
+        backgroundColor: '#32CD32',
+        borderRadius: 5,
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        alignItems: 'center',
+        marginBottom: 10,
+    },
+    runButtonText: {
+        color: 'white',
+        fontWeight: 'bold',
+        fontSize: 16,
+    },
+    outputContainer: {
+        backgroundColor: '#e1e1e1',
+        padding: 10,
+        marginTop: 10,
+        borderRadius: 5,
+    },
+    outputTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        marginBottom: 5,
+    },
+    outputText: {
+        fontSize: 16,
+        color: '#333',
+        fontFamily: 'monospace',
     },
     commentsContainer: {
         marginTop: 20,
@@ -422,30 +593,17 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: '#555',
     },
-    modalContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    },
-    modalContent: {
-        backgroundColor: 'white',
-        padding: 20,
-        borderRadius: 10,
-        width: '80%',
-        alignItems: 'center',
-    },
-    modalTitle: {
-        fontSize: 18,
-        fontWeight: 'bold',
+    input: {
+        borderWidth: 1,
+        borderColor: '#ccc',
+        borderRadius: 5,
+        padding: 10,
+        marginTop: 20,
         marginBottom: 10,
-    },
-    modalSelectedText: {
-        fontStyle: 'italic',
-        marginBottom: 10,
+        backgroundColor: '#fff',
     },
     addButton: {
-        backgroundColor: '#32CD32',
+        backgroundColor: '#00BFFF',
         borderRadius: 5,
         paddingVertical: 10,
         paddingHorizontal: 20,
@@ -457,102 +615,29 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         fontSize: 16,
     },
-    cancelButton: {
-        backgroundColor: '#FF6347',
-        borderRadius: 5,
-        paddingVertical: 10,
-        paddingHorizontal: 20,
-        alignItems: 'center',
-        marginTop: 10,
-    },
-    cancelButtonText: {
-        color: 'white',
-        fontWeight: 'bold',
-        fontSize: 16,
-    },
-    textWord: {
-        fontSize: 16,
-    },
-    annotationCount: {
-        fontSize: 12,
-        color: 'red',
-    },
-    annotatedWord: {
-        marginVertical: 2,
-    },
-    textWord: {
-        fontSize: 16,
-    },
-    annotationCount: {
-        fontSize: 12,
-        color: 'red',
-    },
-    modalContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    },
-    modalContent: {
-        backgroundColor: 'white',
-        padding: 20,
-        borderRadius: 10,
-        width: '80%',
-        alignItems: 'center',
-    },
-    modalTitle: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        marginBottom: 10,
+    picker: {
+        marginVertical: 20,
+        height: 50,
+        width: '100%',
     },
     modalSelectedText: {
-        fontStyle: 'italic',
         marginBottom: 10,
-    },
-    addButton: {
-        backgroundColor: '#32CD32',
-        borderRadius: 5,
-        paddingVertical: 10,
-        paddingHorizontal: 20,
-        alignItems: 'center',
-        marginTop: 10,
-    },
-    addButtonText: {
-        color: 'white',
-        fontWeight: 'bold',
         fontSize: 16,
-    },
-    cancelButton: {
-        backgroundColor: '#FF6347',
-        borderRadius: 5,
-        paddingVertical: 10,
-        paddingHorizontal: 20,
-        alignItems: 'center',
-        marginTop: 10,
-    },
-    cancelButtonText: {
-        color: 'white',
-        fontWeight: 'bold',
-        fontSize: 16,
-    },
-    descriptionText: {
-        fontSize: 16,
-        lineHeight: 24,
         color: '#333',
+        fontStyle: 'italic',
+    },    
+    answeredButton: {
+        backgroundColor: '#FF4500',
+        borderRadius: 5,
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        alignItems: 'center',
+        marginVertical: 10,
     },
-    wordContainer: {
-        display: 'inline-flex',
-    },
-    textWord: {
+    answeredButtonText: {
+        color: 'white',
+        fontWeight: 'bold',
         fontSize: 16,
-    },
-    selectedWord: {
-        backgroundColor: 'yellow', // Highlight selected words
-        borderRadius: 4,
-    },
-    annotationCount: {
-        fontSize: 12,
-        color: 'red',
     },
     modalContainer: {
         flex: 1,
@@ -572,25 +657,8 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         marginBottom: 10,
     },
-    modalSelectedText: {
-        fontStyle: 'italic',
-        marginBottom: 10,
-    },
-    addButton: {
-        backgroundColor: '#32CD32',
-        borderRadius: 5,
-        paddingVertical: 10,
-        paddingHorizontal: 20,
-        alignItems: 'center',
-        marginTop: 10,
-    },
-    addButtonText: {
-        color: 'white',
-        fontWeight: 'bold',
-        fontSize: 16,
-    },
     cancelButton: {
-        backgroundColor: '#FF6347',
+        backgroundColor: '#FF4500',
         borderRadius: 5,
         paddingVertical: 10,
         paddingHorizontal: 20,
@@ -601,8 +669,8 @@ const styles = StyleSheet.create({
         color: 'white',
         fontWeight: 'bold',
         fontSize: 16,
-    },
-    
+    },    
 });
+
 
 export default PostDetail;
