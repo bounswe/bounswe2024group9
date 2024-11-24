@@ -5,16 +5,19 @@ import { Separator } from "./ui/seperator";
 import SyntaxHighlighter from "react-syntax-highlighter";
 import { docco } from "react-syntax-highlighter/dist/esm/styles/hljs";
 import language from "react-syntax-highlighter/dist/esm/languages/hljs/1c";
+import { Navbar, LeftSidebar, RightSidebar } from '../PageComponents'; 
 import PostComment from "../PostComment";
 import QuestionDetail from "../QuestionDetail";
 import Comment from "../Comment";
+
+
 
 export default function CodeExecution() {
 
   const { question_id } = useParams(); // Extract the questionId from the URL
   const [questionData, setQuestionData] = useState("");
   const [commentData, setCommentData] = useState("");
-
+  const [isAnswered,setAnswered] = useState(false);
 
   const [code, setCode] = useState(""); // State to store the user input (code)
   const [output, setOutput] = useState(""); // State to store the backend's response (output)
@@ -36,6 +39,7 @@ export default function CodeExecution() {
         });
       const data = await response.json();
       setQuestionData(data.question);
+      console.log(questionData.author);
       setLanguageId(data.question.language_id);
       setLoading(false);
     } catch (err) {
@@ -144,6 +148,7 @@ export default function CodeExecution() {
   // TODO Now there is only one output box, we need to create a separate output box for each code execution
   // TODO Need to check if the comment and the question has code_snippet, if there is not there shouldnt be a run code button
   return (
+    <>
     <div className="min-h-screen bg-gray-100 text-gray-900">
       <div className="container mx-auto p-4 max-w-4xl">
         <h1 className="text-2xl font-bold mb-4 text-gray-900">
@@ -161,6 +166,7 @@ export default function CodeExecution() {
             tags={questionData.tags}
             initialVotes={questionData.upvote_count}
             question_id={question_id}
+            isAnswered= {isAnswered}
 
           />
           {questionData.code_snippet && (
@@ -191,6 +197,7 @@ export default function CodeExecution() {
                     explanation={comment.details}
                     code={comment.code_snippet}
                     author={comment.user}
+                    questionAuthor = {questionData.author}
                     initialVotes={comment.upvotes}
                     comment_id={comment.comment_id}
                     answer_of_the_question = {comment.answer_of_the_question}
@@ -264,5 +271,6 @@ export default function CodeExecution() {
         </div>
       </div>
     </div>
+    </>
   );
 }

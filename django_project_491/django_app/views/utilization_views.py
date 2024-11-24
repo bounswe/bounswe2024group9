@@ -290,7 +290,7 @@ def upvote_object(request, object_type: str, object_id: int):
                 existing_vote.save()
                 question.upvotes += 2
                 question.save()
-                return JsonResponse({'success': 'Changed downvote to upvote'}, status=200)
+                return JsonResponse({'success': question.upvotes}, status=200)
 
         # Create a new upvote
         Question_Vote.objects.create(

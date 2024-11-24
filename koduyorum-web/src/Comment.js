@@ -10,8 +10,8 @@ import './QuestionDetail.css';
 function Comment(props) {
 
   const [votes, setVotes] = useState(props.initialVotes);
-  const [isQuestionOwner] = useState(true);
-  const [isCommentOwner] = useState(true);
+  const isQuestionOwner = localStorage.getItem("username") === props.questionAuthor;
+  const isCommentOwner = localStorage.getItem("username") === props.author;
   const [isAnswer, setAnswer] = useState(props.answer_of_the_question | false);
   const navigate = useNavigate();
 
@@ -106,7 +106,7 @@ function Comment(props) {
     const token = localStorage.getItem('authToken');
     try {
       const response = await fetch(`${process.env.REACT_APP_API_URL}/mark_comment_as_answer/${props.comment_id}`, {
-        method: 'POST',
+        method: 'GET',
         headers: {
           'Content-Type': 'application/json',
           'User-ID': localStorage.getItem('user_id'),
@@ -186,7 +186,6 @@ function Comment(props) {
 }
 
 Comment.propTypes = {
-  question_id: PropTypes.number,
   language: PropTypes.string,
   code: PropTypes.string,
   explanation: PropTypes.string,

@@ -10,13 +10,15 @@ import './QuestionDetail.css';
 function QuestionDetail(props) {
 
     const [votes, setVotes] = useState(props.initialVotes);
-    const [isOwner] = useState(true);
+    const isOwner = localStorage.getItem("username") === props.author;
     const navigate = useNavigate();
     //Todo implement ownership logic for enabling buttons
 
-    const [isAnswered] = useState(false);
+    const [isAnswered] = useState(props.isAnswered | false);
     //Todo implement logic for answering question
-
+    
+    
+    
     // Vote handlers
     const handlePostUpvote = async () => {
       const token = localStorage.getItem('authToken');
@@ -193,7 +195,6 @@ function QuestionDetail(props) {
     explanation: PropTypes.string,
     number: PropTypes.number,
     initialVotes: PropTypes.number,
-    question_id : PropTypes.number,
     comment_id : PropTypes.number,
     author : PropTypes.string,
     answer_of_the_question: PropTypes.bool
