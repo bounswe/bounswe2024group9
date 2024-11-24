@@ -182,10 +182,6 @@ export default function CodeExecution() {
         <Separator className="my-8 bg-gray-300" />
 
         <div className="container mx-auto p-4 max-w-4xl">
-          <h1 className="text-2xl font-bold mb-4 text-gray-900">
-            {questionData.title}
-          </h1>
-
           <div className="space-y-6">
             <h2 className="text-xl font-semibold text-gray-800">Answers</h2>
             {commentData.length > 0 ? (

@@ -170,7 +170,7 @@ function Comment(props) {
             </button>
           </>
           )}
-          {isQuestionOwner && (
+          {(isQuestionOwner && !isAnswer) && (
             <button
               className="px-4 py-2 bg-green-500 text-white text-sm font-semibold rounded hover:bg-green-600"
               onClick={toggleAnswer}

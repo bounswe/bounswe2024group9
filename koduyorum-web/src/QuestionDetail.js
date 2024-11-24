@@ -14,9 +14,29 @@ function QuestionDetail(props) {
     const navigate = useNavigate();
     //Todo implement ownership logic for enabling buttons
 
-    const [isAnswered] = useState(props.isAnswered | false);
-    //Todo implement logic for answering question
-    
+    const [isAnswered,setAnswered] = useState(false);
+
+    const fetchAnswerStatus = async () => {
+        try {
+          const token = localStorage.getItem('authToken');
+          const response = await fetch(`${process.env.REACT_APP_API_URL}/question/${props.question_id}/comments/`,
+            {
+              method: 'GET',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,  // Add the token here
+              }
+            });
+          const data = await response.json();
+          setAnswered(data.comments.some(c => c.answer_of_the_question));
+        
+        } catch (err) {
+          
+        }
+      };
+    useEffect(() => {
+        fetchAnswerStatus();        
+      }, []);
     
     
     // Vote handlers
