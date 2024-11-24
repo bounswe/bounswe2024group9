@@ -197,7 +197,7 @@ def mark_comment_as_answer(request: HttpRequest, comment_id : int) -> HttpRespon
 
     try:
         comment = Comment.objects.get(_id=comment_id)
-        question : Question = Comment.question
+        question : Question = comment.question
         user_id = request.headers.get('User-ID', None)
         if user_id is None:
             return JsonResponse({'error': 'User ID parameter is required in the header'}, status=400)

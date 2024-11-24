@@ -94,7 +94,7 @@ class Question(models.Model):
         outs = result['stdout'].split('\n')
         return outs
 
-    def mark_as_answered(self): # TODO
+    def mark_as_answered(self,comment_id): # TODO
         self.answered = True
         self.save()
 

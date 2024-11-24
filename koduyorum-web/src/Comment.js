@@ -12,7 +12,7 @@ function Comment(props) {
   const [votes, setVotes] = useState(props.initialVotes);
   const isQuestionOwner = localStorage.getItem("username") === props.questionAuthor;
   const isCommentOwner = localStorage.getItem("username") === props.author;
-  const [isAnswer, setAnswer] = useState(props.answer_of_the_question | false);
+  const [isAnswer, setAnswer] = useState(props.answer_of_the_question);
   const navigate = useNavigate();
 
   // Vote handlers
