@@ -1,13 +1,21 @@
 import React, { useState } from 'react';
 
-const CreateAnnotation = ({ visible, selectedText, startIndex, endIndex, language_id, onClose }) => {
+const CreateAnnotation = ({ visible, selectedText, startIndex, endIndex, language_id, annotationId, onClose }) => {
   const [annotationText, setAnnotationText] = useState('');
 
   if (!visible) {
     return null; // Do not render anything if the modal is not visible
   }
 
-  const handleSubmitAnnotation = async () =>  {
+  const handleSubmit = async () =>  {
+    console.log(annotationId);
+    const url = annotationId
+      ? `${process.env.REACT_APP_API_URL}/edit_annotation/${annotationId}/` // Edit existing annotation
+      :`${process.env.REACT_APP_API_URL}/create_annotation/`; // Create new annotation
+
+    const method = annotationId ? 'PUT' : 'POST';
+
+
     if (!annotationText) {
         console.error('Annotation text required')
         return;
@@ -24,8 +32,8 @@ const CreateAnnotation = ({ visible, selectedText, startIndex, endIndex, languag
             type: 'annotation',
         };
 
-        const response = await fetch(`${process.env.REACT_APP_API_URL}/create_annotation/`, {
-            method: 'POST',
+        const response = await fetch(url, {
+            method,
             headers: {
                 'Content-Type': 'application/json',
                 'User-ID': user_id, 
@@ -33,12 +41,12 @@ const CreateAnnotation = ({ visible, selectedText, startIndex, endIndex, languag
             body: JSON.stringify(annotationData),
         });
 
-        if (response.status === 201) {
+        if (response.status === 201 || response.status === 200) {
            
             setAnnotationText('');
             console.log('Success')
-
-         
+            // onClose();
+            window.location.reload();
         } else {
             const data = await response.json();
             console.error('Error adding annotation:', data);
@@ -51,15 +59,15 @@ const CreateAnnotation = ({ visible, selectedText, startIndex, endIndex, languag
   return (
     <div className="custom-modal">
       <div className="modal-content">
-        <h3>Add Annotation</h3>
-        <p><strong>Selected Text:</strong> {selectedText}</p>
+      <h3>{annotationId ? 'Edit Annotation' : 'Create Annotation'}</h3>
+      <p><strong>Selected Text:</strong> {selectedText}</p>
         <textarea
           value={annotationText}
           onChange={(e) => setAnnotationText(e.target.value)}
           placeholder="Enter your annotation..."
         />
         <div className="modal-buttons">
-          <button className="submit-button" onClick={handleSubmitAnnotation}>Submit</button>
+        <button onClick={handleSubmit}>{annotationId ? 'Save Changes' : 'Create'}</button>
           <button className="cancel-button" onClick={onClose}>Cancel</button>
         </div>
       </div>

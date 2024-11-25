@@ -25,6 +25,8 @@ const SearchResults = () => {
   const [endIndex, setEndIndex] = useState(null);
   const [annotationData, setAnnotationData] = useState([]);
   const [modalPosition, setModalPosition] = useState({ top: 0, left: 0 });
+  const [languageId, setLanguageId] = useState(null);
+  const [annotationId, setAnnotationId] = useState(null);
 
 
   const { wiki_id, wiki_name} = useParams(); // Get wiki_id from the URL
@@ -195,6 +197,12 @@ const fetchSearchResults = async (query) => {
           <div className="annotation-tooltip">
             {annotationText}  {/* This will show the annotation text */}
             <button
+              className="edit-icon"
+              onClick={() => handleEditAnnotation(annotationId, annotation_starting_point, annotation_ending_point)} // Call edit handler
+            >
+              ✏️
+            </button>
+            <button
               className="delete-icon"
               onClick={() => handleDeleteAnnotation(annotationId)} // Replace annotationId with the actual ID
             >
@@ -215,6 +223,14 @@ const fetchSearchResults = async (query) => {
   
     return annotatedText;
   };  
+
+  const handleEditAnnotation = async (annotationId, startOffset, endOffset) => {
+      // Fetch annotation data by ID
+      setStartIndex(startOffset);
+      setEndIndex(endOffset);
+      setModalVisible(true);
+      setAnnotationId(annotationId);
+  };
 
   const handleDeleteAnnotation = async (annotationId) => {
     try {
@@ -339,6 +355,7 @@ const fetchSearchResults = async (query) => {
                 startIndex={startIndex}
                 endIndex={endIndex}
                 language_id={wiki_id}
+                annotationId={annotationId}
                 onClose={() => setModalVisible(false)}
               />
             <div className="info-box" onMouseUp={(e) => handleTextSelection(e)}>

@@ -24,7 +24,7 @@
   .annotation:hover .annotation-tooltip {
     opacity: 1;
   }
-  .delete-icon {
+  .edit-icon, .delete-icon {
     background: none;
     border: none;
     color: #ffffff; /* White color to match the tooltip */
@@ -35,6 +35,6 @@
     transition: color 0.3s ease;
   }
   
-  .delete-icon:hover {
+  .edit-icon,.delete-icon:hover {
     color: #ff4444; /* Highlight the icon in red on hover */
   }
