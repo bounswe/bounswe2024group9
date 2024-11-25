@@ -40,24 +40,24 @@ const CreateQuestion = ({ route, navigation }) => {
             language,
             details,
             code_snippet: codeSnippet,
-            tags: tags.split(',').map(tag => tag.trim()), 
-            author_id: user_id  // Include author_id from route.params
+            tags: tags.split(',').map(tag => tag.trim()),
         };
-
+    
         try {
             const response = await fetch('http://10.0.2.2:8000/create_question/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'User-ID': user_id.toString(),
                 },
                 body: JSON.stringify(postData),
             });
-
+    
             const data = await response.json();
-
+    
             if (response.status === 201) {
                 Alert.alert('Success', 'Question created successfully');
-                navigation.goBack(); 
+                navigation.goBack();
             } else {
                 Alert.alert('Error', data.error);
             }

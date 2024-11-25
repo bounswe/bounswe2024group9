@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import comment_views, question_views, user_views, utilization_views
+from .views import comment_views, question_views, user_views, utilization_views, annotation_views
 from django.conf.urls.static import static
 from django.conf import settings
 
@@ -38,6 +38,8 @@ urlpatterns = [
     path('get_random_reported_question/', question_views.fetch_random_reported_question, name='ger_random_reported_question'),
     path('gel_all_questions/', question_views.get_all_questions, name='get_all_questions'),
 
+    path('get_code_snippet_if_empty/<int:question_id>/', question_views.get_code_snippet_if_empty, name='get_code_snippet_if_empty'),
+    
     path('list_questions_by_time/', question_views.list_questions_by_time, name='list_questions'),
     path('list_questions_by_language/<str:language>/<int:page_number>', question_views.list_questions_by_language, name='list_questions'),
     path('list_questions_by_tags/<str:tags>/<int:page_number>/', question_views.list_questions_by_tags, name='list_questions_by_tags'),
@@ -65,9 +67,24 @@ urlpatterns = [
     path('question_of_the_day/', question_views.question_of_the_day, name='question_of_the_day'),
     path('daily_question/', question_views.question_of_the_day, name='wiki_search'),
 
+
+    path('create_annotation/', annotation_views.create_annotation, name='create_annotation'),
+    path('delete_annotation/<int:annotation_id>/', annotation_views.delete_annotation, name='delete_annotation'),
+    path('edit_annotation/<int:annotation_id>/', annotation_views.edit_annotation, name='edit_annotation'),
+    path('get_annotations_by_language_id/<int:language_qid>/', annotation_views.get_annotations_by_language, name='get_annotations_by_language_id'),
+    path('annotations/all/', annotation_views.get_all_annotations, name='get_all_annotations'),
+    path('multi_search/', user_views.multi_search, name='multi_search'),
+    path('get_user_profile_by_id/<int:user_id>/', user_views.get_user_profile_by_id, name='get_user_profile_by_id'),
+
+    
     # Static label related functions
     path('questions/<int:question_id>/label-info/', question_views.fetch_question_label_info, name='fetch_question_label'),
     path('questions/<int:question_id>/topic/', question_views.get_topic_url, name='get_topic_url'),
     path('topics/', question_views.list_all_topics, name='list_all_topics'),
 
+    path('create_annotation/', annotation_views.create_annotation, name='create_annotation'),
+    path('delete_annotation/<int:annotation_id>/', annotation_views.delete_annotation, name='delete_annotation'),
+    path('edit_annotation/<int:annotation_id>/', annotation_views.edit_annotation, name='edit_annotation'),
+    path('get_annotations_by_language_id/<int:language_qid>/', annotation_views.get_annotations_by_language, name='get_annotations_by_language_id'),
+    path('annotations/all/', annotation_views.get_all_annotations, name='get_all_annotations'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
