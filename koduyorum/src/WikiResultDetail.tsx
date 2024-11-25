@@ -214,99 +214,128 @@ const WikiResultDetail = ({ route }) => {
     };
 
     return (
-        <ScrollView style={styles.container}>
-            {/* Main Information Section */}
-            {mainInfo && (
-                <View style={styles.section}>
-                    <Text style={styles.title}>{mainInfo.languageLabel.value}</Text>
+<ScrollView style={styles.container}>
+    {/* Main Information Section */}
+    {mainInfo && (
+        <View style={styles.section}>
+            <Text style={styles.title}>{mainInfo.languageLabel.value}</Text>
 
-                    {mainInfo.wikipediaLink && (
-                        <Text
-                            style={styles.link}
-                            onPress={() => Linking.openURL(mainInfo.wikipediaLink.value)}
-                        >
-                            Wikipedia: {mainInfo.wikipediaLink.value}
-                        </Text>
-                    )}
-                </View>
+            {mainInfo.wikipediaLink && (
+                <Text
+                    style={styles.link}
+                    onPress={() => Linking.openURL(mainInfo.wikipediaLink.value)}
+                >
+                    Wikipedia: {mainInfo.wikipediaLink.value}
+                </Text>
             )}
+        </View>
+    )}
 
-            {/* Wikipedia Information */}
-            {wikipedia.title && (
-                <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Wikipedia Summary:</Text>
-                    <Text style={styles.wikiTitle}>{wikipedia.title}</Text>
-                    {renderAnnotatedText(wikipedia.info)}
+    {/* Wikipedia Information */}
+    {wikipedia.title && (
+        <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Wikipedia Summary:</Text>
+            <Text style={styles.wikiTitle}>{wikipedia.title}</Text>
+            {renderAnnotatedText(wikipedia.info)}
+        </View>
+    )}
+
+    {/* Annotation Modal */}
+    <Modal visible={annotationModalVisible} animationType="slide" transparent>
+        <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+                <Text style={styles.modalTitle}>Add Annotation</Text>
+
+                {/* Display the selected text */}
+                {startIndex !== null && endIndex !== null && (
+                    <Text style={styles.modalSelectedText}>
+                        "{wikipedia.info.split(' ').slice(startIndex, endIndex + 1).join(' ')}"
+                    </Text>
+                )}
+
+                <TextInput
+                    style={styles.input}
+                    placeholder="Enter annotation text..."
+                    value={annotationText}
+                    onChangeText={setAnnotationText}
+                />
+
+                <View style={styles.modalButtonsContainer}>
+                    <TouchableOpacity style={styles.addButton} onPress={handleAddAnnotation}>
+                        <Text style={styles.addButtonText}>Submit</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={styles.cancelButton}
+                        onPress={() => {
+                            setAnnotationModalVisible(false);
+                            setStartIndex(null);
+                            setEndIndex(null);
+                            setAnnotationText('');
+                        }}
+                    >
+                        <Text style={styles.cancelButtonText}>Cancel</Text>
+                    </TouchableOpacity>
                 </View>
-            )}
+            </View>
+        </View>
+    </Modal>
 
-            {/* Annotation Modal */}
-            <Modal visible={annotationModalVisible} animationType="slide" transparent>
-                <View style={styles.modalContainer}>
-                    <View style={styles.modalContent}>
-                        <Text style={styles.modalTitle}>Add Annotation</Text>
-                        <TextInput
-                            style={styles.input}
-                            placeholder="Enter annotation text..."
-                            value={annotationText}
-                            onChangeText={setAnnotationText}
-                        />
-                        <TouchableOpacity style={styles.addButton} onPress={handleAddAnnotation}>
-                            <Text style={styles.addButtonText}>Submit</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            style={styles.cancelButton}
-                            onPress={() => {
-                                setAnnotationModalVisible(false);
-                                setStartIndex(null);
-                                setEndIndex(null);
-                                setAnnotationText('');
-                            }}
-                        >
-                            <Text style={styles.cancelButtonText}>Cancel</Text>
-                        </TouchableOpacity>
-                    </View>
+    {/* Reply Modal */}
+    <Modal visible={replyModalVisible} animationType="slide" transparent>
+        <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+                <Text style={styles.modalTitle}>Annotation Details</Text>
+
+                {/* Display the selected annotation text */}
+                {selectedAnnotation && (
+                    <Text style={styles.modalSelectedText}>
+                        "{wikipedia.info
+                            .split(' ')
+                            .slice(
+                                selectedAnnotation.annotation_starting_point,
+                                selectedAnnotation.annotation_ending_point + 1
+                            )
+                            .join(' ')}"
+                    </Text>
+                )}
+
+                <Text style={styles.selectedText}>{selectedAnnotation?.text}</Text>
+
+                {/* Delete Button */}
+                <TouchableOpacity
+                    style={styles.deleteButton}
+                    onPress={() => deleteAnnotation(selectedAnnotation?.annotation_id)}
+                >
+                    <Text style={styles.deleteButtonText}>Delete Annotation</Text>
+                </TouchableOpacity>
+
+                {/* Reply Input */}
+                <TextInput
+                    style={styles.input}
+                    placeholder="Reply to this annotation..."
+                    value={replyText}
+                    onChangeText={setReplyText}
+                />
+
+                <View style={styles.modalButtonsContainer}>
+                    <TouchableOpacity
+                        style={styles.addButton}
+                        onPress={() => handleReplyToAnnotation(selectedAnnotation?.annotation_id)}
+                    >
+                        <Text style={styles.addButtonText}>Reply</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={styles.cancelButton}
+                        onPress={() => setReplyModalVisible(false)}
+                    >
+                        <Text style={styles.cancelButtonText}>Close</Text>
+                    </TouchableOpacity>
                 </View>
-            </Modal>
+            </View>
+        </View>
+    </Modal>
+</ScrollView>
 
-            {/* Reply Modal */}
-            <Modal visible={replyModalVisible} animationType="slide" transparent>
-                <View style={styles.modalContainer}>
-                    <View style={styles.modalContent}>
-                        <Text style={styles.modalTitle}>Annotation Details</Text>
-                        <Text style={styles.selectedText}>{selectedAnnotation?.text}</Text>
-
-                        {/* Delete Button */}
-                        <TouchableOpacity
-                            style={styles.deleteButton}
-                            onPress={() => deleteAnnotation(selectedAnnotation?.annotation_id)}
-                        >
-                            <Text style={styles.deleteButtonText}>Delete Annotation</Text>
-                        </TouchableOpacity>
-
-                        {/* Reply Input */}
-                        <TextInput
-                            style={styles.input}
-                            placeholder="Reply to this annotation..."
-                            value={replyText}
-                            onChangeText={setReplyText}
-                        />
-                        <TouchableOpacity
-                            style={styles.addButton}
-                            onPress={() => handleReplyToAnnotation(selectedAnnotation?.annotation_id)}
-                        >
-                            <Text style={styles.addButtonText}>Reply</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            style={styles.cancelButton}
-                            onPress={() => setReplyModalVisible(false)}
-                        >
-                            <Text style={styles.cancelButtonText}>Close</Text>
-                        </TouchableOpacity>
-                    </View>
-                </View>
-            </Modal>
-        </ScrollView>
     );
 };
 
@@ -374,7 +403,7 @@ const styles = StyleSheet.create({
         borderRadius: 5,
         paddingVertical: 10,
         paddingHorizontal: 20,
-        alignItems: 'center',
+
         marginTop: 10,
     },
     addButtonText: {
@@ -387,7 +416,7 @@ const styles = StyleSheet.create({
         borderRadius: 5,
         paddingVertical: 10,
         paddingHorizontal: 20,
-        alignItems: 'center',
+
         marginTop: 10,
     },
     cancelButtonText: {
@@ -400,7 +429,7 @@ const styles = StyleSheet.create({
         borderRadius: 5,
         paddingVertical: 10,
         paddingHorizontal: 20,
-        alignItems: 'center',
+
         marginTop: 10,
     },
     deleteButtonText: {
