@@ -350,7 +350,7 @@ def mark_as_answered(request, question_id : int) -> HttpResponse:
     if author.user_id != request_user_id:
         return JsonResponse({'error': 'Only the owner of the question can mark it as answered'}, status=403)
     
-    question.mark_as_answered()
+    # question.mark_as_answered() #TODO ADD COMMENT ID HERE
 
     return JsonResponse({'success': 'Question marked as answered successfully'}, status=200)
 
