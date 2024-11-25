@@ -178,12 +178,14 @@ def create_question(request: HttpRequest) -> HttpResponse:
 
 
             if language_id is None:
+                print("Invalid language")
                 return JsonResponse({'error': 'Invalid language'}, status=400)
             
             try:
                 question_controller = QuestionQualityController()
                 is_valid_question = question_controller.is_valid_question(data)
                 if(not is_valid_question):
+                    print("Question is not valid")
                     return JsonResponse({'error': 'Question is not valid'}, status=400)
             except Exception as e:
                 print(e)
@@ -236,7 +238,7 @@ def edit_question(request: HttpRequest, question_id: int) -> HttpResponse:
     
     user_id = int(user_id)
     
-    editor_user = User.objects.get(pk=user_id)
+    editor_user = User.objects.get(user_id=user_id)
 
     try:
         question = Question.objects.get(_id=question_id)
@@ -258,8 +260,9 @@ def edit_question(request: HttpRequest, question_id: int) -> HttpResponse:
         print(question.code_snippet)
         question.tags = data.get('tags', question.tags)
         question.save()
+
         return JsonResponse({'success': 'Question edited successfully'}, status=200)
-        
+
     except Question.DoesNotExist:
         return JsonResponse({'error': 'Question not found'}, status=404)
 
@@ -268,6 +271,7 @@ def edit_question(request: HttpRequest, question_id: int) -> HttpResponse:
         return JsonResponse({'error': f'Malformed data: {str(e)}'}, status=400)
 
     except Exception as e:
+        print(e)
         return JsonResponse({'error': f'An error occurred: {str(e)}'}, status=500)
 
 @csrf_exempt
@@ -295,7 +299,7 @@ def delete_question(request: HttpRequest, question_id: int) -> HttpResponse:
     
     user_id = int(user_id)
     
-    deletor_user = User.objects.get(pk=user_id)
+    deletor_user = User.objects.get(user_id=user_id)
 
     try:
         question = Question.objects.get(_id=question_id)
@@ -307,11 +311,12 @@ def delete_question(request: HttpRequest, question_id: int) -> HttpResponse:
         question.delete()
         return JsonResponse({'success': 'Question Deleted Successfully'}, status=200)
 
-        #deletor_user.questions.remove(question)
+        #return JsonResponse({'success': 'Question deleted successfully'}, status=200)
 
     except Question.DoesNotExist:
         return JsonResponse({'error': 'Question not found'}, status=404)
     except Exception as e:
+        print(e)
         return JsonResponse({'error': f'An error occurred: {str(e)}'}, status=500)
 
 
@@ -345,7 +350,7 @@ def mark_as_answered(request, question_id : int) -> HttpResponse:
     if author.user_id != request_user_id:
         return JsonResponse({'error': 'Only the owner of the question can mark it as answered'}, status=403)
     
-    question.mark_as_answered()
+    # question.mark_as_answered() #TODO ADD COMMENT ID HERE
 
     return JsonResponse({'success': 'Question marked as answered successfully'}, status=200)
 

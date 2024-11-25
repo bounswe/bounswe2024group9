@@ -132,7 +132,6 @@ def edit_comment(request: HttpRequest, comment_id: int) -> HttpResponse:
 
         if editor_user.user_id != comment_owner_user_id and editor_user.userType != UserType.ADMIN:
             return JsonResponse({'error': 'Only admins and owner of the comments can edit comments'}, status=403)
-
         
         data = json.loads(request.body)
     
@@ -149,8 +148,6 @@ def edit_comment(request: HttpRequest, comment_id: int) -> HttpResponse:
 
     except (KeyError, json.JSONDecodeError) as e:
         return JsonResponse({'error': f'Malformed data: {str(e)}'}, status=400)
-    
-    
 
 @csrf_exempt
 @invalidate_user_cache()
@@ -197,7 +194,6 @@ def delete_comment(request: HttpRequest, comment_id: int) -> HttpResponse:
         return JsonResponse({'error': 'Comment not found'}, status=404)
     except Exception as e:
         return JsonResponse({'error': f'An error occurred: {str(e)}'}, status=500)
-    
 
 @csrf_exempt
 @invalidate_user_cache()
@@ -225,7 +221,7 @@ def mark_comment_as_answer(request: HttpRequest, comment_id : int) -> HttpRespon
 
     try:
         comment = Comment.objects.get(_id=comment_id)
-        question : Question = comment.question
+        question = comment.question
         user_id = request.headers.get('User-ID', None)
         if user_id is None:
             return JsonResponse({'error': 'User ID parameter is required in the header'}, status=400)

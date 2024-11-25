@@ -108,6 +108,9 @@ class Question(models.Model):
 
     author = models.ForeignKey('User', on_delete=models.CASCADE, related_name='questions')
 
+    def __str__(self):
+        return f"{self.title} ({self.language})"
+    
     def run_snippet(self): # TODO
         result = run_code(self.code_snippet, self.language_id)
         if result['stderr']:
@@ -122,7 +125,7 @@ class Question(models.Model):
         else:
             return result['stdout'].split('\n')
 
-    def mark_as_answered(self,comment_id): # TODO
+    def mark_as_answered(self, comment_id): # TODO
         self.answered = True
         self.save()
 
