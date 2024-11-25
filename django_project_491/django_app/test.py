@@ -201,7 +201,7 @@ class CommentModelTest(TestCase):
         # Create a test question
         self.question = Question.objects.create(
             title='Sample Question',
-            language='Python',
+            language='Python (3.12.5)',
             details='How to test models in Django?',
             code_snippet='print("Test")',
             author=self.user
@@ -240,7 +240,7 @@ class QuestionModelTest(TestCase):
         # Create a test question
         self.question = Question.objects.create(
             title='Sample Question',
-            language='Python',
+            language='Python (3.12.5)',
             language_id=71,  # Language ID for Python
             details='How to test models in Django?',
             code_snippet='print("Test")',
@@ -260,7 +260,7 @@ class QuestionModelTest(TestCase):
         comment = Comment.objects.create(
             details='This is a test comment',
             code_snippet='print("Test comment")',
-            language='Python',
+            language='Python (3.12.5)',
             question=self.question,
             author=self.user
         )
@@ -288,7 +288,7 @@ class VoteModelTest(TestCase):
         # Create a test question
         self.question = Question.objects.create(
             title='Sample Question',
-            language='Python',
+            language='Python (3.12.5)',
             details='How to test models in Django?',
             code_snippet='print("Test")',
             author=self.user
@@ -298,7 +298,7 @@ class VoteModelTest(TestCase):
         self.comment = Comment.objects.create(
             details='This is a test comment',
             code_snippet='print("Test comment")',
-            language='Python',
+            language='Python (3.12.5)',
             question=self.question,
             author=self.user
         )
@@ -997,3 +997,60 @@ class CommentViewsTest(TestCase):
         # Refresh the comment object to check if it's marked as an answer
         comment.refresh_from_db()
         self.assertTrue(comment.answer_of_the_question)  # Ensure the comment is marked as the answer
+
+
+
+class UtilsViews(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username='testuser',
+            password='password',
+            email="test@gmail.com"
+        )
+
+        self.question = Question.objects.create(
+            title='Test Question',
+            language='Python (3.12.5)',
+            language_id=71,
+            tags=['tag1', 'tag2'],
+            details='This is a test question.',
+            code_snippet='print("Test")',
+            author=self.user
+        )
+
+        self.comment = Comment.objects.create(
+            details='This is a test comment.',
+            author=self.user,
+            question=self.question,
+            language='Python (3.12.5)',
+            language_id=71,
+            code_snippet='print("Testfrom comment)'
+        )
+
+
+
+    def test_run_code_of_comment(self):
+        response = self.client.get(reverse('run_code', args=["comment", self.comment._id]))
+        self.assertEqual(response.status_code, 200)
+        response_data = response.json()
+        self.assertTrue(  'SyntaxError: EOL while scanning string literal' in response_data['output'][-1],)
+
+    def test_run_code_of_question(self):
+        response = self.client.get(reverse('run_code', args=["question", self.question._id]))
+        self.assertEqual(response.status_code, 200)
+        response_data = response.json()
+        print(response_data)
+        self.assertEqual(response_data['output'][0],  'Test')
+
+
+    def test_upvote_comment(self):
+        response = self.client.post(reverse('upvote_object', args=["question",self.question._id]), **{'HTTP_User-ID': self.user.user_id})
+        self.assertEqual(response.status_code, 200)
+        self.question.refresh_from_db()
+        self.assertEqual(self.question.upvotes, 1)
+
+    def test_downvote_comment(self):
+        response = self.client.post(reverse('downvote_object', args=["comment", self.comment._id]), **{'HTTP_User-ID': self.user.user_id})
+        self.assertEqual(response.status_code, 200)
+        self.comment.refresh_from_db()
+        self.assertEqual(self.comment.upvotes, -1)
