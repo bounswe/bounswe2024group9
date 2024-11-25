@@ -301,152 +301,148 @@ const fetchSearchResults = async (query) => {
   };
 
   return (
-
     <div className="feed">
-    {loading ? (
-      <LoadingComponent />
-    ) : error ? (
-      <div className="error">{error}</div>
-    ) : (
-      <div className="feed-container">
-    
-      <Navbar
-			searchQuery={searchQuery}
-			handleSearchQueryChange={handleSearchQueryChange}
-			handleSearch={handleSearch}
-			handleEnter={handleEnter}
-			searchResults={searchResults}
-			isLoading={isLoading}
-			searched={searched}
-			handleSearchResultClick={handleSearchResultClick}
-		/>
-
-
-      
-
-      {/* Main Content Area */}
-      <div className="feed-content">
-        {/* Sidebar with tags */}
-        <LeftSidebar handleTagClick={handleTagClick} />
-
-        
-
-        {/* Content Section */}
-        <div className='info-container'>
-          {/* Tab Navigation */}
-      <div className="tab-navigation">
-          <button
-            className={`tab-button ${activeTab === 'info' ? 'active-tab' : ''}`}
-            onClick={() => setActiveTab('info')}
-          >
-            Info
-          </button>
-          <button
-            className={`tab-button ${activeTab === 'questions' ? 'active-tab' : ''}`}
-            onClick={() => setActiveTab('questions')}
-          >
-            Questions
-          </button>
-      </div>
-          {activeTab === 'info' ? (
-            <div>
-              <CreateAnnotation
-                visible={modalVisible}
-                selectedText={selectedText}
-                startIndex={startIndex}
-                endIndex={endIndex}
-                language_id={wiki_id}
-                annotationId={annotationId}
-                onClose={() => setModalVisible(false)}
-              />
-            <div className="info-box" onMouseUp={(e) => handleTextSelection(e)}>
-              
-              <h2 className="language-title">{wiki_name}</h2>
-            <div className="info-box">
-              <h2  style={{paddingBottom: '0.5rem', borderBottom: '1px solid #ccc' }}className="language-title">{wiki_name}</h2>
-              {infoData.mainInfo.length > 0 && (
+      {loading ? (
+        <LoadingComponent />
+      ) : error ? (
+        <div className="error">{error}</div>
+      ) : (
+        <div className="feed-container">
+          <Navbar
+            searchQuery={searchQuery}
+            handleSearchQueryChange={handleSearchQueryChange}
+            handleSearch={handleSearch}
+            handleEnter={handleEnter}
+            searchResults={searchResults}
+            isLoading={isLoading}
+            searched={searched}
+            handleSearchResultClick={handleSearchResultClick}
+          />
+  
+          <div className="feed-content">
+            <LeftSidebar handleTagClick={handleTagClick} />
+  
+            <div className='info-container'>
+              <div className="tab-navigation">
+                <button
+                  className={`tab-button ${activeTab === 'info' ? 'active-tab' : ''}`}
+                  onClick={() => setActiveTab('info')}
+                >
+                  Info
+                </button>
+                <button
+                  className={`tab-button ${activeTab === 'questions' ? 'active-tab' : ''}`}
+                  onClick={() => setActiveTab('questions')}
+                >
+                  Questions
+                </button>
+              </div>
+  
+              {activeTab === 'info' ? (
                 <div>
-                  {infoData?.mainInfo?.[0]?.inceptionDate?.value && (
-                    <p>
-                      <strong>Inception Date:</strong> {new Date(infoData.mainInfo[0].inceptionDate.value).toLocaleDateString()}
-                    </p>
-                  )}
-                  {infoData?.mainInfo?.[0]?.website?.value && (
-                    <p>
-                      <strong>Website:</strong>{' '}
-                      <a href={infoData.mainInfo[0].website.value} target="_blank" rel="noopener noreferrer">
-                        {infoData.mainInfo[0].website.value}
-                      </a>
-                    </p>
-                  )}
-                  {infoData?.mainInfo?.[0]?.influencedByLabel?.value && (
-                    <p>
-                      <strong>Influenced By:</strong> {infoData.mainInfo[0].influencedByLabel.value}
-                    </p>
-                  )}
-                  {infoData?.mainInfo?.[0]?.wikipediaLink?.value && (
-                    <p>
-                      <strong>Wikipedia Link:</strong>{' '}
-                      <a href={infoData.mainInfo[0].wikipediaLink.value} target="_blank" rel="noopener noreferrer">
-                        {infoData.mainInfo[0].wikipediaLink.value}
-                      </a>
-                    </p>
-                  )}
+                  <CreateAnnotation
+                    visible={modalVisible}
+                    selectedText={selectedText}
+                    startIndex={startIndex}
+                    endIndex={endIndex}
+                    language_id={wiki_id}
+                    annotationId={annotationId}
+                    onClose={() => setModalVisible(false)}
+                  />
+                  <div className="info-box" onMouseUp={(e) => handleTextSelection(e)}>
+                    <h2 className="language-title">{wiki_name}</h2>
+                    <div className="info-box">
+                      <h2 style={{paddingBottom: '0.5rem', borderBottom: '1px solid #ccc'}} className="language-title">
+                        {wiki_name}
+                      </h2>
+                      {infoData.mainInfo.length > 0 && (
+                        <div>
+                          {infoData?.mainInfo?.[0]?.inceptionDate?.value && (
+                            <p>
+                              <strong>Inception Date:</strong> {new Date(infoData.mainInfo[0].inceptionDate.value).toLocaleDateString()}
+                            </p>
+                          )}
+                          {infoData?.mainInfo?.[0]?.website?.value && (
+                            <p>
+                              <strong>Website:</strong>{' '}
+                              <a href={infoData.mainInfo[0].website.value} target="_blank" rel="noopener noreferrer">
+                                {infoData.mainInfo[0].website.value}
+                              </a>
+                            </p>
+                          )}
+                          {infoData?.mainInfo?.[0]?.influencedByLabel?.value && (
+                            <p>
+                              <strong>Influenced By:</strong> {infoData.mainInfo[0].influencedByLabel.value}
+                            </p>
+                          )}
+                          {infoData?.mainInfo?.[0]?.wikipediaLink?.value && (
+                            <p>
+                              <strong>Wikipedia Link:</strong>{' '}
+                              <a href={infoData.mainInfo[0].wikipediaLink.value} target="_blank" rel="noopener noreferrer">
+                                {infoData.mainInfo[0].wikipediaLink.value}
+                              </a>
+                            </p>
+                          )}
+                        </div>
+                      )}
+                      {infoData.instances.length > 0 && (
+                        <div>
+                          <br />
+                          <h3><strong>Related Instances</strong></h3>
+                          <ul className="related-instances">
+                            {infoData.instances.map((instance, index) => (
+                              <li key={index}>
+                                <strong>{instance.instanceLabel}:</strong>
+                                <ul>
+                                  {instance.relatedLanguages.map((lang, i) => (
+                                    <li key={i}>
+                                      <button
+                                        className="related-instance-link"
+                                        onClick={() => handleRelatedInstanceClick(lang, navigate)}
+                                      >
+                                        {lang.relatedLanguageLabel}
+                                      </button>
+                                    </li>
+                                  ))}
+                                  <br />
+                                </ul>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      {infoData.wikipedia && (
+                        <div>
+                          {addAnnotations(infoData.wikipedia.info, annotationData)}
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
-              )}
-              {infoData.instances.length > 0 && (
-                <div>
-                  <br></br>
-                  <h3><strong>Related Instances</strong></h3>
-                  <ul className="related-instances">
-                    {infoData.instances.map((instance, index) => (
-                      <li key={index}>
-                        <strong>{instance.instanceLabel}:</strong>
-                        <ul>
-                          {instance.relatedLanguages.map((lang, i) => (
-                            <li key={i}>
-                              <button
-                                className="related-instance-link"
-                                onClick={() => handleRelatedInstanceClick(lang, navigate)}
-                              >
-                                {lang.relatedLanguageLabel}
-                              </button>
-                            </li>
-                          ))}
-                          <br></br>
-                        </ul>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-              {infoData.wikipedia && (
-                <div>
-                {addAnnotations(infoData.wikipedia.info, annotationData)}
-                </div>
-              )}
-            </div>
-
-          ) : (
-            <div className="questions-list">
-              <h2 style={{ marginBottom: '1rem', paddingBottom: '0.5rem', borderBottom: '1px solid #ccc', fontSize: '1.5rem' }}>{questionData.length} Questions</h2>
-              {questionData.length > 0 ? (
-                questionData.map((question) => (
-                  <PostPreview key={question.id} post={question} onClick={() => navigate(`/question/${question.id}`)} />
-                ))
               ) : (
-                <p>No questions found</p>
+                <div className="questions-list">
+                  <h2 style={{ marginBottom: '1rem', paddingBottom: '0.5rem', borderBottom: '1px solid #ccc', fontSize: '1.5rem' }}>
+                    {questionData.length} Questions
+                  </h2>
+                  {questionData.length > 0 ? (
+                    questionData.map((question) => (
+                      <PostPreview 
+                        key={question.id} 
+                        post={question} 
+                        onClick={() => navigate(`/question/${question.id}`)} 
+                      />
+                    ))
+                  ) : (
+                    <p>No questions found</p>
+                  )}
+                </div>
               )}
             </div>
-          )}
+            <RightSidebar />
+          </div>
         </div>
-         {/* Right Edge - Top Contributors */}
-        <RightSidebar />
-      </div>
+      )}
     </div>
-    
-    )}
-  </div>
   );
 };
 
