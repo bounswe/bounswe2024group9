@@ -320,7 +320,7 @@ const [output, setOutput] = useState([]); // State to store the backend's respon
               +
             </button>
             <PostComment
-             question_id = {question_id} 
+             question_id = {parseInt(question_id, 10)} 
              />
           </div>
 
