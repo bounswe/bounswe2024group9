@@ -1,4 +1,5 @@
-from ..models import Question, Comment, UserType, User, VoteType,Question_Vote
+
+from ..models import Question, Comment, UserType, User, VoteType, Question_Vote, Topic
 from django.db.models import Count, Q, F
 from django.http import HttpRequest, HttpResponse, JsonResponse
 import json
@@ -85,7 +86,6 @@ def get_question_details(request: HttpRequest, question_id: int) -> HttpResponse
             'author': question.author.username,
             'comments_count': question.comments.count(),
             'answered': question.answered,
-            'topic': question.topic,
             'reported_by': [user.username for user in question.reported_by.all()],
             'upvoted_by': [vote.user.username for vote in question.votes.filter(vote_type=VoteType.UPVOTE.value)],
             'downvoted_by': [vote.user.username for vote in question.votes.filter(vote_type=VoteType.DOWNVOTE.value)]
@@ -269,7 +269,6 @@ def edit_question(request: HttpRequest, question_id: int) -> HttpResponse:
 
     except Exception as e:
         return JsonResponse({'error': f'An error occurred: {str(e)}'}, status=500)
-
 
 @csrf_exempt
 @invalidate_user_cache()
@@ -503,7 +502,6 @@ def random_questions(request):
         'codeSnippet': question.code_snippet,
         'tags': question.tags,
         'answered': question.answered,
-        'topic': question.topic
     } for question in questions]
     print(questions_data)
     return JsonResponse({'questions': questions_data}, safe=False)
@@ -550,7 +548,6 @@ def question_of_the_day(request):
             'codeSnippet': question.code_snippet,
             'tags': question.tags,
             'answered': question.answered,
-            'topic': question.topic
         }
 
         today = timezone.localdate()  # This gives you a timezone-aware date object
@@ -638,7 +635,6 @@ def list_questions_according_to_the_user(request, user_id: int):
         'codeSnippet': question.code_snippet,
         'tags': question.tags,
         'answered': question.answered,
-        'topic': question.topic,
         'author': question.author.username,
         'upvoted_by': [vote.user.username for vote in question.votes.filter(vote_type=VoteType.UPVOTE.value)],
         'downvoted_by': [vote.user.username for vote in question.votes.filter(vote_type=VoteType.DOWNVOTE.value)],
@@ -768,7 +764,6 @@ def fetch_random_reported_question(request: HttpRequest) -> HttpResponse:
         'author' : question.author.username,
         'comments_count': question.comments.count(),
         'answered': question.answered,
-        'topic': question.topic,
         'reported_by': [user.username for user in question.reported_by.all()],
         'upvoted_by': [vote.user.username for vote in question.votes.filter(vote_type=VoteType.UPVOTE.value)],
         'downvoted_by': [vote.user.username for vote in question.votes.filter(vote_type=VoteType.DOWNVOTE.value)],   
@@ -816,7 +811,6 @@ def fetch_all_at_once(request, user_id: int):
                 'codeSnippet': q.code_snippet,
                 'tags': q.tags,
                 'answered': q.answered,
-                'topic': q.topic,
                 'is_upvoted': user_votes_dict.get(q.pk) == VoteType.UPVOTE.value,
                 'is_downvoted': user_votes_dict.get(q.pk) == VoteType.DOWNVOTE.value,
             }
@@ -844,7 +838,6 @@ def fetch_all_at_once(request, user_id: int):
                 'codeSnippet': question.code_snippet,
                 'tags': question.tags,
                 'answered': question.answered,
-                'topic': question.topic,
             }
 
             seconds_until_midnight = (timezone.localtime().replace(hour=23, minute=59, second=59) - timezone.localtime()).seconds
@@ -896,3 +889,48 @@ def fetch_all_at_once(request, user_id: int):
 
     print(f"Time taken: {time.time() - time_start:.2f} seconds")
     return JsonResponse(feed_data, safe=False)
+
+def get_all_questions(request):
+    questions = Question.objects.all()
+    questions_data = [{
+        'id': question._id,
+        'title': question.title,
+        'language': question.language,
+        'tags': question.tags,
+        'details': question.details,
+        'code_snippet': question.code_snippet,
+        'upvotes': question.upvotes,
+        'creationDate': question.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+        'author': question.author.username,
+        'comments_count': question.comments.count(),
+        'answered': question.answered,
+        'reported_by': [user.username for user in question.reported_by.all()],
+        'upvoted_by': [vote.user.username for vote in question.votes.filter(vote_type=VoteType.UPVOTE.value)],
+        'downvoted_by': [vote.user.username for vote in question.votes.filter(vote_type=VoteType.DOWNVOTE.value)]
+    } for question in questions]
+
+    return JsonResponse({'questions': questions_data}, safe=False)
+    
+def get_topic_url(request, topic_name: str):
+    related_url = Topic.get_url_for_topic(topic_name)
+    if related_url:
+        return JsonResponse({'topic': topic_name, 'url': related_url}, status=200)
+    return JsonResponse({'error': f'Topic "{topic_name}" not found'}, status=404)
+
+
+def list_all_topics(request):
+    topics = Topic.get_all_topics()
+    topics_data = [{'name': topic.name, 'url': topic.related_url} for topic in topics]
+    return JsonResponse({'topics': topics_data}, status=200)
+
+
+def fetch_question_label_info(request, question_id: int):
+    try:
+        question = Question.objects.get(_id=question_id)
+        tags_info = question.tags
+        return JsonResponse({
+            'question_id': question_id,
+            'tags': tags_info
+        }, status=200)
+    except Question.DoesNotExist:
+        return JsonResponse({'error': 'Question not found'}, status=404)

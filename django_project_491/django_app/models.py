@@ -101,10 +101,8 @@ class Question(models.Model):
     tags = models.JSONField(blank=True, default=list)  # Example: ['tag1', 'tag2']
     details = models.TextField()
     code_snippet = models.TextField()
-
     upvotes = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
-    topic = models.CharField(max_length=100, blank=True)
     answered = models.BooleanField(default=False)
     reported_by = models.ManyToManyField('User', related_name='reported_questions', blank=True)
 
@@ -124,7 +122,7 @@ class Question(models.Model):
         else:
             return result['stdout'].split('\n')
 
-    def mark_as_answered(self): # TODO
+    def mark_as_answered(self,comment_id): # TODO
         self.answered = True
         self.save()
 
@@ -133,6 +131,18 @@ class Question(models.Model):
         super().save(*args, **kwargs)
         # Check and promote user after saving the question
         self.author.check_and_promote()
+
+    def get_topic_info(self):
+            if self.topic:
+                try:
+                    topic_obj = Topic.objects.get(name__iexact=self.topic)
+                    return {
+                        'label': topic_obj.name,
+                        'url': topic_obj.related_url,
+                    }
+                except Topic.DoesNotExist:
+                    return {'label': self.topic, 'url': None}
+            return {'label': None, 'url': None}
 
 
 class UserManager(BaseUserManager):
@@ -288,3 +298,22 @@ class Annotation(models.Model):
 
     def __unicode__(self):
         return self.text
+        
+class Topic(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    related_url = models.URLField()
+
+    def __str__(self):
+        return self.name
+
+    @staticmethod
+    def get_all_topics():
+        return Topic.objects.all()
+
+    @staticmethod
+    def get_url_for_topic(topic_name):
+        try:
+            topic = Topic.objects.get(name__iexact=topic_name)
+            return topic.related_url
+        except Topic.DoesNotExist:
+            return None
