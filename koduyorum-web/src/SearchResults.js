@@ -375,8 +375,6 @@ const fetchSearchResults = async (query) => {
                     onClose={() => setModalVisible(false)}
                   />
                   <div className="info-box" onMouseUp={(e) => handleTextSelection(e)}>
-                    <h2 className="language-title">{wiki_name}</h2>
-                    <div className="info-box">
                       <h2 style={{paddingBottom: '0.5rem', borderBottom: '1px solid #ccc'}} className="language-title">
                         {wiki_name}
                       </h2>
@@ -443,7 +441,6 @@ const fetchSearchResults = async (query) => {
                       )}
                     </div>
                   </div>
-                </div>
               ) : (
                 <div className="questions-list">
                   <h2 style={{ marginBottom: '1rem', paddingBottom: '0.5rem', borderBottom: '1px solid #ccc', fontSize: '1.5rem' }}>
