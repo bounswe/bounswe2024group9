@@ -181,11 +181,21 @@ const fetchSearchResults = async (query) => {
   };
 
   const addAnnotations = (text, annotations) => {
+    console.log("Adding annotations to text:", text);
+    console.log("Annotations list:", annotations);
+
     let annotatedText = [];
     let lastIndex = 0;
+
+    // Sort annotations by starting point to avoid misplacement
+    const sortedAnnotations = annotations.sort(
+      (a, b) => a.annotation_starting_point - b.annotation_starting_point
+    );
   
-    annotations.forEach((annotation) => {
+    sortedAnnotations.forEach((annotation) => {
       const { annotation_starting_point, annotation_ending_point, text: annotationText , annotation_id: annotationId} = annotation;
+
+      console.log("Processing annotation:", annotation);
       // Add text before the annotation
       if (lastIndex < annotation_starting_point) {
         annotatedText.push(text.slice(lastIndex, annotation_starting_point));
@@ -221,17 +231,25 @@ const fetchSearchResults = async (query) => {
     if (lastIndex < text.length) {
       annotatedText.push(text.slice(lastIndex));
     }
-  
+    console.log("Final annotated text:", annotatedText);
     return annotatedText;
   };  
 
   const handleEditAnnotation = async (annotationId, startOffset, endOffset) => {
-      // Fetch annotation data by ID
-      setStartIndex(startOffset);
-      setEndIndex(endOffset);
-      setModalVisible(true);
-      setAnnotationId(annotationId);
+    // Fetch the annotation to get its text
+    const annotationToEdit = annotationData.find((annotation) => annotation.annotation_id === annotationId);
+    if (annotationToEdit) {
+        console.log("Editing annotation:", annotationToEdit);
+        setSelectedText(annotationToEdit.text); // Set selected text from the annotation
+        setStartIndex(startOffset);
+        setEndIndex(endOffset);
+        setModalVisible(true);
+        setAnnotationId(annotationId);
+    } else {
+        console.error("Annotation not found for editing.");
+    }
   };
+
 
   const handleDeleteAnnotation = async (annotationId) => {
     try {
@@ -273,6 +291,9 @@ const fetchSearchResults = async (query) => {
   
       const mouseX = e.clientX;
       const mouseY = e.clientY;
+
+      console.log("Text selected:", selection.toString());
+      console.log("Selection start index:", startOffset, "end index:", endOffset);
 
       setSelectedText(selection.toString());
       setStartIndex(startOffset);
