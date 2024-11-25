@@ -81,4 +81,9 @@ urlpatterns = [
     path('questions/<int:question_id>/topic/', question_views.get_topic_url, name='get_topic_url'),
     path('topics/', question_views.list_all_topics, name='list_all_topics'),
 
+    path('create_annotation/', annotation_views.create_annotation, name='create_annotation'),
+    path('delete_annotation/<int:annotation_id>/', annotation_views.delete_annotation, name='delete_annotation'),
+    path('edit_annotation/<int:annotation_id>/', annotation_views.edit_annotation, name='edit_annotation'),
+    path('get_annotations_by_language_id/<int:language_qid>/', annotation_views.get_annotations_by_language, name='get_annotations_by_language_id'),
+    path('annotations/all/', annotation_views.get_all_annotations, name='get_all_annotations'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

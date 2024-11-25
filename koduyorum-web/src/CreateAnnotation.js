@@ -67,8 +67,15 @@ const CreateAnnotation = ({ visible, selectedText, startIndex, endIndex, languag
           placeholder="Enter your annotation..."
         />
         <div className="modal-buttons">
-        <button onClick={handleSubmit}>{annotationId ? 'Save Changes' : 'Create'}</button>
-          <button className="cancel-button" onClick={onClose}>Cancel</button>
+        <button
+          className={annotationId ? "save-button" : "create-button"}
+          onClick={handleSubmit}
+        >
+          {annotationId ? "Save Changes" : "Create"}
+        </button>
+        <button className="cancel-button" onClick={onClose}>
+          Cancel
+        </button>
         </div>
       </div>
 
@@ -109,13 +116,27 @@ const CreateAnnotation = ({ visible, selectedText, startIndex, endIndex, languag
             justify-content: space-between;
             gap: 10px;
           }
-          .submit-button {
-            background: #4CAF50;
+          .save-button {
+            background: #007bff; /* Blue color for Save Changes */
             color: white;
             padding: 10px 20px;
             border: none;
             border-radius: 4px;
             cursor: pointer;
+          }
+          .save-button:hover {
+            background: #0056b3; /* Darker blue on hover */
+          }
+          .create-button {
+            background: #28a745; /* Green color for Create */
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+          }
+          .create-button:hover {
+            background: #218838; /* Darker green on hover */
           }
           .cancel-button {
             background: #f44336;
