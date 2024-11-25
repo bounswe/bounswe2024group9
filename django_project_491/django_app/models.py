@@ -273,6 +273,25 @@ class User(AbstractBaseUser):
         
         return self.userType
     
+class Topic(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    related_url = models.URLField()
+
+    def __str__(self):
+        return self.name
+
+    @staticmethod
+    def get_all_topics():
+        return Topic.objects.all()
+
+    @staticmethod
+    def get_url_for_topic(topic_name):
+        try:
+            topic = Topic.objects.get(name__iexact=topic_name)
+            return topic.related_url
+        except Topic.DoesNotExist:
+            return None
+
 
 class Annotation(models.Model):
     _id = models.AutoField(primary_key=True)
@@ -298,22 +317,3 @@ class Annotation(models.Model):
 
     def __unicode__(self):
         return self.text
-        
-class Topic(models.Model):
-    name = models.CharField(max_length=100, unique=True)
-    related_url = models.URLField()
-
-    def __str__(self):
-        return self.name
-
-    @staticmethod
-    def get_all_topics():
-        return Topic.objects.all()
-
-    @staticmethod
-    def get_url_for_topic(topic_name):
-        try:
-            topic = Topic.objects.get(name__iexact=topic_name)
-            return topic.related_url
-        except Topic.DoesNotExist:
-            return None

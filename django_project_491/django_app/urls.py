@@ -74,8 +74,10 @@ urlpatterns = [
     path('multi_search/', user_views.multi_search, name='multi_search'),
     path('get_user_profile_by_id/<int:user_id>/', user_views.get_user_profile_by_id, name='get_user_profile_by_id'),
 
+    
     # Static label related functions
     path('questions/<int:question_id>/label-info/', question_views.fetch_question_label_info, name='fetch_question_label'),
     path('questions/<int:question_id>/topic/', question_views.get_topic_url, name='get_topic_url'),
     path('topics/', question_views.list_all_topics, name='list_all_topics'),
+
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
