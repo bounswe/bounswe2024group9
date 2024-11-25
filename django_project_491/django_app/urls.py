@@ -39,9 +39,12 @@ urlpatterns = [
     path('remove_bookmark/<int:question_id>/', question_views.remove_bookmark, name='remove_bookmark'),
     path('get_random_reported_question/', question_views.fetch_random_reported_question, name='ger_random_reported_question'),
     path('gel_all_questions/', question_views.get_all_questions, name='get_all_questions'),
-    path('get_code_snippet_if_empty/<int:question_id>/', question_views.get_code_snippet_if_empty, name='get_code_snippet_if_empty'),
 
-    path('list_questions_by_language/<str:language>/<int:page_number>', question_views.list_questions_by_language, name='list_questions_by_language'),
+
+    path('get_code_snippet_if_empty/<int:question_id>/', question_views.get_code_snippet_if_empty, name='get_code_snippet_if_empty'),
+    
+    path('list_questions_by_time/', question_views.list_questions_by_time, name='list_questions'),
+    path('list_questions_by_language/<str:language>/<int:page_number>', question_views.list_questions_by_language, name='list_questions'),
     path('list_questions_by_tags/<str:tags>/<int:page_number>/', question_views.list_questions_by_tags, name='list_questions_by_tags'),
     path('list_questions_by_hotness/<int:page_number>', question_views.list_questions_by_hotness, name='list_questions_by_hotness'),
     path('random_questions/', question_views.random_questions, name='random_questions'),

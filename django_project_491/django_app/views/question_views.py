@@ -490,7 +490,39 @@ def list_questions_by_hotness(request, page_number=1):
     } for question in questions]
 
     return JsonResponse({'questions': questions_data}, safe=False, status=200)
+    
+@csrf_exempt   
+def list_questions_by_time(request, page_number=1):
+    """
+    List questions ordered by creation date (most recent first) in a paginated manner.
+    Args:
+        request (HttpRequest): The HTTP request object.
+        page_number (int, optional): The page number for pagination. Defaults to 1.
+    Returns:
+        JsonResponse: A JSON response containing a list of questions with their details.
+            Each question includes the following fields:
+            - id (int): The unique identifier of the question.
+            - title (str): The title of the question.
+            - language (str): The programming language related to the question.
+            - tags (list): A list of tags associated with the question.
+            - details (str): The detailed description of the question.
+            - code_snippet (str): The code snippet related to the question.
+            - upvotes (int): The number of upvotes the question has received.
+            - creationDate (str): The creation date of the question in 'YYYY-MM-DD HH:MM:SS' format.
+    """
+    questions = Question.objects.order_by('-created_at')[10 * (page_number - 1): 10 * page_number]
+    questions_data = [{
+        'id': question._id,
+        'title': question.title,
+        'language': question.language,
+        'tags': question.tags,
+        'details': question.details,
+        'code_snippet': question.code_snippet,
+        'upvotes': question.upvotes,
+        'creationDate': question.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+    } for question in questions]
 
+    return JsonResponse({'questions': questions_data}, safe=False, status=200)
 
 def random_questions(request):
     # Retrieve 5 random questions
