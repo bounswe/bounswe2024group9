@@ -127,13 +127,12 @@ function Comment(props) {
 
   return (
     <div className="p-4 border border-gray-300 rounded">
-      <h3 className="font-semibold text-gray-700">Answer {props.number}</h3>
       {isAnswer && (
-        <div className={`status-label answered`}>
+        <div className={`question-status-label answered`}>
           Answer
         </div>
       )}
-
+      <h3 className="font-semibold text-gray-700">Answer {props.number}</h3>
       <p className="text-gray-600">{props.explanation}</p>
       {props.code && (
         <SyntaxHighlighter language="javascript" style={docco}>
@@ -179,7 +178,7 @@ function Comment(props) {
             </button>
           )}
         </div>
-        <p className="username ">@{props.author}</p>
+        <p className="question-username">@{props.author}</p>
       </div>
     </div>
   );

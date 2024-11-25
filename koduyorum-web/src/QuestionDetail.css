@@ -1,4 +1,4 @@
-.post-card {
+.question-post-card {
     background-color: #fff;
     border-radius: 12px;
     padding: 15px;
@@ -9,11 +9,11 @@
     transition: transform 0.2s;
 }
 
-.post-card:hover {
+.question-post-card:hover {
     transform: scale(1.02);
 }
 
-.status-label {
+.question-status-label {
     position: relative;
     bottom: -5px;
     right: -5px;
@@ -37,7 +37,7 @@
     margin-bottom: 8px;
 }
 
-.labels-container {
+.question-labels-container {
     display: flex;
     flex-direction: column; 
     gap: 8px; 
@@ -136,7 +136,7 @@
     animation: downvoteEffect 0.5s ease-in-out;
 }
 
-.username {
+.question-username {
     position: relative;
     bottom: -10px;
     right: 10px; 

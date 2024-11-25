@@ -107,7 +107,7 @@ function QuestionDetail(props) {
       }, [props.isAnswered]);
     return (
       <div className="p-4 border border-gray-300 rounded">
-        <div className={`status-label ${isAnswered ? 'answered' : 'unanswered'}`}>
+        <div className={`question-status-label ${isAnswered ? 'answered' : 'unanswered'}`}>
                     {isAnswered ? 'Answered' : 'Unanswered'}
                 </div>
             <div className="flex flex-wrap gap-2 mt-1">
@@ -145,10 +145,10 @@ function QuestionDetail(props) {
         {
           <>
             <h3 className="font-semibold text-gray-700">{props.inputType}</h3>
+            <p className="mt-2 text-gray-600">{props.explanation}</p>
             <SyntaxHighlighter language="javascript" style={docco}>
               {props.code}
             </SyntaxHighlighter>
-            <p className="mt-2 text-gray-600">{props.explanation}</p>
             <div className="flex items-center justify-between mt-4">
               <div className="flex items-center gap-2">
                 <button
@@ -180,7 +180,7 @@ function QuestionDetail(props) {
             </>
             )}
               </div>
-              <p className="username ">@{props.author}</p>
+              <p className="question-username ">@{props.author}</p>
             </div>
           </>
         }

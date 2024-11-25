@@ -808,7 +808,6 @@ def fetch_all_at_once(request, user_id: int):
                 'codeSnippet': q.code_snippet,
                 'tags': q.tags,
                 'answered': q.answered,
-                'topic': q.topic,
                 'is_upvoted': user_votes_dict.get(q.pk) == VoteType.UPVOTE.value,
                 'is_downvoted': user_votes_dict.get(q.pk) == VoteType.DOWNVOTE.value,
             }
@@ -836,7 +835,6 @@ def fetch_all_at_once(request, user_id: int):
                 'codeSnippet': question.code_snippet,
                 'tags': question.tags,
                 'answered': question.answered,
-                'topic': question.topic,
             }
 
             seconds_until_midnight = (timezone.localtime().replace(hour=23, minute=59, second=59) - timezone.localtime()).seconds
