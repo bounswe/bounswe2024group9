@@ -85,7 +85,6 @@ def get_question_details(request: HttpRequest, question_id: int) -> HttpResponse
             'author': question.author.username,
             'comments_count': question.comments.count(),
             'answered': question.answered,
-            'topic': question.topic,
             'reported_by': [user.username for user in question.reported_by.all()],
             'upvoted_by': [vote.user.username for vote in question.votes.filter(vote_type=VoteType.UPVOTE.value)],
             'downvoted_by': [vote.user.username for vote in question.votes.filter(vote_type=VoteType.DOWNVOTE.value)]
@@ -269,7 +268,6 @@ def edit_question(request: HttpRequest, question_id: int) -> HttpResponse:
 
     except Exception as e:
         return JsonResponse({'error': f'An error occurred: {str(e)}'}, status=500)
-
 
 @csrf_exempt
 @invalidate_user_cache()
@@ -503,7 +501,6 @@ def random_questions(request):
         'codeSnippet': question.code_snippet,
         'tags': question.tags,
         'answered': question.answered,
-        'topic': question.topic
     } for question in questions]
     print(questions_data)
     return JsonResponse({'questions': questions_data}, safe=False)
@@ -550,7 +547,6 @@ def question_of_the_day(request):
             'codeSnippet': question.code_snippet,
             'tags': question.tags,
             'answered': question.answered,
-            'topic': question.topic
         }
 
         today = timezone.localdate()  # This gives you a timezone-aware date object
@@ -638,7 +634,6 @@ def list_questions_according_to_the_user(request, user_id: int):
         'codeSnippet': question.code_snippet,
         'tags': question.tags,
         'answered': question.answered,
-        'topic': question.topic,
         'author': question.author.username
     } for question in personalized_questions]
     return JsonResponse({'questions': questions_data}, safe=False)
@@ -766,7 +761,6 @@ def fetch_random_reported_question(request: HttpRequest) -> HttpResponse:
         'author' : question.author.username,
         'comments_count': question.comments.count(),
         'answered': question.answered,
-        'topic': question.topic,
         'reported_by': [user.username for user in question.reported_by.all()],
         'upvoted_by': [vote.user.username for vote in question.votes.filter(vote_type=VoteType.UPVOTE.value)],
         'downvoted_by': [vote.user.username for vote in question.votes.filter(vote_type=VoteType.DOWNVOTE.value)],   
@@ -814,7 +808,6 @@ def fetch_all_at_once(request, user_id: int):
                 'codeSnippet': q.code_snippet,
                 'tags': q.tags,
                 'answered': q.answered,
-                'topic': q.topic,
                 'is_upvoted': user_votes_dict.get(q.pk) == VoteType.UPVOTE.value,
                 'is_downvoted': user_votes_dict.get(q.pk) == VoteType.DOWNVOTE.value,
             }
@@ -842,7 +835,6 @@ def fetch_all_at_once(request, user_id: int):
                 'codeSnippet': question.code_snippet,
                 'tags': question.tags,
                 'answered': question.answered,
-                'topic': question.topic,
             }
 
             seconds_until_midnight = (timezone.localtime().replace(hour=23, minute=59, second=59) - timezone.localtime()).seconds

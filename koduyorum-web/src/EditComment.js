@@ -1,17 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import * as PropTypes from "prop-types";
+
 import './PostComment.css';
 
-function PostComment(props) {
-    const [details, setDetails] = useState('');
-    const [codeSnippet, setCodeSnippet] = useState('');
-    const [language, setLanguage] = useState('');
+function EditComment(props) {
+    const [details, setDetails] = useState(props.details);
+    const [codeSnippet, setCodeSnippet] = useState(props.codeSnippet);
+    const [language, setLanguage] = useState(props.language);
     const [availableLanguages, setAvailableLanguages] = useState([]); // Ensure it's initialized as an array
     const navigate = useNavigate();
-    PostComment.propTypes = {
-        question_id: PropTypes.number
-    }
     // Fetch available languages from backend
     useEffect(() => {
         const fetchLanguages = async () => {
@@ -49,24 +47,24 @@ function PostComment(props) {
 
         try {
             const user_id = localStorage.getItem('user_id');
-            const response = await fetch(`${process.env.REACT_APP_API_URL}/create_comment/${props.question_id}`, {
+            const response = await fetch(`${process.env.REACT_APP_API_URL}/edit_comment/${props.comment_id}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'user-id': user_id
+                    'User-ID': user_id
                 },
                 body: JSON.stringify(postData),
             });
 
             if (response.ok) {
-                alert('Comment created successfully!');
+                alert('Comment edited successfully!');
                 props.fetchComments();
             } else {
                 const data = await response.json();
-                alert(data.error || 'Failed to create comment');
+                alert(data.error || 'Failed to edit comment');
             }
         } catch (error) {
-            alert('Failed to create comment');
+            alert('Failed to edit comment');
             console.error('Error:', error);
         } finally {
             props.closePopup()
@@ -76,7 +74,7 @@ function PostComment(props) {
     return (
 
         <div>
-            <h2>Create New Comment</h2>
+            <h2>Edit Comment</h2>
             <div className="post-comment-language">
                 <label>Select Language:</label>
                 <select
@@ -105,10 +103,16 @@ function PostComment(props) {
             />
 
             <button className="post-comment-submit" onClick={handleSubmit}>
-                Submit Comment
+                Edit Comment
             </button>
         </div>
     );
 }
+EditComment.propTypes = {
+    comment_id : PropTypes.number,
+    language : PropTypes.string,
+    details : PropTypes.string,
+    codeSnippet : PropTypes.string
+}
 
-export default PostComment;
+export default EditComment;
