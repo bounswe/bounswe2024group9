@@ -101,6 +101,10 @@ function QuestionDetail(props) {
           console.error('Error deleting:', error);
         }
       };
+
+      useEffect(() => {
+        setAnswered(props.isAnswered);
+      }, [props.isAnswered]);
     return (
       <div className="p-4 border border-gray-300 rounded">
         <div className={`status-label ${isAnswered ? 'answered' : 'unanswered'}`}>

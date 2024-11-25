@@ -118,7 +118,7 @@ function Comment(props) {
 
         const data = await response.json();
         setAnswer(true);
-        //TODO set question as answered as well
+        props.fetchComments();
       }
     } catch (error) {
       console.error('Error upvoting:', error);
