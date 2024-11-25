@@ -33,9 +33,7 @@ const WikiResultDetail = ({ route }) => {
     const fetchAnnotations = async () => {
         try {
             const languageId = mainInfo.language.value.split('/').pop().replace('Q', '');
-            const response = await fetch(
-                `http://10.0.2.2:8000/get_annotations_by_language/${languageId}/`
-            );
+            const response = await fetch(`http://10.0.2.2:8000/get_annotations_by_language_id/${languageId}/`);
             const data = await response.json();
     
             if (response.ok) {
