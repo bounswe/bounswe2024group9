@@ -51,8 +51,12 @@ cd bounswe2024group9</code></pre>
 AWS_HOST=XXX
 JUDGE0_API_KEY=XXX
 DJANGO_SECRET_KEY=XXX
-ALTERNATIVE_JUDGE0_API_KEY=XXX
-REACT_APP_API_URL=XXX</code></pre>
+JUDGE0_API_KEY_POOL=XXX
+REACT_APP_API_URL=XXX
+REACT_APP_FRONTEND_URL=XXX
+EMAIL_HOST_USER=XXX
+GEMINI_AI_KEY_POOL=XXX
+</code></pre>
     <li>Run the following command to run Docker image
         <pre><code>docker compose up</code></pre>
     </li>
