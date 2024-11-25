@@ -15,12 +15,10 @@ const PostDetail = ({ route }) => {
     const [codeOutput, setCodeOutput] = useState('');
     const [annotations, setAnnotations] = useState([]);
     const [startIndex, setStartIndex] = useState(null);
-    const [upvotes, setUpvotes] = useState(post.upvotes);
-    const [isAnswered, setIsAnswered] = useState(post.answered);
     const [endIndex, setEndIndex] = useState(null);
     const [annotationModalVisible, setAnnotationModalVisible] = useState(false);
     const [annotationText, setAnnotationText] = useState('');
-    const [selectedAnnotationTarget, setSelectedAnnotationTarget] = useState(null); // Target for annotation
+    const [selectedAnnotationTarget, setSelectedAnnotationTarget] = useState(null);
 
     useEffect(() => {
         const fetchComments = async () => {
