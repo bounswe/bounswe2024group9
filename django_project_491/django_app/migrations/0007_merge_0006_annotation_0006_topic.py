@@ -7,7 +7,6 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('django_app', '0006_annotation'),
-        ('django_app', '0006_topic'),
     ]
 
     operations = [

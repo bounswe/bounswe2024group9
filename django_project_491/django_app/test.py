@@ -109,8 +109,7 @@ class CodeExecutionTests(TestCase):
         # Validate response status and content
         self.assertEqual(response.status_code, 200)
         response_json = response.json()
-        self.assertIn('stdout', response_json)
-        self.assertTrue(response_json['stdout'].startswith('Hello, World!'))
+        self.assertTrue(response_json['output'][0].startswith('Hello, World!'))
 
 class UserWorkflowIntegrationTests(TestCase):
     def setUp(self):
@@ -245,7 +244,6 @@ class QuestionModelTest(TestCase):
             details='How to test models in Django?',
             code_snippet='print("Test")',
             tags=['Django', 'Testing'],
-            topic='Django Testing',
             author=self.user
         )
 
@@ -1002,7 +1000,7 @@ class CommentViewsTest(TestCase):
 
 class UtilsViews(TestCase):
     def setUp(self):
-        self.user = User.objects.create_user(
+        self.user = get_user_model().objects.create_user(
             username='testuser',
             password='password',
             email="test@gmail.com"
