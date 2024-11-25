@@ -47,7 +47,8 @@ def get_user_profile_by_username(request, username : str) -> JsonResponse:
         'interested_topics': user.interested_topics,
         'known_languages': user.known_languages,
         'name': user.name,
-        'surname': user.surname
+        'surname': user.surname,
+        'user_id': user.user_id,
     }
     
     return JsonResponse({'user': user_data}, status=200)
@@ -547,7 +548,8 @@ def list_most_contributed_five_person(request: HttpRequest) -> JsonResponse:
             'email': user.email,
             'name': user.name,
             'surname': user.surname,
-            'contribution_points': calculate_contribution_points(user)  # Optionally include the contribution score
+            'contribution_points': calculate_contribution_points(user),  # Optionally include the contribution score
+            'user_id' : user.user_id,
         })
     
     return JsonResponse({'users': user_data}, status=200)

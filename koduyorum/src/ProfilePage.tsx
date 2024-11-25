@@ -65,12 +65,11 @@ const ProfilePage = ({ route }) => {
                     source={
                         profile.profile_pic
                             ? { uri: profile.profile_pic }
-                            : require('../assets/pp.jpg') // Default profile picture
+                            : require('../assets/pp.jpg')
                     }
                     style={styles.profileImage}
                 />
                 <Text style={styles.username}>{profile.username}</Text>
-                <Text style={styles.bio}>{profile.bio || 'No bio available'}</Text>
             </View>
 
             <View style={styles.questionsSection}>
@@ -90,6 +89,7 @@ const ProfilePage = ({ route }) => {
                                 programmingLanguage: item.language,
                                 tags: item.tags,
                                 answered: item.answered,
+                                codeSnippet: item.code_snippet
                             }}
                                 currentUser={user_id}
                                 onPress={handlePostPress}

@@ -20,7 +20,24 @@ const TopContributorsPage = () => {
                 const response = await fetch('http://10.0.2.2:8000/get_top_five_contributors/');
                 const data = await response.json();
                 if (response.ok) {
-                    setContributors(data.users);
+                    const enrichedContributors = await Promise.all(
+                        data.users.map(async (user) => {
+                            const profileResponse = await fetch(
+                                `http://10.0.2.2:8000/get_user_profile_by_username/${user.username}`
+                            );
+                            const profileData = await profileResponse.json();
+        
+                            // Construct full URL for the profile picture
+                            const baseURL = 'http://10.0.2.2:8000';
+                            return {
+                                ...user,
+                                profile_pic: profileData.user?.profile_pic
+                                    ? `${baseURL}${profileData.user.profile_pic}` // Prepend base URL to profile_pic
+                                    : null,
+                            };
+                        })
+                    );
+                    setContributors(enrichedContributors);
                 } else {
                     Alert.alert('Error', data.error || 'Failed to fetch contributors');
                 }
@@ -29,6 +46,7 @@ const TopContributorsPage = () => {
                 Alert.alert('Error', 'Failed to load contributors');
             }
         };
+        
 
         fetchContributors();
     }, []);
@@ -43,7 +61,7 @@ const TopContributorsPage = () => {
             onPress={() => handlePressContributor(item.username, item.user_id)}
         >
             <Image
-                source={{ uri: `http://10.0.2.2:8000/profile_pics/${item.username}.jpg` }}
+                source={{ uri: item.profile_pic || 'https://via.placeholder.com/50' }} // Default placeholder image
                 style={styles.profileImage}
                 onError={({ nativeEvent: { error } }) =>
                     console.log('Error loading profile image:', error)

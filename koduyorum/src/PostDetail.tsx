@@ -56,58 +56,6 @@ const PostDetail = ({ route }) => {
         fetchLanguages();
     }, []);
 
-    const handleUpvote = async () => {
-        try {
-            const response = await fetch(
-                `http://10.0.2.2:8000/upvote_object/question/${post.id}/`,
-                {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'User-ID': user_id,
-                    },
-                }
-            );
-
-            if (response.ok) {
-                setUpvotes(upvotes + 1);
-                Alert.alert('Success', 'Question upvoted successfully');
-            } else {
-                const data = await response.json();
-                Alert.alert('Error', data.error || 'Failed to upvote');
-            }
-        } catch (error) {
-            console.error('Error upvoting:', error);
-            Alert.alert('Error', 'Failed to upvote');
-        }
-    };
-
-    const handleDownvote = async () => {
-        try {
-            const response = await fetch(
-                `http://10.0.2.2:8000/downvote_object/question/${post.id}/`,
-                {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'User-ID': user_id, // Pass user ID in headers
-                    },
-                }
-            );
-
-            if (response.ok) {
-                setUpvotes(upvotes - 1); // Decrement upvote count
-                Alert.alert('Success', 'Question downvoted successfully');
-            } else {
-                const data = await response.json();
-                Alert.alert('Error', data.error || 'Failed to downvote');
-            }
-        } catch (error) {
-            console.error('Error downvoting:', error);
-            Alert.alert('Error', 'Failed to downvote');
-        }
-    };
-
     const handleMarkAsAnswered = async () => {
         try {
             const response = await fetch(
@@ -181,7 +129,7 @@ const PostDetail = ({ route }) => {
 
     const handleRunCode = async () => {
         try {
-            const response = await fetch(`http://10.0.2.2:8000/run_code_of_question_or_comment/question/${post.id}/`);
+            const response = await fetch(`http://10.0.2.2:8000/run_code/question/${post.id}/`);
             const data = await response.json();
     
             if (response.status === 200) {
@@ -361,18 +309,6 @@ const PostDetail = ({ route }) => {
                 </SyntaxHighlighter>
             </View>
 
-
-    
-            {/* Upvote and Downvote Buttons */}
-            <View style={styles.voteContainer}>
-                <TouchableOpacity style={styles.voteButton} onPress={handleUpvote}>
-                    <Text style={styles.voteButtonText}>Upvote ({upvotes})</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.voteButton} onPress={handleDownvote}>
-                    <Text style={styles.voteButtonText}>Downvote</Text>
-                </TouchableOpacity>
-            </View>
-    
             {/* Mark as Answered Button */}
             {!isAnswered && post.user_id === user_id && (
                 <TouchableOpacity style={styles.answeredButton} onPress={handleMarkAsAnswered}>
