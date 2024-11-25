@@ -129,12 +129,9 @@ def edit_comment(request: HttpRequest, comment_id: int) -> HttpResponse:
     try:
         comment = Comment.objects.get(_id=comment_id)
         comment_owner_user_id = comment.author.user_id
-        comment_owner_user_id = comment.author.user_id
 
-        if editor_user.user_id != comment_owner_user_id and editor_user.userType != UserType.ADMIN:
         if editor_user.user_id != comment_owner_user_id and editor_user.userType != UserType.ADMIN:
             return JsonResponse({'error': 'Only admins and owner of the comments can edit comments'}, status=403)
-
         
         data = json.loads(request.body)
     
@@ -151,9 +148,6 @@ def edit_comment(request: HttpRequest, comment_id: int) -> HttpResponse:
 
     except (KeyError, json.JSONDecodeError) as e:
         return JsonResponse({'error': f'Malformed data: {str(e)}'}, status=400)
-
-    return JsonResponse({'success': 'Comment updated successfully'}, status=200)
-
 
 @csrf_exempt
 @invalidate_user_cache()
@@ -187,9 +181,7 @@ def delete_comment(request: HttpRequest, comment_id: int) -> HttpResponse:
     try:
         comment = Comment.objects.get(_id=comment_id)
         comment_owner_user_id = comment.author.user_id
-        comment_owner_user_id = comment.author.user_id
 
-        if deletor_user.user_id != comment_owner_user_id and deletor_user.userType != UserType.ADMIN:
         if deletor_user.user_id != comment_owner_user_id and deletor_user.userType != UserType.ADMIN:
             return JsonResponse({'error': 'Only admins and owner of the comments can delete comments'}, status=403)
 
@@ -202,9 +194,6 @@ def delete_comment(request: HttpRequest, comment_id: int) -> HttpResponse:
         return JsonResponse({'error': 'Comment not found'}, status=404)
     except Exception as e:
         return JsonResponse({'error': f'An error occurred: {str(e)}'}, status=500)
-    
-    return JsonResponse({'success': f'Comment {comment_id} is deleted'}, status=200)
-
 
 @csrf_exempt
 @invalidate_user_cache()

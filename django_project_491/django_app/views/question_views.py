@@ -243,9 +243,7 @@ def edit_question(request: HttpRequest, question_id: int) -> HttpResponse:
     try:
         question = Question.objects.get(_id=question_id)
         question_owner_user_id = question.author.user_id
-        question_owner_user_id = question.author.user_id
 
-        if editor_user.user_id != question_owner_user_id and editor_user.userType != UserType.ADMIN:
         if editor_user.user_id != question_owner_user_id and editor_user.userType != UserType.ADMIN:
             return JsonResponse({'error': 'Only admins and owner of the questions can edit questions'}, status=403)
 
