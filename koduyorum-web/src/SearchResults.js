@@ -181,16 +181,26 @@ const fetchSearchResults = async (query) => {
   };
 
   const addAnnotations = (text, annotations) => {
+    console.log("Adding annotations to text:", text);
+    console.log("Annotations list:", annotations);
+
     let annotatedText = [];
     let lastIndex = 0;
+
+    // Sort annotations by starting point to avoid misplacement
+    const sortedAnnotations = annotations.sort(
+      (a, b) => a.annotation_starting_point - b.annotation_starting_point
+    );
   
-    annotations.forEach((annotation) => {
+    sortedAnnotations.forEach((annotation) => {
       const { annotation_starting_point, annotation_ending_point, text: annotationText , annotation_id: annotationId} = annotation;
-      // Add text before the annotation
+
+      console.log("Processing annotation:", annotation);
+      
       if (lastIndex < annotation_starting_point) {
         annotatedText.push(text.slice(lastIndex, annotation_starting_point));
       }
-  
+      
       // Add annotated text with tooltip
       annotatedText.push(
         <span className="annotation" key={annotation_starting_point}>
@@ -221,17 +231,25 @@ const fetchSearchResults = async (query) => {
     if (lastIndex < text.length) {
       annotatedText.push(text.slice(lastIndex));
     }
-  
+    console.log("Final annotated text:", annotatedText);
     return annotatedText;
   };  
 
   const handleEditAnnotation = async (annotationId, startOffset, endOffset) => {
-      // Fetch annotation data by ID
-      setStartIndex(startOffset);
-      setEndIndex(endOffset);
-      setModalVisible(true);
-      setAnnotationId(annotationId);
+    // Fetch the annotation to get its text
+    const annotationToEdit = annotationData.find((annotation) => annotation.annotation_id === annotationId);
+    if (annotationToEdit) {
+        console.log("Editing annotation:", annotationToEdit);
+        setSelectedText(annotationToEdit.text); // Set selected text from the annotation
+        setStartIndex(startOffset);
+        setEndIndex(endOffset);
+        setModalVisible(true);
+        setAnnotationId(annotationId);
+    } else {
+        console.error("Annotation not found for editing.");
+    }
   };
+
 
   const handleDeleteAnnotation = async (annotationId) => {
     try {
@@ -245,6 +263,10 @@ const fetchSearchResults = async (query) => {
       });
 
       if (response.ok) {
+        // Update the state to remove the deleted annotation
+        setAnnotationData((prevAnnotations) =>
+          prevAnnotations.filter((annotation) => annotation.annotation_id !== annotationId)
+        );
         alert('Annotation deleted successfully.');
         // Optional: Trigger a re-fetch of annotations or update state to reflect the deletion
       } else {
@@ -270,6 +292,9 @@ const fetchSearchResults = async (query) => {
       const mouseX = e.clientX;
       const mouseY = e.clientY;
 
+      console.log("Text selected:", selection.toString());
+      console.log("Selection start index:", startOffset, "end index:", endOffset);
+
       setSelectedText(selection.toString());
       setStartIndex(startOffset);
       setEndIndex(endOffset);
@@ -279,7 +304,10 @@ const fetchSearchResults = async (query) => {
       console.log('No text selected.');
     }
   };
+  
 
+
+  
   const renderAnnotatedText = (textData) => {
     const { text, annotation, start, end } = textData;
   
@@ -318,11 +346,12 @@ const fetchSearchResults = async (query) => {
             searched={searched}
             handleSearchResultClick={handleSearchResultClick}
           />
-  
+
           <div className="feed-content">
             <LeftSidebar handleTagClick={handleTagClick} />
-  
-            <div className='info-container'>
+
+            <div className="info-container">
+ 
               <div className="tab-navigation">
                 <button
                   className={`tab-button ${activeTab === 'info' ? 'active-tab' : ''}`}
@@ -337,7 +366,6 @@ const fetchSearchResults = async (query) => {
                   Questions
                 </button>
               </div>
-  
               {activeTab === 'info' ? (
                 <div>
                   <CreateAnnotation
@@ -350,8 +378,6 @@ const fetchSearchResults = async (query) => {
                     onClose={() => setModalVisible(false)}
                   />
                   <div className="info-box" onMouseUp={(e) => handleTextSelection(e)}>
-                    <h2 className="language-title">{wiki_name}</h2>
-                    <div className="info-box">
                       <h2 style={{paddingBottom: '0.5rem', borderBottom: '1px solid #ccc'}} className="language-title">
                         {wiki_name}
                       </h2>
@@ -418,7 +444,6 @@ const fetchSearchResults = async (query) => {
                       )}
                     </div>
                   </div>
-                </div>
               ) : (
                 <div className="questions-list">
                   <h2 style={{ marginBottom: '1rem', paddingBottom: '0.5rem', borderBottom: '1px solid #ccc', fontSize: '1.5rem' }}>
