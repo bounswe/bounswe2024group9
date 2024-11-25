@@ -786,7 +786,7 @@ class QuestionViewTests(TestCase):
         self.assertTrue(self.user in self.question.reported_by.all())
 
     def test_list_questions_by_language(self):
-        response = self.client.get(reverse('list_questions_by_language', args=['Python', 1]))
+        response = self.client.get(reverse('list_questions', args=['Python', 1]))
         self.assertEqual(response.status_code, 200)
         response_data = response.json()
         self.assertIn('questions', response_data)
@@ -832,7 +832,7 @@ class QuestionViewTests(TestCase):
             **{'HTTP_User-ID': self.user.user_id}
         )
         self.assertEqual(response.status_code, 200)
-        response = self.client.get(reverse('get_random_reported_question'))
+        response = self.client.get(reverse('ger_random_reported_question'))
         self.assertEqual(response.status_code, 200)
         self.assertIn('question', response.json())
 
