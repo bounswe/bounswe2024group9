@@ -56,32 +56,6 @@ const PostDetail = ({ route }) => {
         fetchLanguages();
     }, []);
 
-    const handleMarkAsAnswered = async () => {
-        try {
-            const response = await fetch(
-                `http://10.0.2.2:8000/mark_as_answered/${post.id}/`,
-                {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'User-ID': user_id, // Pass user ID in headers
-                    },
-                }
-            );
-
-            if (response.ok) {
-                setIsAnswered(true); // Update local state
-                Alert.alert('Success', 'Question marked as answered');
-            } else {
-                const data = await response.json();
-                Alert.alert('Error', data.error || 'Failed to mark as answered');
-            }
-        } catch (error) {
-            console.error('Error marking as answered:', error);
-            Alert.alert('Error', 'Failed to mark as answered');
-        }
-    };
-
     const handleAddComment = async () => {
         if (newComment.trim() === '' || selectedLanguage === '') {
             Alert.alert('Comment, language, and code snippet cannot be empty');
@@ -143,22 +117,6 @@ const PostDetail = ({ route }) => {
         }
     };
     
-
-    const renderComments = () => {
-        return comments.map((comment, index) => (
-            <View key={index} style={styles.comment}>
-                <Text style={styles.commentUser}>{comment.user}:</Text>
-                {renderAnnotatedText(comment.details, index)}
-                {comment.code_snippet ? (
-                    <SyntaxHighlighter language={selectedLanguage || 'javascript'} style={atomOneDark}>
-                        {renderAnnotatedText(comment.code_snippet, `codeComment-${index}`)}
-                    </SyntaxHighlighter>
-                ) : null}
-            </View>
-        ));
-    };
-    
-
     const handleWordPress = (index, target) => {
         setSelectedAnnotationTarget(target);
         if (startIndex === null) {
@@ -228,8 +186,6 @@ const PostDetail = ({ route }) => {
         }
     };
     
-    
-
     const renderAnnotatedText = (text, target) => {
         if (!text) {
             return <Text style={styles.description}>No text available</Text>;
@@ -308,13 +264,6 @@ const PostDetail = ({ route }) => {
                         .join(' ')}
                 </SyntaxHighlighter>
             </View>
-
-            {/* Mark as Answered Button */}
-            {!isAnswered && post.user_id === user_id && (
-                <TouchableOpacity style={styles.answeredButton} onPress={handleMarkAsAnswered}>
-                    <Text style={styles.answeredButtonText}>Mark as Answered</Text>
-                </TouchableOpacity>
-            )}
     
             {/* Run Code Button */}
             <TouchableOpacity style={styles.runButton} onPress={handleRunCode}>
@@ -460,23 +409,6 @@ const styles = StyleSheet.create({
         padding: 15,
         marginBottom: 20,
     },
-    voteContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginBottom: 20,
-    },
-    voteButton: {
-        backgroundColor: '#00BFFF',
-        borderRadius: 5,
-        paddingVertical: 10,
-        paddingHorizontal: 20,
-        alignItems: 'center',
-    },
-    voteButtonText: {
-        color: 'white',
-        fontWeight: 'bold',
-        fontSize: 16,
-    },
     runButton: {
         backgroundColor: '#32CD32',
         borderRadius: 5,
@@ -565,19 +497,6 @@ const styles = StyleSheet.create({
         color: '#333',
         fontStyle: 'italic',
     },    
-    answeredButton: {
-        backgroundColor: '#FF4500',
-        borderRadius: 5,
-        paddingVertical: 10,
-        paddingHorizontal: 20,
-        alignItems: 'center',
-        marginVertical: 10,
-    },
-    answeredButtonText: {
-        color: 'white',
-        fontWeight: 'bold',
-        fontSize: 16,
-    },
     modalContainer: {
         flex: 1,
         justifyContent: 'center',
