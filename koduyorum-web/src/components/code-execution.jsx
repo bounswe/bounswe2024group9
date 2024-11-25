@@ -21,7 +21,7 @@ export default function CodeExecution() {
   const [isAnswered, setAnswered] = useState(false);
 
   const [code, setCode] = useState(""); // State to store the user input (code)
-  const [output, setOutput] = useState(""); // State to store the backend's response (output)
+const [output, setOutput] = useState([]); // State to store the backend's response (output)
   const [isloading, setIsLoading] = useState(true); // State to manage opening page
 
   const [loading, setLoading] = useState(false); // State to manage loading state
@@ -174,7 +174,7 @@ export default function CodeExecution() {
         body: JSON.stringify({ source_code: code, language_id: languageId }),  // Send code and language ID as JSON
       });
       const data = await response.json();  // Parse the JSON response
-      setOutput(data.stdout);  // Set the output from backend
+      setOutput(data.output);  // Set the output from backend
 
     } catch (error) {
       setOutput("Error: Could not execute the code."); // Handle errors
@@ -309,11 +309,14 @@ export default function CodeExecution() {
                   {loading ? "Executing..." : "Execute Code"}
                 </button>
               </form>
-
               <div className="mt-6">
                 <h2 className="text-xl font-semibold mb-2">Output:</h2>
                 <pre className="w-full p-4 bg-gray-200 text-gray-800 whitespace-pre-wrap">
-                  {loading ? "Waiting for output..." : output || "No output yet."}
+                    {loading ? "Waiting for output..." : (
+                      output.length > 0 ? output.map((line, index) => (
+                  <div key={index}>{line}</div>
+                  )) : "No output yet."
+                )}
                 </pre>
               </div>
             </div>

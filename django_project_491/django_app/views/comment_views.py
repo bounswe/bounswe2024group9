@@ -4,10 +4,33 @@ import json
 from django.views.decorators.csrf import csrf_exempt
 from ..Utils.utils import *
 from ..Utils.forms import *
+from django.core.cache import cache
+from functools import wraps
 
+def invalidate_user_cache(cache_key_prefix='feed_user'):
+    """
+    A decorator to invalidate the cache for a given user_id.
+    """
+    def decorator(func):
+        @wraps(func)
+        def wrapper(request, *args, **kwargs):
+            user_id = request.headers.get('User-ID')
 
+            if user_id:
+                # Invalidate the user's cache
+                cache_key = f"{cache_key_prefix}_{user_id}"
+                cache.delete(cache_key)
+
+            # Call the original function
+            response = func(request, *args, **kwargs)
+
+            return response
+
+        return wrapper
+    return decorator
 
 @csrf_exempt
+@invalidate_user_cache()
 def create_comment(request: HttpRequest, question_id: int) -> HttpResponse:
     """
     Handle the creation of a new comment for a specific question.
@@ -105,9 +128,9 @@ def edit_comment(request: HttpRequest, comment_id: int) -> HttpResponse:
 
     try:
         comment = Comment.objects.get(_id=comment_id)
-        comment_owner_user_id = comment.author.id
+        comment_owner_user_id = comment.author.user_id
 
-        if editor_user.id != comment_owner_user_id and editor_user.userType != UserType.ADMIN:
+        if editor_user.user_id != comment_owner_user_id and editor_user.userType != UserType.ADMIN:
             return JsonResponse({'error': 'Only admins and owner of the comments can edit comments'}, status=403)
 
         
@@ -127,6 +150,7 @@ def edit_comment(request: HttpRequest, comment_id: int) -> HttpResponse:
 
 
 @csrf_exempt
+@invalidate_user_cache()
 def delete_comment(request: HttpRequest, comment_id: int) -> HttpResponse:
     """
     Deletes a comment with the given comment_id if the request is made by the comment owner or an admin.
@@ -173,6 +197,7 @@ def delete_comment(request: HttpRequest, comment_id: int) -> HttpResponse:
     
 
 @csrf_exempt
+@invalidate_user_cache()
 def mark_comment_as_answer(request: HttpRequest, comment_id : int) -> HttpResponse:
     """
     Marks a comment as the answer to a question. Only owner of the question and admin can mark a comment as the answer.

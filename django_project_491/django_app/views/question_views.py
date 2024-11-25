@@ -1,5 +1,5 @@
-from ..models import Question, Comment, UserType, User, VoteType
-from django.db.models import Count
+from ..models import Question, Comment, UserType, User, VoteType,Question_Vote
+from django.db.models import Count, Q, F
 from django.http import HttpRequest, HttpResponse, JsonResponse
 import json
 from django.views.decorators.csrf import csrf_exempt
@@ -11,7 +11,31 @@ from ..Utils.utils import *
 from ..Utils.forms import *
 from ..ai_service.control_question_quality import QuestionQualityController
 from typing import List
+from concurrent.futures import ThreadPoolExecutor
+from django.core.cache import cache
+from functools import wraps
 
+def invalidate_user_cache(cache_key_prefix='feed_user'):
+    """
+    A decorator to invalidate the cache for a given user_id.
+    """
+    def decorator(func):
+        @wraps(func)
+        def wrapper(request, *args, **kwargs):
+            user_id = request.headers.get('User-ID')
+
+            if user_id:
+                # Invalidate the user's cache
+                cache_key = f"{cache_key_prefix}_{user_id}"
+                cache.delete(cache_key)
+
+            # Call the original function
+            response = func(request, *args, **kwargs)
+
+            return response
+
+        return wrapper
+    return decorator
 
 def get_question_details(request: HttpRequest, question_id: int) -> HttpResponse:
     """
@@ -116,6 +140,7 @@ def get_question_comments(request, question_id):
         return JsonResponse({'error': 'Question not found'}, status=404)
 
 @csrf_exempt  
+@invalidate_user_cache()
 def create_question(request: HttpRequest) -> HttpResponse:
     """
     Handle the creation of a new question.
@@ -214,9 +239,9 @@ def edit_question(request: HttpRequest, question_id: int) -> HttpResponse:
 
     try:
         question = Question.objects.get(_id=question_id)
-        question_owner_user_id = question.author.id
+        question_owner_user_id = question.author.user_id
 
-        if editor_user.id != question_owner_user_id and editor_user.userType != UserType.ADMIN:
+        if editor_user.user_id != question_owner_user_id and editor_user.userType != UserType.ADMIN:
             return JsonResponse({'error': 'Only admins and owner of the questions can edit questions'}, status=403)
 
         data = json.loads(request.body)
@@ -228,9 +253,12 @@ def edit_question(request: HttpRequest, question_id: int) -> HttpResponse:
         question.language_id = Lang2ID.get(language)
         question.details = data.get('details', question.details)
         question.code_snippet = data.get('code_snippet', question.code_snippet)
+        print(data.get('code_snippet'))
+        print(question.code_snippet)
         question.tags = data.get('tags', question.tags)
         question.save()
-
+        return JsonResponse({'success': 'Question edited successfully'}, status=200)
+        
     except Question.DoesNotExist:
         return JsonResponse({'error': 'Question not found'}, status=404)
 
@@ -242,6 +270,7 @@ def edit_question(request: HttpRequest, question_id: int) -> HttpResponse:
         return JsonResponse({'error': f'An error occurred: {str(e)}'}, status=500)
 
 @csrf_exempt
+@invalidate_user_cache()
 def delete_question(request: HttpRequest, question_id: int) -> HttpResponse:
     """
     Deletes a question based on the provided question ID.
@@ -286,6 +315,7 @@ def delete_question(request: HttpRequest, question_id: int) -> HttpResponse:
 
 
 @csrf_exempt
+@invalidate_user_cache()
 def mark_as_answered(request, question_id : int) -> HttpResponse:
     """
     Marks a question as answered.
@@ -313,7 +343,7 @@ def mark_as_answered(request, question_id : int) -> HttpResponse:
     author: User = question.author
     if author.user_id != request_user_id:
         return JsonResponse({'error': 'Only the owner of the question can mark it as answered'}, status=403)
-
+    
     question.mark_as_answered()
 
     return JsonResponse({'success': 'Question marked as answered successfully'}, status=200)
@@ -374,11 +404,12 @@ def list_questions_by_language(request, language: str, page_number = 1) -> HttpR
     questions_data = [{
         'id': question._id,
         'title': question.title,
-        'language': question.language,
+        'programmingLanguage': question.language,
         'tags': question.tags,
         'details': question.details,
         'code_snippet': question.code_snippet,
-        'likes': question.upvotes,
+        'upvotes': question.upvotes,
+        'author': question.author.username,
         'creationDate': question.created_at .strftime('%Y-%m-%d %H:%M:%S'),
     } for question in questions]
 
@@ -736,3 +767,124 @@ def fetch_random_reported_question(request: HttpRequest) -> HttpResponse:
     }
     
     return JsonResponse({'question': question_data}, safe=False)
+
+@csrf_exempt
+def fetch_all_at_once(request, user_id: int):
+    import time
+    time_start = time.time()
+    cache_key = f"feed_user_{user_id}"
+    
+    feed_data = cache.get(cache_key)
+    if feed_data:
+        return JsonResponse(feed_data, safe=False)
+
+    def get_questions_for_user(user_id):
+        user = get_user_model().objects.get(pk=user_id)
+        user_votes = Question_Vote.objects.filter(user_id=user_id).values('question_id', 'vote_type')
+        user_votes_dict = {vote['question_id']: vote['vote_type'] for vote in user_votes}
+        
+        questions = (
+            Question.objects.filter(
+                Q(language__in=user.known_languages) | Q(tags__overlap=user.interested_topics)
+            )
+            .distinct()[:10]
+        )
+
+        if len(questions) < 10:
+            general_questions = Question.objects.exclude(
+                pk__in=[q.pk for q in questions]
+            ).order_by('?')[:10 - len(questions)]
+            questions = list(questions) + list(general_questions)
+
+        return [
+            {
+                'id': q.pk,
+                'title': q.title,
+                'description': q.details,
+                'user_id': q.author.pk,
+                'likes': q.upvotes,
+                'comments_count': q.comments.count(),
+                'programmingLanguage': q.language,
+                'codeSnippet': q.code_snippet,
+                'tags': q.tags,
+                'answered': q.answered,
+                'topic': q.topic,
+                'is_upvoted': user_votes_dict.get(q.pk) == VoteType.UPVOTE.value,
+                'is_downvoted': user_votes_dict.get(q.pk) == VoteType.DOWNVOTE.value,
+            }
+            for q in questions
+        ]
+
+    def get_question_of_the_day():
+        today = timezone.now().date()
+        cache_key = f"question_of_the_day_{today}"
+
+        question_data = cache.get(cache_key)
+        if not question_data:
+            question = Question.objects.order_by('?').first()
+            if not question:
+                return {'error': 'No questions available'}
+
+            question_data = {
+                'id': question._id,
+                'title': question.title,
+                'description': question.details,
+                'user_id': question.author.pk,
+                'likes': question.upvotes,
+                'comments_count': question.comments.count(),
+                'programmingLanguage': question.language,
+                'codeSnippet': question.code_snippet,
+                'tags': question.tags,
+                'answered': question.answered,
+                'topic': question.topic,
+            }
+
+            seconds_until_midnight = (timezone.localtime().replace(hour=23, minute=59, second=59) - timezone.localtime()).seconds
+            cache.set(cache_key, question_data, timeout=seconds_until_midnight)
+
+        return question_data
+
+    def get_top_5_contributors():
+        contributors = (
+            User.objects.annotate(
+                question_points=Count('questions') * 2,
+                comment_points=Count('authored_comments', filter=Q(authored_comments__answer_of_the_question=False))
+                + Count('authored_comments', filter=Q(authored_comments__answer_of_the_question=True)) * 5,
+            )
+            .annotate(total_points=F('question_points') + F('comment_points'))
+            .order_by('-total_points')[:5]
+        )
+
+        return [
+            {
+                'username': user.username,
+                'email': user.email,
+                'name': user.name,
+                'surname': user.surname,
+                'contribution_points': user.total_points,
+            }
+            for user in contributors
+        ]
+
+    # Fetch the data concurrently
+    with ThreadPoolExecutor() as executor:
+        future_questions = executor.submit(get_questions_for_user, user_id)
+        future_question_of_the_day = executor.submit(get_question_of_the_day)
+        future_top_contributors = executor.submit(get_top_5_contributors)
+
+        questions = future_questions.result()
+        question_of_the_day = future_question_of_the_day.result()
+        top_contributors = future_top_contributors.result()
+
+    # Combine all data
+    feed_data = {
+        'personalized_questions': questions,
+        'question_of_the_day': question_of_the_day,
+        'top_contributors': top_contributors
+    }
+
+    # Cache the feed data for a specified amount of time
+    cache.set(cache_key, feed_data, timeout=3600)  # Cache for 1 hour (3600 seconds)
+
+    print(f"Time taken: {time.time() - time_start:.2f} seconds")
+    return JsonResponse(feed_data, safe=False)

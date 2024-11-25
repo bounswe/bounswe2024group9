@@ -9,6 +9,26 @@ from .Utils.utils import *
 # python manage.py makemigrations
 # python manage.py migrate
 
+def check_status(status):
+    status_list = [
+    "In Queue",
+    "Processing",
+    "Accepted",
+    "Wrong Answer",
+    "Time Limit Exceeded",
+    "Compilation Error",
+    "Runtime Error (SIGSEGV)",
+    "Runtime Error (SIGXFSZ)",
+    "Runtime Error (SIGFPE)",
+    "Runtime Error (SIGABRT)",
+    "Runtime Error (NZEC)",
+    "Runtime Error (Other)",
+    "Internal Error",
+    "Exec Format Error"
+    ]
+
+    return status_list[status["id"]-1]
+
 class UserType(Enum):
     ADMIN = "admin"
     USER = "user"
@@ -56,12 +76,16 @@ class Comment(models.Model):
     def run_snippet(self):
         result = run_code(self.code_snippet, self.language_id)
         if result['stderr']:
-            return result['stderr']
-        if result['stdout']  is None:
-            return "NO OUTPUT for STDOUT"
+            return [result['stderr']]
 
-        outs = result['stdout'].split('\n')
-        return outs
+        elif result['status']['id'] != 3 and result['status']['id'] != 4:
+            return [check_status(result['status'])]
+
+        elif result['stdout'] is None:
+            return ["NO OUTPUT for STDOUT"]
+
+        else:
+            return result['stdout'].split('\n')
 
     def save(self, *args, **kwargs):
         # Call the original save method
@@ -87,12 +111,16 @@ class Question(models.Model):
     def run_snippet(self): # TODO
         result = run_code(self.code_snippet, self.language_id)
         if result['stderr']:
-            return result['stderr']
-        if result['stdout']  is None:
-            return "NO OUTPUT for STDOUT";
+            return [result['stderr']]
 
-        outs = result['stdout'].split('\n')
-        return outs
+        elif result['status']['id'] != 3 and result['status']['id'] != 4:
+            return [check_status(result['status'])]
+
+        elif result['stdout'] is None:
+            return ["NO OUTPUT for STDOUT"]
+
+        else:
+            return result['stdout'].split('\n')
 
     def mark_as_answered(self,comment_id): # TODO
         self.answered = True

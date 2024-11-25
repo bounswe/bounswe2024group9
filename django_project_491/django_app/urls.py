@@ -24,6 +24,8 @@ urlpatterns = [
 
     path('get_top_five_contributors/', user_views.list_most_contributed_five_person, name='get_top_five_contributors'),
     
+    path('fetch_feed_at_once/<int:user_id>/', question_views.fetch_all_at_once, name='get_user_profile'),
+
     path('get_question/<int:question_id>/', question_views.get_question_details, name='get_question'),
     path('question/<int:question_id>/comments/', question_views.get_question_comments, name='get_question_comments'),
     path('create_question/', question_views.create_question, name='create_question'),

@@ -5,7 +5,7 @@ from django.shortcuts import render
 from django.http import  JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
-from ..models import Question, Comment, VoteType, Question_Vote, Comment_Vote
+from ..models import Question, Comment, VoteType, Question_Vote, Comment_Vote, check_status
 from urllib.parse import quote
 from django.contrib.contenttypes.models import ContentType
 
@@ -439,12 +439,18 @@ def post_sample_code(request):
     language_id = data.get('language_id', 71)  # Default to Python
 
     result = run_code(source_code, language_id)
+    print(result)
+    outs = []
+    if result['stderr']:
+        outs = [result['stderr']]
 
-    if result is None:
-        return JsonResponse({'error': 'Error running code'}, status=500)
+    elif result['status']['id'] != 3 and result['status']['id'] != 4:
+        outs = [check_status(result['status'])]
 
-    try:
-        result = run_code(source_code, language_id)
-        return JsonResponse(result)
-    except Exception as e:
-        return JsonResponse({'error': str(e)}, status=500)
+    elif result['stdout'] is None:
+        outs =  ["NO OUTPUT for STDOUT"]
+
+    else:
+        outs = result['stdout'].split('\n')
+    return JsonResponse({'output': outs, 'status': result['status']})
+
