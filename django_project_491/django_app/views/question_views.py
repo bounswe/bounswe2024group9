@@ -886,3 +886,25 @@ def fetch_all_at_once(request, user_id: int):
 
     print(f"Time taken: {time.time() - time_start:.2f} seconds")
     return JsonResponse(feed_data, safe=False)
+
+def get_all_questions(request):
+    questions = Question.objects.all()
+    questions_data = [{
+        'id': question._id,
+        'title': question.title,
+        'language': question.language,
+        'tags': question.tags,
+        'details': question.details,
+        'code_snippet': question.code_snippet,
+        'upvotes': question.upvotes,
+        'creationDate': question.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+        'author': question.author.username,
+        'comments_count': question.comments.count(),
+        'answered': question.answered,
+        'topic': question.topic,
+        'reported_by': [user.username for user in question.reported_by.all()],
+        'upvoted_by': [vote.user.username for vote in question.votes.filter(vote_type=VoteType.UPVOTE.value)],
+        'downvoted_by': [vote.user.username for vote in question.votes.filter(vote_type=VoteType.DOWNVOTE.value)]
+    } for question in questions]
+
+    return JsonResponse({'questions': questions_data}, safe=False)
