@@ -20,38 +20,9 @@ from io import BytesIO
 
 from .Utils.utils import run_code
 from .views.utilization_views import wiki_result, wiki_search
-from .models import User
+from .models import User, Comment, Question, Comment_Vote, Question_Vote, UserType, VoteType
 from django.urls import reverse
 from unittest.mock import patch, MagicMock
-
-# class TestRunCode(TestCase):
-#     # def setUp(self):
-#     #     # Create a sample user for testing
-#     #     self.user = User.objects.create_user(
-#     #         username='testuser',
-#     #         email="test",
-#     #         password='testpassword'
-#     #     )
-#     #
-#     # def test_run_code(self):
-#     #     # Test the run_code function with a simple Python code
-#     #     self.client.login(username='testuser', email='test', password='testpassword')
-#     #
-#     #     response = self.client.post('/run_code/', {
-#     #         'source_code': 'print("Hello, World!")',
-#     #         'language_name': 'Python (3.8.1)'})
-#     #
-#     #     self.assertEqual(response.status_code, 200)
-#     #     self.assertTrue('stdout' in response.json())
-#     #     self.assertTrue(response.json()['stdout'].startswith('Hello, World!'))
-#     #
-#     # def test_authentication(self):
-#     #     response = self.client.get('/run_code/', {
-#     #         'source_code': 'print("Hello, World!")',
-#     #         'language_name': 'Invalid Language Name'})
-#     #     self.assertEqual(response.status_code, 302)  # Redirect to login page
-#
-
 
 class TestSearchResult(TestCase):
     def setUp(self):
@@ -217,7 +188,7 @@ class UserWorkflowIntegrationTests(TestCase):
     def tearDown(self):
         # Clean up by deleting the test user
         self.user.delete()
-        
+
 class CommentModelTest(TestCase):
     def setUp(self):
         # Create a test user
