@@ -259,44 +259,52 @@ const Profile = () => {
                         <div className="profile-content">
                             {activeTab === 'questions' && (
                                 <div className="content-list">
-                                    {profileData.questions.map((q) => (
-                                        <PostPreview
-                                            key={q.id}
-                                            post={{
-                                                post_id: q.id,
-                                                title: q.title,
-                                                description: q.details,
-                                                programmingLanguage: q.language,
-                                                topic: q.tags?.join(', '),
-                                                tags: q.tags,
-                                                answered: q.answered,
-                                                likes: q.upvotes,
-                                                comments: q.comments?.length,
-                                            }}
-                                            onClick={() => navigate(`/question/${q.id}`)}
-                                        />
-                                    ))}
+                                    {profileData.questions.length > 0 ? (
+                                        profileData.questions.map((q) => (
+                                            <PostPreview
+                                                key={q.id}
+                                                post={{
+                                                    post_id: q.id,
+                                                    title: q.title,
+                                                    description: q.details,
+                                                    programmingLanguage: q.language,
+                                                    topic: q.tags?.join(', '),
+                                                    tags: q.tags,
+                                                    answered: q.answered,
+                                                    likes: q.upvotes,
+                                                    comments: q.comments?.length,
+                                                }}
+                                                onClick={() => navigate(`/question/${q.id}`)}
+                                            />
+                                        ))
+                                    ) : (
+                                        <p>You do not have any questions.</p>
+                                    )}
                                 </div>
                             )}
                             {activeTab === 'bookmarks' && (
                                 <div className="content-list">
-                                    {profileData.bookmarks.map((b) => (
-                                        <PostPreview
-                                            key={b.id}
-                                            post={{
-                                                post_id: b.id,
-                                                title: b.title,
-                                                description: b.details,
-                                                programmingLanguage: b.language,
-                                                topic: b.tags?.join(', '),
-                                                tags: b.tags, 
-                                                answered: b.answered,
-                                                likes: b.upvotes,
-                                                comments: b.comments?.length,
-                                            }}
-                                            onClick={() => navigate(`/question/${b.id}`)}
-                                        />
-                                    ))}
+                                    {profileData.bookmarks.length > 0 ? (
+                                        profileData.bookmarks.map((b) => (
+                                            <PostPreview
+                                                key={b.id}
+                                                post={{
+                                                    post_id: b.id,
+                                                    title: b.title,
+                                                    description: b.details,
+                                                    programmingLanguage: b.language,
+                                                    topic: b.tags?.join(', '),
+                                                    tags: b.tags, 
+                                                    answered: b.answered,
+                                                    likes: b.upvotes,
+                                                    comments: b.comments?.length,
+                                                }}
+                                                onClick={() => navigate(`/question/${b.id}`)}
+                                            />
+                                        ))
+                                    ) : (
+                                        <p>You do not have any bookmarks.</p>
+                                    )}
                                 </div>
                             )}
                         </div>
