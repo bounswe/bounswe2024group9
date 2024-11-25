@@ -245,6 +245,10 @@ const fetchSearchResults = async (query) => {
       });
 
       if (response.ok) {
+        // Update the state to remove the deleted annotation
+        setAnnotationData((prevAnnotations) =>
+          prevAnnotations.filter((annotation) => annotation.annotation_id !== annotationId)
+        );
         alert('Annotation deleted successfully.');
         // Optional: Trigger a re-fetch of annotations or update state to reflect the deletion
       } else {

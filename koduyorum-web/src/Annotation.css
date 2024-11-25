@@ -1,9 +1,13 @@
 .annotation {
     position: relative;
     cursor: pointer;
-    font-style: italic;
-    color: darkcyan; /* Example: Tomato color */
-  }
+    font-style: italic; /* Italicize the text to differentiate it from the rest */
+    background-color: cyan; /* Light yellow background for highlight effect */
+    padding: 2px; /* Add padding for better appearance */
+    border-radius: 2px; /* Slightly round the edges to mimic a marker stroke */
+    display: inline-block; /* Keep it inline while allowing styling */
+    color: black; /* Ensure the text is readable */
+}
   
   .annotation-tooltip {
     position: absolute;
@@ -11,10 +15,10 @@
     left: 20%;
     background-color: rgba(0, 0, 0, 0.7);
     color: white;
-    padding: 5px;
+    padding: 10px; /* Comfortable padding */
     border-radius: 3px;
     font-size: 12px;
-    max-width: 200px;
+    max-width: 300px; /* Limit width to prevent overflowing */
     white-space: nowrap;
     z-index: 10;
     opacity: 0;
