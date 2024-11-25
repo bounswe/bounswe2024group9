@@ -49,7 +49,7 @@ const App = () => {
           options={{ headerShown: false, gestureEnabled: false }}
         />
         <Stack.Screen 
-          name="LabelDetails" 
+          name="LabelDetailsScreen" 
           component={LabelDetailsScreen}
           options={{ headerShown: false, gestureEnabled: false }}
         />

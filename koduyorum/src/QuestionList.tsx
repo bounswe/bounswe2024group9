@@ -163,8 +163,13 @@ const QuestionList = () => {
     };
 
     const renderFeedItem = ({ item }: any) => (
-        <QuestionCard post={item} currentUser={user_id} onPress={() => handlePostPress(item)} />
+        <QuestionCard
+            post={item}
+            currentUser={{ id: user_id, username }} // Pass both id and username
+            onPress={() => handlePostPress(item)}
+        />
     );
+    
 
     const renderSearchResult = ({ item }: any) => (
         <TouchableOpacity style={styles.resultItem} onPress={() => handlePostPress(item)}>
@@ -174,6 +179,7 @@ const QuestionList = () => {
             </Text>
         </TouchableOpacity>
     );
+    
 
     return (
         <View style={styles.container}>

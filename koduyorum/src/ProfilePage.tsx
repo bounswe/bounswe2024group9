@@ -79,7 +79,7 @@ const ProfilePage = ({ route }) => {
                         data={profile.questions}
                         keyExtractor={(item) => item.id.toString()}
                         renderItem={({ item }) => (
-                            <QuestionCard
+                        <QuestionCard
                             post={{
                                 id: item.id,
                                 title: item.title,
@@ -89,11 +89,14 @@ const ProfilePage = ({ route }) => {
                                 programmingLanguage: item.language,
                                 tags: item.tags,
                                 answered: item.answered,
-                                codeSnippet: item.code_snippet
+                                codeSnippet: item.code_snippet,
+                                upvoted_by: item.upvoted_by,
+                                downvoted_by: item.downvoted_by,
                             }}
-                                currentUser={user_id}
-                                onPress={handlePostPress}
-                            />
+                            currentUser={{ id: user_id, username: profile.username }} // Pass both id and username
+                            onPress={handlePostPress}
+                        />
+
                         )}
                     />
 

@@ -639,7 +639,9 @@ def list_questions_according_to_the_user(request, user_id: int):
         'tags': question.tags,
         'answered': question.answered,
         'topic': question.topic,
-        'author': question.author.username
+        'author': question.author.username,
+        'upvoted_by': [vote.user.username for vote in question.votes.filter(vote_type=VoteType.UPVOTE.value)],
+        'downvoted_by': [vote.user.username for vote in question.votes.filter(vote_type=VoteType.DOWNVOTE.value)],
     } for question in personalized_questions]
     return JsonResponse({'questions': questions_data}, safe=False)
 
