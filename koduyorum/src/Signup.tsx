@@ -41,11 +41,8 @@ const Signup = ({ navigation }: Props) => {
   
         const json = await response.json();
         if (response.ok) {
-          Alert.alert('User saved successfully!');
-          
           setTimeout(() => {
-            // Navigate to the QuestionList screen with both username and user_id
-            navigation.navigate('QuestionList', { username: json.username, user_id: json.user_id });
+            navigation.navigate('InterestPage', { user_id: json.user_id,  username: username});
           }, 2000);
         } else {
           Alert.alert(json.error || 'Failed to save user.');

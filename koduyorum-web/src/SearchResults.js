@@ -4,6 +4,8 @@ import { Navbar, LeftSidebar, RightSidebar } from './PageComponents';
 import { LoadingComponent }  from './LoadingPage'
 import { fetchWikiIdAndName } from './Feed'; 
 import './SearchResults.css';
+import CreateAnnotation from './CreateAnnotation';
+import './Annotation.css'
 import PostPreview from "./PostPreview";
 
 const SearchResults = () => {
@@ -18,6 +20,15 @@ const SearchResults = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [posts, setPosts] = useState([]);
   const searchDisplayRef = useRef(null);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedText, setSelectedText] = useState('');
+  const [startIndex, setStartIndex] = useState(null);
+  const [endIndex, setEndIndex] = useState(null);
+  const [annotationData, setAnnotationData] = useState([]);
+  const [modalPosition, setModalPosition] = useState({ top: 0, left: 0 });
+  const [languageId, setLanguageId] = useState(null);
+  const [annotationId, setAnnotationId] = useState(null);
+
 
   const { wiki_id, wiki_name} = useParams(); // Get wiki_id from the URL
   const navigate = useNavigate();
@@ -148,6 +159,7 @@ const fetchSearchResults = async (query) => {
 
       const infoResponse = await fetch(`${process.env.REACT_APP_API_URL}/result/${encodeURIComponent(wikiId)}`);
       const questionResponse = await fetch(`${process.env.REACT_APP_API_URL}/list_questions_by_language/${encodeURIComponent(wikiName)}/1`);
+      const annotationResponse = await fetch(`${process.env.REACT_APP_API_URL}/get_annotations_by_language_id/${wikiId.slice(1)}/`);
 
       if (!infoResponse.ok || !questionResponse.ok) {
         throw new Error('Failed to load data');
@@ -155,15 +167,137 @@ const fetchSearchResults = async (query) => {
 
       const infoData = await infoResponse.json();
       const questionData = await questionResponse.json();      
+      const annotationData = await annotationResponse.json();
       const questionsArray = questionData.questions;
       setInfoData(infoData || { mainInfo: [], instances: [], wikipedia: {} });
       setQuestionData(questionsArray || []);
+      setAnnotationData(annotationData.data || []);
     } catch (err) {
       console.error("Error fetching search data:", err);
       setError("Failed to load search data.");
     } finally {
       setLoading(false);
     }
+  };
+
+  const addAnnotations = (text, annotations) => {
+    let annotatedText = [];
+    let lastIndex = 0;
+  
+    annotations.forEach((annotation) => {
+      const { annotation_starting_point, annotation_ending_point, text: annotationText , annotation_id: annotationId} = annotation;
+      // Add text before the annotation
+      if (lastIndex < annotation_starting_point) {
+        annotatedText.push(text.slice(lastIndex, annotation_starting_point));
+      }
+  
+      // Add annotated text with tooltip
+      annotatedText.push(
+        <span className="annotation" key={annotation_starting_point}>
+          <em>{text.slice(annotation_starting_point, annotation_ending_point)}</em>
+          <div className="annotation-tooltip">
+            {annotationText}  {/* This will show the annotation text */}
+            <button
+              className="edit-icon"
+              onClick={() => handleEditAnnotation(annotationId, annotation_starting_point, annotation_ending_point)} // Call edit handler
+            >
+              ✏️
+            </button>
+            <button
+              className="delete-icon"
+              onClick={() => handleDeleteAnnotation(annotationId)} // Replace annotationId with the actual ID
+            >
+              🗑️
+            </button>
+          </div>
+        </span>
+      );
+  
+      // Update the lastIndex to the end of the annotation
+      lastIndex = annotation_ending_point;
+    });
+  
+    // Add the remaining text after the last annotation
+    if (lastIndex < text.length) {
+      annotatedText.push(text.slice(lastIndex));
+    }
+  
+    return annotatedText;
+  };  
+
+  const handleEditAnnotation = async (annotationId, startOffset, endOffset) => {
+      // Fetch annotation data by ID
+      setStartIndex(startOffset);
+      setEndIndex(endOffset);
+      setModalVisible(true);
+      setAnnotationId(annotationId);
+  };
+
+  const handleDeleteAnnotation = async (annotationId) => {
+    try {
+      const userId = localStorage.getItem('user_id');
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/delete_annotation/${annotationId}/`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'User-ID': userId,
+        },
+      });
+
+      if (response.ok) {
+        alert('Annotation deleted successfully.');
+        // Optional: Trigger a re-fetch of annotations or update state to reflect the deletion
+      } else {
+        const errorData = await response.json();
+        console.error('Error deleting annotation:', errorData);
+        alert('Failed to delete annotation.');
+      }
+    } catch (error) {
+      console.error('Error during annotation deletion:', error);
+      alert('An unexpected error occurred.');
+    }
+  };
+  
+
+  const handleTextSelection = (e) => {
+    const selection = window.getSelection();
+    if (selection && selection.rangeCount > 0 && selection.toString().trim() !== '') {
+      const range = selection.getRangeAt(0); // Get the selected range
+  
+      const startOffset = range.startOffset; // Start of the selection in the container
+      const endOffset = range.endOffset; // End of the selection in the container
+  
+      const mouseX = e.clientX;
+      const mouseY = e.clientY;
+
+      setSelectedText(selection.toString());
+      setStartIndex(startOffset);
+      setEndIndex(endOffset);
+      setModalVisible(true);
+      setModalPosition({ top: mouseY, left: mouseX });
+    } else {
+      console.log('No text selected.');
+    }
+  };
+
+  const renderAnnotatedText = (textData) => {
+    const { text, annotation, start, end } = textData;
+  
+    // Split the text into parts (before annotation, annotation, and after annotation)
+    const beforeAnnotation = text.slice(0, start);
+    const annotatedPart = text.slice(start, end);
+    const afterAnnotation = text.slice(end);
+  
+    // Return JSX elements with annotations applied
+    return (
+      <>
+        {beforeAnnotation}
+        <span className="annotation" title={annotation}>
+          <em>{annotatedPart}</em>
+        </span>
+        {afterAnnotation}
+      </>
+    );
   };
 
   return (
@@ -215,6 +349,19 @@ const fetchSearchResults = async (query) => {
           </button>
       </div>
           {activeTab === 'info' ? (
+            <div>
+              <CreateAnnotation
+                visible={modalVisible}
+                selectedText={selectedText}
+                startIndex={startIndex}
+                endIndex={endIndex}
+                language_id={wiki_id}
+                annotationId={annotationId}
+                onClose={() => setModalVisible(false)}
+              />
+            <div className="info-box" onMouseUp={(e) => handleTextSelection(e)}>
+              
+              <h2 className="language-title">{wiki_name}</h2>
             <div className="info-box">
               <h2  style={{paddingBottom: '0.5rem', borderBottom: '1px solid #ccc' }}className="language-title">{wiki_name}</h2>
               {infoData.mainInfo.length > 0 && (
@@ -275,10 +422,11 @@ const fetchSearchResults = async (query) => {
               )}
               {infoData.wikipedia && (
                 <div>
-                  <p>{infoData.wikipedia.info}</p>
+                {addAnnotations(infoData.wikipedia.info, annotationData)}
                 </div>
               )}
             </div>
+
           ) : (
             <div className="questions-list">
               <h2 style={{ marginBottom: '1rem', paddingBottom: '0.5rem', borderBottom: '1px solid #ccc', fontSize: '1.5rem' }}>{questionData.length} Questions</h2>
@@ -296,6 +444,7 @@ const fetchSearchResults = async (query) => {
         <RightSidebar />
       </div>
     </div>
+    
     )}
   </div>
   );
