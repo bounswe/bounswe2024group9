@@ -144,7 +144,7 @@ function PostQuestion() {
                 onChange={(selectedOptions) => setTags(selectedOptions.map(option => option.value))}
                 placeholder="Select Tags"
             />
-            <button className="post-question-submit" onClick={handleSubmit}>
+            <button className="post-question-submit" style={{ marginTop: '20px' }} onClick={handleSubmit}>
                 Submit Question
             </button>
         </div>
