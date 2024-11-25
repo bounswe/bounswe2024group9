@@ -38,7 +38,7 @@ urlpatterns = [
     path('get_random_reported_question/', question_views.fetch_random_reported_question, name='ger_random_reported_question'),
     path('gel_all_questions/', question_views.get_all_questions, name='get_all_questions'),
 
-
+    path('list_questions_by_time/', question_views.list_questions_by_time, name='list_questions'),
     path('list_questions_by_language/<str:language>/<int:page_number>', question_views.list_questions_by_language, name='list_questions'),
     path('list_questions_by_tags/<str:tags>/<int:page_number>/', question_views.list_questions_by_tags, name='list_questions_by_tags'),
     path('list_questions_by_hotness/<int:page_number>', question_views.list_questions_by_hotness, name='get_question_comments'),
