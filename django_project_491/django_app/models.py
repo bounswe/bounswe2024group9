@@ -132,6 +132,18 @@ class Question(models.Model):
         # Check and promote user after saving the question
         self.author.check_and_promote()
 
+    def get_topic_info(self):
+            if self.topic:
+                try:
+                    topic_obj = Topic.objects.get(name__iexact=self.topic)
+                    return {
+                        'label': topic_obj.name,
+                        'url': topic_obj.related_url,
+                    }
+                except Topic.DoesNotExist:
+                    return {'label': self.topic, 'url': None}
+            return {'label': None, 'url': None}
+
 
 class UserManager(BaseUserManager):
     def create_user(self, username, email, password=None, userType: UserType = UserType.USER):
@@ -260,3 +272,23 @@ class User(AbstractBaseUser):
             self.save()
         
         return self.userType
+    
+class Topic(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    related_url = models.URLField()
+
+    def __str__(self):
+        return self.name
+
+    @staticmethod
+    def get_all_topics():
+        return Topic.objects.all()
+
+    @staticmethod
+    def get_url_for_topic(topic_name):
+        try:
+            topic = Topic.objects.get(name__iexact=topic_name)
+            return topic.related_url
+        except Topic.DoesNotExist:
+            return None
+

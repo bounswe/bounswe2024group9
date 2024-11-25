@@ -1,4 +1,5 @@
-from ..models import Question, Comment, UserType, User, VoteType,Question_Vote
+
+from ..models import Question, Comment, UserType, User, VoteType, Question_Vote, Topic
 from django.db.models import Count, Q, F
 from django.http import HttpRequest, HttpResponse, JsonResponse
 import json
@@ -908,3 +909,27 @@ def get_all_questions(request):
     } for question in questions]
 
     return JsonResponse({'questions': questions_data}, safe=False)
+    
+def get_topic_url(request, topic_name: str):
+    related_url = Topic.get_url_for_topic(topic_name)
+    if related_url:
+        return JsonResponse({'topic': topic_name, 'url': related_url}, status=200)
+    return JsonResponse({'error': f'Topic "{topic_name}" not found'}, status=404)
+
+
+def list_all_topics(request):
+    topics = Topic.get_all_topics()
+    topics_data = [{'name': topic.name, 'url': topic.related_url} for topic in topics]
+    return JsonResponse({'topics': topics_data}, status=200)
+
+
+def fetch_question_label_info(request, question_id: int):
+    try:
+        question = Question.objects.get(_id=question_id)
+        tags_info = question.tags
+        return JsonResponse({
+            'question_id': question_id,
+            'tags': tags_info
+        }, status=200)
+    except Question.DoesNotExist:
+        return JsonResponse({'error': 'Question not found'}, status=404)

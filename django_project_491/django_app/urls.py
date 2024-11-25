@@ -64,4 +64,10 @@ urlpatterns = [
     path('specific_feed/<int:user_id>/', question_views.list_questions_according_to_the_user, name='specific_feed'),
     path('question_of_the_day/', question_views.question_of_the_day, name='question_of_the_day'),
     path('daily_question/', question_views.question_of_the_day, name='wiki_search'),
+
+    # Static label related functions
+    path('questions/<int:question_id>/label-info/', question_views.fetch_question_label_info, name='fetch_question_label'),
+    path('questions/<int:question_id>/topic/', question_views.get_topic_url, name='get_topic_url'),
+    path('topics/', question_views.list_all_topics, name='list_all_topics'),
+
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
