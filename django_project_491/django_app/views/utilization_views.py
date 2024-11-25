@@ -288,9 +288,9 @@ def upvote_object(request, object_type: str, object_id: int):
                 # Change existing downvote to upvote 
                 existing_vote.vote_type = VoteType.UPVOTE.value
                 existing_vote.save()
-                question.upvotes += 1
+                question.upvotes += 2
                 question.save()
-                return JsonResponse({'success': 'Changed downvote to upvote'}, status=200)
+                return JsonResponse({'success': question.upvotes}, status=200)
 
         # Create a new upvote
         Question_Vote.objects.create(
@@ -300,7 +300,7 @@ def upvote_object(request, object_type: str, object_id: int):
         )
         question.upvotes += 1
         question.save()
-        return JsonResponse({'success': 'Question upvoted successfully'}, status=200)
+        return JsonResponse({'success': question.upvotes}, status=200)
 
     elif object_type == 'comment':
         try:
@@ -319,7 +319,7 @@ def upvote_object(request, object_type: str, object_id: int):
                 existing_vote.save()
                 comment.upvotes += 2 # One for resetting the vote and one for the upvote
                 comment.save()
-                return JsonResponse({'success': 'Changed downvote to upvote'}, status=200)
+                return JsonResponse({'success': comment.upvotes}, status=200)
 
         # Create a new upvote
         Comment_Vote.objects.create(
@@ -329,7 +329,7 @@ def upvote_object(request, object_type: str, object_id: int):
         )
         comment.upvotes += 1
         comment.save()
-        return JsonResponse({'success': 'Comment upvoted successfully'}, status=200)
+        return JsonResponse({'success': comment.upvotes}, status=200)
 
     else:
         return JsonResponse({'error': 'Invalid object type'}, status=400)
@@ -378,9 +378,9 @@ def downvote_object(request, object_type: str, object_id: int):
                 # Change existing upvote to downvote
                 existing_vote.vote_type = VoteType.DOWNVOTE.value
                 existing_vote.save()
-                question.upvotes -= 1
+                question.upvotes -= 2
                 question.save()
-                return JsonResponse({'success': 'Changed upvote to downvote'}, status=200)
+                return JsonResponse({'success': question.upvotes}, status=200)
 
         # Create a new downvote
         Question_Vote.objects.create(
@@ -390,7 +390,7 @@ def downvote_object(request, object_type: str, object_id: int):
         )
         question.upvotes -= 1
         question.save()
-        return JsonResponse({'success': 'Question downvoted successfully'}, status=200)
+        return JsonResponse({'success': question.upvotes}, status=200)
 
     elif object_type == 'comment':
         try:
@@ -407,9 +407,9 @@ def downvote_object(request, object_type: str, object_id: int):
                 # Change existing upvote to downvote
                 existing_vote.vote_type = VoteType.DOWNVOTE.value
                 existing_vote.save()
-                comment.upvotes -= 1
+                comment.upvotes -= 2
                 comment.save()
-                return JsonResponse({'success': 'Changed upvote to downvote'}, status=200)
+                return JsonResponse({'success': comment.upvotes}, status=200)
 
         # Create a new downvote
         Comment_Vote.objects.create(
@@ -419,7 +419,7 @@ def downvote_object(request, object_type: str, object_id: int):
         )
         comment.upvotes -= 1
         comment.save()
-        return JsonResponse({'success': 'Comment downvoted successfully'}, status=200)
+        return JsonResponse({'success': comment.upvotes}, status=200)
 
     else:
         return JsonResponse({'error': 'Invalid object type'}, status=400)
