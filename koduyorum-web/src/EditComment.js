@@ -57,14 +57,14 @@ function EditComment(props) {
             });
 
             if (response.ok) {
-                alert('Comment created successfully!');
+                alert('Comment edited successfully!');
                 props.fetchComments();
             } else {
                 const data = await response.json();
-                alert(data.error || 'Failed to create comment');
+                alert(data.error || 'Failed to edit comment');
             }
         } catch (error) {
-            alert('Failed to create comment');
+            alert('Failed to edit comment');
             console.error('Error:', error);
         } finally {
             props.closePopup()

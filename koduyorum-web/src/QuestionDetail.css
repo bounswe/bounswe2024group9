@@ -150,6 +150,6 @@
     transition: transform 0.2s ease-in-out;
 }
 
-.username:hover {
+.question-username:hover {
     transform: scale(1.1); /* Slightly grow when hovered */
 }

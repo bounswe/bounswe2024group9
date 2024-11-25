@@ -12,6 +12,7 @@ function QuestionDetail(props) {
 
     const [votes, setVotes] = useState(props.initialVotes);
     const isOwner = localStorage.getItem("username") === props.author;
+    const [author] = useState(props.author);
     const navigate = useNavigate();
 
     const [isAnswered, setAnswered] = useState(props.isAnswered);
@@ -21,6 +22,8 @@ function QuestionDetail(props) {
   const openPopup = () => setIsPopupVisible(true);
   const closePopup = () => setIsPopupVisible(false);
   const popupRef = useRef(null);
+
+  const redirectToProfile = () => navigate(`/profile/${author}`);
 
   useEffect(() => {
     const handleClickOutside = event => {
@@ -200,7 +203,7 @@ function QuestionDetail(props) {
                                 </div>
                             )}
                         </div>
-                        <p className="question-username ">@{props.author}</p>
+                        <button className="question-username" onClick = {redirectToProfile}>@{props.author}</button>
                     </div>
 
                 </>

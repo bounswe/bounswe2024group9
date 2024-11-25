@@ -22,6 +22,8 @@ function Comment(props) {
   const closePopup = () => setIsPopupVisible(false);
   const popupRef = useRef(null);
 
+  const redirectToProfile = () => navigate(`/profile/${props.author}`);
+  
   // Vote handlers
   const handleCommentUpvote = async () => {
     const token = localStorage.getItem('authToken');
@@ -167,7 +169,7 @@ function Comment(props) {
             </button>
           )}
         </div>
-        <p className="question-username">@{props.author}</p>
+        <p className="question-username" onClick={redirectToProfile}>@{props.author}</p>
       </div>
       {isPopupVisible && (
         <div className="popup" >
