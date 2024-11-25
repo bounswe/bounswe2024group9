@@ -318,5 +318,3 @@ class Topic(models.Model):
             return topic.related_url
         except Topic.DoesNotExist:
             return None
-            
-            

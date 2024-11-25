@@ -8,6 +8,7 @@
     display: inline-block; /* Keep it inline while allowing styling */
     color: black; /* Ensure the text is readable */
 }
+
   
   .annotation-tooltip {
     position: absolute;

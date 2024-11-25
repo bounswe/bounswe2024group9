@@ -7,6 +7,10 @@ import QuestionList from './src/QuestionList.tsx';
 import PostDetail from './src/PostDetail';
 import WikiResultDetail from './src/WikiResultDetail';
 import CreateQuestion from './src/CreateQuestion'; 
+import LabelDetailsScreen from './src/LabelDetailScreen.tsx';
+import InterestPage from './src/InterestPage.tsx';
+import ProfilePage from './src/ProfilePage.tsx';
+import TopContributorsPage from './src/TopContributorsPage.tsx';
 
 const Stack = createStackNavigator();
 
@@ -17,34 +21,53 @@ const App = () => {
         <Stack.Screen
             name="Login"
             component={Login}
-            options={{ headerShown: false }}
+            options={{ headerShown: false, gestureEnabled: false }}
         />
         <Stack.Screen
             name="Signup" 
             component={Signup}
-            options={{ headerShown: false }}
+            options={{ headerShown: false, gestureEnabled: false }}
         />
         <Stack.Screen
             name="QuestionList" 
             component={QuestionList}
-            options={{ headerShown: false }}
+            options={{ headerShown: false, gestureEnabled: false }}
         />
         <Stack.Screen 
           name="PostDetail" 
           component={PostDetail} 
-          options={{ headerShown: false }}
+          options={{ headerShown: false, gestureEnabled: false }}
         />
         <Stack.Screen 
           name="WikiResultDetail" 
           component={WikiResultDetail} 
-          options={{ headerShown: false }}
+          options={{ headerShown: false , gestureEnabled: false}}
         />
         <Stack.Screen 
           name="CreateQuestion" 
           component={CreateQuestion} 
-          options={{ headerShown: false }}
+          options={{ headerShown: false, gestureEnabled: false }}
         />
-
+        <Stack.Screen 
+          name="LabelDetailsScreen" 
+          component={LabelDetailsScreen}
+          options={{ headerShown: false, gestureEnabled: false }}
+        />
+        <Stack.Screen 
+          name="InterestPage" 
+          component={InterestPage}
+          options={{ headerShown: false, gestureEnabled: false }}
+        />
+        <Stack.Screen 
+          name="ProfilePage" 
+          component={ProfilePage}
+          options={{ headerShown: false, gestureEnabled: false }}
+        />
+        <Stack.Screen 
+          name="TopContributors" 
+          component={TopContributorsPage}
+          options={{ headerShown: false, gestureEnabled: false }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );

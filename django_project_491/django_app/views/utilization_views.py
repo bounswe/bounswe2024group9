@@ -335,7 +335,7 @@ def upvote_object(request, object_type: str, object_id: int):
         return JsonResponse({'error': 'Invalid object type'}, status=400)
 
 
-
+@csrf_exempt
 def downvote_object(request, object_type: str, object_id: int):
     """
     Handles the downvoting of an object (question or comment) by a user.

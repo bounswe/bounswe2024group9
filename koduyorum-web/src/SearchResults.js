@@ -196,11 +196,11 @@ const fetchSearchResults = async (query) => {
       const { annotation_starting_point, annotation_ending_point, text: annotationText , annotation_id: annotationId} = annotation;
 
       console.log("Processing annotation:", annotation);
-      // Add text before the annotation
+      
       if (lastIndex < annotation_starting_point) {
         annotatedText.push(text.slice(lastIndex, annotation_starting_point));
       }
-  
+      
       // Add annotated text with tooltip
       annotatedText.push(
         <span className="annotation" key={annotation_starting_point}>
@@ -304,7 +304,10 @@ const fetchSearchResults = async (query) => {
       console.log('No text selected.');
     }
   };
+  
 
+
+  
   const renderAnnotatedText = (textData) => {
     const { text, annotation, start, end } = textData;
   
@@ -348,6 +351,7 @@ const fetchSearchResults = async (query) => {
             <LeftSidebar handleTagClick={handleTagClick} />
 
             <div className="info-container">
+ 
               <div className="tab-navigation">
                 <button
                   className={`tab-button ${activeTab === 'info' ? 'active-tab' : ''}`}
@@ -362,7 +366,6 @@ const fetchSearchResults = async (query) => {
                   Questions
                 </button>
               </div>
-
               {activeTab === 'info' ? (
                 <div>
                   <CreateAnnotation
