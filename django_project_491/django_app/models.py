@@ -101,10 +101,8 @@ class Question(models.Model):
     tags = models.JSONField(blank=True, default=list)  # Example: ['tag1', 'tag2']
     details = models.TextField()
     code_snippet = models.TextField()
-
     upvotes = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
-    topic = models.CharField(max_length=100, blank=True)
     answered = models.BooleanField(default=False)
     reported_by = models.ManyToManyField('User', related_name='reported_questions', blank=True)
 
@@ -137,6 +135,17 @@ class Question(models.Model):
         # Check and promote user after saving the question
         self.author.check_and_promote()
 
+    def get_topic_info(self):
+            if self.topic:
+                try:
+                    topic_obj = Topic.objects.get(name__iexact=self.topic)
+                    return {
+                        'label': topic_obj.name,
+                        'url': topic_obj.related_url,
+                    }
+                except Topic.DoesNotExist:
+                    return {'label': self.topic, 'url': None}
+            return {'label': None, 'url': None}
 
 
 class UserManager(BaseUserManager):
@@ -266,3 +275,48 @@ class User(AbstractBaseUser):
             self.save()
         
         return self.userType
+    
+class Topic(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    related_url = models.URLField()
+
+    def __str__(self):
+        return self.name
+
+    @staticmethod
+    def get_all_topics():
+        return Topic.objects.all()
+
+    @staticmethod
+    def get_url_for_topic(topic_name):
+        try:
+            topic = Topic.objects.get(name__iexact=topic_name)
+            return topic.related_url
+        except Topic.DoesNotExist:
+            return None
+
+
+class Annotation(models.Model):
+    _id = models.AutoField(primary_key=True)
+    text = models.TextField()
+    language_qid = models.IntegerField(default=0)  # QID of the question example : Q24582
+    annotation_starting_point = models.IntegerField(default=0) 
+    annotation_ending_point = models.IntegerField(default=0)
+    annotation_date = models.DateTimeField(auto_now_add=True)
+    author = models.ForeignKey('User', on_delete=models.CASCADE, related_name='annotations')
+    parent_annotation = models.ForeignKey(
+        'self',
+        on_delete=models.CASCADE,
+        related_name='child_annotations',
+        null=True,
+        blank=True
+    )
+
+    def __str__(self):
+        return self.text
+
+    def __repr__(self):
+        return self.text
+
+    def __unicode__(self):
+        return self.text

@@ -18,7 +18,7 @@ function PostComment(props) {
             try {
                 const response = await fetch(`${process.env.REACT_APP_API_URL}/get_api_languages/`);
                 const data = await response.json();
-                
+
                 if (data && Array.isArray(data.languages)) {
                     setAvailableLanguages(data.languages);
                 } else if (data && typeof data.languages === 'object') {
@@ -43,7 +43,7 @@ function PostComment(props) {
 
         const postData = {
             'language': language,
-            'details' : details,
+            'details': details,
             'code_snippet': codeSnippet
         };
 
@@ -51,16 +51,16 @@ function PostComment(props) {
             const user_id = localStorage.getItem('user_id');
             const response = await fetch(`${process.env.REACT_APP_API_URL}/create_comment/${props.question_id}`, {
                 method: 'POST',
-                headers: { 
+                headers: {
                     'Content-Type': 'application/json',
-                    'user-id':user_id
+                    'user-id': user_id
                 },
                 body: JSON.stringify(postData),
             });
 
             if (response.ok) {
                 alert('Comment created successfully!');
-                navigate('question/'+ props.question_id);
+                props.fetchComments();
             } else {
                 const data = await response.json();
                 alert(data.error || 'Failed to create comment');
@@ -68,15 +68,15 @@ function PostComment(props) {
         } catch (error) {
             alert('Failed to create comment');
             console.error('Error:', error);
+        } finally {
+            props.closePopup()
         }
     };
 
     return (
-        <div className="post-comment-container">
+
+        <div>
             <h2>Create New Comment</h2>
-
-            
-
             <div className="post-comment-language">
                 <label>Select Language:</label>
                 <select
