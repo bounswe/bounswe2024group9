@@ -33,9 +33,11 @@ const WikiResultDetail = ({ route }) => {
     const fetchAnnotations = async () => {
         try {
             const languageId = mainInfo.language.value.split('/').pop().replace('Q', '');
-            const response = await fetch(`http://10.0.2.2:8000/get_annotations_by_language_id/${languageId}/`);
+            const response = await fetch(
+                `http://10.0.2.2:8000/get_annotations_by_language/${languageId}/`
+            );
             const data = await response.json();
-
+    
             if (response.ok) {
                 setAnnotations(data.data || []);
             } else {
@@ -46,14 +48,34 @@ const WikiResultDetail = ({ route }) => {
             Alert.alert('Error', 'Failed to fetch annotations.');
         }
     };
+    
 
+    const fetchRepliesForAnnotation = async (annotationId) => {
+        try {
+            const response = await fetch(`http://10.0.2.2:8000/get_replies/${annotationId}/`);
+            const data = await response.json();
+    
+            if (response.ok) {
+                return data.replies || [];
+            } else {
+                Alert.alert('Error', data.error || 'Failed to fetch replies.');
+                return [];
+            }
+        } catch (error) {
+            console.error('Error fetching replies:', error);
+            Alert.alert('Error', 'Failed to fetch replies.');
+            return [];
+        }
+    };
+
+    
     const handleWordPress = (index) => {
         const clickedAnnotation = annotations.find(
             (annotation) =>
                 index >= annotation.annotation_starting_point &&
                 index <= annotation.annotation_ending_point
         );
-
+    
         if (clickedAnnotation) {
             setSelectedAnnotation(clickedAnnotation);
             setReplyModalVisible(true);
@@ -69,6 +91,8 @@ const WikiResultDetail = ({ route }) => {
             }
         }
     };
+    
+    
 
     const handleAddAnnotation = async () => {
         if (startIndex === null || endIndex === null || !annotationText.trim()) {
@@ -119,29 +143,29 @@ const WikiResultDetail = ({ route }) => {
         }
     };
 
-    const handleReplyToAnnotation = async () => {
+    const handleReplyToAnnotation = async (parentId) => {
         if (!replyText.trim()) {
             Alert.alert('Error', 'Reply cannot be empty.');
             return;
         }
-
+    
         try {
             const replyData = {
-                parent_id: selectedAnnotation.annotation_id,
+                parent_id: parentId,
                 text: replyText,
                 language_qid: mainInfo.language.value.split('/').pop().replace('Q', ''),
                 type: 'annotation_child',
             };
-
+    
             const response = await fetch('http://10.0.2.2:8000/create_annotation/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'User-ID': user_id
+                    'User-ID': user_id,
                 },
                 body: JSON.stringify(replyData),
             });
-
+    
             if (response.status === 201) {
                 Alert.alert('Success', 'Reply added successfully');
                 setReplyModalVisible(false);
@@ -156,12 +180,13 @@ const WikiResultDetail = ({ route }) => {
             Alert.alert('Error', 'Failed to reply to annotation');
         }
     };
+    
 
     const renderAnnotatedText = (text) => {
         if (!text) {
             return <Text style={styles.wikiInfo}>No information available</Text>;
         }
-
+    
         const words = text.split(' ');
         return (
             <Text style={styles.wikiInfo}>
@@ -187,6 +212,7 @@ const WikiResultDetail = ({ route }) => {
             </Text>
         );
     };
+    
 
     const deleteAnnotation = async (annotationId) => {
         console.log(user_id);
@@ -280,7 +306,6 @@ const WikiResultDetail = ({ route }) => {
         </View>
     </Modal>
 
-    {/* Reply Modal */}
     <Modal visible={replyModalVisible} animationType="slide" transparent>
         <View style={styles.modalContainer}>
             <View style={styles.modalContent}>
@@ -301,13 +326,19 @@ const WikiResultDetail = ({ route }) => {
 
                 <Text style={styles.selectedText}>{selectedAnnotation?.text}</Text>
 
-                {/* Delete Button */}
-                <TouchableOpacity
-                    style={styles.deleteButton}
-                    onPress={() => deleteAnnotation(selectedAnnotation?.annotation_id)}
-                >
-                    <Text style={styles.deleteButtonText}>Delete Annotation</Text>
-                </TouchableOpacity>
+                {/* Replies Section */}
+                <Text style={styles.replySectionTitle}>Replies:</Text>
+                <ScrollView style={styles.repliesContainer}>
+                    {selectedAnnotation?.child_annotations?.length > 0 ? (
+                        selectedAnnotation.child_annotations.map((reply, index) => (
+                            <View key={index} style={styles.replyItem}>
+                                <Text style={styles.replyText}>{reply.text}</Text>
+                            </View>
+                        ))
+                    ) : (
+                        <Text style={styles.noRepliesText}>No replies yet.</Text>
+                    )}
+                </ScrollView>
 
                 {/* Reply Input */}
                 <TextInput
@@ -334,6 +365,9 @@ const WikiResultDetail = ({ route }) => {
             </View>
         </View>
     </Modal>
+
+
+
 </ScrollView>
 
     );
@@ -436,7 +470,34 @@ const styles = StyleSheet.create({
         color: 'white',
         fontWeight: 'bold',
         fontSize: 16,
-    }
+    },
+    replySectionTitle: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        marginTop: 15,
+        marginBottom: 10,
+    },
+    repliesContainer: {
+        maxHeight: 150,
+        width: '100%',
+        marginBottom: 15,
+    },
+    replyItem: {
+        padding: 10,
+        borderBottomWidth: 1,
+        borderBottomColor: '#ccc',
+    },
+    replyText: {
+        fontSize: 14,
+        color: '#333',
+    },
+    noRepliesText: {
+        fontSize: 14,
+        color: '#888',
+        textAlign: 'center',
+    },
+    
+    
 });
 
 export default WikiResultDetail;

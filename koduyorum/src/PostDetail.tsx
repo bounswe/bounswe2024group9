@@ -10,6 +10,7 @@ const PostDetail = ({ route }) => {
     const [comments, setComments] = useState([]);
     const [newComment, setNewComment] = useState('');
     const [codeSnippet, setCodeSnippet] = useState('');
+    const [codeSnippetState, setCodeSnippetState] = useState(post.codeSnippet || '');
     const [availableLanguages, setAvailableLanguages] = useState([]);
     const [selectedLanguage, setSelectedLanguage] = useState('');
     const [codeOutput, setCodeOutput] = useState('');
@@ -54,6 +55,27 @@ const PostDetail = ({ route }) => {
         fetchLanguages();
     }, []);
 
+    useEffect(() => {
+        const fetchCodeSnippetIfEmpty = async () => {
+            if (!codeSnippet.trim()) {
+                try {
+                    const response = await fetch(`http://10.0.2.2:8000/get_code_snippet_if_empty/${post.id}/`);
+                    const data = await response.json();
+                    if (response.status === 200) {
+                        setCodeSnippetState(data.codeSnippet);
+                    } else {
+                        Alert.alert('Error', data.error || 'Failed to fetch code snippet');
+                    }
+                } catch (error) {
+                    console.error('Error fetching code snippet:', error);
+                    Alert.alert('Error', 'Failed to fetch code snippet');
+                }
+            }
+        };
+
+        fetchCodeSnippetIfEmpty();
+    }, [post.id, codeSnippet]);
+
     const handleAddComment = async () => {
         if (newComment.trim() === '' || selectedLanguage === '') {
             Alert.alert('Comment, language, and code snippet cannot be empty');
@@ -89,7 +111,7 @@ const PostDetail = ({ route }) => {
                     },
                 ]);
                 setNewComment('');
-                setCodeSnippet(''); // Clear code snippet input
+                setCodeSnippet(''); 
             } else {
                 Alert.alert('Error', data.error || 'Failed to add comment');
             }
@@ -139,7 +161,7 @@ const PostDetail = ({ route }) => {
             selectedAnnotationTarget === 'description'
                 ? (post.description || '').split(' ').slice(startIndex, endIndex + 1).join(' ')
                 : selectedAnnotationTarget === 'codeSnippet'
-                ? (post.codeSnippet || '').split(' ').slice(startIndex, endIndex + 1).join(' ')
+                ? (codeSnippetState || '').split(' ').slice(startIndex, endIndex + 1).join(' ')
                 : (comments[selectedAnnotationTarget]?.details || '')
                       .split(' ')
                       .slice(startIndex, endIndex + 1)
@@ -218,7 +240,6 @@ const PostDetail = ({ route }) => {
         );
     };
 
-    
     return (
         <ScrollView contentContainerStyle={styles.container}>
             <Text style={styles.title}>{post.title}</Text>
@@ -232,7 +253,7 @@ const PostDetail = ({ route }) => {
                     language={post.programmingLanguage}
                     style={atomOneDark}
                 >
-                    {(post.codeSnippet || '')
+                    {(codeSnippetState || '')
                         .split(' ')
                         .map((word, index) => {
                             // Check if this word is part of an annotation
@@ -333,7 +354,7 @@ const PostDetail = ({ route }) => {
                         {/* Display the selected text */}
                         <Text style={styles.selectedText}>
                             {selectedAnnotationTarget === 'description' && post.description.split(' ').slice(startIndex, endIndex + 1).join(' ')}
-                            {selectedAnnotationTarget === 'codeSnippet' && post.codeSnippet.split(' ').slice(startIndex, endIndex + 1).join(' ')}
+                            {selectedAnnotationTarget === 'codeSnippet' && codeSnippetState.split(' ').slice(startIndex, endIndex + 1).join(' ')}
                             {selectedAnnotationTarget?.startsWith('comment-') && 
                                 comments[parseInt(selectedAnnotationTarget.split('-')[1])].details
                                     .split(' ')

@@ -934,3 +934,23 @@ def fetch_question_label_info(request, question_id: int):
         }, status=200)
     except Question.DoesNotExist:
         return JsonResponse({'error': 'Question not found'}, status=404)
+
+@csrf_exempt
+def get_code_snippet_if_empty(request, question_id: int) -> HttpResponse:
+    """
+    Retrieve the code snippet for a question if it's empty.
+    If the `code_snippet` is empty, an alternative logic can be applied to generate or fetch a snippet.
+    """
+    try:
+        question = Question.objects.get(_id=question_id)
+        
+        if not question.code_snippet.strip():
+            # Example logic: Attempt to fetch a snippet based on the question details or tags
+            suggested_snippet = f"# Example snippet for {question.title}\ndef example_function():\n    pass"
+            return JsonResponse({'codeSnippet': suggested_snippet}, status=200)
+
+        return JsonResponse({'codeSnippet': question.code_snippet}, status=200)
+    except Question.DoesNotExist:
+        return JsonResponse({'error': 'Question not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
