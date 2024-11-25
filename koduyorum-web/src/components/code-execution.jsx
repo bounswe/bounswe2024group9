@@ -211,6 +211,8 @@ const [output, setOutput] = useState([]); // State to store the backend's respon
               initialVotes={questionData.upvote_count}
               question_id={question_id}
               isAnswered={isAnswered}
+              title = {questionData.title}
+              fetchQuestion = {fetchQuestion}
 
             />
             {questionData.code_snippet && (
@@ -239,6 +241,7 @@ const [output, setOutput] = useState([]); // State to store the backend's respon
                       author={comment.user}
                       questionAuthor={questionData.author}
                       initialVotes={comment.upvotes}
+                      language = {comment.language_id}
                       comment_id={comment.comment_id}
                       answer_of_the_question={comment.answer_of_the_question}
                       fetchComments={fetchComments}

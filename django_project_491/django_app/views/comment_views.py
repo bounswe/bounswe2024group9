@@ -140,6 +140,8 @@ def edit_comment(request: HttpRequest, comment_id: int) -> HttpResponse:
         comment.code_snippet = data.get('code_snippet', comment.code_snippet)
         comment.language_id = data.get('language_id', comment.language_id)
         comment.save()
+        return JsonResponse({'success': 'Comment edited successfully'}, status=200)
+
 
     except Comment.DoesNotExist:
         return JsonResponse({'error': 'Comment not found'}, status=404)
@@ -147,7 +149,8 @@ def edit_comment(request: HttpRequest, comment_id: int) -> HttpResponse:
 
     except (KeyError, json.JSONDecodeError) as e:
         return JsonResponse({'error': f'Malformed data: {str(e)}'}, status=400)
-
+    
+    
 
 @csrf_exempt
 @invalidate_user_cache()

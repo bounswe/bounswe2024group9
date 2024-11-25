@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState,useRef, useEffect } from "react";
 import { Navigate, useParams } from "react-router-dom";
 import { useNavigate } from 'react-router-dom';
 import * as PropTypes from "prop-types";
@@ -6,6 +6,7 @@ import SyntaxHighlighter from "react-syntax-highlighter";
 import { docco } from "react-syntax-highlighter/dist/esm/styles/hljs";
 import { faThumbsUp, faCommentDots, faThumbsDown } from '@fortawesome/free-solid-svg-icons';
 import './QuestionDetail.css';
+import EditComment from "./EditComment"
 
 function Comment(props) {
 
@@ -14,6 +15,12 @@ function Comment(props) {
   const isCommentOwner = localStorage.getItem("username") === props.author;
   const [isAnswer, setAnswer] = useState(props.answer_of_the_question);
   const navigate = useNavigate();
+
+  const [isPopupVisible, setIsPopupVisible] = useState(false);
+
+  const openPopup = () => setIsPopupVisible(true);
+  const closePopup = () => setIsPopupVisible(false);
+  const popupRef = useRef(null);
 
   // Vote handlers
   const handleCommentUpvote = async () => {
@@ -60,25 +67,7 @@ function Comment(props) {
     }
   };
   const handleEditComment = async () => {
-    const token = localStorage.getItem('authToken');
-    try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/downvote_object/comment/${props.comment_id}/`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'User-ID': localStorage.getItem('user_id'),
-          'Authorization': `Bearer ${token}`
-        },
-      });
-
-      if (response.ok) {
-
-        const data = await response.json();
-        setVotes(data.success);
-      }
-    } catch (error) {
-      console.error('Error upvoting:', error);
-    }
+    openPopup();
   };
   const handleDeleteComment = async () => {
     const token = localStorage.getItem('authToken');
@@ -180,7 +169,22 @@ function Comment(props) {
         </div>
         <p className="question-username">@{props.author}</p>
       </div>
+      {isPopupVisible && (
+        <div className="popup" >
+          <div className="popup-content" ref={popupRef}>
+            <EditComment
+              comment_id={props.comment_id}
+              language={props.language}
+              codeSnippet = {props.code}
+              details={props.explanation}
+              fetchComments={props.fetchComments}
+              closePopup={closePopup}
+            />
+          </div>
+        </div>
+      )}
     </div>
+
   );
 }
 
