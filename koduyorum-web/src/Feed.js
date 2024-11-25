@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { useNavigate} from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Navbar, LeftSidebar, RightSidebar } from "./PageComponents";
 import PostPreview from "./PostPreview";
 import { LoadingComponent } from "./LoadingPage"; // Importing the LoadingComponent
@@ -112,17 +112,18 @@ function Feed() {
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
-
+      const data = await response.json();
       if (sort === "newest") {
         try {
-          const response = await fetchPostsByTime();
+          const newestPosts = await fetchPostsByTime();
+          setPosts(newestPosts);
           console.log("Response:", response);
         } catch (error) {
           console.error("Error fetching posts by time:", error);
         }
+      } else {
+        setPosts(data.personalized_questions);
       }
-      const data = await response.json();
-      setPosts(data.personalized_questions);
       setQuestionOfTheDay(data.question_of_the_day);
       setTopContributors(data.top_contributors);
     } catch (error) {
@@ -197,20 +198,23 @@ function Feed() {
 
   const fetchPostsByTime = async () => {
     try {
-        const response = await fetch(`${process.env.REACT_APP_API_URL}/list_questions_by_time/`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        });
-        if (response.ok) {
-            const data = await response.json();
-            return data.questions;
-        } else {
-            console.error('Error fetching questions:', response.statusText);
+      const response = await fetch(
+        `${process.env.REACT_APP_API_URL}/list_questions_by_time/`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
         }
+      );
+      if (response.ok) {
+        const data = await response.json();
+        return data.questions;
+      } else {
+        console.error("Error fetching questions:", response.statusText);
+      }
     } catch (error) {
-        console.error('Error fetching questions:', error);
+      console.error("Error fetching questions:", error);
     }
   };
 
@@ -288,7 +292,7 @@ function Feed() {
     return text.length > length ? text.substring(0, length) + "..." : text;
   };
 
-  // Render 
+  // Render
   return (
     <div className="feed-container">
       {loading ? (
