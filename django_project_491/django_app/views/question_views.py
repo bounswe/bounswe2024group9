@@ -911,11 +911,10 @@ def list_all_topics(request):
 def fetch_question_label_info(request, question_id: int):
     try:
         question = Question.objects.get(_id=question_id)
-        topic_info = question.get_topic_info()
+        tags_info = question.tags
         return JsonResponse({
             'question_id': question_id,
-            'topic_label': topic_info['label'],
-            'topic_url': topic_info['url']
+            'tags': tags_info
         }, status=200)
     except Question.DoesNotExist:
         return JsonResponse({'error': 'Question not found'}, status=404)
