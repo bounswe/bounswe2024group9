@@ -117,7 +117,7 @@ function Feed() {
         try {
           const newestPosts = await fetchPostsByTime();
           setPosts(newestPosts);
-          console.log("Response:", response);
+          console.log("Response:", newestPosts);
         } catch (error) {
           console.error("Error fetching posts by time:", error);
         }
@@ -267,14 +267,13 @@ function Feed() {
     };
   }, [searched]);
 
-  // Filtering and Sorting Posts
   const filteredPosts = posts.filter(
     (post) =>
       (filter === "all" ||
         (filter === "answered" && post.answered === true) ||
         (filter === "unanswered" && post.answered === false)) &&
       (language === "all" ||
-        post.programmingLanguage.toLowerCase() === language.toLowerCase()) &&
+        post.programmingLanguage?.toLowerCase() === language.toLowerCase()) &&
       (post.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         post.preview?.toLowerCase().includes(searchQuery.toLowerCase()))
   );
