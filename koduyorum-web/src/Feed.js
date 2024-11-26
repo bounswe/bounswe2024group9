@@ -113,17 +113,18 @@ function Feed() {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
       const data = await response.json();
-      if (sort === "newest") {
-        try {
-          const newestPosts = await fetchPostsByTime();
-          setPosts(newestPosts);
-          console.log("Response:", newestPosts);
-        } catch (error) {
-          console.error("Error fetching posts by time:", error);
-        }
-      } else {
-        setPosts(data.personalized_questions);
-      }
+      // if (sort === "newest") {
+      //   try {
+      //     const newestPosts = await fetchPostsByTime();
+      //     setPosts(newestPosts);
+      //     console.log("Response:", newestPosts);
+      //   } catch (error) {
+      //     console.error("Error fetching posts by time:", error);
+      //   }
+      // } else {
+      //   setPosts(data.personalized_questions);
+      // }
+      setPosts(data.personalized_questions);
       setQuestionOfTheDay(data.question_of_the_day);
       setTopContributors(data.top_contributors);
     } catch (error) {
