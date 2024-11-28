@@ -35,9 +35,9 @@ const Signup = () => {
       );
 
       if (response.ok) {
-        setSuccessMessage("Sign up successful! Redirecting to the login page...");
+        setSuccessMessage("Sign up successful! Redirecting to the survey page...");
         setTimeout(() => {
-          window.location.href = "/login"; // Redirect after 2 seconds
+          window.location.href = "/survey"; // Redirect after 2 seconds
         }, 2000);
       } else {
         const data = await response.json();
