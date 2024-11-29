@@ -6,6 +6,10 @@ from ..Utils.utils import *
 from ..Utils.forms import *
 from django.core.cache import cache
 from functools import wraps
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
 
 def invalidate_user_cache(cache_key_prefix='feed_user'):
     """
@@ -29,7 +33,66 @@ def invalidate_user_cache(cache_key_prefix='feed_user'):
         return wrapper
     return decorator
 
+@swagger_auto_schema(
+    method='post',
+    operation_summary="Create Comment",
+    operation_description="Create a new comment for a specific question",
+    manual_parameters=[
+        openapi.Parameter(
+            name='User-ID',
+            in_=openapi.IN_HEADER,
+            type=openapi.TYPE_INTEGER,
+            description="ID of the user creating the comment",
+            required=True
+        ),
+        openapi.Parameter(
+            name='question_id',
+            in_=openapi.IN_PATH,
+            type=openapi.TYPE_INTEGER,
+            description="ID of the question to add the comment to",
+            required=True
+        ),
+    ],
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        required=['details', 'language'],
+        properties={
+            'details': openapi.Schema(type=openapi.TYPE_STRING, description="Comment text"),
+            'code_snippet': openapi.Schema(type=openapi.TYPE_STRING, description="Code snippet (optional)"),
+            'language': openapi.Schema(type=openapi.TYPE_STRING, description="Programming language")
+        }
+    ),
+    responses={
+        201: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'success': openapi.Schema(type=openapi.TYPE_STRING),
+                'comment_id': openapi.Schema(type=openapi.TYPE_INTEGER)
+            }
+        ),
+        400: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'error': openapi.Schema(type=openapi.TYPE_STRING)
+            }
+        ),
+        404: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'error': openapi.Schema(type=openapi.TYPE_STRING)
+            }
+        ),
+        405: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'error': openapi.Schema(type=openapi.TYPE_STRING)
+            }
+        )
+    }
+)
+@api_view(['POST'])
 @csrf_exempt
+@permission_classes([AllowAny])
 @invalidate_user_cache()
 def create_comment(request: HttpRequest, question_id: int) -> HttpResponse:
     """
@@ -99,6 +162,63 @@ def create_comment(request: HttpRequest, question_id: int) -> HttpResponse:
     return JsonResponse({'error': 'Invalid request method'}, status=405)
 
 
+@swagger_auto_schema(
+    method='put',
+    operation_summary="Edit Comment",
+    operation_description="Edit an existing comment. Only admins and comment owners can edit comments.",
+    manual_parameters=[
+        openapi.Parameter(
+            name='User-ID',
+            in_=openapi.IN_HEADER,
+            type=openapi.TYPE_INTEGER,
+            description="ID of the user attempting to edit the comment",
+            required=True
+        ),
+        openapi.Parameter(
+            name='comment_id',
+            in_=openapi.IN_PATH,
+            type=openapi.TYPE_INTEGER,
+            description="ID of the comment to be edited",
+            required=True
+        ),
+    ],
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            'details': openapi.Schema(type=openapi.TYPE_STRING, description="Updated comment text"),
+            'code_snippet': openapi.Schema(type=openapi.TYPE_STRING, description="Updated code snippet"),
+            'language_id': openapi.Schema(type=openapi.TYPE_INTEGER, description="Updated language ID")
+        }
+    ),
+    responses={
+        200: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'success': openapi.Schema(type=openapi.TYPE_STRING)
+            }
+        ),
+        400: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'error': openapi.Schema(type=openapi.TYPE_STRING)
+            }
+        ),
+        403: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'error': openapi.Schema(type=openapi.TYPE_STRING)
+            }
+        ),
+        404: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'error': openapi.Schema(type=openapi.TYPE_STRING)
+            }
+        )
+    }
+)
+@api_view(['PUT'])
+@permission_classes([AllowAny])
 @csrf_exempt
 def edit_comment(request: HttpRequest, comment_id: int) -> HttpResponse:
     """
@@ -149,6 +269,61 @@ def edit_comment(request: HttpRequest, comment_id: int) -> HttpResponse:
     except (KeyError, json.JSONDecodeError) as e:
         return JsonResponse({'error': f'Malformed data: {str(e)}'}, status=400)
 
+@swagger_auto_schema(
+    method='delete',
+    operation_summary="Delete Comment",
+    operation_description="Delete a comment. Only admins and comment owners can delete comments.",
+    manual_parameters=[
+        openapi.Parameter(
+            name='User-ID',
+            in_=openapi.IN_HEADER,
+            type=openapi.TYPE_INTEGER,
+            description="ID of the user attempting to delete the comment",
+            required=True
+        ),
+        openapi.Parameter(
+            name='comment_id',
+            in_=openapi.IN_PATH,
+            type=openapi.TYPE_INTEGER,
+            description="ID of the comment to be deleted",
+            required=True
+        ),
+    ],
+    responses={
+        200: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'success': openapi.Schema(type=openapi.TYPE_STRING)
+            }
+        ),
+        400: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'error': openapi.Schema(type=openapi.TYPE_STRING)
+            }
+        ),
+        403: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'error': openapi.Schema(type=openapi.TYPE_STRING)
+            }
+        ),
+        404: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'error': openapi.Schema(type=openapi.TYPE_STRING)
+            }
+        ),
+        500: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'error': openapi.Schema(type=openapi.TYPE_STRING)
+            }
+        )
+    }
+)
+@api_view(['DELETE'])
+@permission_classes([AllowAny])
 @csrf_exempt
 @invalidate_user_cache()
 def delete_comment(request: HttpRequest, comment_id: int) -> HttpResponse:
@@ -195,6 +370,82 @@ def delete_comment(request: HttpRequest, comment_id: int) -> HttpResponse:
     except Exception as e:
         return JsonResponse({'error': f'An error occurred: {str(e)}'}, status=500)
 
+@swagger_auto_schema(
+   method='post',
+   operation_summary="Mark Comment as Answer",
+   operation_description="""Marks a comment as the answer to its associated question. 
+   Only the question owner or an admin user can mark a comment as the answer.""",
+   manual_parameters=[
+       openapi.Parameter(
+           name='User-ID',
+           in_=openapi.IN_HEADER,
+           type=openapi.TYPE_INTEGER,
+           description="ID of the user attempting to mark the comment as answer",
+           required=True
+       ),
+       openapi.Parameter(
+           name='comment_id',
+           in_=openapi.IN_PATH,
+           type=openapi.TYPE_INTEGER,
+           description="ID of the comment to be marked as answer",
+           required=True
+       )
+   ],
+   responses={
+       200: openapi.Schema(
+           type=openapi.TYPE_OBJECT,
+           properties={
+               'success': openapi.Schema(
+                   type=openapi.TYPE_STRING,
+                   description="Success message",
+                   example="Comment 123 marked as the answer for question 456"
+               )
+           }
+       ),
+       400: openapi.Schema(
+           type=openapi.TYPE_OBJECT,
+           properties={
+               'error': openapi.Schema(
+                   type=openapi.TYPE_STRING,
+                   description="Bad request error message",
+                   example="Comment ID parameter is required"
+               )
+           }
+       ),
+       403: openapi.Schema(
+           type=openapi.TYPE_OBJECT,
+           properties={
+               'error': openapi.Schema(
+                   type=openapi.TYPE_STRING,
+                   description="Permission denied error message",
+                   example="Only the author of the question can mark a comment as the answer"
+               )
+           }
+       ),
+       404: openapi.Schema(
+           type=openapi.TYPE_OBJECT,
+           properties={
+               'error': openapi.Schema(
+                   type=openapi.TYPE_STRING,
+                   description="Not found error message",
+                   example="Comment not found"
+               )
+           }
+       ),
+       500: openapi.Schema(
+           type=openapi.TYPE_OBJECT,
+           properties={
+               'error': openapi.Schema(
+                   type=openapi.TYPE_STRING,
+                   description="Server error message",
+                   example="An error occurred: [error details]"
+               )
+           }
+       )
+   }
+)
+@api_view(['POST'])
+@permission_classes([AllowAny])
 @csrf_exempt
 @invalidate_user_cache()
 def mark_comment_as_answer(request: HttpRequest, comment_id : int) -> HttpResponse:
