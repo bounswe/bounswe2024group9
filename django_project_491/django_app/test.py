@@ -109,8 +109,8 @@ class CodeExecutionTests(TestCase):
         # Validate response status and content
         self.assertEqual(response.status_code, 200)
         response_json = response.json()
-        self.assertIn('stdout', response_json)
-        self.assertTrue(response_json['stdout'].startswith('Hello, World!'))
+        self.assertIn('output', response_json)
+        self.assertTrue(response_json['output'][0].startswith('Hello, World!'))
 
 class UserWorkflowIntegrationTests(TestCase):
     def setUp(self):
@@ -245,7 +245,7 @@ class QuestionModelTest(TestCase):
             details='How to test models in Django?',
             code_snippet='print("Test")',
             tags=['Django', 'Testing'],
-            topic='Django Testing',
+            # topic='Django Testing',
             author=self.user
         )
 
@@ -788,7 +788,7 @@ class QuestionViewTests(TestCase):
         self.assertTrue(self.user in self.question.reported_by.all())
 
     def test_list_questions_by_language(self):
-        response = self.client.get(reverse('list_questions_by_language', args=['Python', 1]))
+        response = self.client.get(reverse('list_questions', args=['Python', 1]))
         self.assertEqual(response.status_code, 200)
         response_data = response.json()
         self.assertIn('questions', response_data)
