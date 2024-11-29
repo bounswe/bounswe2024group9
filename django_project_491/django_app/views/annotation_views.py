@@ -10,8 +10,8 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 
 
-@csrf_exempt
 @swagger_auto_schema(
+    tags=['Annotation'],
     method='post',
     operation_summary="Create Annotation",
     operation_description="Create a new annotation with optional parent annotation support",
@@ -138,6 +138,8 @@ def create_annotation(request):
 # }
 
 @swagger_auto_schema(
+    tags=['Annotation'],
+
     method='delete',
     operation_summary="Delete Annotation",
     operation_description="Delete an annotation. Only the author of the annotation can delete the annotation.",
@@ -245,6 +247,7 @@ def delete_annotation(request, annotation_id):
 
 
 @swagger_auto_schema(
+    tags=['Annotation'],
    method='put',
    operation_summary="Edit Annotation",
    operation_description="Edit an existing annotation. Only the author of the annotation can edit it.",
@@ -387,6 +390,7 @@ def edit_annotation(request, annotation_id):
     return JsonResponse({'error': 'Invalid request method'}, status=405)
 
 @swagger_auto_schema(
+    tags=['Annotation'],
    method='get',
    operation_summary="Get Annotations by Language",
    operation_description="Retrieve all annotations for a specific language, including their child annotations",
@@ -545,6 +549,7 @@ def get_annotations_by_language(request, language_qid):
 
 
 @swagger_auto_schema(
+    tags=['Annotation'],
    method='get',
    operation_summary="Get All Annotations",
    operation_description="Retrieve all annotations in the system, including their child annotations",

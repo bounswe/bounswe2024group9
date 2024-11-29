@@ -15,6 +15,10 @@ from typing import List
 from concurrent.futures import ThreadPoolExecutor
 from django.core.cache import cache
 from functools import wraps
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
 
 def invalidate_user_cache(cache_key_prefix='feed_user'):
     """
@@ -140,6 +144,91 @@ def get_question_comments(request, question_id):
     except Question.DoesNotExist:
         return JsonResponse({'error': 'Question not found'}, status=404)
 
+@swagger_auto_schema(
+    tags=['Question'],
+   method='post',
+   operation_summary="Create Question",
+   operation_description="""Create a new question with title, language, details, and optional code snippet and tags.
+   The question will be validated for quality before creation.""",
+   manual_parameters=[
+       openapi.Parameter(
+           name='User-ID',
+           in_=openapi.IN_HEADER,
+           type=openapi.TYPE_INTEGER,
+           description="ID of the user creating the question",
+           required=True
+       ),
+   ],
+   request_body=openapi.Schema(
+       type=openapi.TYPE_OBJECT,
+       required=['title', 'language', 'details'],
+       properties={
+           'title': openapi.Schema(
+               type=openapi.TYPE_STRING,
+               description="Title of the question"
+           ),
+           'language': openapi.Schema(
+               type=openapi.TYPE_STRING,
+               description="Programming language related to the question"
+           ),
+           'details': openapi.Schema(
+               type=openapi.TYPE_STRING,
+               description="Detailed description of the question"
+           ),
+           'code_snippet': openapi.Schema(
+               type=openapi.TYPE_STRING,
+               description="Code snippet related to the question",
+               default=""
+           ),
+           'tags': openapi.Schema(
+               type=openapi.TYPE_ARRAY,
+               items=openapi.Schema(
+                   type=openapi.TYPE_STRING
+               ),
+               description="List of tags associated with the question",
+               default=[]
+           )
+       }
+   ),
+   responses={
+       201: openapi.Schema(
+           type=openapi.TYPE_OBJECT,
+           properties={
+               'success': openapi.Schema(
+                   type=openapi.TYPE_STRING,
+                   description="Success message",
+                   example="Question created successfully"
+               ),
+               'question_id': openapi.Schema(
+                   type=openapi.TYPE_INTEGER,
+                   description="ID of the created question"
+               )
+           }
+       ),
+       400: openapi.Schema(
+           type=openapi.TYPE_OBJECT,
+           properties={
+               'error': openapi.Schema(
+                   type=openapi.TYPE_STRING,
+                   description="Error message",
+                   example="Invalid language or Question is not valid or Malformed data"
+               )
+           }
+       ),
+       405: openapi.Schema(
+           type=openapi.TYPE_OBJECT,
+           properties={
+               'error': openapi.Schema(
+                   type=openapi.TYPE_STRING,
+                   description="Method not allowed error",
+                   example="Invalid request method"
+               )
+           }
+       )
+   }
+)
+@api_view(['POST'])
+@permission_classes([AllowAny])
 @csrf_exempt  
 @invalidate_user_cache()
 def create_question(request: HttpRequest) -> HttpResponse:
@@ -210,7 +299,7 @@ def create_question(request: HttpRequest) -> HttpResponse:
 
     return JsonResponse({'error': 'Invalid request method'}, status=405)
 
-
+@permission_classes([AllowAny])
 @csrf_exempt
 def edit_question(request: HttpRequest, question_id: int) -> HttpResponse:
     """
@@ -275,6 +364,7 @@ def edit_question(request: HttpRequest, question_id: int) -> HttpResponse:
         return JsonResponse({'error': f'An error occurred: {str(e)}'}, status=500)
 
 @csrf_exempt
+@permission_classes([AllowAny])
 @invalidate_user_cache()
 def delete_question(request: HttpRequest, question_id: int) -> HttpResponse:
     """
@@ -322,6 +412,7 @@ def delete_question(request: HttpRequest, question_id: int) -> HttpResponse:
 
 @csrf_exempt
 @invalidate_user_cache()
+@permission_classes([AllowAny])
 def mark_as_answered(request, question_id : int) -> HttpResponse:
     """
     Marks a question as answered.
@@ -357,6 +448,7 @@ def mark_as_answered(request, question_id : int) -> HttpResponse:
 
 # TODO: FIND OUT WHAT TO DO WITH REPORTED QUESTIONS
 @csrf_exempt
+@permission_classes([AllowAny])
 def report_question(request, question_id : int) -> HttpResponse:    
     """
     Report a question by a user.
@@ -391,6 +483,7 @@ def report_question(request, question_id : int) -> HttpResponse:
 
 
 @csrf_exempt
+@permission_classes([AllowAny])
 def list_questions_by_language(request, language: str, page_number = 1) -> HttpResponse:    
     """
     List questions filtered by programming language with pagination.
@@ -423,6 +516,7 @@ def list_questions_by_language(request, language: str, page_number = 1) -> HttpR
 
 
 @csrf_exempt
+@permission_classes([AllowAny])
 def list_questions_by_tags(request, tags: str, page_number=1) -> HttpResponse:
     """
     List questions filtered by tags with pagination.
@@ -458,6 +552,7 @@ def list_questions_by_tags(request, tags: str, page_number=1) -> HttpResponse:
 
 
 @csrf_exempt
+@permission_classes([AllowAny])
 def list_questions_by_hotness(request, page_number=1):
     """
     List questions ordered by hotness (number of upvotes) in a paginated manner.
@@ -492,6 +587,7 @@ def list_questions_by_hotness(request, page_number=1):
     return JsonResponse({'questions': questions_data}, safe=False, status=200)
     
 @csrf_exempt   
+@permission_classes([AllowAny])
 def list_questions_by_time(request, page_number=1):
     """
     List questions ordered by creation date (most recent first) in a paginated manner.
@@ -545,6 +641,7 @@ def random_questions(request):
 
 
 @csrf_exempt
+@permission_classes([AllowAny])
 def question_of_the_day(request):
     """
     Retrieve the question of the day. If a question has already been selected and cached for today, 
@@ -596,6 +693,7 @@ def question_of_the_day(request):
 
 
 @csrf_exempt
+@permission_classes([AllowAny])
 def list_questions_according_to_the_user(request, user_id: int):
     """
     List personalized questions for a user based on their known languages, interested topics, and general questions.
@@ -679,6 +777,7 @@ def list_questions_according_to_the_user(request, user_id: int):
     return JsonResponse({'questions': questions_data}, safe=False)
 
 @csrf_exempt
+@permission_classes([AllowAny])
 def bookmark_question(request: HttpRequest, question_id: int) -> HttpResponse:
     """
     Bookmark a question for a user.
@@ -712,6 +811,7 @@ def bookmark_question(request: HttpRequest, question_id: int) -> HttpResponse:
     return JsonResponse({'success': 'Question bookmarked successfully'}, status=200)
 
 @csrf_exempt
+@permission_classes([AllowAny])
 def remove_bookmark(request: HttpRequest, question_id: int) -> HttpResponse:
     """
     Remove a question from a user's bookmarks.
@@ -751,6 +851,7 @@ def remove_bookmark(request: HttpRequest, question_id: int) -> HttpResponse:
     return JsonResponse({'success': 'Bookmark removed successfully'}, status=200)
 
 @csrf_exempt
+@permission_classes([AllowAny])
 def fetch_random_reported_question(request: HttpRequest) -> HttpResponse:
     """
     Fetches a random question that has been reported by users.
@@ -808,6 +909,93 @@ def fetch_random_reported_question(request: HttpRequest) -> HttpResponse:
     
     return JsonResponse({'question': question_data}, safe=False)
 
+@swagger_auto_schema(
+        tags=['Question'],
+   method='get',
+   operation_summary="Fetch Complete User Feed",
+   operation_description="""Retrieves a complete feed for a user including:
+   - Personalized questions based on user's known languages and interests
+   - Question of the day
+   - Top 5 contributors
+   Results are cached for 1 hour for performance.""",
+   manual_parameters=[
+       openapi.Parameter(
+           name='user_id',
+           in_=openapi.IN_PATH,
+           type=openapi.TYPE_INTEGER,
+           description="ID of the user to fetch feed for",
+           required=True
+       ),
+   ],
+   responses={
+       200: openapi.Schema(
+           type=openapi.TYPE_OBJECT,
+           properties={
+               'personalized_questions': openapi.Schema(
+                   type=openapi.TYPE_ARRAY,
+                   items=openapi.Schema(
+                       type=openapi.TYPE_OBJECT,
+                       properties={
+                           'id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                           'title': openapi.Schema(type=openapi.TYPE_STRING),
+                           'description': openapi.Schema(type=openapi.TYPE_STRING),
+                           'user_id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                           'likes': openapi.Schema(type=openapi.TYPE_INTEGER),
+                           'comments_count': openapi.Schema(type=openapi.TYPE_INTEGER),
+                           'programmingLanguage': openapi.Schema(type=openapi.TYPE_STRING),
+                           'codeSnippet': openapi.Schema(type=openapi.TYPE_STRING),
+                           'tags': openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Schema(type=openapi.TYPE_STRING)),
+                           'answered': openapi.Schema(type=openapi.TYPE_BOOLEAN),
+                           'is_upvoted': openapi.Schema(type=openapi.TYPE_BOOLEAN),
+                           'is_downvoted': openapi.Schema(type=openapi.TYPE_BOOLEAN),
+                       }
+                   ),
+                   description="List of personalized questions for the user"
+               ),
+               'question_of_the_day': openapi.Schema(
+                   type=openapi.TYPE_OBJECT,
+                   properties={
+                       'id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                       'title': openapi.Schema(type=openapi.TYPE_STRING),
+                       'description': openapi.Schema(type=openapi.TYPE_STRING),
+                       'user_id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                       'likes': openapi.Schema(type=openapi.TYPE_INTEGER),
+                       'comments_count': openapi.Schema(type=openapi.TYPE_INTEGER),
+                       'programmingLanguage': openapi.Schema(type=openapi.TYPE_STRING),
+                       'codeSnippet': openapi.Schema(type=openapi.TYPE_STRING),
+                       'tags': openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Schema(type=openapi.TYPE_STRING)),
+                       'answered': openapi.Schema(type=openapi.TYPE_BOOLEAN),
+                   }
+               ),
+               'top_contributors': openapi.Schema(
+                   type=openapi.TYPE_ARRAY,
+                   items=openapi.Schema(
+                       type=openapi.TYPE_OBJECT,
+                       properties={
+                           'username': openapi.Schema(type=openapi.TYPE_STRING),
+                           'email': openapi.Schema(type=openapi.TYPE_STRING),
+                           'name': openapi.Schema(type=openapi.TYPE_STRING),
+                           'surname': openapi.Schema(type=openapi.TYPE_STRING),
+                           'contribution_points': openapi.Schema(type=openapi.TYPE_INTEGER),
+                       }
+                   ),
+                   description="List of top 5 contributors"
+               )
+           }
+       ),
+       404: openapi.Schema(
+           type=openapi.TYPE_OBJECT,
+           properties={
+               'error': openapi.Schema(
+                   type=openapi.TYPE_STRING,
+                   description="Error message when user is not found"
+               )
+           }
+       )
+   }
+)
+@api_view(['GET'])
+@permission_classes([AllowAny])
 @csrf_exempt
 def fetch_all_at_once(request, user_id: int):
     import time

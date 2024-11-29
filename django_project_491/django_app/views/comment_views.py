@@ -34,6 +34,7 @@ def invalidate_user_cache(cache_key_prefix='feed_user'):
     return decorator
 
 @swagger_auto_schema(
+    tags=['Comment'],
     method='post',
     operation_summary="Create Comment",
     operation_description="Create a new comment for a specific question",
@@ -163,6 +164,7 @@ def create_comment(request: HttpRequest, question_id: int) -> HttpResponse:
 
 
 @swagger_auto_schema(
+    tags=['Comment'],
     method='put',
     operation_summary="Edit Comment",
     operation_description="Edit an existing comment. Only admins and comment owners can edit comments.",
@@ -270,6 +272,7 @@ def edit_comment(request: HttpRequest, comment_id: int) -> HttpResponse:
         return JsonResponse({'error': f'Malformed data: {str(e)}'}, status=400)
 
 @swagger_auto_schema(
+    tags=['Comment'],
     method='delete',
     operation_summary="Delete Comment",
     operation_description="Delete a comment. Only admins and comment owners can delete comments.",
@@ -371,6 +374,7 @@ def delete_comment(request: HttpRequest, comment_id: int) -> HttpResponse:
         return JsonResponse({'error': f'An error occurred: {str(e)}'}, status=500)
 
 @swagger_auto_schema(
+    tags=['Comment'],
    method='post',
    operation_summary="Mark Comment as Answer",
    operation_description="""Marks a comment as the answer to its associated question. 
