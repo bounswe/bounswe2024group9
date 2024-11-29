@@ -145,7 +145,7 @@ def get_question_comments(request, question_id):
         return JsonResponse({'error': 'Question not found'}, status=404)
 
 @swagger_auto_schema(
-    tags=['Question'],
+    tags=['Questions'],
    method='post',
    operation_summary="Create Question",
    operation_description="""Create a new question with title, language, details, and optional code snippet and tags.
@@ -299,7 +299,76 @@ def create_question(request: HttpRequest) -> HttpResponse:
 
     return JsonResponse({'error': 'Invalid request method'}, status=405)
 
+@swagger_auto_schema(
+   method='put',
+   tags=['Questions'],
+   operation_summary="Edit Question",
+   operation_description="Edit an existing question. Only the question owner or admin can edit.",
+   manual_parameters=[
+       openapi.Parameter(
+           name='User-ID',
+           in_=openapi.IN_HEADER,
+           type=openapi.TYPE_INTEGER,
+           description="ID of the user attempting to edit the question",
+           required=True
+       ),
+       openapi.Parameter(
+           name='question_id',
+           in_=openapi.IN_PATH,
+           type=openapi.TYPE_INTEGER,
+           description="ID of the question to be edited",
+           required=True
+       ),
+   ],
+   request_body=openapi.Schema(
+       type=openapi.TYPE_OBJECT,
+       properties={
+           'title': openapi.Schema(type=openapi.TYPE_STRING, description="Updated question title"),
+           'language': openapi.Schema(type=openapi.TYPE_STRING, description="Updated programming language"),
+           'details': openapi.Schema(type=openapi.TYPE_STRING, description="Updated question details"),
+           'code_snippet': openapi.Schema(type=openapi.TYPE_STRING, description="Updated code snippet"),
+           'tags': openapi.Schema(
+               type=openapi.TYPE_ARRAY,
+               items=openapi.Schema(type=openapi.TYPE_STRING),
+               description="Updated list of tags"
+           )
+       }
+   ),
+   responses={
+       200: openapi.Schema(
+           type=openapi.TYPE_OBJECT,
+           properties={
+               'success': openapi.Schema(type=openapi.TYPE_STRING, example="Question edited successfully")
+           }
+       ),
+       400: openapi.Schema(
+           type=openapi.TYPE_OBJECT,
+           properties={
+               'error': openapi.Schema(type=openapi.TYPE_STRING, example="Malformed data")
+           }
+       ),
+       403: openapi.Schema(
+           type=openapi.TYPE_OBJECT,
+           properties={
+               'error': openapi.Schema(type=openapi.TYPE_STRING, example="Only admins and owner of the questions can edit questions")
+           }
+       ),
+       404: openapi.Schema(
+           type=openapi.TYPE_OBJECT,
+           properties={
+               'error': openapi.Schema(type=openapi.TYPE_STRING, example="Question not found")
+           }
+       ),
+       500: openapi.Schema(
+           type=openapi.TYPE_OBJECT,
+           properties={
+               'error': openapi.Schema(type=openapi.TYPE_STRING, example="An error occurred")
+           }
+       )
+   }
+)
 @permission_classes([AllowAny])
+@api_view(['PUT'])
 @csrf_exempt
 def edit_question(request: HttpRequest, question_id: int) -> HttpResponse:
     """
@@ -363,7 +432,62 @@ def edit_question(request: HttpRequest, question_id: int) -> HttpResponse:
         print(e)
         return JsonResponse({'error': f'An error occurred: {str(e)}'}, status=500)
 
+@swagger_auto_schema(
+   method='delete',
+   tags=['Questions'],
+   operation_summary="Delete Question",
+   operation_description="Delete an existing question. Only the question owner or admin can delete.",
+   manual_parameters=[
+       openapi.Parameter(
+           name='User-ID',
+           in_=openapi.IN_HEADER,
+           type=openapi.TYPE_INTEGER,
+           description="ID of the user attempting to delete the question",
+           required=True
+       ),
+       openapi.Parameter(
+           name='question_id',
+           in_=openapi.IN_PATH,
+           type=openapi.TYPE_INTEGER,
+           description="ID of the question to be deleted",
+           required=True
+       ),
+   ],
+   responses={
+       200: openapi.Schema(
+           type=openapi.TYPE_OBJECT,
+           properties={
+               'success': openapi.Schema(type=openapi.TYPE_STRING, example="Question Deleted Successfully")
+           }
+       ),
+       400: openapi.Schema(
+           type=openapi.TYPE_OBJECT,
+           properties={
+               'error': openapi.Schema(type=openapi.TYPE_STRING, example="User ID parameter is required in the header")
+           }
+       ),
+       403: openapi.Schema(
+           type=openapi.TYPE_OBJECT,
+           properties={
+               'error': openapi.Schema(type=openapi.TYPE_STRING, example="Only admins and owner of the questions can delete questions")
+           }
+       ),
+       404: openapi.Schema(
+           type=openapi.TYPE_OBJECT,
+           properties={
+               'error': openapi.Schema(type=openapi.TYPE_STRING, example="Question not found")
+           }
+       ),
+       500: openapi.Schema(
+           type=openapi.TYPE_OBJECT,
+           properties={
+               'error': openapi.Schema(type=openapi.TYPE_STRING, example="An error occurred")
+           }
+       )
+   }
+)
 @csrf_exempt
+@api_view(['DELETE'])
 @permission_classes([AllowAny])
 @invalidate_user_cache()
 def delete_question(request: HttpRequest, question_id: int) -> HttpResponse:
@@ -481,7 +605,59 @@ def report_question(request, question_id : int) -> HttpResponse:
 
     return JsonResponse({'success': 'Question reported successfully'}, status=200)
 
-
+@swagger_auto_schema(
+   method='get',
+   tags=['Questions'],
+   operation_summary="List Questions by Language",
+   operation_description="Retrieve a paginated list of questions filtered by programming language",
+   manual_parameters=[
+       openapi.Parameter(
+           name='language',
+           in_=openapi.IN_PATH,
+           type=openapi.TYPE_STRING,
+           description="Programming language to filter questions by",
+           required=True
+       ),
+       openapi.Parameter(
+           name='page_number',
+           in_=openapi.IN_PATH,
+           type=openapi.TYPE_INTEGER,
+           description="Page number for pagination (10 items per page)",
+           default=1
+       )
+   ],
+   responses={
+       200: openapi.Schema(
+           type=openapi.TYPE_OBJECT,
+           properties={
+               'questions': openapi.Schema(
+                   type=openapi.TYPE_ARRAY,
+                   items=openapi.Schema(
+                       type=openapi.TYPE_OBJECT,
+                       properties={
+                           'id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                           'title': openapi.Schema(type=openapi.TYPE_STRING),
+                           'programmingLanguage': openapi.Schema(type=openapi.TYPE_STRING),
+                           'tags': openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Schema(type=openapi.TYPE_STRING)),
+                           'details': openapi.Schema(type=openapi.TYPE_STRING),
+                           'code_snippet': openapi.Schema(type=openapi.TYPE_STRING),
+                           'upvotes': openapi.Schema(type=openapi.TYPE_INTEGER),
+                           'author': openapi.Schema(type=openapi.TYPE_STRING),
+                           'creationDate': openapi.Schema(type=openapi.TYPE_STRING, format='date-time')
+                       }
+                   )
+               )
+           }
+       ),
+       400: openapi.Schema(
+           type=openapi.TYPE_OBJECT,
+           properties={
+               'error': openapi.Schema(type=openapi.TYPE_STRING, example="Language parameter is required")
+           }
+       )
+   }
+)
+@api_view(['GET'])
 @csrf_exempt
 @permission_classes([AllowAny])
 def list_questions_by_language(request, language: str, page_number = 1) -> HttpResponse:    
@@ -515,8 +691,61 @@ def list_questions_by_language(request, language: str, page_number = 1) -> HttpR
     return JsonResponse({'questions': questions_data}, safe=False, status=200)
 
 
-@csrf_exempt
+@swagger_auto_schema(
+   method='get',
+   tags=['Questions'],
+   operation_summary="List Questions by Tags",
+   operation_description="Retrieve a paginated list of questions filtered by tags",
+   manual_parameters=[
+       openapi.Parameter(
+           name='tags',
+           in_=openapi.IN_PATH,
+           type=openapi.TYPE_STRING,
+           description="Comma-separated list of tags to filter questions by",
+           required=True,
+           example="python,django,rest"
+       ),
+       openapi.Parameter(
+           name='page_number',
+           in_=openapi.IN_PATH,
+           type=openapi.TYPE_INTEGER,
+           description="Page number for pagination (10 items per page)",
+           default=1
+       )
+   ],
+   responses={
+       200: openapi.Schema(
+           type=openapi.TYPE_OBJECT,
+           properties={
+               'questions': openapi.Schema(
+                   type=openapi.TYPE_ARRAY,
+                   items=openapi.Schema(
+                       type=openapi.TYPE_OBJECT,
+                       properties={
+                           'id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                           'title': openapi.Schema(type=openapi.TYPE_STRING),
+                           'language': openapi.Schema(type=openapi.TYPE_STRING),
+                           'tags': openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Schema(type=openapi.TYPE_STRING)),
+                           'details': openapi.Schema(type=openapi.TYPE_STRING),
+                           'code_snippet': openapi.Schema(type=openapi.TYPE_STRING),
+                           'upvotes': openapi.Schema(type=openapi.TYPE_INTEGER),
+                           'creationDate': openapi.Schema(type=openapi.TYPE_STRING, format='date-time')
+                       }
+                   )
+               )
+           }
+       ),
+       400: openapi.Schema(
+           type=openapi.TYPE_OBJECT,
+           properties={
+               'error': openapi.Schema(type=openapi.TYPE_STRING, example="Tags parameter is required")
+           }
+       )
+   }
+)
+@api_view(['GET'])
 @permission_classes([AllowAny])
+@csrf_exempt
 def list_questions_by_tags(request, tags: str, page_number=1) -> HttpResponse:
     """
     List questions filtered by tags with pagination.
@@ -619,6 +848,7 @@ def list_questions_by_time(request, page_number=1):
     } for question in questions]
 
     return JsonResponse({'questions': questions_data}, safe=False, status=200)
+
 
 def random_questions(request):
     # Retrieve 5 random questions
@@ -910,7 +1140,7 @@ def fetch_random_reported_question(request: HttpRequest) -> HttpResponse:
     return JsonResponse({'question': question_data}, safe=False)
 
 @swagger_auto_schema(
-        tags=['Question'],
+        tags=['Questions'],
    method='get',
    operation_summary="Fetch Complete User Feed",
    operation_description="""Retrieves a complete feed for a user including:
