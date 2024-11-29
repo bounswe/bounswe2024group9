@@ -1256,22 +1256,35 @@ Continued to deliver everything related to our mobile app including annotation f
  - [PR #315](https://github.com/bounswe/bounswe2024group9/pull/315) Lead - No conflicts.
  - [PR #309](https://github.com/bounswe/bounswe2024group9/pull/309) Lead - No conflicts.
 
-#### Fatih Akgöz
-- Responsibilities: Development of question detail page aka code execution webpage.
-- Main Contributions:
--- Integrated the backend for fetching quetion details. Added layout for question and comments. Added buttons regarding upvotes and downvotes. Added post and comment owners name to layout. Added related tag and language information. Fix get backend services used for code execution page. Integrated post services for marking comments as answer, editing and deleting users questions and comments to question detail page. Added navigation bar and loading preview for question detail page. Added redirection for post and comment creator profiles. Fix some bugs on the backend for used services. Refactored the code execution component and split the components created.   [# 275](https://github.com/bounswe/bounswe2024group9/issues/275)
+## Fatih Akgöz
+### Responsibilities:
+- Development of question detail a.k.a. code execution page on web.
 
-- Pull Requests:
--- My Merged Prs: 
-[#295](https://github.com/bounswe/bounswe2024group9/pull/295) Lead - No Conflicts
-[#311](https://github.com/bounswe/bounswe2024group9/pull/311) Lead - No Conflicts
--- Reviewed Pr:
-[#259](https://github.com/bounswe/bounswe2024group9/pull/259)
-- Code related issues:
--- Since task i was assigned was related to a single page of the application i worked on a few branches and a single issue.
--- There were several merge conflicts and too many branches regarding web development.
-- Non-code related issues:
--- Because i was able to take this course very late with a petition i had to spend significant amount of time familiariazing myself with the technology stack.
+### Main Contributions:
+- Integrated the backend for fetching question details.
+- Added layout for question and comments.
+- Added buttons regarding upvotes and downvotes.
+- Added post and comment owners name to layout.
+- Added related tag and language information.
+- Fix get backend services used for code execution page. 
+- Integrated post services for marking comments as answer, editing and deleting users questions and comments to question detail page. 
+- Added navigation bar and loading preview for question detail page. 
+- Added redirection for post and comment creator profiles.
+- Fix some bugs on the backend for question and comment related services.
+- Refactored the code execution component and split the components created.
+
+### Pull Requests:
+#### My Merged Prs: 
+- [PR #295](https://github.com/bounswe/bounswe2024group9/pull/295) Lead - No Conflicts.
+- [PR #311](https://github.com/bounswe/bounswe2024group9/pull/311) Lead - No Conflicts.
+#### Reviewed Pr:
+- [PR #259](https://github.com/bounswe/bounswe2024group9/pull/259)
+### Code related issues:
+- [# 263](https://github.com/bounswe/bounswe2024group9/issues/263)
+- [# 275](https://github.com/bounswe/bounswe2024group9/issues/275)
+- [# 296](https://github.com/bounswe/bounswe2024group9/issues/296)
+- [# 299](https://github.com/bounswe/bounswe2024group9/issues/299)
+- [# 300](https://github.com/bounswe/bounswe2024group9/issues/300)
     
 #### Mehmet Emin İpekdal
 - Responsibilities: Cover the functions with unittests.
