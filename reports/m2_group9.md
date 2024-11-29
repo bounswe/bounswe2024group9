@@ -1286,9 +1286,81 @@ Continued to deliver everything related to our mobile app including annotation f
 - [# 299](https://github.com/bounswe/bounswe2024group9/issues/299)
 - [# 300](https://github.com/bounswe/bounswe2024group9/issues/300)
     
-#### Mehmet Emin İpekdal
-- Responsibilities: Cover the functions with unittests.
-- Main Contributions: 
---- By covering edge cases (switching vote types, invalid inputs, or resource non-existence), I have strengthened the system's resilience and reliability. This not only improves the application’s robustness but also enhances user trust, ensuring that their actions are accurately reflected in the platform. These tests serve as a foundation for future development, reducing the risk of regression and promoting codebase stability.
-- Pull Requests:
--- [PR #307](https://github.com/bounswe/bounswe2024group9/pull/307)
+## Mehmet Emin İpekdal
+### Responsibilities: 
+- Cover the general modals with unittests.
+- Cover the new added API calls in user_views.py, comment_views.py and utilization_views.py with unittests.
+- Fix the merge conflicts of 272-emin-add-unittests branch with main branch.
+
+### API Calls Coverage:
+
+     
+```mehme@DESKTOP-JONRJOU MINGW64 ~/Desktop/Workspace/cmpe451group9/bounswe2024group9/django_project_491 (main)
+$ python manage.py test
+Connection successful!
+Tables in the database:
+('auth_group',)
+('auth_group_permissions',)
+('auth_permission',)
+('auth_user',)
+('auth_user_groups',)
+('auth_user_user_permissions',)
+('django_admin_log',)
+('django_app_annotation',)
+('django_app_comment',)
+('django_app_comment_vote',)
+('django_app_question',)
+('django_app_question_reported_by',)
+('django_app_question_vote',)
+('django_app_topic',)
+('django_app_user',)
+('django_app_user_bookmarks',)
+('django_content_type',)
+('django_migrations',)
+('django_session',)
+('token_blacklist_blacklistedtoken',)
+('token_blacklist_outstandingtoken',)
+Found 28 test(s).
+Creating test database for alias 'default'...
+System check identified some issues:
+
+WARNINGS:
+?: (mysql.W002) MySQL Strict Mode is not set for database connection 'default'
+        HINT: MySQL's Strict Mode fixes many data integrity problems in MySQL, such as data truncation upon insertion, by escalating warnings into errors. It is strongly recommended you activate it. See: https://docs.djangoproject.com/en/5.1/ref/databases/#mysql-sql-mode
+
+System check identified 1 issue (0 silenced).
+.Request successful.
+Submission created successfully. Token: 96899289-26f5-4245-9f82-22b665fb301e
+.Request successful.
+.....Request successful.
+Submission created successfully. Token: c874c075-4eee-492e-b65d-d8957ce51fae
+.....................
+----------------------------------------------------------------------
+Ran 28 tests in 125.683s
+
+OK
+Destroying test database for alias 'default'...
+(venv)
+```
+
+### Main Contributions: 
+- By covering edge cases (switching vote types, invalid inputs, or resource non-existence), I have strengthened the system's resilience and reliability. This not only improves the application’s robustness but also enhances user trust, ensuring that their actions are accurately reflected in the platform. These tests serve as a foundation for future development, reducing the risk of regression and promoting codebase stability.
+- I was responsible for resolving errors between unittest branch and the main, since there were a lot of functions added, and there were many pages updated in both frontend and backend, there were many conflicts. I have spent a significant time resolving them. All my commits can be seen [here](https://github.com/bounswe/bounswe2024group9/commits/main/?author=mehmeteminipekdal).
+- I have added forgotten responses, incorrect field calls and forgotten urls for some methods as [here](https://github.com/bounswe/bounswe2024group9/commit/b0bbee6167321394ee7dd3caca88fe61475839b0#diff-683d51ec240b5cd58b15af6031e1cb0a457b3456dba4d0bbd1d4252237685e1bR26).
+- I was the note taker for [meeting #4](https://github.com/bounswe/bounswe2024group9/wiki/Meeting-Notes-%234-15.11.2024).
+
+### Code-related significant issues:
+
+ - [#272](https://github.com/bounswe/bounswe2024group9/issues/272)
+
+### Management-related significant issues:
+
+ - [#266](https://github.com/bounswe/bounswe2024group9/issues/266)
+
+### Pull Requests:
+
+- [PR #307](https://github.com/bounswe/bounswe2024group9/pull/307)
+
+### Additional Information:
+
+- I have spent most of my time with the errors and debugging the functionality of the methods. There were a lot of methods added and their fields were changing with time. I needed to adapt every field that is added to a modal. Those changes caused significant incompatibilities, because some of the fields were deleted and caused my correctly functioning unittests to get errors.
