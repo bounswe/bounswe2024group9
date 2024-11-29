@@ -4,7 +4,67 @@ import json
 from django.views.decorators.csrf import csrf_exempt
 from ..Utils.utils import *
 from ..Utils.forms import *
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
+from rest_framework.decorators import api_view
 
+
+@csrf_exempt
+@swagger_auto_schema(
+    method='post',
+    operation_summary="Create Annotation",
+    operation_description="Create a new annotation with optional parent annotation support",
+    manual_parameters=[
+        openapi.Parameter(
+            name='User-ID',
+            in_=openapi.IN_HEADER,
+            type=openapi.TYPE_INTEGER,
+            description="ID of the user creating the annotation",
+            required=True
+        ),
+    ],
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        required=['text'],
+        properties={
+            'text': openapi.Schema(type=openapi.TYPE_STRING, description="The text the person wants to annotate to look after"),
+            'language_qid': openapi.Schema(type=openapi.TYPE_INTEGER, description="Language QID to fetch when the specified language is searched", default=0),
+            'annotation_starting_point': openapi.Schema(type=openapi.TYPE_INTEGER, description="Annotation starting point in the text", default=0),
+            'annotation_ending_point': openapi.Schema(type=openapi.TYPE_INTEGER, description="Annotation ending point in the text", default=0),
+            'type': openapi.Schema(type=openapi.TYPE_STRING, description="Type of annotation to decide main annnoation or annotation comment(optional, use 'annotation_child' for child annotations)"),
+            'parent_id': openapi.Schema(type=openapi.TYPE_INTEGER, description="Parent annotation ID (required if type is 'annotation_child')")
+        }
+    ),
+    responses={
+        201: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'success': openapi.Schema(type=openapi.TYPE_STRING, description="Success message"),
+                'annotation_id': openapi.Schema(type=openapi.TYPE_INTEGER, description="ID of the created annotation"),
+                'parent_id': openapi.Schema(type=openapi.TYPE_INTEGER, description="ID of the parent annotation (if applicable)", nullable=True)
+            }
+        ),
+        400: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'error': openapi.Schema(type=openapi.TYPE_STRING, description="Error message")
+            }
+        ),
+        404: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'error': openapi.Schema(type=openapi.TYPE_STRING, description="Error message")
+            }
+        ),
+        405: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'error': openapi.Schema(type=openapi.TYPE_STRING, description="Invalid request method error")
+            }
+        )
+    }
+)
+@api_view(['POST']) 
 @csrf_exempt
 def create_annotation(request):
     if request.method == 'POST':

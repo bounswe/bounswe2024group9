@@ -15,8 +15,65 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.urls import path, re_path
+from rest_framework import permissions
+from drf_yasg.views import get_schema_view
+from drf_yasg import openapi
+
+
+schema_view = get_schema_view(
+    openapi.Info(
+        title="Koduyorum API",
+        default_version='v1',
+        description="""
+            Kodyorum API is a large platform offering questions and answers, along with learning for programming. The main features of the API include the following, among others:
+
+            1. User System:
+            - Authenticate users and managed user profiles
+            - Users share and love
+            - Edit a profile and selected language
+
+            2. Question Platform:
+            - Create, read, update and delete questions.
+            - Remove questions on programming languages, tags and topics.
+            - Bookmark and report functionality
+            - Sorting questions by time, popularity, and relevance
+
+            3. Interactive Features:
+            - Comment system with answer marking
+            - Comment and question voting system
+            - Ability to run code in multiple programming languages
+            - Bookmarking system to save interesting questions
+
+            4. Wiki: Add
+            - Looking up programming information
+            - Working with data from Wikipedia
+            - Language Specific Annotations and Resources
+
+            5. Feeding System:W
+
+            - Customized feeds by using what user likes 
+            - Question of the day feature 
+            - Topic-based content organization 
+            - Dynamic content update It supports both authenticated and public access, with some extra features in the case of registered users.
+        """,        
+        contact=openapi.Contact(email="cmpe451.9@gmail.com"),
+        license=openapi.License(name="BSD License"),
+    ),
+    public=True,
+    permission_classes=(permissions.AllowAny,),
+)
 
 urlpatterns = [
+    re_path(r'^swagger(?P<format>\.json|\.yaml)$', 
+        schema_view.without_ui(cache_timeout=0), 
+        name='schema-json'),
+    path('swagger/', 
+        schema_view.with_ui('swagger', cache_timeout=0), 
+        name='schema-swagger-ui'),
+    path('redoc/', 
+        schema_view.with_ui('redoc', cache_timeout=0), 
+        name='schema-redoc'),
     path('admin/', admin.site.urls),
     path('', include('django_app.urls')),
 
