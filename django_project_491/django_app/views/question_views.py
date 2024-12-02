@@ -186,7 +186,7 @@ def create_question(request: HttpRequest) -> HttpResponse:
                 is_valid_question = question_controller.is_valid_question(data)
                 if(not is_valid_question):
                     print("Question is not valid")
-                    return JsonResponse({'error': 'Question is not valid'}, status=400)
+                    return JsonResponse({'error': 'Question is not approved by LLM'}, status=400)
             except Exception as e:
                 print(e)
 

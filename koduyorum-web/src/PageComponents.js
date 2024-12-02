@@ -22,7 +22,7 @@ const LogoutButton = () => {
       });
   };
 
-  return <button className="nav-link" onClick={handleLogout}>Log Out</button>;
+  return <button className="px-4 py-2 text-white hover:bg-blue-200 rounded-md transition-colors" onClick={handleLogout}>Log Out</button>;
 };
 
 // Navbar Component with Search Functionality
@@ -51,8 +51,8 @@ export const Navbar = ({
   };
 
   return (
-    <div className="navbar">
-      <div className="navbar-left">
+    <div className="navbar flex items-center justify-between w-full px-4 py-2">
+      <div className="navbar-left flex items-center gap-4">
         <img
           id="bar_logo"
           src="/resources/icon2-transparent.png"

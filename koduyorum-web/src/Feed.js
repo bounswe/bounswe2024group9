@@ -309,7 +309,6 @@ function Feed() {
             searched={searched}
             handleSearchResultClick={handleSearchResultClick}
           />
-
           <div className="feed-content">
             {/* Left Edge - Popular Tags */}
             <LeftSidebar handleTagClick={handleTagClick} />
@@ -329,7 +328,7 @@ function Feed() {
                   </button>
                 </div>
               )}
-              <h2 className="section-title">Questions</h2>
+              <h2 className="section-title">Questions</h2>            
               <div className="filters">
                 <select
                   className="filter-dropdown"
@@ -355,7 +354,7 @@ function Feed() {
                   value={sort}
                   onChange={(e) => setSort(e.target.value)}
                 >
-                  <option value="newest">Newest</option>
+                  <option value="newest" >Newest</option>
                   <option value="popular">Most Popular</option>
                 </select>
               </div>

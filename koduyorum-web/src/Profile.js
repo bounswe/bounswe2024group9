@@ -4,6 +4,8 @@ import { Navbar } from './PageComponents';
 import { LoadingComponent } from './LoadingPage';
 import PostPreview from './PostPreview';
 import './Profile.css';
+import { showNotification } from './NotificationCenter';
+import NotificationCenter from './NotificationCenter';
 
 const Profile = () => {
     const { username } = useParams();
@@ -59,7 +61,8 @@ const Profile = () => {
         const userId = localStorage.getItem('user_id'); // Fetch the user ID from localStorage
         if (!userId) {
             console.error('User ID is undefined in localStorage');
-            alert('Unable to upload profile picture. Please try again later.');
+            showNotification('Unable to upload profile picture. Please try again later.');
+            // alert('Unable to upload profile picture. Please try again later.');
             return;
         }
 
@@ -86,14 +89,17 @@ const Profile = () => {
                         ...prevData,
                         profilePicture: updatedProfilePictureUrl,
                     }));
-                    alert('Profile picture updated successfully!');
+                    showNotification('Profile picture updated successfully!');
+                    // alert('Profile picture updated successfully!');
                 } else {
                     console.error('Failed to upload profile picture');
-                    alert('Failed to upload profile picture. Please try again.');
+                    showNotification('Failed to upload profile picture. Please try again.');
+                    // alert('Failed to upload profile picture. Please try again.');
                 }
             } catch (error) {
                 console.error('Error uploading profile picture:', error);
-                alert('An error occurred while uploading the profile picture.');
+                // alert('An error occurred while uploading the profile picture.');
+                showNotification('An error occurred while uploading the profile picture.');
             }
         }
     };
@@ -173,11 +179,14 @@ const Profile = () => {
                     }
                 );
                 if (response.ok) {
-                    alert('Account deleted successfully.');
+                    // alert('Account deleted successfully.');
+                    showNotification('Account deleted successfully.');
+                    
                     localStorage.removeItem('authToken');
                     localStorage.removeItem('user_id');
                     localStorage.removeItem('username');
-                    navigate('/signup');
+                    await new Promise(resolve => setTimeout(resolve, 2000)); // Wait for 2 seconds
+                    navigate('/login');
                 } else {
                     console.error('Failed to delete account');
                 }
@@ -195,7 +204,8 @@ const Profile = () => {
                 body: JSON.stringify({ email: profileData.email }),
             });
             if (response.ok) {
-                alert('A password update link has been sent to your email.');
+                // alert('A password update link has been sent to your email.');
+                showNotification('A password update link has been sent to your email.');
             } else {
                 console.error('Failed to send password reset link');
             }
@@ -213,6 +223,7 @@ const Profile = () => {
             ) : (
                 <div>
                     <Navbar />
+                    <NotificationCenter />
 
                     <div className="profile-page">
                         <div className="profile-header">
