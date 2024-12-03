@@ -206,7 +206,10 @@ const fetchSearchResults = async (query) => {
         <span className="annotation" key={annotation_starting_point}>
           <em>{text.slice(annotation_starting_point, annotation_ending_point)}</em>
           <div className="annotation-tooltip">
-            {annotationText}  {/* This will show the annotation text */}
+            {annotationText}  {/* This will show the annotation text 
+            TODO: do not show icons to annotations not written by the logged in user
+            */}
+
             <button
               className="edit-icon"
               onClick={() => handleEditAnnotation(annotationId, annotation_starting_point, annotation_ending_point)} // Call edit handler
