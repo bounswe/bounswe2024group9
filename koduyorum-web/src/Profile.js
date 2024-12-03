@@ -211,143 +211,155 @@ const Profile = () => {
         {loading ? (
                 <LoadingComponent /> // Show loading screen while data is being fetched
             ) : (
-        
-            <div className="profile-page">
-                <Navbar />
-                <div className="profile-header">
-                    <div className="profile-picture">
-                        <img
-                            src={profileData.profilePicture || `/resources/default-pp.jpeg`}
-                            alt="Profile"
-                        />
+                <div>
+                    <Navbar />
+
+                    <div className="profile-page">
+                        <div className="profile-header">
+                            <div className="profile-picture">
+                                <img
+                                    src={profileData.profilePicture || `/resources/default-pp.jpeg`}
+                                    alt="Profile"
+                                />
+                                {isOwner && (
+                                    <>
+                                        <div className="profile-picture-overlay">UPDATE</div>
+                                        <input type="file" onChange={handleProfilePictureUpload} />
+                                    </>
+                                )}
+                            </div>
+                            <div className="profile-name">
+                                <h1>{profileData.username}</h1>
+                                <p className="bio">{profileData.bio || "No bio provided."}</p>
+                                {isOwner && (
+                                    <button className="edit-button" onClick={openEditPopup}>
+                                        Edit Profile
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+
                         {isOwner && (
-                            <>
-                                <div className="profile-picture-overlay">UPDATE</div>
-                                <input type="file" onChange={handleProfilePictureUpload} />
-                            </>
-                        )}
-                    </div>
-                    <div className="profile-name">
-                        <h1>{profileData.username}</h1>
-                        <p className="bio">{profileData.bio || "No bio provided."}</p>
-                        {isOwner && (
-                            <button className="edit-button" onClick={openEditPopup}>
-                                Edit Profile
+                        <div className="profile-tabs">
+                            <button
+                                className={`tab ${activeTab === 'questions' ? 'active' : ''}`}
+                                onClick={() => setActiveTab('questions')}
+                            >
+                                Questions
                             </button>
+                            <button
+                                className={`tab ${activeTab === 'bookmarks' ? 'active' : ''}`}
+                                onClick={() => setActiveTab('bookmarks')}
+                            >
+                                Bookmarks
+                            </button>
+                        </div>
+                        )}
+
+                        <div className="profile-content">
+                            {activeTab === 'questions' && (
+                                <div className="content-list">
+                                    {profileData.questions.length > 0 ? (
+                                        profileData.questions.map((q) => (
+                                            <PostPreview
+                                                key={q.id}
+                                                post={{
+                                                    post_id: q.id,
+                                                    title: q.title,
+                                                    description: q.details,
+                                                    programmingLanguage: q.language,
+                                                    topic: q.tags?.join(', '),
+                                                    tags: q.tags,
+                                                    answered: q.answered,
+                                                    likes: q.upvotes,
+                                                    comments: q.comments?.length,
+                                                }}
+                                                onClick={() => navigate(`/question/${q.id}`)}
+                                            />
+                                        ))
+                                    ) : (
+                                        <p>You do not have any questions.</p>
+                                    )}
+                                </div>
+                            )}
+                            {activeTab === 'bookmarks' && (
+                                <div className="content-list">
+                                    {profileData.bookmarks.length > 0 ? (
+                                        profileData.bookmarks.map((b) => (
+                                            <PostPreview
+                                                key={b.id}
+                                                post={{
+                                                    post_id: b.id,
+                                                    title: b.title,
+                                                    description: b.details,
+                                                    programmingLanguage: b.language,
+                                                    topic: b.tags?.join(', '),
+                                                    tags: b.tags, 
+                                                    answered: b.answered,
+                                                    likes: b.upvotes,
+                                                    comments: b.comments?.length,
+                                                }}
+                                                onClick={() => navigate(`/question/${b.id}`)}
+                                            />
+                                        ))
+                                    ) : (
+                                        <p>You do not have any bookmarks.</p>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                        
+                        {isOwner && (
+                            <div className="account-actions">
+                                <button className="edit-button" onClick={handlePasswordUpdate}>Update Password</button>
+                                <button onClick={handleDeleteAccount} className="delete-account">
+                                    Delete Account
+                                </button>
+                            </div>
+                        )}
+
+                        {isEditPopupOpen && (
+                        <div className="edit-popup">
+                            <div className="popup-content">
+                            <h3>Edit Profile</h3>
+                            {error && <p className="error-message">{error}</p>}
+                            {successMessage && <p className="success-message">{successMessage}</p>}
+                            <form onSubmit={handleEditSubmit}>
+                                <div className="form-group">
+                                <label>Username:</label>
+                                <input
+                                    type="text"
+                                    value={editData.username}
+                                    onChange={(e) => setEditData({ ...editData, username: e.target.value })}
+                                    required
+                                />
+                                </div>
+                                <div className="form-group">
+                                <label>Email:</label>
+                                <input
+                                    type="email"
+                                    value={editData.email}
+                                    onChange={(e) => setEditData({ ...editData, email: e.target.value })}
+                                    required
+                                />
+                                </div>
+                                <div className="form-group">
+                                <label>Bio:</label>
+                                <textarea
+                                    value={editData.bio}
+                                    onChange={(e) => setEditData({ ...editData, bio: e.target.value })}
+                                />
+                                </div>
+                                <button type="submit" className="save-button">Save Changes</button>
+                                <button type="button" className="cancel-button" onClick={closeEditPopup}>
+                                Cancel
+                                </button>
+                            </form>
+                            </div>
+                        </div>
                         )}
                     </div>
                 </div>
-
-                {isOwner && (
-                  <div className="profile-tabs">
-                      <button
-                          className={`tab ${activeTab === 'questions' ? 'active' : ''}`}
-                          onClick={() => setActiveTab('questions')}
-                      >
-                          Questions
-                      </button>
-                      <button
-                          className={`tab ${activeTab === 'bookmarks' ? 'active' : ''}`}
-                          onClick={() => setActiveTab('bookmarks')}
-                      >
-                          Bookmarks
-                      </button>
-                  </div>
-                )}
-
-                <div className="profile-content">
-                    {activeTab === 'questions' && (
-                        <div className="content-list">
-                            {profileData.questions.map((q) => (
-                                <PostPreview
-                                    key={q.id}
-                                    post={{
-                                        post_id: q.id,
-                                        title: q.title,
-                                        description: q.details,
-                                        programmingLanguage: q.language,
-                                        topic: q.tags?.join(', '),
-                                        answered: q.answered,
-                                        likes: q.upvotes,
-                                        comments: q.comments?.length,
-                                    }}
-                                    onClick={() => navigate(`/question/${q.id}`)}
-                                />
-                            ))}
-                        </div>
-                    )}
-                    {activeTab === 'bookmarks' && (
-                        <div className="content-list">
-                            {profileData.bookmarks.map((b) => (
-                                <PostPreview
-                                    key={b.id}
-                                    post={{
-                                        post_id: b.id,
-                                        title: b.title,
-                                        description: b.details,
-                                        programmingLanguage: b.language,
-                                        topic: b.tags?.join(', '),
-                                        answered: b.answered,
-                                        likes: b.upvotes,
-                                        comments: b.comments?.length,
-                                    }}
-                                    onClick={() => navigate(`/question/${b.id}`)}
-                                />
-                            ))}
-                        </div>
-                    )}
-                </div>
-                
-                {isOwner && (
-                    <div className="account-actions">
-                        <button className="edit-button" onClick={handlePasswordUpdate}>Update Password</button>
-                        <button onClick={handleDeleteAccount} className="delete-account">
-                            Delete Account
-                        </button>
-                    </div>
-                )}
-
-                {isEditPopupOpen && (
-                  <div className="edit-popup">
-                    <div className="popup-content">
-                      <h3>Edit Profile</h3>
-                      {error && <p className="error-message">{error}</p>}
-                      {successMessage && <p className="success-message">{successMessage}</p>}
-                      <form onSubmit={handleEditSubmit}>
-                        <div className="form-group">
-                          <label>Username:</label>
-                          <input
-                            type="text"
-                            value={editData.username}
-                            onChange={(e) => setEditData({ ...editData, username: e.target.value })}
-                            required
-                          />
-                        </div>
-                        <div className="form-group">
-                          <label>Email:</label>
-                          <input
-                            type="email"
-                            value={editData.email}
-                            onChange={(e) => setEditData({ ...editData, email: e.target.value })}
-                            required
-                          />
-                        </div>
-                        <div className="form-group">
-                          <label>Bio:</label>
-                          <textarea
-                            value={editData.bio}
-                            onChange={(e) => setEditData({ ...editData, bio: e.target.value })}
-                          />
-                        </div>
-                        <button type="submit" className="save-button">Save Changes</button>
-                        <button type="button" className="cancel-button" onClick={closeEditPopup}>
-                          Cancel
-                        </button>
-                      </form>
-                    </div>
-                  </div>
-                )}
-            </div>
             )}
         </div>
     );

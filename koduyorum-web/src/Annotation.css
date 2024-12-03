@@ -1,0 +1,45 @@
+.annotation {
+    position: relative;
+    cursor: pointer;
+    font-style: italic; /* Italicize the text to differentiate it from the rest */
+    background-color: cyan; /* Light yellow background for highlight effect */
+    padding: 2px; /* Add padding for better appearance */
+    border-radius: 2px; /* Slightly round the edges to mimic a marker stroke */
+    display: inline-block; /* Keep it inline while allowing styling */
+    color: black; /* Ensure the text is readable */
+}
+
+  
+  .annotation-tooltip {
+    position: absolute;
+    top: 120%;
+    left: 20%;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 10px; /* Comfortable padding */
+    border-radius: 3px;
+    font-size: 12px;
+    max-width: 300px; /* Limit width to prevent overflowing */
+    white-space: nowrap;
+    z-index: 10;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  
+  .annotation:hover .annotation-tooltip {
+    opacity: 1;
+  }
+  .edit-icon, .delete-icon {
+    background: none;
+    border: none;
+    color: #ffffff; /* White color to match the tooltip */
+    font-size: 16px; /* Adjust icon size */
+    cursor: pointer;
+    margin-left: 8px; /* Space between text and icon */
+    padding: 4px;
+    transition: color 0.3s ease;
+  }
+  
+  .edit-icon,.delete-icon:hover {
+    color: #ff4444; /* Highlight the icon in red on hover */
+  }

@@ -1,0 +1,84 @@
+.post-comment-container {
+    max-width: 600px;
+    margin: 2rem auto;
+    padding: 1.5rem;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.post-comment-container h2 {
+    color: #333;
+    text-align: center;
+    margin-bottom: 1rem;
+    font-size: 1.8rem;
+}
+
+.post-comment-input,
+.post-comment-textarea,
+.post-comment-language select {
+    width: 100%;
+    padding: 0.75rem;
+    margin: 0.5rem 0;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+
+.post-comment-textarea {
+    height: 100px;
+    resize: vertical;
+}
+
+.code-snippet {
+    height: 80px;
+    font-family: monospace;
+    background-color: #f9f9f9;
+}
+
+.post-comment-language {
+    margin: 1rem 0;
+}
+
+.post-comment-language label {
+    font-weight: bold;
+    color: #333;
+    margin-right: 10px;
+}
+
+.post-comment-submit {
+    width: 100%;
+    padding: 0.75rem;
+    background-color: #0077b6;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.post-comment-submit:hover {
+    background-color: #005f8d;
+}
+
+.popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .popup-content {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    width: 300px;
+    text-align: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }

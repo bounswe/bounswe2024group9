@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import './ResetPassword.css';
 
 const ResetPassword = () => {
-    const { token, uid } = useParams(); // Extract token and uid from the URL
+    const { token, uid } = useParams(); 
     const navigate = useNavigate();
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -12,6 +12,7 @@ const ResetPassword = () => {
     const [loading, setLoading] = useState(false);
 
     const handlePasswordReset = async () => {
+
         setError('');
         if (newPassword !== confirmPassword) {
             setError('Passwords do not match!');
@@ -20,7 +21,7 @@ const ResetPassword = () => {
 
         try {
             setLoading(true);
-            const response = await fetch(`${process.env.REACT_APP_API_URL}/update_password/`, {
+            const response = await fetch(`${process.env.REACT_APP_API_URL}/reset_password/${uid}/${token}/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -28,8 +29,6 @@ const ResetPassword = () => {
                 body: JSON.stringify({
                     new_password: newPassword,
                     confirm_password: confirmPassword,
-                    token,
-                    uid,
                 }),
             });
 

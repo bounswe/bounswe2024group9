@@ -9,6 +9,26 @@ from .Utils.utils import *
 # python manage.py makemigrations
 # python manage.py migrate
 
+def check_status(status):
+    status_list = [
+    "In Queue",
+    "Processing",
+    "Accepted",
+    "Wrong Answer",
+    "Time Limit Exceeded",
+    "Compilation Error",
+    "Runtime Error (SIGSEGV)",
+    "Runtime Error (SIGXFSZ)",
+    "Runtime Error (SIGFPE)",
+    "Runtime Error (SIGABRT)",
+    "Runtime Error (NZEC)",
+    "Runtime Error (Other)",
+    "Internal Error",
+    "Exec Format Error"
+    ]
+
+    return status_list[status["id"]-1]
+
 class UserType(Enum):
     ADMIN = "admin"
     USER = "user"
@@ -53,18 +73,25 @@ class Comment(models.Model):
     # Link each comment to a user (author)
     author = models.ForeignKey('User', on_delete=models.CASCADE, related_name='authored_comments')  # Updated related_name
 
-    def run_snippet(self): # TODO
+    def run_snippet(self):
         result = run_code(self.code_snippet, self.language_id)
-        outs = result['stdout'].split('\n')
-        return outs
+        if result['stderr']:
+            return [result['stderr']]
 
-    # def upvote(self):
-    #     self.upvotes += 1
-    #     self.save()
+        elif result['status']['id'] != 3 and result['status']['id'] != 4:
+            return [check_status(result['status'])]
 
-    # def downvote(self):
-    #     self.upvotes -= 1
-    #     self.save()
+        elif result['stdout'] is None:
+            return ["NO OUTPUT for STDOUT"]
+
+        else:
+            return result['stdout'].split('\n')
+
+    def save(self, *args, **kwargs):
+        # Call the original save method
+        super().save(*args, **kwargs)
+        # Check and promote user after saving the comment
+        self.author.check_and_promote()
 
 class Question(models.Model):
     _id = models.AutoField(primary_key=True)
@@ -74,31 +101,51 @@ class Question(models.Model):
     tags = models.JSONField(blank=True, default=list)  # Example: ['tag1', 'tag2']
     details = models.TextField()
     code_snippet = models.TextField()
-
     upvotes = models.IntegerField(default=0)
-    created_at  = models.DateTimeField(auto_now_add=True)
-    topic = models.CharField(max_length=100, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
     answered = models.BooleanField(default=False)
     reported_by = models.ManyToManyField('User', related_name='reported_questions', blank=True)
 
     author = models.ForeignKey('User', on_delete=models.CASCADE, related_name='questions')
 
+    def __str__(self):
+        return f"{self.title} ({self.language})"
+    
     def run_snippet(self): # TODO
         result = run_code(self.code_snippet, self.language_id)
-        outs = result['stdout'].split('\n')
-        return outs
+        if result['stderr']:
+            return [result['stderr']]
 
-    def mark_as_answered(self): # TODO
+        elif result['status']['id'] != 3 and result['status']['id'] != 4:
+            return [check_status(result['status'])]
+
+        elif result['stdout'] is None:
+            return ["NO OUTPUT for STDOUT"]
+
+        else:
+            return result['stdout'].split('\n')
+
+    def mark_as_answered(self, comment_id): # TODO
         self.answered = True
         self.save()
 
-    # def upvote(self):
-    #     self.upvotes += 1
-    #     self.save()
+    def save(self, *args, **kwargs):
+        # Call the original save method
+        super().save(*args, **kwargs)
+        # Check and promote user after saving the question
+        self.author.check_and_promote()
 
-    # def downvote(self):
-    #     self.upvotes -= 1
-    #     self.save()
+    def get_topic_info(self):
+            if self.topic:
+                try:
+                    topic_obj = Topic.objects.get(name__iexact=self.topic)
+                    return {
+                        'label': topic_obj.name,
+                        'url': topic_obj.related_url,
+                    }
+                except Topic.DoesNotExist:
+                    return {'label': self.topic, 'url': None}
+            return {'label': None, 'url': None}
 
 
 class UserManager(BaseUserManager):
@@ -209,3 +256,68 @@ class User(AbstractBaseUser):
             'upvotes': bookmark.upvotes,
             'creationDate': bookmark.created_at.strftime('%Y-%m-%d %H:%M:%S'),
         } for bookmark in self.bookmarks.all()]
+
+    def calculate_total_points(self):
+        question_points = self.questions.count() * 2
+        comment_points = sum(5 if comment.answer_of_the_question else 1 for comment in self.authored_comments.all())
+        return question_points + comment_points
+
+    def check_and_promote(self):
+        total_points = self.calculate_total_points()
+        promotion_threshold = 100  # A threshold to promote a user to a super user, or demote super user to a user
+
+        if total_points >= promotion_threshold and self.userType != UserType.SUPER_USER:
+            self.userType = UserType.SUPER_USER
+            self.save()
+        
+        elif total_points < promotion_threshold and self.userType == UserType.SUPER_USER:
+            self.userType = UserType.USER
+            self.save()
+        
+        return self.userType
+    
+
+class Annotation(models.Model):
+    _id = models.AutoField(primary_key=True)
+    text = models.TextField()
+    language_qid = models.IntegerField(default=0)  # QID of the question example : Q24582
+    annotation_starting_point = models.IntegerField(default=0) 
+    annotation_ending_point = models.IntegerField(default=0)
+    annotation_date = models.DateTimeField(auto_now_add=True)
+    author = models.ForeignKey('User', on_delete=models.CASCADE, related_name='annotations')
+    parent_annotation = models.ForeignKey(
+        'self',
+        on_delete=models.CASCADE,
+        related_name='child_annotations',
+        null=True,
+        blank=True
+    )
+
+    def __str__(self):
+        return self.text
+
+    def __repr__(self):
+        return self.text
+
+    def __unicode__(self):
+        return self.text
+        
+        
+class Topic(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    related_url = models.URLField()
+
+    def __str__(self):
+        return self.name
+
+    @staticmethod
+    def get_all_topics():
+        return Topic.objects.all()
+
+    @staticmethod
+    def get_url_for_topic(topic_name):
+        try:
+            topic = Topic.objects.get(name__iexact=topic_name)
+            return topic.related_url
+        except Topic.DoesNotExist:
+            return None
