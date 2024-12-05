@@ -31,6 +31,7 @@ const SearchResults = () => {
   const [languageId, setLanguageId] = useState(null);
   const [annotationId, setAnnotationId] = useState(null);
   const [topContributors, setTopContributors] = useState([]); // Top Contributors state
+  const [originalText, setOriginalText] = useState(null);
 
 
   const { wiki_id, wiki_name} = useParams(); // Get wiki_id from the URL
@@ -188,6 +189,7 @@ const SearchResults = () => {
       const annotationData = infoQuestionAnnotationData.annotations;
       const topContributors = infoQuestionAnnotationData.top_contributors; // Top Contributors data
 
+      setOriginalText(infoData.wikipedia.info);
       setInfoData(infoData || { mainInfo: [], instances: [], wikipedia: {} });
       setQuestionData(questionData || []);
       setAnnotationData(annotationData || []);
@@ -308,21 +310,25 @@ const SearchResults = () => {
 
   const handleTextSelection = (e) => {
     const selection = window.getSelection();
-    if (selection && selection.rangeCount > 0 && selection.toString().trim() !== '') {
-      const range = selection.getRangeAt(0); // Get the selected range
   
-      const startOffset = range.startOffset; // Start of the selection in the container
-      const endOffset = range.endOffset; // End of the selection in the container
+    if (selection && selection.rangeCount > 0 && selection.toString().trim() !== '') {
+      const range = selection.getRangeAt(0);
+      const selectedText = selection.toString();
+      const plainText = originalText; // Use the original full text
+      const startOffset = plainText.indexOf(selectedText);
+      const endOffset = startOffset + selectedText.length;
+  
+      if (startOffset === -1 || endOffset > plainText.length) {
+        console.error("Error calculating offsets. Selection might span across multiple elements or annotations.");
+        return;
+      }
+  
+      setSelectedText(selectedText);
+      setStartIndex(startOffset);
+      setEndIndex(endOffset);
   
       const mouseX = e.clientX;
       const mouseY = e.clientY;
-
-      console.log("Text selected:", selection.toString());
-      console.log("Selection start index:", startOffset, "end index:", endOffset);
-
-      setSelectedText(selection.toString());
-      setStartIndex(startOffset);
-      setEndIndex(endOffset);
       setModalVisible(true);
       setModalPosition({ top: mouseY, left: mouseX });
     } else {
