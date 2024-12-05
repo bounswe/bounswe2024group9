@@ -227,7 +227,8 @@ const SearchResults = () => {
       
       // Add annotated text with tooltip
       annotatedText.push(
-        <span className="annotation" key={annotationId}>
+        <dev class="annotation-container">
+        <span className="annotation" key={annotation_starting_point}>
           <em>{text.slice(annotation_starting_point, annotation_ending_point)}</em>
           <div className="annotation-tooltip">
             {annotationText}  {/* This will show the annotation text */}
@@ -245,6 +246,7 @@ const SearchResults = () => {
             </button>
           </div>
         </span>
+        </dev>
       );
   
       // Update the lastIndex to the end of the annotation
