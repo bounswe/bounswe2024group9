@@ -680,6 +680,7 @@ def get_all_annotations(request):
                     'annotation_ending_point': annotation.annotation_ending_point,
                     'annotation_date': annotation.annotation_date,
                     'author_id': annotation.author.user_id,
+                    "author_name": annotation.author.username,
                     'parent_id': annotation.parent_annotation._id if annotation.parent_annotation else None,
                     'child_annotations': [
                         {
@@ -689,7 +690,8 @@ def get_all_annotations(request):
                             'annotation_starting_point': child.annotation_starting_point,
                             'annotation_ending_point': child.annotation_ending_point,
                             'annotation_date': child.annotation_date,
-                            'author_id': child.author.user_id
+                            'author_id': child.author.user_id,
+                            "author_name": child.author.username
                         } for child in annotation.child_annotations.all()
                     ]
                 }
