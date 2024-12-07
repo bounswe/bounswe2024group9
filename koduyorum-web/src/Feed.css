@@ -84,20 +84,8 @@ body {
     justify-content: space-between; 
   }
   
-  .tags-container, .contributors-container {
-  width: 15%;
-  background-color: white;
-  padding: 1rem;
-  border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  }
 
-  .tags-list, .contributors-list {
-    list-style: none;
-    padding: 0;
-  }
-  
-  .tag-link, .contributor {
+  .contributor {
     color: #0077b6;
     text-decoration: none;
   }
@@ -107,18 +95,146 @@ body {
     margin: 0 2rem;
   }
   
-  .filters {
-    display: flex;
-    justify-content: flex-start;
-    gap: 1rem;
-    margin-bottom: 1rem;
+  .tags-container,
+  .filters-container,
+  .contributors-container {
+      background-color: white;
+      padding: 1rem;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      width: 100%; 
+  }
+  
+  .sorters{
+    width: 15%;
+    margin: 10px 0 20px 0;
+  }
+  
+  .contributors-container {
+      width: 15%;
+  }
+  
+  .filters-container {
+      margin-top: 1rem;
+  }
+  
+  /* Lists */
+  .tags-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+  }
+  .apply-filters-btn {
+    width: 100%;
+    padding: 10px;
+    margin-top: 1rem;
+    background-color: #0077b6;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+
+  .tag-filter-container {
+    margin: 1rem 0;
+}
+
+.tag-select {
+    width: 100%;
+}
+
+/* Style the react-select dropdown to match your theme */
+.tag-select .select__control {
+    border: 1px solid #e0e0e0;
+    border-radius: 5px;
+    min-height: 38px;
+}
+
+.tag-select .select__control:hover {
+    border-color: #0077b6;
+}
+
+.tag-select .select__control--is-focused {
+    border-color: #0077b6;
+    box-shadow: 0 0 0 2px rgba(0, 119, 182, 0.1);
+}
+
+.tag-select .select__multi-value {
+    background-color: #e0f7fa;
+}
+
+.tag-select .select__multi-value__label {
+    color: #0077b6;
+}
+
+.tag-select .select__multi-value__remove:hover {
+    background-color: #b2ebf2;
+    color: #0077b6;
+}
+
+  .apply-filters-btn:hover {
+      background-color: #005f8d;
+  }
+
+  .apply-filters-btn:focus {
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(0, 119, 182, 0.1);
+  }
+  
+  /* Tag buttons */
+  .tag-link {
+      display: inline-block;
+      background-color: #e0f7fa;
+      color: #0077b6;
+      padding: 8px 15px;
+      margin-bottom: 8px;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.2s;
+  }
+  
+  .tag-link:hover {
+      background-color: #b2ebf2;
+  }
+  
+  /* Filter styles */
+  .filters-title {
+      color: #0077b6;
+      font-size: 1.5rem;
+      margin: 0 0 1rem 0;
+      font-weight: 500;
   }
   
   .filter-dropdown {
-    padding: 0.5rem;
-    border: 1px solid #ccc;
-    border-radius: 5px;
+      width: 100%;
+      padding: 8px 12px;
+      margin-bottom: 10px;
+      border: 1px solid #e0e0e0;
+      border-radius: 5px;
+      font-size: 0.9rem;
+      color: #333;
+      background-color: white;
+      cursor: pointer;
   }
+  
+  .filter-dropdown:hover {
+      border-color: #0077b6;
+  }
+  
+  .filter-dropdown:focus {
+      outline: none;
+      border-color: #0077b6;
+      box-shadow: 0 0 0 2px rgba(0, 119, 182, 0.1);
+  }
+  
+  .filter-dropdown:last-child {
+      margin-bottom: 0;
+  }
+
   
   .posts-list {
     display: flex;
@@ -173,9 +289,10 @@ body {
   }
   
   .section-title {
-    font-size: 1.2rem;
-    margin-bottom: 1rem;
     color: #0077b6;
+    font-size: 1.5rem;
+    margin: 0 0 1rem 0;
+    font-weight: 500;
   }
   
   .contributors-list {
@@ -231,11 +348,15 @@ body {
     }
   
     .tags-container,
-    .contributors-container {
-      width: 100%;
-      margin-bottom: 1rem;
+    .contributors-container,
+    .filters {
+        width: 100%;
+        margin-bottom: 1rem;
     }
-  
+
+    .filters {
+      order: -1; /* Makes filters appear at the top on mobile */
+  }
     .posts-container {
       margin: 0;
     }

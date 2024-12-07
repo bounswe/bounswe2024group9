@@ -15,7 +15,7 @@ from typing import List
 from concurrent.futures import ThreadPoolExecutor
 from django.core.cache import cache
 from functools import wraps
-
+from datetime import timedelta
 from .utilization_views import wiki_result
 from .annotation_views import get_annotations_by_language
 from django.http import HttpRequest
@@ -1029,3 +1029,78 @@ def fetch_search_results_at_once(request, wiki_id, language, page_number = 1):
         'questions': question_result,
         'annotations': annotation_result
     }, safe=False)
+
+@csrf_exempt
+def get_questions_according_to_filter(request):
+    try:
+        user_id = request.headers.get('User-ID', None)
+        user_votes = Question_Vote.objects.filter(user_id=user_id).values('question_id', 'vote_type')
+        user_votes_dict = {vote['question_id']: vote['vote_type'] for vote in user_votes}
+
+        # Parse the request body
+        data = json.loads(request.body)
+        print(data)
+        status = data.get('status', 'all')
+        language = data.get('language', 'all')
+        tags = data.get('tags', [])
+        start_date = data.get('startDate') 
+        end_date = data.get('endDate')
+        
+        # Start with all questions, ordered by creation date
+        questions = Question.objects.all().order_by('-created_at')
+        
+        # Apply status filter
+        if status != 'all':
+            questions = questions.filter(answered=(status == 'answered'))
+            
+        # Apply language filter
+        if language != 'all':
+            questions = questions.filter(language__iexact=language)
+            
+        # Apply tags filter 
+        if tags:
+            lowercase_tags = [tag.lower() for tag in tags]
+            questions = questions.filter(tags__iregex=r'(?i)' + '|'.join(tags))
+
+        # Apply date filters only 
+        if start_date and start_date != "":
+            try:
+                start_date = datetime.strptime(start_date, '%Y-%m-%d')
+                questions = questions.filter(created_at__date__gte=start_date)
+            except ValueError:
+                print("Invalid date format for start_date")
+                pass 
+                
+        if end_date and end_date != "":
+            try:
+                end_date = datetime.strptime(end_date, '%Y-%m-%d')
+                # Add one day to include the end date fully
+                end_date = end_date + timedelta(days=1)
+                questions = questions.filter(created_at__date__lt=end_date)
+            except ValueError:
+                print("Invalid date format for end_date")
+                pass 
+
+        # We need 10 of them in the frontend
+        questions = questions[:10]
+
+        questions_data = [{
+            'id': q.pk,
+            'title': q.title,
+            'description': q.details,
+            'user_id': q.author.pk,
+            'username': q.author.username,
+            'upvotes': q.upvotes,
+            'comments_count': q.comments.count(),
+            'programmingLanguage': q.language,
+            'codeSnippet': q.code_snippet,
+            'tags': q.tags,
+            'answered': q.answered,
+            'is_upvoted': user_votes_dict.get(q.pk) == VoteType.UPVOTE.value,
+            'is_downvoted': user_votes_dict.get(q.pk) == VoteType.DOWNVOTE.value,
+            'created_at' : q.created_at.strftime('%Y-%m-%d %H:%M:%S')
+        } for q in questions]
+        
+        return JsonResponse({'questions': questions_data}, safe=False)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)

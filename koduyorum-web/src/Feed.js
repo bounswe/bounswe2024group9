@@ -4,6 +4,7 @@ import { Navbar, LeftSidebar, RightSidebar } from "./PageComponents";
 import PostPreview from "./PostPreview";
 import { LoadingComponent } from "./LoadingPage"; // Importing the LoadingComponent
 import "./Feed.css";
+import NotificationCenter from './NotificationCenter';
 
 function Feed() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -198,18 +199,7 @@ function Feed() {
     };
   }, [searched]);
 
-  const filteredPosts = posts.filter(
-    (post) =>
-      (filter === "all" ||
-        (filter === "answered" && post.answered === true) ||
-        (filter === "unanswered" && post.answered === false)) &&
-      (language === "all" ||
-        post.programmingLanguage?.toLowerCase() === language.toLowerCase()) &&
-      (post.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        post.preview?.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
-
-  const sortedPosts = filteredPosts.sort((a, b) => {
+  const sortedPosts = posts.sort((a, b) => {
     if (sort === "newest") {
       return new Date(b.created_at) - new Date(a.created_at);
     } else if (sort === "popular") {
@@ -239,10 +229,11 @@ function Feed() {
             searched={searched}
             handleSearchResultClick={handleSearchResultClick}
           />
+          <NotificationCenter />
 
           <div className="feed-content">
             {/* Left Edge - Popular Tags */}
-            <LeftSidebar handleTagClick={handleTagClick} />
+            <LeftSidebar handleTagClick={handleTagClick} setPosts={setPosts} />
 
             {/* Middle - Posts */}
             <div className="posts-container">
@@ -260,26 +251,8 @@ function Feed() {
                 </div>
               )}
               <h2 className="section-title">Questions</h2>
-              <div className="filters">
-                <select
-                  className="filter-dropdown"
-                  value={filter}
-                  onChange={(e) => setFilter(e.target.value)}
-                >
-                  <option value="all">All Posts</option>
-                  <option value="answered">Answered</option>
-                  <option value="unanswered">Unanswered</option>
-                </select>
-                <select
-                  className="filter-dropdown"
-                  value={language}
-                  onChange={(e) => setLanguage(e.target.value)}
-                >
-                  <option value="all">All Languages</option>
-                  <option value="Python">Python</option>
-                  <option value="JavaScript">JavaScript</option>
-                  <option value="C++">C++</option>
-                </select>
+              <h5>Sort according to:</h5>
+              <div className="sorters">
                 <select
                   className="filter-dropdown"
                   value={sort}
@@ -289,7 +262,6 @@ function Feed() {
                   <option value="popular">Most Popular</option>
                 </select>
               </div>
-
               <div className="questions-list">
                 {sortedPosts.length > 0 ? (
                   sortedPosts.map((post) => (

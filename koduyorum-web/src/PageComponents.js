@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Feed.css';
+import Select from 'react-select';
+import { predefinedTags } from './constants/tags';
+import { showNotification } from './NotificationCenter';
 
 // LogoutButton Component
 const LogoutButton = () => {
@@ -102,25 +105,147 @@ export const Navbar = ({
 };
 
 // LeftSidebar Component
-export const LeftSidebar = ({ tags, handleTagClick }) => (
-  <div className="tags-container">
-    <h3 className="section-title">Popular Tags</h3>
-    <ul className="tags-list">
-      <li>
-        <button onClick={() => handleTagClick('javascript')} className="tag-link">JavaScript</button>
-      </li>
-      <li>
-        <button onClick={() => handleTagClick('python')} className="tag-link">Python</button>
-      </li>
-      <li>
-        <button onClick={() => handleTagClick('react')} className="tag-link">React</button>
-      </li>
-      <li>
-        <button onClick={() => handleTagClick('algorithms')} className="tag-link">Algorithms</button>
-      </li>
-    </ul>
-  </div>
-);
+export const LeftSidebar = ({ tags, handleTagClick, setPosts }) => {
+  const [filters, setFilters] = useState({
+    status: 'all',
+    language: 'all',
+    tags: [],
+    startDate: '',
+    endDate: ''
+  });
+
+  const handleFilterChange = (filterType, value) => {
+    setFilters(prev => ({
+      ...prev,
+      [filterType]: value
+    }));
+  };
+
+  const handleApplyFilters = async () => {
+    console.log('Applying filters:', filters);
+    if (filters.endDate && filters.startDate && filters.endDate < filters.startDate) {
+      showNotification('End date cannot be before start date');
+      console.log('End date cannot be before start date');
+      return;
+    }
+    try {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/get_questions_according_to_filter`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'User-ID': localStorage.getItem('user_id'),
+        },
+        body: JSON.stringify({
+          status: filters.status,
+          language: filters.language,
+          tags: filters.tags,
+          date_range: {
+            start_date: filters.startDate,
+            end_date: filters.endDate
+          }
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Filtered questions:', data);
+        setPosts(data.questions);
+      }
+    } catch (error) {
+      console.error('Error fetching filtered questions:', error);
+    }
+  };
+  console.log(predefinedTags)
+
+  return (
+    <div className="sidebar-layout">
+      <div className="tags-container">
+        <h3 className="section-title">Popular Tags</h3>
+        <ul className="tags-list">
+          <li>
+            <button onClick={() => handleTagClick('javascript')} className="tag-link">JavaScript</button>
+          </li>
+          <li>
+            <button onClick={() => handleTagClick('python')} className="tag-link">Python</button>
+          </li>
+          <li>
+            <button onClick={() => handleTagClick('react')} className="tag-link">React</button>
+          </li>
+          <li>
+            <button onClick={() => handleTagClick('algorithms')} className="tag-link">Algorithms</button>
+          </li>
+        </ul>
+      </div>
+      
+      <div className="filters-container">
+        <h3 className="filters-title">Filters</h3>
+        <select
+          className="filter-dropdown"
+          onChange={(e) => handleFilterChange('status', e.target.value)}
+          defaultValue="all"
+        >
+          <option value="all">All Posts</option>
+          <option value="answered">Answered</option>
+          <option value="unanswered">Unanswered</option>
+        </select>
+        
+        <select
+          className="filter-dropdown"
+          onChange={(e) => handleFilterChange('language', e.target.value)}
+          defaultValue="all"
+          style={{ marginBottom: '0' }}
+        >
+          <option value="all">All Languages</option>
+          <option value="python">Python</option>
+          <option value="javascript">JavaScript</option>
+          <option value="cpp">C++</option>
+        </select>
+
+        <div className="tag-filter-container">
+          <Select
+              isMulti
+              options={predefinedTags.map(tag => ({ value: tag, label: tag }))}
+              value={filters.tags?.map(tag => ({ value: tag, label: tag })) || []}
+              onChange={(selectedOptions) => handleFilterChange('tags', selectedOptions?.map(option => option.value) || [])}
+              placeholder="Select Tags"
+              className="tag-select"
+          />
+        </div>
+
+        <div className="date-filters">
+          <label>
+            Start Date:
+            <input
+              type="date"
+              className="date-input"
+              value={filters.startDate}
+              onChange={(e) => handleFilterChange('startDate', e.target.value)}
+            />
+          </label>
+          
+          <label>
+            End Date:
+            <input
+              type="date"
+              className="date-input"
+              value={filters.endDate}
+              onChange={(e) => handleFilterChange('endDate', e.target.value)}
+            />
+          </label>
+        </div>
+
+        <button 
+          onClick={handleApplyFilters}
+          className="apply-filters-btn "
+        >
+          Apply Filters
+        </button>
+      </div>
+    </div>
+  );
+};
+
+
 
 // RightSidebar Component
 export const RightSidebar = ({ topContributors }) => {
