@@ -113,17 +113,6 @@ function Feed() {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
       const data = await response.json();
-      // if (sort === "newest") {
-      //   try {
-      //     const newestPosts = await fetchPostsByTime();
-      //     setPosts(newestPosts);
-      //     console.log("Response:", newestPosts);
-      //   } catch (error) {
-      //     console.error("Error fetching posts by time:", error);
-      //   }
-      // } else {
-      //   setPosts(data.personalized_questions);
-      // }
       setPosts(data.personalized_questions);
       setQuestionOfTheDay(data.question_of_the_day);
       setTopContributors(data.top_contributors);
@@ -141,61 +130,6 @@ function Feed() {
     }
   }, []);
 
-  const fetchPosts = async () => {
-    const user_id = localStorage.getItem("user_id");
-    try {
-      const response = await fetch(
-        `${process.env.REACT_APP_API_URL}/specific_feed/${user_id}/`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            "User-ID": user_id,
-          },
-        }
-      );
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-      const data = await response.json();
-      setPosts(data.questions);
-    } catch (error) {
-      console.error("Error fetching posts:", error.message);
-      setError(
-        "Failed to load posts. Please check your network or server configuration."
-      );
-    }
-  };
-
-  const fetchQuestionOfTheDay = async () => {
-    try {
-      const response = await fetch(
-        `${process.env.REACT_APP_API_URL}/daily_question/`
-      );
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-      const data = await response.json();
-      setQuestionOfTheDay(data.question);
-    } catch (error) {
-      console.error("Error fetching Question of the Day:", error.message);
-    }
-  };
-
-  const fetchTopContributors = async () => {
-    try {
-      const response = await fetch(
-        `${process.env.REACT_APP_API_URL}/get_top_five_contributors/`
-      );
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-      const data = await response.json();
-      setTopContributors(data.users || []);
-    } catch (error) {
-      console.error("Error fetching top contributors:", error.message);
-    }
-  };
 
   const fetchPostsByTime = async () => {
     try {
@@ -221,11 +155,7 @@ function Feed() {
 
   const fetchSearchResults = async (query) => {
     try {
-      console.log("Original search string:", query);
-
       query = query.replace(/[^a-z0-9]/gi, "");
-
-      console.log("Alphanumeric search string:", query);
 
       if (query === "") {
         return [];
@@ -309,6 +239,7 @@ function Feed() {
             searched={searched}
             handleSearchResultClick={handleSearchResultClick}
           />
+
           <div className="feed-content">
             {/* Left Edge - Popular Tags */}
             <LeftSidebar handleTagClick={handleTagClick} />
@@ -328,7 +259,7 @@ function Feed() {
                   </button>
                 </div>
               )}
-              <h2 className="section-title">Questions</h2>            
+              <h2 className="section-title">Questions</h2>
               <div className="filters">
                 <select
                   className="filter-dropdown"
@@ -354,7 +285,7 @@ function Feed() {
                   value={sort}
                   onChange={(e) => setSort(e.target.value)}
                 >
-                  <option value="newest" >Newest</option>
+                  <option value="newest">Newest</option>
                   <option value="popular">Most Popular</option>
                 </select>
               </div>

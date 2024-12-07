@@ -260,8 +260,7 @@ def edit_question(request: HttpRequest, question_id: int) -> HttpResponse:
         question.language_id = Lang2ID.get(language)
         question.details = data.get('details', question.details)
         question.code_snippet = data.get('code_snippet', question.code_snippet)
-        print(data.get('code_snippet'))
-        print(question.code_snippet)
+
         question.tags = data.get('tags', question.tags)
         question.save()
 
@@ -540,7 +539,7 @@ def random_questions(request):
         'title': question.title,
         'description': question.details,
         'user_id': question.author.pk,
-        'likes': question.upvotes,
+        'upvotes': question.upvotes,
         'comments_count': question.comments.count(),
         'programmingLanguage': question.language,
         'codeSnippet': question.code_snippet,
@@ -586,7 +585,7 @@ def question_of_the_day(request):
             'title': question.title,
             'description': question.details,
             'user_id': question.author.pk,
-            'likes': question.upvotes,
+            'upvotes': question.upvotes,
             'comments_count': question.comments.count(),
             'programmingLanguage': question.language,
             'codeSnippet': question.code_snippet,
@@ -849,7 +848,8 @@ def fetch_all_feed_at_once(request, user_id: int):
                 'title': q.title,
                 'description': q.details,
                 'user_id': q.author.pk,
-                'likes': q.upvotes,
+                'username': q.author.username,
+                'upvotes': q.upvotes,
                 'comments_count': q.comments.count(),
                 'programmingLanguage': q.language,
                 'codeSnippet': q.code_snippet,
@@ -857,6 +857,7 @@ def fetch_all_feed_at_once(request, user_id: int):
                 'answered': q.answered,
                 'is_upvoted': user_votes_dict.get(q.pk) == VoteType.UPVOTE.value,
                 'is_downvoted': user_votes_dict.get(q.pk) == VoteType.DOWNVOTE.value,
+                'created_at' : q.created_at.strftime('%Y-%m-%d %H:%M:%S')
             }
             for q in questions
         ]
@@ -876,7 +877,8 @@ def fetch_all_feed_at_once(request, user_id: int):
                 'title': question.title,
                 'description': question.details,
                 'user_id': question.author.pk,
-                'likes': question.upvotes,
+                'upvotes': question.upvotes,
+                'username': question.author.username,
                 'comments_count': question.comments.count(),
                 'programmingLanguage': question.language,
                 'codeSnippet': question.code_snippet,
