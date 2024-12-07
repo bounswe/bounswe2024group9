@@ -7,6 +7,8 @@ import './SearchResults.css';
 import CreateAnnotation from './CreateAnnotation';
 import './Annotation.css'
 import PostPreview from "./PostPreview";
+import { showNotification } from './NotificationCenter';
+import NotificationCenter from './NotificationCenter';
 
 const SearchResults = () => {
   const [activeTab, setActiveTab] = useState('info');
@@ -267,16 +269,19 @@ const fetchSearchResults = async (query) => {
         setAnnotationData((prevAnnotations) =>
           prevAnnotations.filter((annotation) => annotation.annotation_id !== annotationId)
         );
-        alert('Annotation deleted successfully.');
+        // alert('Annotation deleted successfully.');
+        showNotification('Annotation deleted successfully.');
         // Optional: Trigger a re-fetch of annotations or update state to reflect the deletion
       } else {
         const errorData = await response.json();
         console.error('Error deleting annotation:', errorData);
-        alert('Failed to delete annotation.');
+        showNotification('Failed to delete annotation.');
+        // alert('Failed to delete annotation.');
       }
     } catch (error) {
       console.error('Error during annotation deletion:', error);
-      alert('An unexpected error occurred.');
+      showNotification('An unexpected error occurred.');
+      // alert('An unexpected error occurred.');
     }
   };
   
@@ -346,7 +351,7 @@ const fetchSearchResults = async (query) => {
             searched={searched}
             handleSearchResultClick={handleSearchResultClick}
           />
-
+          <NotificationCenter />
           <div className="feed-content">
             <LeftSidebar handleTagClick={handleTagClick} />
 

@@ -186,6 +186,42 @@ body {
     margin-bottom: 0.5rem;
     font-size: 1rem;
   }
+  @media screen and (max-width: 1300px) {
+    .feed-content {
+        gap: 0;
+    }
+
+    .contributors-container {
+        padding: 0;
+    }
+
+    .contributors-list li {
+        margin-bottom: 0.5rem;
+        font-size: 1rem;
+        width: 100%;
+        display: flex;
+        flex-direction: column; /* Stack children vertically */
+        align-items: center; /* Center align the content */
+    }
+
+    .contributor-item {
+        display: flex;
+        flex-direction: column; /* Stack username and points vertically */
+        align-items: center;
+        text-align: center;
+        width: 100%;
+        padding: 8px;
+    }
+
+    .contributor-item .contributor-name {
+        margin-bottom: 4px; /* Add some space between username and points */
+    }
+
+    .contributor-item .contributor-points {
+        font-size: 0.9rem;
+        color: #666;
+    }
+}
   
   /* Media Queries */
   @media (max-width: 768px) {
