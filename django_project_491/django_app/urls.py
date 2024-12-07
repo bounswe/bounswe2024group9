@@ -26,8 +26,9 @@ urlpatterns = [
     path('preferred_languages/', user_views.get_user_preferred_languages, name='preferred_languages'),
     path('get_top_five_contributors/', user_views.list_most_contributed_five_person, name='get_top_five_contributors'),
     
-    path('fetch_feed_at_once/<int:user_id>/', question_views.fetch_all_at_once, name='get_user_profile'),
-
+    path('fetch_feed_at_once/<int:user_id>/', question_views.fetch_all_feed_at_once, name='get_user_profile'),
+    path('fetch_search_results_at_once/<str:wiki_id>/<str:language>/<int:page_number>', question_views.fetch_search_results_at_once, name='fetch_search_results_at_once'),
+    
     path('get_question/<int:question_id>/', question_views.get_question_details, name='get_question'),
     path('question/<int:question_id>/comments/', question_views.get_question_comments, name='get_question_comments'),
     path('create_question/', question_views.create_question, name='create_question'),
@@ -84,9 +85,4 @@ urlpatterns = [
     path('questions/<int:question_id>/topic/', question_views.get_topic_url, name='get_topic_url'),
     path('topics/', question_views.list_all_topics, name='list_all_topics'),
 
-    path('create_annotation/', annotation_views.create_annotation, name='create_annotation'),
-    path('delete_annotation/<int:annotation_id>/', annotation_views.delete_annotation, name='delete_annotation'),
-    path('edit_annotation/<int:annotation_id>/', annotation_views.edit_annotation, name='edit_annotation'),
-    path('get_annotations_by_language_id/<int:language_qid>/', annotation_views.get_annotations_by_language, name='get_annotations_by_language_id'),
-    path('annotations/all/', annotation_views.get_all_annotations, name='get_all_annotations'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
