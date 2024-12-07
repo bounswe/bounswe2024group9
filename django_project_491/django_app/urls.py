@@ -61,7 +61,6 @@ urlpatterns = [
 
     path('run_code/<str:type>/<int:id>/', utilization_views.run_code_of_question_or_comment, name='run_code'),
 
-    path('list_questions/', question_views.list_questions_by_language, name='list_questions'),
     # path('run_code/', utilization_views.run_code_view, name='run_code'),
     path('code_execute/', utilization_views.post_sample_code, name='code_execute'),
     
