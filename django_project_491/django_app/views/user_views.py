@@ -42,6 +42,7 @@ def get_user_profile_by_username(request, username : str) -> JsonResponse:
         'questions': user.get_question_details(),
         'comments': user.get_comment_details(),
         'bookmarks': user.get_bookmark_details(),
+        'annotations': user.get_annotation_details(),
         'profile_pic': user.profile_pic.url if user.profile_pic else None,
         'bio': user.bio,
         'interested_topics': user.interested_topics,
