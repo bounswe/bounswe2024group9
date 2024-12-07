@@ -48,7 +48,9 @@ function NotificationCenter(){
     }, []);
     
     return (
-        <div className="fixed top-5 right-4 z-50 flex flex-col gap-3" style={{ minWidth: '350px' }}>
+        <div className="fixed top-5 right-4 z-500 flex flex-col gap-3" style={{ 
+            minWidth: '350px',
+         }}>
         {toasts.map((toast) => (
           <div 
             key={toast.id} 
