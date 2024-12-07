@@ -69,7 +69,7 @@ const SearchResults = () => {
       const wikiIdName = await fetchWikiIdAndName(result.languageLabel.value);
       const wikiId = wikiIdName[0];
       const wikiName = wikiIdName[1];
-      console.log("Wiki ID and Name:", wikiId, wikiName);
+      // console.log("Wiki ID and Name:", wikiId, wikiName);
       if (wikiId) {
           console.log("Navigating to:", `/result/${wikiId}/${encodeURIComponent(wikiName)}`);
           setSearched(false);
@@ -158,7 +158,6 @@ const SearchResults = () => {
     try {
       setLoading(true);
       setError(null);
-      console.log("Fetching search data for wiki ID:", encodeURIComponent(wikiId), wikiId.slice(1));
 
       // const infoResponse = await fetch(`${process.env.REACT_APP_API_URL}/result/${encodeURIComponent(wikiId)}`);
       // const questionResponse = await fetch(`${process.env.REACT_APP_API_URL}/list_questions_by_language/${encodeURIComponent(wikiName)}/1`);
@@ -180,7 +179,6 @@ const SearchResults = () => {
       const questionData = infoQuestionAnnotationData.questions;      
       const annotationData = infoQuestionAnnotationData.annotations;
 
-      console.log("annotationData data:", annotationData);
       setInfoData(infoData || { mainInfo: [], instances: [], wikipedia: {} });
       setQuestionData(questionData || []);
       setAnnotationData(annotationData || []);
@@ -363,7 +361,7 @@ const SearchResults = () => {
           />
           <NotificationCenter />
           <div className="feed-content">
-            <LeftSidebar handleTagClick={handleTagClick} />
+            <LeftSidebar handleTagClick={handleTagClick} setPosts={setQuestionData} language={wiki_name}/>
 
             <div className="info-container">
  

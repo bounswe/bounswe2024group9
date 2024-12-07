@@ -139,40 +139,40 @@ body {
 
   .tag-filter-container {
     margin: 1rem 0;
-}
+  }
 
-.tag-select {
-    width: 100%;
-}
+  .tag-select {
+      width: 100%;
+  }
 
-/* Style the react-select dropdown to match your theme */
-.tag-select .select__control {
-    border: 1px solid #e0e0e0;
-    border-radius: 5px;
-    min-height: 38px;
-}
+  /* Style the react-select dropdown to match your theme */
+  .tag-select .select__control {
+      border: 1px solid #e0e0e0;
+      border-radius: 5px;
+      min-height: 38px;
+  }
 
-.tag-select .select__control:hover {
-    border-color: #0077b6;
-}
+  .tag-select .select__control:hover {
+      border-color: #0077b6;
+  }
 
-.tag-select .select__control--is-focused {
-    border-color: #0077b6;
-    box-shadow: 0 0 0 2px rgba(0, 119, 182, 0.1);
-}
+  .tag-select .select__control--is-focused {
+      border-color: #0077b6;
+      box-shadow: 0 0 0 2px rgba(0, 119, 182, 0.1);
+  }
 
-.tag-select .select__multi-value {
-    background-color: #e0f7fa;
-}
+  .tag-select .select__multi-value {
+      background-color: #e0f7fa;
+  }
 
-.tag-select .select__multi-value__label {
-    color: #0077b6;
-}
+  .tag-select .select__multi-value__label {
+      color: #0077b6;
+  }
 
-.tag-select .select__multi-value__remove:hover {
-    background-color: #b2ebf2;
-    color: #0077b6;
-}
+  .tag-select .select__multi-value__remove:hover {
+      background-color: #b2ebf2;
+      color: #0077b6;
+  }
 
   .apply-filters-btn:hover {
       background-color: #005f8d;
@@ -235,7 +235,28 @@ body {
       margin-bottom: 0;
   }
 
-  
+  .date-filters {
+    margin-top: 1rem;
+  }    
+
+  .date-input-group {
+      margin-bottom: 1rem;
+  }
+
+  .date-input-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+      color: #333;
+  }
+
+  .date-input {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #e0e0e0;
+      border-radius: 5px;
+      font-size: 0.9rem;
+  }
   .posts-list {
     display: flex;
     flex-direction: column;

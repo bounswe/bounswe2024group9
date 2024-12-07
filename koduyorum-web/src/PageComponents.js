@@ -105,10 +105,10 @@ export const Navbar = ({
 };
 
 // LeftSidebar Component
-export const LeftSidebar = ({ tags, handleTagClick, setPosts }) => {
+export const LeftSidebar = ({ tags, handleTagClick, setPosts, language }) => {
   const [filters, setFilters] = useState({
     status: 'all',
-    language: 'all',
+    language: language == "" ? "all" : language,
     tags: [],
     startDate: '',
     endDate: ''
@@ -122,10 +122,8 @@ export const LeftSidebar = ({ tags, handleTagClick, setPosts }) => {
   };
 
   const handleApplyFilters = async () => {
-    console.log('Applying filters:', filters);
     if (filters.endDate && filters.startDate && filters.endDate < filters.startDate) {
       showNotification('End date cannot be before start date');
-      console.log('End date cannot be before start date');
       return;
     }
     try {
@@ -155,7 +153,6 @@ export const LeftSidebar = ({ tags, handleTagClick, setPosts }) => {
       console.error('Error fetching filtered questions:', error);
     }
   };
-  console.log(predefinedTags)
 
   return (
     <div className="sidebar-layout">
@@ -192,9 +189,13 @@ export const LeftSidebar = ({ tags, handleTagClick, setPosts }) => {
         <select
           className="filter-dropdown"
           onChange={(e) => handleFilterChange('language', e.target.value)}
-          defaultValue="all"
-          style={{ marginBottom: '0' }}
+          value={language !== "" ? language : filters.language}
+          disabled={language !== ""}
+          style={{ marginBottom: '0', opacity: language !== "" ? 0.7 : 1 }}
         >
+          {language !== "" && !["all", "python", "javascript", "cpp"].includes(language) && (
+            <option value={language}>{language}</option>
+          )}
           <option value="all">All Languages</option>
           <option value="python">Python</option>
           <option value="javascript">JavaScript</option>
@@ -213,25 +214,29 @@ export const LeftSidebar = ({ tags, handleTagClick, setPosts }) => {
         </div>
 
         <div className="date-filters">
-          <label>
-            Start Date:
+          <div className="date-input-group">
+            <label>
+              Start Date:
+            </label>
             <input
               type="date"
               className="date-input"
               value={filters.startDate}
               onChange={(e) => handleFilterChange('startDate', e.target.value)}
             />
-          </label>
-          
-          <label>
-            End Date:
+          </div>
+
+          <div className="date-input-group">
+            <label>
+              End Date:
+            </label>
             <input
               type="date"
               className="date-input"
               value={filters.endDate}
               onChange={(e) => handleFilterChange('endDate', e.target.value)}
             />
-          </label>
+          </div>
         </div>
 
         <button 

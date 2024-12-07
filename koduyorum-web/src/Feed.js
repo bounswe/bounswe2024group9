@@ -233,7 +233,7 @@ function Feed() {
 
           <div className="feed-content">
             {/* Left Edge - Popular Tags */}
-            <LeftSidebar handleTagClick={handleTagClick} setPosts={setPosts} />
+            <LeftSidebar handleTagClick={handleTagClick} setPosts={setPosts} language={''}/>
 
             {/* Middle - Posts */}
             <div className="posts-container">
