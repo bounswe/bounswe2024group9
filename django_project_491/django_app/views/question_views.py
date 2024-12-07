@@ -124,7 +124,7 @@ def get_question_comments(request, question_id):
     """
     try:
         question = Question.objects.get(_id=question_id)
-        comments: List[Comment] = question.comments.all()
+        comments: List[Comment] = question.comments.all().order_by('-upvotes') 
 
         comments_data = [{
             'comment_id': comment._id,
@@ -1039,7 +1039,6 @@ def get_questions_according_to_filter(request):
 
         # Parse the request body
         data = json.loads(request.body)
-        print(data)
         status = data.get('status', 'all')
         language = data.get('language', 'all')
         tags = data.get('tags', [])
