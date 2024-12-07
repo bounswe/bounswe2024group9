@@ -97,7 +97,7 @@ class Question(models.Model):
     _id = models.AutoField(primary_key=True)
     title = models.CharField(max_length=200)
     language = models.CharField(max_length=200)  # programmingLanguage field like python
-    language_id = models.IntegerField(default=71)  # Language ID for Python like 71
+    language_id = models.IntegerField(default=-1)   # Language ID for Python like 71
     tags = models.JSONField(blank=True, default=list)  # Example: ['tag1', 'tag2']
     details = models.TextField()
     code_snippet = models.TextField()

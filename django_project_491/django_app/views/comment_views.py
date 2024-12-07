@@ -54,7 +54,7 @@ def create_comment(request: HttpRequest, question_id: int) -> HttpResponse:
             data = json.loads(request.body)
             comment_details = data.get('details')
             code_snippet = data.get('code_snippet', '')
-            language = data.get('language')
+            language = data.get('language', "")
 
             # Fetch the question by its _id (since your model uses _id as the primary key)
             try:
@@ -62,12 +62,15 @@ def create_comment(request: HttpRequest, question_id: int) -> HttpResponse:
             except Question.DoesNotExist:
                 return JsonResponse({'error': 'Question not found'}, status=404)
 
-            # Get the language ID mapping
-            Lang2ID = get_languages()
-            language_id = Lang2ID.get(language, None)
+            if not language:
+                language_id = -1
+            else:
+                # Get the language ID mapping
+                Lang2ID = get_languages()
+                language_id = Lang2ID.get(language, None)
 
-            if language_id is None:
-                return JsonResponse({'error': 'Invalid language'}, status=400)
+                if language_id is None:
+                    return JsonResponse({'error': 'Invalid language'}, status=400)
             
             user_id = request.headers.get('User-ID', None)
             if user_id is None:
@@ -240,6 +243,62 @@ def mark_comment_as_answer(request: HttpRequest, comment_id : int) -> HttpRespon
         question.save()
 
         return JsonResponse({'success': f'Comment {comment_id} marked as the answer for question {question._id}'}, status=200)
+
+    except Comment.DoesNotExist:
+        return JsonResponse({'error': 'Comment not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': f'An error occurred: {str(e)}'}, status=500)
+
+@csrf_exempt
+@invalidate_user_cache()
+def unmark_comment_as_answer(request: HttpRequest, comment_id: int) -> HttpResponse:
+    """
+    Unmarks a comment as the answer to a question. Only owner of the question and admin can unmark a comment as the answer.
+    Args:
+        request (HttpRequest): The HTTP request object containing user information.
+        comment_id (int): The ID of the comment to be unmarked as the answer.
+    Returns:
+        HttpResponse: A JSON response indicating the success or failure of the operation.
+    Raises:
+        JsonResponse: If the comment ID is not provided, if the comment does not exist,
+                     if the user is not the author of the question, or if any other error occurs.
+    Responses:
+        200: Comment successfully unmarked as the answer.
+        400: Comment ID parameter is required.
+        403: Only the author of the question can unmark a comment as the answer.
+        404: Comment not found.
+        500: An error occurred during the operation.
+    """
+    
+    if not comment_id:
+        return JsonResponse({'error': 'Comment ID parameter is required'}, status=400)
+
+    try:
+        comment = Comment.objects.get(_id=comment_id)
+        question : Question = comment.question
+        user_id = request.headers.get('User-ID', None)
+        if user_id is None:
+            return JsonResponse({'error': 'User ID parameter is required in the header'}, status=400)
+
+        user_id = int(user_id)
+        user = User.objects.get(pk=user_id)
+
+        if user != question.author and user.userType != UserType.ADMIN:
+            return JsonResponse({'error': 'Only the author of the question can unmark a comment as the answer'}, status=403)
+
+        # Unmark this comment
+        comment.answer_of_the_question = False
+        comment.save()
+
+        # Check if there are any other comments marked as answer
+        other_answer_exists = question.comments.filter(answer_of_the_question=True).exists()
+        
+        # Only update question's answered status if no other answers exist
+        if not other_answer_exists:
+            question.answered = False
+            question.save()
+
+        return JsonResponse({'success': f'Comment {comment_id} unmarked as the answer for question {question._id}'}, status=200)
 
     except Comment.DoesNotExist:
         return JsonResponse({'error': 'Comment not found'}, status=404)

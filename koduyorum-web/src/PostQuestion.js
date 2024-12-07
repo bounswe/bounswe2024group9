@@ -42,14 +42,18 @@ function PostQuestion() {
 
     // Submit question to backend
     const handleSubmit = async () => {
-        if (!title || !details || !language) {
+        if (!title || !details) {
             // alert('All fields are required!');
-            showNotification('All fields are required!');
+            showNotification('Post must have a title and description!');
             return;
         }
-        console.log('Tags:', tags);
+
+        if (codeSnippet.trim() && !language) {
+            showNotification('You must select a language for the written code!');
+            return;
+        }
+
         const user_id = localStorage.getItem('user_id');
-        
         const postData = {
             title,
             language,
@@ -66,8 +70,6 @@ function PostQuestion() {
                 },
                 body: JSON.stringify(postData),
             });
-
-            console.log('Response:', response);
 
             if (response.ok) {
                 showNotification('Question created successfully!');

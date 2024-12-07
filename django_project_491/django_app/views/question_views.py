@@ -166,33 +166,34 @@ def create_question(request: HttpRequest) -> HttpResponse:
     """
     if request.method == 'POST':
         try:
+            user_id = request.headers.get('User-ID', None)
+
             data = json.loads(request.body)
             title = data.get('title')
-            language = data.get('language')
+            language = data.get('language', "")
             details = data.get('details')
-            user_id = request.headers.get('User-ID', None)
             code_snippet = data.get('code_snippet', '')  # There may not be a code snippet
             tags = data.get('tags', [])  # There may not be any tags
 
             user = User.objects.get(pk=user_id)
-            Lang2ID = get_languages()
-            language_id = Lang2ID.get(language, None)
+            if not language:
+                language_id = -1
+            else:
+                Lang2ID = get_languages()
+                language_id = Lang2ID.get(language, None)
+                if language_id is None:
+                    return JsonResponse({'error': 'Invalid language'}, status=400)
 
             user = User.objects.get(pk=request.headers.get('User-ID', None))
 
-
-            if language_id is None:
-                print("Invalid language")
-                return JsonResponse({'error': 'Invalid language'}, status=400)
-            
-            try:
-                question_controller = QuestionQualityController()
-                is_valid_question = question_controller.is_valid_question(data)
-                if(not is_valid_question):
-                    print("Question is not valid")
-                    return JsonResponse({'error': 'Question is not approved by LLM'}, status=400)
-            except Exception as e:
-                print(e)
+            # try:
+            #     question_controller = QuestionQualityController()
+            #     is_valid_question = question_controller.is_valid_question(data)
+            #     if(not is_valid_question):
+            #         print("Question is not valid")
+            #         return JsonResponse({'error': 'Question is not approved by LLM'}, status=400)
+            # except Exception as e:
+            #     print(e)
 
             question = Question.objects.create(
                 title=title,

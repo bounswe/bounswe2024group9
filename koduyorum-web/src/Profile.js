@@ -7,7 +7,6 @@ import './Profile.css';
 import { showNotification } from './NotificationCenter';
 import NotificationCenter from './NotificationCenter';
 import Comment from "./Comment";
-import { checkPropTypes } from 'prop-types';
 
 const Profile = () => {
     const { username } = useParams();
