@@ -16,6 +16,10 @@ from concurrent.futures import ThreadPoolExecutor
 from django.core.cache import cache
 from functools import wraps
 
+from .utilization_views import wiki_result
+from .annotation_views import get_annotations_by_language
+from django.http import HttpRequest
+
 def invalidate_user_cache(cache_key_prefix='feed_user'):
     """
     A decorator to invalidate the cache for a given user_id.
@@ -391,7 +395,7 @@ def report_question(request, question_id : int) -> HttpResponse:
 
 
 @csrf_exempt
-def list_questions_by_language(request, language: str, page_number = 1) -> HttpResponse:    
+def list_questions_by_language(request, language: str, page_number = 1, return_data_only = False) -> HttpResponse:    
     """
     List questions filtered by programming language with pagination.
     Args:
@@ -418,6 +422,9 @@ def list_questions_by_language(request, language: str, page_number = 1) -> HttpR
         'author': question.author.username,
         'creationDate': question.created_at .strftime('%Y-%m-%d %H:%M:%S'),
     } for question in questions]
+
+    if return_data_only:
+        return questions_data
 
     return JsonResponse({'questions': questions_data}, safe=False, status=200)
 
@@ -809,7 +816,7 @@ def fetch_random_reported_question(request: HttpRequest) -> HttpResponse:
     return JsonResponse({'question': question_data}, safe=False)
 
 @csrf_exempt
-def fetch_all_at_once(request, user_id: int):
+def fetch_all_feed_at_once(request, user_id: int):
     import time
     time_start = time.time()
     cache_key = f"feed_user_{user_id}"
@@ -991,3 +998,32 @@ def get_code_snippet_if_empty(request, question_id: int) -> HttpResponse:
         return JsonResponse({'error': 'Question not found'}, status=404)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+
+def fetch_search_results_at_once(request, wiki_id, language, page_number = 1):
+    mock_request = HttpRequest()
+    mock_request.method = 'GET'
+    wiki_id_numerical_part = ''.join(filter(str.isdigit, wiki_id))
+
+    def get_info():
+        return wiki_result('', wiki_id, return_data_only=True)
+    
+    def get_questions():
+        return list_questions_by_language('', language, page_number, return_data_only=True)
+    
+    def get_annotations():
+        return get_annotations_by_language(mock_request, wiki_id_numerical_part, return_data_only=True)
+
+    with ThreadPoolExecutor(max_workers=3) as executor:
+        info_future = executor.submit(get_info)
+        questions_future = executor.submit(get_questions)
+        annotations_future = executor.submit(get_annotations)
+
+        information_result = info_future.result()
+        question_result = questions_future.result()
+        annotation_result = annotations_future.result()
+
+    return JsonResponse({
+        'information': information_result,
+        'questions': question_result,
+        'annotations': annotation_result
+    }, safe=False)

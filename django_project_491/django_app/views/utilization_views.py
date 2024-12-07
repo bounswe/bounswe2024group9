@@ -66,7 +66,7 @@ def wiki_search(request, search_strings):
 
 
 # Shows the resulting info of the chosen wiki item
-def wiki_result(response, wiki_id):
+def wiki_result(response, wiki_id, return_data_only=False):
     """
     Retrieve language information from Wikidata and return as a JSON response.
 
@@ -187,6 +187,8 @@ def wiki_result(response, wiki_id):
         'wikipedia': wikipedia_data
     }
 
+    if return_data_only:
+        return final_response
     return JsonResponse(final_response)
 
 

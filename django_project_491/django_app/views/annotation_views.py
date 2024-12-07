@@ -151,7 +151,7 @@ def edit_annotation(request, annotation_id):
     return JsonResponse({'error': 'Invalid request method'}, status=405)
 
 @csrf_exempt
-def get_annotations_by_language(request, language_qid):
+def get_annotations_by_language(request, language_qid, return_data_only=False):
     if request.method == 'GET':
         try:
             # Fetch all annotations with the given language_qid
@@ -186,11 +186,18 @@ def get_annotations_by_language(request, language_qid):
                 }
                 annotations_data.append(annotation_data)
 
+            if return_data_only:
+                return annotations_data
+
             return JsonResponse({'success': 'Annotations retrieved', 'data': annotations_data}, status=200)
 
         except Exception as e:
+            if return_data_only:
+                return []
             return JsonResponse({'error': str(e)}, status=400)
 
+    if return_data_only:
+        return []
     return JsonResponse({'error': 'Invalid request method'}, status=405)
 
 
