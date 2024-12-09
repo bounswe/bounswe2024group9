@@ -15,6 +15,10 @@ from typing import List
 from concurrent.futures import ThreadPoolExecutor
 from django.core.cache import cache
 from functools import wraps
+from datetime import timedelta
+from .utilization_views import wiki_result
+from .annotation_views import get_annotations_by_language
+from django.http import HttpRequest
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from rest_framework.decorators import api_view, permission_classes
@@ -124,7 +128,7 @@ def get_question_comments(request, question_id):
     """
     try:
         question = Question.objects.get(_id=question_id)
-        comments: List[Comment] = question.comments.all()
+        comments: List[Comment] = question.comments.all().order_by('-upvotes') 
 
         comments_data = [{
             'comment_id': comment._id,
@@ -251,33 +255,34 @@ def create_question(request: HttpRequest) -> HttpResponse:
     """
     if request.method == 'POST':
         try:
+            user_id = request.headers.get('User-ID', None)
+
             data = json.loads(request.body)
             title = data.get('title')
-            language = data.get('language')
+            language = data.get('language', "")
             details = data.get('details')
-            user_id = request.headers.get('User-ID', None)
             code_snippet = data.get('code_snippet', '')  # There may not be a code snippet
             tags = data.get('tags', [])  # There may not be any tags
 
             user = User.objects.get(pk=user_id)
-            Lang2ID = get_languages()
-            language_id = Lang2ID.get(language, None)
+            if not language:
+                language_id = -1
+            else:
+                Lang2ID = get_languages()
+                language_id = Lang2ID.get(language, None)
+                if language_id is None:
+                    return JsonResponse({'error': 'Invalid language'}, status=400)
 
             user = User.objects.get(pk=request.headers.get('User-ID', None))
 
-
-            if language_id is None:
-                print("Invalid language")
-                return JsonResponse({'error': 'Invalid language'}, status=400)
-            
-            try:
-                question_controller = QuestionQualityController()
-                is_valid_question = question_controller.is_valid_question(data)
-                if(not is_valid_question):
-                    print("Question is not valid")
-                    return JsonResponse({'error': 'Question is not valid'}, status=400)
-            except Exception as e:
-                print(e)
+            # try:
+            #     question_controller = QuestionQualityController()
+            #     is_valid_question = question_controller.is_valid_question(data)
+            #     if(not is_valid_question):
+            #         print("Question is not valid")
+            #         return JsonResponse({'error': 'Question is not approved by LLM'}, status=400)
+            # except Exception as e:
+            #     print(e)
 
             question = Question.objects.create(
                 title=title,
@@ -414,8 +419,7 @@ def edit_question(request: HttpRequest, question_id: int) -> HttpResponse:
         question.language_id = Lang2ID.get(language)
         question.details = data.get('details', question.details)
         question.code_snippet = data.get('code_snippet', question.code_snippet)
-        print(data.get('code_snippet'))
-        print(question.code_snippet)
+
         question.tags = data.get('tags', question.tags)
         question.save()
 
@@ -660,7 +664,7 @@ def report_question(request, question_id : int) -> HttpResponse:
 @api_view(['GET'])
 @csrf_exempt
 @permission_classes([AllowAny])
-def list_questions_by_language(request, language: str, page_number = 1) -> HttpResponse:    
+def list_questions_by_language(request, language: str, page_number = 1, return_data_only = False) -> HttpResponse:    
     """
     List questions filtered by programming language with pagination.
     Args:
@@ -687,6 +691,9 @@ def list_questions_by_language(request, language: str, page_number = 1) -> HttpR
         'author': question.author.username,
         'creationDate': question.created_at .strftime('%Y-%m-%d %H:%M:%S'),
     } for question in questions]
+
+    if return_data_only:
+        return questions_data
 
     return JsonResponse({'questions': questions_data}, safe=False, status=200)
 
@@ -859,7 +866,7 @@ def random_questions(request):
         'title': question.title,
         'description': question.details,
         'user_id': question.author.pk,
-        'likes': question.upvotes,
+        'upvotes': question.upvotes,
         'comments_count': question.comments.count(),
         'programmingLanguage': question.language,
         'codeSnippet': question.code_snippet,
@@ -906,7 +913,7 @@ def question_of_the_day(request):
             'title': question.title,
             'description': question.details,
             'user_id': question.author.pk,
-            'likes': question.upvotes,
+            'upvotes': question.upvotes,
             'comments_count': question.comments.count(),
             'programmingLanguage': question.language,
             'codeSnippet': question.code_snippet,
@@ -1227,7 +1234,7 @@ def fetch_random_reported_question(request: HttpRequest) -> HttpResponse:
 @api_view(['GET'])
 @permission_classes([AllowAny])
 @csrf_exempt
-def fetch_all_at_once(request, user_id: int):
+def fetch_all_feed_at_once(request, user_id: int):
     import time
     time_start = time.time()
     cache_key = f"feed_user_{user_id}"
@@ -1260,7 +1267,8 @@ def fetch_all_at_once(request, user_id: int):
                 'title': q.title,
                 'description': q.details,
                 'user_id': q.author.pk,
-                'likes': q.upvotes,
+                'username': q.author.username,
+                'upvotes': q.upvotes,
                 'comments_count': q.comments.count(),
                 'programmingLanguage': q.language,
                 'codeSnippet': q.code_snippet,
@@ -1268,6 +1276,7 @@ def fetch_all_at_once(request, user_id: int):
                 'answered': q.answered,
                 'is_upvoted': user_votes_dict.get(q.pk) == VoteType.UPVOTE.value,
                 'is_downvoted': user_votes_dict.get(q.pk) == VoteType.DOWNVOTE.value,
+                'created_at' : q.created_at.strftime('%Y-%m-%d %H:%M:%S')
             }
             for q in questions
         ]
@@ -1287,7 +1296,8 @@ def fetch_all_at_once(request, user_id: int):
                 'title': question.title,
                 'description': question.details,
                 'user_id': question.author.pk,
-                'likes': question.upvotes,
+                'upvotes': question.upvotes,
+                'username': question.author.username,
                 'comments_count': question.comments.count(),
                 'programmingLanguage': question.language,
                 'codeSnippet': question.code_snippet,
@@ -1407,5 +1417,108 @@ def get_code_snippet_if_empty(request, question_id: int) -> HttpResponse:
         return JsonResponse({'codeSnippet': question.code_snippet}, status=200)
     except Question.DoesNotExist:
         return JsonResponse({'error': 'Question not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+def fetch_search_results_at_once(request, wiki_id, language, page_number = 1):
+    mock_request = HttpRequest()
+    mock_request.method = 'GET'
+    wiki_id_numerical_part = ''.join(filter(str.isdigit, wiki_id))
+
+    def get_info():
+        return wiki_result('', wiki_id, return_data_only=True)
+    
+    def get_questions():
+        return list_questions_by_language('', language, page_number, return_data_only=True)
+    
+    def get_annotations():
+        return get_annotations_by_language(mock_request, wiki_id_numerical_part, return_data_only=True)
+
+    with ThreadPoolExecutor(max_workers=3) as executor:
+        info_future = executor.submit(get_info)
+        questions_future = executor.submit(get_questions)
+        annotations_future = executor.submit(get_annotations)
+
+        information_result = info_future.result()
+        question_result = questions_future.result()
+        annotation_result = annotations_future.result()
+
+    return JsonResponse({
+        'information': information_result,
+        'questions': question_result,
+        'annotations': annotation_result
+    }, safe=False)
+
+@csrf_exempt
+def get_questions_according_to_filter(request):
+    try:
+        user_id = request.headers.get('User-ID', None)
+        user_votes = Question_Vote.objects.filter(user_id=user_id).values('question_id', 'vote_type')
+        user_votes_dict = {vote['question_id']: vote['vote_type'] for vote in user_votes}
+
+        # Parse the request body
+        data = json.loads(request.body)
+        status = data.get('status', 'all')
+        language = data.get('language', 'all')
+        tags = data.get('tags', [])
+        start_date = data.get('startDate') 
+        end_date = data.get('endDate')
+        
+        # Start with all questions, ordered by creation date
+        questions = Question.objects.all().order_by('-created_at')
+        
+        # Apply status filter
+        if status != 'all':
+            questions = questions.filter(answered=(status == 'answered'))
+            
+        # Apply language filter
+        if language != 'all':
+            questions = questions.filter(language__iexact=language)
+            
+        # Apply tags filter 
+        if tags:
+            lowercase_tags = [tag.lower() for tag in tags]
+            questions = questions.filter(tags__iregex=r'(?i)' + '|'.join(tags))
+
+        # Apply date filters only 
+        if start_date and start_date != "":
+            try:
+                start_date = datetime.strptime(start_date, '%Y-%m-%d')
+                questions = questions.filter(created_at__date__gte=start_date)
+            except ValueError:
+                print("Invalid date format for start_date")
+                pass 
+                
+        if end_date and end_date != "":
+            try:
+                end_date = datetime.strptime(end_date, '%Y-%m-%d')
+                # Add one day to include the end date fully
+                end_date = end_date + timedelta(days=1)
+                questions = questions.filter(created_at__date__lt=end_date)
+            except ValueError:
+                print("Invalid date format for end_date")
+                pass 
+
+        # We need 10 of them in the frontend
+        questions = questions[:10]
+
+        questions_data = [{
+            'id': q.pk,
+            'title': q.title,
+            'description': q.details,
+            'user_id': q.author.pk,
+            'username': q.author.username,
+            'upvotes': q.upvotes,
+            'comments_count': q.comments.count(),
+            'programmingLanguage': q.language,
+            'codeSnippet': q.code_snippet,
+            'tags': q.tags,
+            'answered': q.answered,
+            'is_upvoted': user_votes_dict.get(q.pk) == VoteType.UPVOTE.value,
+            'is_downvoted': user_votes_dict.get(q.pk) == VoteType.DOWNVOTE.value,
+            'created_at' : q.created_at.strftime('%Y-%m-%d %H:%M:%S')
+        } for q in questions]
+        
+        return JsonResponse({'questions': questions_data}, safe=False)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)

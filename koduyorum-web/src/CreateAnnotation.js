@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { showNotification } from './NotificationCenter';
 
 const CreateAnnotation = ({ visible, selectedText, startIndex, endIndex, language_id, annotationId, onClose }) => {
   const [annotationText, setAnnotationText] = useState('');
@@ -50,8 +51,10 @@ const CreateAnnotation = ({ visible, selectedText, startIndex, endIndex, languag
         } else {
             const data = await response.json();
             console.error('Error adding annotation:', data);
+            showNotification(data.error, 'just now');
         }
     } catch (error) {
+        showNotification('An error occurred while adding annotation', 'just now');
         console.error('Error adding annotation:', error);
     }
   }
@@ -92,7 +95,7 @@ const CreateAnnotation = ({ visible, selectedText, startIndex, endIndex, languag
             display: flex;
             justify-content: center;
             align-items: center;
-            z-index: 1000;
+            z-index: 100;
           }
           .modal-content {
             background: white;

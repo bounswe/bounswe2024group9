@@ -4,6 +4,9 @@ import { Navbar } from './PageComponents';
 import { LoadingComponent } from './LoadingPage';
 import PostPreview from './PostPreview';
 import './Profile.css';
+import { showNotification } from './NotificationCenter';
+import NotificationCenter from './NotificationCenter';
+import Comment from "./Comment";
 
 const Profile = () => {
     const { username } = useParams();
@@ -26,7 +29,7 @@ const Profile = () => {
                 );
                 if (response.ok) {
                     const data = await response.json();
-                    
+                    console.log('Profile data:', data);
                     setProfileData(data.user);
                     if (data.user['profile_pic'] != null) {    
                       const updatedProfilePictureUrl = `${process.env.REACT_APP_API_URL}${data.user['profile_pic']}`;
@@ -59,7 +62,8 @@ const Profile = () => {
         const userId = localStorage.getItem('user_id'); // Fetch the user ID from localStorage
         if (!userId) {
             console.error('User ID is undefined in localStorage');
-            alert('Unable to upload profile picture. Please try again later.');
+            showNotification('Unable to upload profile picture. Please try again later.');
+            // alert('Unable to upload profile picture. Please try again later.');
             return;
         }
 
@@ -86,14 +90,17 @@ const Profile = () => {
                         ...prevData,
                         profilePicture: updatedProfilePictureUrl,
                     }));
-                    alert('Profile picture updated successfully!');
+                    showNotification('Profile picture updated successfully!');
+                    // alert('Profile picture updated successfully!');
                 } else {
                     console.error('Failed to upload profile picture');
-                    alert('Failed to upload profile picture. Please try again.');
+                    showNotification('Failed to upload profile picture. Please try again.');
+                    // alert('Failed to upload profile picture. Please try again.');
                 }
             } catch (error) {
                 console.error('Error uploading profile picture:', error);
-                alert('An error occurred while uploading the profile picture.');
+                // alert('An error occurred while uploading the profile picture.');
+                showNotification('An error occurred while uploading the profile picture.');
             }
         }
     };
@@ -114,6 +121,7 @@ const Profile = () => {
     setError("");
     setSuccessMessage("");
   };
+
 
   // Handle editing profile
   const handleEditSubmit = async (event) => {
@@ -173,11 +181,14 @@ const Profile = () => {
                     }
                 );
                 if (response.ok) {
-                    alert('Account deleted successfully.');
+                    // alert('Account deleted successfully.');
+                    showNotification('Account deleted successfully.');
+                    
                     localStorage.removeItem('authToken');
                     localStorage.removeItem('user_id');
                     localStorage.removeItem('username');
-                    navigate('/signup');
+                    await new Promise(resolve => setTimeout(resolve, 2000)); // Wait for 2 seconds
+                    navigate('/login');
                 } else {
                     console.error('Failed to delete account');
                 }
@@ -195,7 +206,8 @@ const Profile = () => {
                 body: JSON.stringify({ email: profileData.email }),
             });
             if (response.ok) {
-                alert('A password update link has been sent to your email.');
+                // alert('A password update link has been sent to your email.');
+                showNotification('A password update link has been sent to your email.');
             } else {
                 console.error('Failed to send password reset link');
             }
@@ -213,6 +225,7 @@ const Profile = () => {
             ) : (
                 <div>
                     <Navbar />
+                    <NotificationCenter />
 
                     <div className="profile-page">
                         <div className="profile-header">
@@ -240,20 +253,32 @@ const Profile = () => {
                         </div>
 
                         {isOwner && (
-                        <div className="profile-tabs">
-                            <button
-                                className={`tab ${activeTab === 'questions' ? 'active' : ''}`}
-                                onClick={() => setActiveTab('questions')}
-                            >
-                                Questions
-                            </button>
-                            <button
-                                className={`tab ${activeTab === 'bookmarks' ? 'active' : ''}`}
-                                onClick={() => setActiveTab('bookmarks')}
-                            >
-                                Bookmarks
-                            </button>
-                        </div>
+                            <div className="profile-tabs">
+                                <button
+                                    className={`tab ${activeTab === 'questions' ? 'active' : ''}`}
+                                    onClick={() => setActiveTab('questions')}
+                                >
+                                    Questions
+                                </button>
+                                <button
+                                    className={`tab ${activeTab === 'comments' ? 'active' : ''}`}
+                                    onClick={() => setActiveTab('comments')}
+                                >
+                                    Comments
+                                </button>
+                                <button
+                                    className={`tab ${activeTab === 'annotations' ? 'active' : ''}`}
+                                    onClick={() => setActiveTab('annotations')}
+                                >
+                                    Annotations
+                                </button>
+                                <button
+                                    className={`tab ${activeTab === 'bookmarks' ? 'active' : ''}`}
+                                    onClick={() => setActiveTab('bookmarks')}
+                                >
+                                    Bookmarks
+                                </button>
+                            </div>
                         )}
 
                         <div className="profile-content">
@@ -263,17 +288,7 @@ const Profile = () => {
                                         profileData.questions.map((q) => (
                                             <PostPreview
                                                 key={q.id}
-                                                post={{
-                                                    post_id: q.id,
-                                                    title: q.title,
-                                                    description: q.details,
-                                                    programmingLanguage: q.language,
-                                                    topic: q.tags?.join(', '),
-                                                    tags: q.tags,
-                                                    answered: q.answered,
-                                                    likes: q.upvotes,
-                                                    comments: q.comments?.length,
-                                                }}
+                                                post={q}
                                                 onClick={() => navigate(`/question/${q.id}`)}
                                             />
                                         ))
@@ -304,6 +319,70 @@ const Profile = () => {
                                         ))
                                     ) : (
                                         <p>You do not have any bookmarks.</p>
+                                    )}
+                                </div>
+                            )}
+                            {activeTab === 'comments' && (
+                                <div className="content-list">
+                                    {profileData.comments.length > 0 ? (
+                                        profileData.comments.map((comment, index) => (
+                                            <React.Fragment key={index}>
+                                              <Comment
+                                                question_id={comment.question_id}
+                                                number={index + 1}
+                                                explanation={comment.details}
+                                                code={comment.code_snippet}
+                                                author={comment.user}
+                                                questionAuthor={""}
+                                                initialVotes={comment.upvotes}
+                                                language = {comment.language_id}
+                                                comment_id={comment.comment_id}
+                                                answer_of_the_question={comment.answer_of_the_question}
+                                                fetchComments={""}
+                                              />
+                                            </React.Fragment>
+                                          ))
+                                    ) : (
+                                        <p>You do not have any comments.</p>
+                                    )}
+                                </div>
+                            )}
+                            {activeTab === 'annotations' && (
+                                <div className="content-list">
+                                    {profileData.annotations.length > 0 ? (
+                                        <div className="annotations-list">
+                                            {profileData.annotations.map((annotation) => (
+                                                <div key={annotation.annotation_id} className="annotation-card">
+                                                    <div className="annotation-header">
+                                                        <span className="annotation-id">#{annotation.annotation_id}</span>
+                                                        <span className="annotation-date">
+                                                            {annotation.annotation_date}
+                                                        </span>
+                                                    </div>
+                                                    <div className="annotation-body">
+                                                        <p className="annotation-text">{annotation.text}</p>
+                                                        <div className="annotation-details">
+                                                            <div className="annotation-meta">
+                                                                <span className="label">Language ID:</span>
+                                                                <span className="value">{annotation.language_qid}</span>
+                                                            </div>
+                                                            <div className="annotation-range">
+                                                                <span className="label">Range:</span>
+                                                                <span className="value">
+                                                                    {annotation.annotation_starting_point} - {annotation.annotation_ending_point}
+                                                                </span>
+                                                            </div>
+                                                            <div className="annotation-author">
+                                                                <span className="label">Author:</span>
+                                                                <span className="value">{annotation.author}</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <p>You do not have any annotations.</p>
                                     )}
                                 </div>
                             )}
