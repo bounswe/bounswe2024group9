@@ -395,7 +395,7 @@ def report_question(request, question_id : int) -> HttpResponse:
 
 
 @csrf_exempt
-def list_questions_by_language(request, language: str, page_number = 1, return_data_only = False) -> HttpResponse:    
+def list_questions_by_language(request, user_id, language: str, page_number = 1, return_data_only = False) -> HttpResponse:    
     """
     List questions filtered by programming language with pagination.
     Args:
@@ -411,16 +411,25 @@ def list_questions_by_language(request, language: str, page_number = 1, return_d
 
     questions = Question.objects.filter(language__iexact=language)[10 * (page_number - 1): 10 * page_number]
 
-    questions_data = [{
-        'id': question._id,
+    user = get_user_model().objects.get(pk=user_id)
+    user_votes = Question_Vote.objects.filter(user_id=user_id).values('question_id', 'vote_type')
+    user_votes_dict = {vote['question_id']: vote['vote_type'] for vote in user_votes}
+
+    questions_data = [{   
+        'id': question.pk,
         'title': question.title,
-        'programmingLanguage': question.language,
-        'tags': question.tags,
-        'details': question.details,
-        'code_snippet': question.code_snippet,
+        'description': question.details,
+        'user_id': question.author.pk,
+        'username': question.author.username,
         'upvotes': question.upvotes,
-        'author': question.author.username,
-        'creationDate': question.created_at .strftime('%Y-%m-%d %H:%M:%S'),
+        'comments_count': question.comments.count(),
+        'programmingLanguage': question.language,
+        'codeSnippet': question.code_snippet,
+        'tags': question.tags,
+        'answered': question.answered,
+        'is_upvoted': user_votes_dict.get(question.pk) == VoteType.UPVOTE.value,
+        'is_downvoted': user_votes_dict.get(question.pk) == VoteType.DOWNVOTE.value,
+        'created_at' : question.created_at.strftime('%Y-%m-%d %H:%M:%S')      
     } for question in questions]
 
     if return_data_only:
@@ -1006,12 +1015,12 @@ def fetch_search_results_at_once(request, wiki_id, language, page_number = 1):
     mock_request = HttpRequest()
     mock_request.method = 'GET'
     wiki_id_numerical_part = ''.join(filter(str.isdigit, wiki_id))
-
+    user_id = request.headers.get('User-ID', None)
     def get_info():
         return wiki_result('', wiki_id, return_data_only=True)
     
     def get_questions():
-        return list_questions_by_language('', language, page_number, return_data_only=True)
+        return list_questions_by_language('', user_id ,language, page_number, return_data_only=True)
     
     def get_annotations():
         return get_annotations_by_language(mock_request, wiki_id_numerical_part, return_data_only=True)

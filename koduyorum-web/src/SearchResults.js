@@ -163,8 +163,15 @@ const SearchResults = () => {
       // const questionResponse = await fetch(`${process.env.REACT_APP_API_URL}/list_questions_by_language/${encodeURIComponent(wikiName)}/1`);
       // const annotationResponse = await fetch(`${process.env.REACT_APP_API_URL}/get_annotations_by_language_id/${wikiId.slice(1)}/`);
       
-      const infoQuestionAnnotationResponse = await fetch(`${process.env.REACT_APP_API_URL}/fetch_search_results_at_once/${encodeURIComponent(wikiId)}/${encodeURIComponent(wikiName)}/${(1)}`); 
+      const userId = localStorage.getItem('user_id');
+      const infoQuestionAnnotationResponse = await fetch(`${process.env.REACT_APP_API_URL}/fetch_search_results_at_once/${encodeURIComponent(wikiId)}/${encodeURIComponent(wikiName)}/${(1)}`, {
+        headers: {
+          'Content-Type': 'application/json',
+          'User-ID': userId,
+        },
+      }); 
       // Feth all data and questions' first page. Because it is default and the user can go to other pages, if there are more than one page.
+
 
       if (!infoQuestionAnnotationResponse.ok) {
         throw new Error('Failed to load data');
