@@ -3,7 +3,8 @@ from django.contrib.auth import login, authenticate, get_user_model
 from django.http import HttpRequest, HttpResponse, JsonResponse
 import json
 from django.views.decorators.csrf import csrf_exempt
-from rest_framework.decorators import permission_classes, api_view
+from rest_framework.decorators import permission_classes, api_view, parser_classes
+from rest_framework.parsers import MultiPartParser
 from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
 from rest_framework.permissions import IsAuthenticated
 from django_ratelimit.decorators import ratelimit
@@ -17,8 +18,66 @@ from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 import os
 from .utilization_views import wiki_search
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
 
+@swagger_auto_schema(
+    tags=['Profile'],
+    method='get',
+    operation_summary="Get User Profile",
+    operation_description="Retrieve detailed user profile information by username",
+    manual_parameters=[
+        openapi.Parameter(
+            name='username',
+            in_=openapi.IN_PATH,
+            type=openapi.TYPE_STRING,
+            description="Username of the user whose profile is to be retrieved",
+            required=True
+        ),
+    ],
+    responses={
+        200: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'user': openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        'username': openapi.Schema(type=openapi.TYPE_STRING, description="User's username"),
+                        'email': openapi.Schema(type=openapi.TYPE_STRING, description="User's email address"),
+                        'questions': openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Schema(type=openapi.TYPE_OBJECT), description="List of user's questions"),
+                        'comments': openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Schema(type=openapi.TYPE_OBJECT), description="List of user's comments"),
+                        'bookmarks': openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Schema(type=openapi.TYPE_OBJECT), description="List of user's bookmarks"),
+                        'annotations': openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Schema(type=openapi.TYPE_OBJECT), description="List of user's annotations"),
+                        'profile_pic': openapi.Schema(type=openapi.TYPE_STRING, description="URL of user's profile picture", nullable=True),
+                        'bio': openapi.Schema(type=openapi.TYPE_STRING, description="User's biography"),
+                        'interested_topics': openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Schema(type=openapi.TYPE_STRING), description="List of topics the user is interested in"),
+                        'known_languages': openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Schema(type=openapi.TYPE_STRING), description="List of programming languages known by the user"),
+                        'name': openapi.Schema(type=openapi.TYPE_STRING, description="User's first name"),
+                        'surname': openapi.Schema(type=openapi.TYPE_STRING, description="User's last name"),
+                        'user_id': openapi.Schema(type=openapi.TYPE_INTEGER, description="User's unique identifier")
+                    }
+                )
+            }
+        ),
+        400: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'error': openapi.Schema(type=openapi.TYPE_STRING, description="Error message for invalid request")
+            }
+        ),
+        404: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'error': openapi.Schema(type=openapi.TYPE_STRING, description="Error message when user is not found")
+            }
+        )
+    }
+)
+@api_view(['GET'])
 @csrf_exempt
+@permission_classes([AllowAny])
 def get_user_profile_by_username(request, username : str) -> JsonResponse:
     """
     Retrieve user profile information by username.
@@ -53,6 +112,8 @@ def get_user_profile_by_username(request, username : str) -> JsonResponse:
     }
     
     return JsonResponse({'user': user_data}, status=200)
+
+
 
 @csrf_exempt
 def get_user_profile_by_id(request, user_id : int) -> JsonResponse:
@@ -101,7 +162,66 @@ def get_user_profile_by_id(request, user_id : int) -> JsonResponse:
     
     return JsonResponse({'user': user_data}, status=200)
 
-#TODO find what can be changed in the user profile.
+
+@swagger_auto_schema(
+    tags=['Profile'],
+    method='put',
+    operation_summary="Edit User Profile",
+    operation_description="Edit user profile information. Only admins and profile owners can edit profiles.",
+    manual_parameters=[
+        openapi.Parameter(
+            name='User-ID',
+            in_=openapi.IN_HEADER,
+            type=openapi.TYPE_INTEGER,
+            description="ID of the user attempting to make the edit",
+            required=True
+        ),
+        openapi.Parameter(
+            name='will_be_edited_user_id',
+            in_=openapi.IN_PATH,
+            type=openapi.TYPE_INTEGER,
+            description="ID of the user whose profile will be edited",
+            required=True
+        ),
+    ],
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            'username': openapi.Schema(type=openapi.TYPE_STRING, description="New username"),
+            'email': openapi.Schema(type=openapi.TYPE_STRING, description="New email address"),
+            'bio': openapi.Schema(type=openapi.TYPE_STRING, description="New biography"),
+            'profile_pic': openapi.Schema(type=openapi.TYPE_STRING, description="New profile picture URL")
+        }
+    ),
+    responses={
+        200: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'success': openapi.Schema(type=openapi.TYPE_STRING, description="Success message")
+            }
+        ),
+        400: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'error': openapi.Schema(type=openapi.TYPE_STRING, description="Error message for invalid request")
+            }
+        ),
+        403: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'error': openapi.Schema(type=openapi.TYPE_STRING, description="Error message for unauthorized access")
+            }
+        ),
+        404: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'error': openapi.Schema(type=openapi.TYPE_STRING, description="Error message when user is not found")
+            }
+        )
+    }
+)
+@permission_classes([AllowAny])
+@api_view(['PUT'])
 @csrf_exempt
 def edit_user_profile(request, will_be_edited_user_id : int) -> JsonResponse:
     wants_to_edit_user_id = request.headers.get('User-ID', None)
@@ -139,7 +259,58 @@ def edit_user_profile(request, will_be_edited_user_id : int) -> JsonResponse:
     
     return JsonResponse({'success': 'User profile updated successfully'}, status=200)
 
+
+@swagger_auto_schema(
+    tags=['Profile'],
+    method='delete',
+    operation_summary="Delete User Profile",
+    operation_description="Delete a user profile. Only admins and profile owners can delete profiles.",
+    manual_parameters=[
+        openapi.Parameter(
+            name='User-ID',
+            in_=openapi.IN_HEADER,
+            type=openapi.TYPE_INTEGER,
+            description="ID of the user attempting to delete the profile",
+            required=True
+        ),
+        openapi.Parameter(
+            name='will_be_deleted_user_id',
+            in_=openapi.IN_PATH,
+            type=openapi.TYPE_INTEGER,
+            description="ID of the user profile to be deleted",
+            required=True
+        ),
+    ],
+    responses={
+        200: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'success': openapi.Schema(type=openapi.TYPE_STRING, description="Success message indicating profile deletion")
+            }
+        ),
+        400: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'error': openapi.Schema(type=openapi.TYPE_STRING, description="Error message for missing parameters")
+            }
+        ),
+        403: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'error': openapi.Schema(type=openapi.TYPE_STRING, description="Error message for unauthorized access")
+            }
+        ),
+        404: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'error': openapi.Schema(type=openapi.TYPE_STRING, description="Error message when user is not found")
+            }
+        )
+    }
+)
 @csrf_exempt
+@api_view(['DELETE'])
+@permission_classes([AllowAny])
 def delete_user_profile(request, will_be_deleted_user_id: int) -> JsonResponse:
     """
     Deletes a user profile based on the provided user ID.
@@ -178,6 +349,89 @@ def delete_user_profile(request, will_be_deleted_user_id: int) -> JsonResponse:
     return JsonResponse({'success': 'User profile deleted successfully'}, status=200)
 
 
+@swagger_auto_schema(
+    tags=['Profile'],
+    method='post',
+    operation_summary="User Signup",
+    operation_description="""
+    Create a new user account with the provided credentials.
+    The endpoint performs password matching, username/email uniqueness checks, and automatically logs in the user upon successful registration.
+    """,
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        required=['username', 'email', 'password1', 'password2'],
+        properties={
+            'username': openapi.Schema(
+                type=openapi.TYPE_STRING, 
+                description="Desired username (will be converted to lowercase)"
+            ),
+            'email': openapi.Schema(
+                type=openapi.TYPE_STRING, 
+                description="Email address for the account"
+            ),
+            'password1': openapi.Schema(
+                type=openapi.TYPE_STRING, 
+                description="Desired password"
+            ),
+            'password2': openapi.Schema(
+                type=openapi.TYPE_STRING, 
+                description="Password confirmation (must match password1)"
+            ),
+        }
+    ),
+    responses={
+        201: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'success': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="Success message"
+                ),
+                'user_id': openapi.Schema(
+                    type=openapi.TYPE_INTEGER,
+                    description="ID of the created user"
+                ),
+                'username': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="Username of the created user"
+                ),
+                'token': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="JWT access token for authentication"
+                )
+            }
+        ),
+        400: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'error': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="Error message for validation failures (passwords not matching, username taken, email taken, malformed data)"
+                )
+            }
+        ),
+        405: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'error': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="Error message for invalid HTTP method"
+                )
+            }
+        ),
+        500: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'error': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="Error message for authentication failure after user creation"
+                )
+            }
+        )
+    }
+)
+@api_view(['POST'])
+@permission_classes([AllowAny])
 @csrf_exempt
 def signup(request):
     """
@@ -243,7 +497,64 @@ def signup(request):
     return JsonResponse({'error': 'Invalid request method'}, status=405)
 
 
-
+@swagger_auto_schema(
+    tags=['Profile'],
+    method='post',
+    operation_summary="User Login",
+    operation_description="Authenticate a user with username and password. Returns a JWT access token upon successful authentication.",
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        required=['username', 'password'],
+        properties={
+            'username': openapi.Schema(
+                type=openapi.TYPE_STRING,
+                description="User's username (case-insensitive)"
+            ),
+            'password': openapi.Schema(
+                type=openapi.TYPE_STRING,
+                description="User's password"
+            )
+        }
+    ),
+    responses={
+        200: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'status': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="Success status"
+                ),
+                'user_id': openapi.Schema(
+                    type=openapi.TYPE_INTEGER,
+                    description="ID of the authenticated user"
+                ),
+                'token': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="JWT access token for authentication"
+                ),
+                'user_type': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="Type of user account"
+                )
+            }
+        ),
+        400: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'error': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="Error message for invalid credentials or malformed data"
+                )
+            }
+        ),
+        405: openapi.Schema(
+            type=openapi.TYPE_STRING,
+            description="Method not allowed response for non-POST requests"
+        )
+    }
+)
+@api_view(['POST'])
+@permission_classes([AllowAny])
 @csrf_exempt
 def login_user(request : HttpRequest) -> HttpResponse:
     """
@@ -289,6 +600,72 @@ def login_user(request : HttpRequest) -> HttpResponse:
         return HttpResponse(status=405)
 
 
+@swagger_auto_schema(
+    tags=['Profile'],
+    method='post',
+    operation_summary="Update User Language Preferences",
+    operation_description="Update a user's interested topics and known programming languages",
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        required=['user_id', 'interested_topics', 'known_languages'],
+        properties={
+            'user_id': openapi.Schema(
+                type=openapi.TYPE_INTEGER,
+                description="ID of the user to update"
+            ),
+            'interested_topics': openapi.Schema(
+                type=openapi.TYPE_ARRAY,
+                items=openapi.Schema(type=openapi.TYPE_STRING),
+                description="List of topics the user is interested in"
+            ),
+            'known_languages': openapi.Schema(
+                type=openapi.TYPE_ARRAY,
+                items=openapi.Schema(type=openapi.TYPE_STRING),
+                description="List of programming languages the user knows"
+            )
+        }
+    ),
+    responses={
+        200: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'success': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="Success message"
+                )
+            }
+        ),
+        400: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'error': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="Error message for malformed data"
+                )
+            }
+        ),
+        404: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'error': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="Error message when user is not found"
+                )
+            }
+        ),
+        405: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'error': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="Error message for invalid HTTP method"
+                )
+            }
+        )
+    }
+)
+@api_view(['POST'])
+@permission_classes([AllowAny])
 @csrf_exempt
 def add_interested_languages_for_a_user(request):
     """
@@ -318,7 +695,59 @@ def add_interested_languages_for_a_user(request):
     return JsonResponse({'error': 'Invalid request method'}, status=405)
 
 
-
+@swagger_auto_schema(
+    tags=['Profile'],
+    method='post',
+    operation_summary="Get User Language Preferences",
+    operation_description="Retrieve a user's interested topics and known programming languages",
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        required=['user_id'],
+        properties={
+            'user_id': openapi.Schema(
+                type=openapi.TYPE_INTEGER,
+                description="ID of the user whose preferences to retrieve"
+            )
+        }
+    ),
+    responses={
+        200: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'known_languages': openapi.Schema(
+                    type=openapi.TYPE_ARRAY,
+                    items=openapi.Schema(type=openapi.TYPE_STRING),
+                    description="List of programming languages the user knows"
+                ),
+                'interested_topics': openapi.Schema(
+                    type=openapi.TYPE_ARRAY,
+                    items=openapi.Schema(type=openapi.TYPE_STRING),
+                    description="List of topics the user is interested in"
+                )
+            }
+        ),
+        400: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'error': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="Error message for malformed data"
+                )
+            }
+        ),
+        404: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'error': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="Error message when user is not found"
+                )
+            }
+        )
+    }
+)
+@api_view(['POST'])
+@permission_classes([AllowAny])
 @csrf_exempt
 def get_user_preferred_languages(request):
     """
@@ -339,7 +768,48 @@ def get_user_preferred_languages(request):
     user : User = get_user_model().objects.get(pk=user_id)
     return JsonResponse({'known_languages': user.known_languages, 'interested_topics': user.interested_topics}, status=200)
 
+@swagger_auto_schema(
+    tags=['Profile'],
+    method='post',
+    operation_summary="Logout User",
+    operation_description="Logs out a user by blacklisting their refresh token",
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        required=['token'],
+        properties={
+            'token': openapi.Schema(
+                type=openapi.TYPE_STRING,
+                description="User's refresh token to be blacklisted"
+            )
+        }
+    ),
+    responses={
+        200: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'status': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="Success status"
+                ),
+                'message': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="Success message"
+                )
+            }
+        ),
+        400: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'error': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="Error message if token is missing or invalid"
+                )
+            }
+        )
+    }
+)
 @api_view(['POST'])
+@permission_classes([AllowAny])
 def logout_user(request: HttpRequest) -> HttpResponse:
     """
     Logs out a user by blacklisting their refresh token.
@@ -371,6 +841,41 @@ def logout_user(request: HttpRequest) -> HttpResponse:
         return JsonResponse({'error': str(e)}, status=400)
     
 
+@swagger_auto_schema(
+    tags=['Profile'],
+    method='get',
+    operation_summary="Check Token Validity",
+    operation_description="Verify if the provided authentication token is valid",
+    manual_parameters=[
+        openapi.Parameter(
+            'Authorization',
+            openapi.IN_HEADER,
+            description="Bearer {token}",
+            type=openapi.TYPE_STRING,
+            required=True
+        )
+    ],
+    responses={
+        200: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'status': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="Token validity status message"
+                )
+            }
+        ),
+        401: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'detail': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="Authentication credentials were not provided or are invalid"
+                )
+            }
+        )
+    }
+)
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def check_token(request):
@@ -388,6 +893,43 @@ def check_token(request):
     """
     return JsonResponse({'status': 'Token is valid'}, status=200)
 
+@swagger_auto_schema(
+    tags=['Profile'],
+    method='post',
+    operation_summary="Upload Profile Picture",
+    manual_parameters=[
+        openapi.Parameter(
+            name='User-ID',
+            in_=openapi.IN_HEADER,
+            type=openapi.TYPE_INTEGER,
+            required=True
+        ),
+        openapi.Parameter(
+            name='profile_pic',
+            in_=openapi.IN_FORM,
+            type=openapi.TYPE_FILE,
+            required=True
+        )
+    ],
+    responses={
+        200: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'success': openapi.Schema(type=openapi.TYPE_STRING),
+                'url': openapi.Schema(type=openapi.TYPE_STRING)
+            }
+        ),
+        400: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'error': openapi.Schema(type=openapi.TYPE_STRING)
+            }
+        )
+    }
+)
+@api_view(['POST'])
+@parser_classes([MultiPartParser])
+@permission_classes([AllowAny])
 @csrf_exempt
 def upload_profile_pic(request : HttpRequest) -> HttpResponse:
     """
@@ -418,10 +960,57 @@ def upload_profile_pic(request : HttpRequest) -> HttpResponse:
         return JsonResponse({'success': 'Profile picture uploaded successfully', 'url': user.profile_pic.url}, status=200)
     return JsonResponse({'error': 'Invalid request method'}, status=405)
 
-
-
+@swagger_auto_schema(
+    tags=['Profile'],
+    method='post',
+    operation_summary="Request Password Reset Email",
+    operation_description="""
+    Send a password reset link to the user's email address.
+    A unique token will be generated and included in the reset link.
+    """,
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        required=['email'],
+        properties={
+            'email': openapi.Schema(
+                type=openapi.TYPE_STRING,
+                description="Email address of the user requesting password reset"
+            )
+        }
+    ),
+    responses={
+        200: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'message': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="Success message indicating email was sent"
+                )
+            }
+        ),
+        400: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'error': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="Error message for invalid request method"
+                )
+            }
+        ),
+        404: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'error': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="Error message when no user is found with the provided email"
+                )
+            }
+        )
+    }
+)
+@api_view(['POST'])
+@permission_classes([AllowAny])
 @csrf_exempt
-# @ratelimit(key='ip', rate='5/m', method='POST', block=True) # For now do not use this decorator
 def reset_password_request_mail(request : HttpRequest):
     """
     Handles password reset requests.
@@ -478,6 +1067,88 @@ def reset_password_request_mail(request : HttpRequest):
 
     return JsonResponse({'error': 'Invalid request method.'}, status=400)
 
+
+@swagger_auto_schema(
+    tags=['Profile'],
+    method='get',
+    operation_summary="Get Password Reset Form Data",
+    manual_parameters=[
+        openapi.Parameter(
+            'uidb64',
+            openapi.IN_PATH,
+            type=openapi.TYPE_STRING,
+            description="Base64 encoded user ID",
+            required=True
+        ),
+        openapi.Parameter(
+            'token',
+            openapi.IN_PATH,
+            type=openapi.TYPE_STRING,
+            description="Password reset token",
+            required=True
+        )
+    ],
+    responses={
+        200: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'message': openapi.Schema(type=openapi.TYPE_STRING),
+                'uid': openapi.Schema(type=openapi.TYPE_STRING),
+                'token': openapi.Schema(type=openapi.TYPE_STRING)
+            }
+        ),
+        400: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'error': openapi.Schema(type=openapi.TYPE_STRING)
+            }
+        )
+    }
+)
+@swagger_auto_schema(
+    tags=['Profile'],
+    method='post',
+    operation_summary="Reset Password",
+    manual_parameters=[
+        openapi.Parameter(
+            'uidb64',
+            openapi.IN_PATH,
+            type=openapi.TYPE_STRING,
+            description="Base64 encoded user ID",
+            required=True
+        ),
+        openapi.Parameter(
+            'token',
+            openapi.IN_PATH,
+            type=openapi.TYPE_STRING,
+            description="Password reset token",
+            required=True
+        )
+    ],
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            'new_password': openapi.Schema(type=openapi.TYPE_STRING),
+            'confirm_password': openapi.Schema(type=openapi.TYPE_STRING)
+        }
+    ),
+    responses={
+        200: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'message': openapi.Schema(type=openapi.TYPE_STRING)
+            }
+        ),
+        400: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'error': openapi.Schema(type=openapi.TYPE_STRING)
+            }
+        )
+    }
+)
+@api_view(['GET', 'POST'])
+@permission_classes([AllowAny])
 @csrf_exempt
 def reset_password(request, uidb64, token):
     """
@@ -519,6 +1190,36 @@ def reset_password(request, uidb64, token):
 
     return JsonResponse({'error': 'Invalid or expired token.'}, status=400)
 
+
+@swagger_auto_schema(
+    tags=['Profile'],
+    method='get',
+    operation_summary="Get Top Contributors",
+    operation_description="Lists top 5 users by contribution points (Questions: 2pts, Answers: 5pts, Comments: 1pt)",
+    responses={
+        200: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'users': openapi.Schema(
+                    type=openapi.TYPE_ARRAY,
+                    items=openapi.Schema(
+                        type=openapi.TYPE_OBJECT,
+                        properties={
+                            'username': openapi.Schema(type=openapi.TYPE_STRING),
+                            'email': openapi.Schema(type=openapi.TYPE_STRING),
+                            'name': openapi.Schema(type=openapi.TYPE_STRING),
+                            'surname': openapi.Schema(type=openapi.TYPE_STRING),
+                            'contribution_points': openapi.Schema(type=openapi.TYPE_INTEGER),
+                            'user_id': openapi.Schema(type=openapi.TYPE_INTEGER)
+                        }
+                    )
+                )
+            }
+        )
+    }
+)
+@api_view(['GET'])
+@permission_classes([AllowAny])
 @csrf_exempt
 def list_most_contributed_five_person(request: HttpRequest) -> JsonResponse:
     """
@@ -555,6 +1256,77 @@ def list_most_contributed_five_person(request: HttpRequest) -> JsonResponse:
     
     return JsonResponse({'users': user_data}, status=200)
 
+
+@swagger_auto_schema(
+    tags=['Search'],
+    method='get',
+    operation_summary="Multi-Search",
+    operation_description="Search across wiki, tags, and programming languages",
+    manual_parameters=[
+        openapi.Parameter(
+            name='query',
+            in_=openapi.IN_QUERY,
+            type=openapi.TYPE_STRING,
+            description="Search term",
+            required=True
+        )
+    ],
+    responses={
+        200: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'wiki_results': openapi.Schema(
+                    type=openapi.TYPE_ARRAY,
+                    items=openapi.Schema(
+                        type=openapi.TYPE_OBJECT,
+                        properties={
+                            'label': openapi.Schema(type=openapi.TYPE_STRING),
+                            'url': openapi.Schema(type=openapi.TYPE_STRING)
+                        }
+                    )
+                ),
+                'tag_results': openapi.Schema(
+                    type=openapi.TYPE_ARRAY,
+                    items=openapi.Schema(
+                        type=openapi.TYPE_OBJECT,
+                        properties={
+                            'id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                            'title': openapi.Schema(type=openapi.TYPE_STRING),
+                            'details': openapi.Schema(type=openapi.TYPE_STRING),
+                            'tags': openapi.Schema(type=openapi.TYPE_STRING)
+                        }
+                    )
+                ),
+                'language_results': openapi.Schema(
+                    type=openapi.TYPE_ARRAY,
+                    items=openapi.Schema(
+                        type=openapi.TYPE_OBJECT,
+                        properties={
+                            'id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                            'title': openapi.Schema(type=openapi.TYPE_STRING),
+                            'details': openapi.Schema(type=openapi.TYPE_STRING),
+                            'language': openapi.Schema(type=openapi.TYPE_STRING)
+                        }
+                    )
+                )
+            }
+        ),
+        400: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'error': openapi.Schema(type=openapi.TYPE_STRING)
+            }
+        ),
+        405: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'error': openapi.Schema(type=openapi.TYPE_STRING)
+            }
+        )
+    }
+)
+@api_view(['GET'])
+@permission_classes([AllowAny])
 @csrf_exempt
 def multi_search(request):
     if request.method == 'GET':
