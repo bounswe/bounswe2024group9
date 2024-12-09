@@ -149,7 +149,7 @@ def get_question_comments(request, question_id):
         return JsonResponse({'error': 'Question not found'}, status=404)
 
 @swagger_auto_schema(
-    tags=['Questions'],
+    tags=['Question'],
    method='post',
    operation_summary="Create Question",
    operation_description="""Create a new question with title, language, details, and optional code snippet and tags.
@@ -306,7 +306,7 @@ def create_question(request: HttpRequest) -> HttpResponse:
 
 @swagger_auto_schema(
    method='put',
-   tags=['Questions'],
+   tags=['Question'],
    operation_summary="Edit Question",
    operation_description="Edit an existing question. Only the question owner or admin can edit.",
    manual_parameters=[
@@ -438,7 +438,7 @@ def edit_question(request: HttpRequest, question_id: int) -> HttpResponse:
 
 @swagger_auto_schema(
    method='delete',
-   tags=['Questions'],
+   tags=['Question'],
    operation_summary="Delete Question",
    operation_description="Delete an existing question. Only the question owner or admin can delete.",
    manual_parameters=[
@@ -611,7 +611,7 @@ def report_question(request, question_id : int) -> HttpResponse:
 
 @swagger_auto_schema(
    method='get',
-   tags=['Questions'],
+   tags=['Question'],
    operation_summary="List Questions by Language",
    operation_description="Retrieve a paginated list of questions filtered by programming language",
    manual_parameters=[
@@ -700,7 +700,7 @@ def list_questions_by_language(request, language: str, page_number = 1, return_d
 
 @swagger_auto_schema(
    method='get',
-   tags=['Questions'],
+   tags=['Question'],
    operation_summary="List Questions by Tags",
    operation_description="Retrieve a paginated list of questions filtered by tags",
    manual_parameters=[
@@ -1147,7 +1147,7 @@ def fetch_random_reported_question(request: HttpRequest) -> HttpResponse:
     return JsonResponse({'question': question_data}, safe=False)
 
 @swagger_auto_schema(
-        tags=['Questions'],
+        tags=['Question'],
    method='get',
    operation_summary="Fetch Complete User Feed",
    operation_description="""Retrieves a complete feed for a user including:
@@ -1420,6 +1420,81 @@ def get_code_snippet_if_empty(request, question_id: int) -> HttpResponse:
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
+@swagger_auto_schema(
+    tags=['Question'],
+    method='get',
+    operation_summary="Fetch Combined Search Results",
+    operation_description="""
+    Fetches and combines multiple types of search results concurrently:
+    - Wiki information for the specified ID
+    - Questions for the given language
+    - Annotations related to the wiki ID
+    """,
+    manual_parameters=[
+        openapi.Parameter(
+            name='wiki_id',
+            in_=openapi.IN_PATH,
+            type=openapi.TYPE_STRING,
+            description="Wiki identifier for the search",
+            required=True
+        ),
+        openapi.Parameter(
+            name='language',
+            in_=openapi.IN_PATH,
+            type=openapi.TYPE_STRING,
+            description="Programming language to filter questions",
+            required=True
+        ),
+        openapi.Parameter(
+            name='page_number',
+            in_=openapi.IN_PATH,
+            type=openapi.TYPE_INTEGER,
+            description="Page number for paginated results",
+            default=1
+        )
+    ],
+    responses={
+        200: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'information': openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    description="Wiki information results"
+                ),
+                'questions': openapi.Schema(
+                    type=openapi.TYPE_ARRAY,
+                    items=openapi.Schema(type=openapi.TYPE_OBJECT),
+                    description="Filtered questions for the specified language"
+                ),
+                'annotations': openapi.Schema(
+                    type=openapi.TYPE_ARRAY,
+                    items=openapi.Schema(type=openapi.TYPE_OBJECT),
+                    description="Related annotations for the wiki ID"
+                )
+            }
+        ),
+        404: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'error': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="Error message when resources are not found"
+                )
+            }
+        ),
+        500: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'error': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="Error message for concurrent execution failures"
+                )
+            }
+        )
+    }
+)
+@api_view(['GET'])
+@permission_classes([AllowAny])
 def fetch_search_results_at_once(request, wiki_id, language, page_number = 1):
     mock_request = HttpRequest()
     mock_request.method = 'GET'
@@ -1449,6 +1524,92 @@ def fetch_search_results_at_once(request, wiki_id, language, page_number = 1):
         'annotations': annotation_result
     }, safe=False)
 
+@swagger_auto_schema(
+    tags=['Questions'],
+    method='post',
+    operation_summary="Get Filtered Questions",
+    operation_description="""
+    Retrieves questions based on specified filter criteria.
+    All filter parameters are optional:
+    - If status is not specified, returns questions with all statuses
+    - If language is not specified, returns questions in all languages
+    - If tags are not specified, returns questions with any tags
+    - If dates are not specified, returns questions from all time periods
+    """,
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            'status': openapi.Schema(
+                type=openapi.TYPE_STRING,
+                description="Filter by question status",
+                default='all',
+                enum=['answered, unanswered']
+            ),
+            'language': openapi.Schema(
+                type=openapi.TYPE_STRING,
+                description="Filter by programming language",
+                default=''
+            ),
+            'tags': openapi.Schema(
+                type=openapi.TYPE_ARRAY,
+                items=openapi.Schema(type=openapi.TYPE_STRING),
+                description="Array of tag names to filter by",
+                default=[]
+            ),
+            'startDate': openapi.Schema(
+                type=openapi.TYPE_STRING,
+                format='date',
+                description="Filter questions posted on or after this date (YYYY-MM-DD)",
+                example="2024-01-01"
+            ),
+            'endDate': openapi.Schema(
+                type=openapi.TYPE_STRING,
+                format='date',
+                description="Filter questions posted on or before this date (YYYY-MM-DD)",
+                example="2024-12-31"
+            )
+        }
+    ),
+    responses={
+        200: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'questions': openapi.Schema(
+                    type=openapi.TYPE_ARRAY,
+                    items=openapi.Schema(
+                        type=openapi.TYPE_OBJECT,
+                        properties={
+                            'id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                            'title': openapi.Schema(type=openapi.TYPE_STRING),
+                            'status': openapi.Schema(type=openapi.TYPE_STRING),
+                            'language': openapi.Schema(type=openapi.TYPE_STRING),
+                            'tags': openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Schema(type=openapi.TYPE_STRING)),
+                            'created_at': openapi.Schema(type=openapi.TYPE_STRING, format='date-time'),
+                            'upvotes': openapi.Schema(type=openapi.TYPE_INTEGER),
+                            'views': openapi.Schema(type=openapi.TYPE_INTEGER)
+                        }
+                    ),
+                    description="List of questions matching the filter criteria"
+                ),
+                'total_count': openapi.Schema(
+                    type=openapi.TYPE_INTEGER,
+                    description="Total number of questions matching the filter criteria"
+                )
+            }
+        ),
+        400: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'error': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="Error message for invalid filter parameters"
+                )
+            }
+        )
+    }
+)
+@api_view(['POST'])
+@permission_classes([AllowAny])
 @csrf_exempt
 def get_questions_according_to_filter(request):
     try:
