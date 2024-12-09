@@ -38,7 +38,6 @@ DEBUG = True
 CORS_ALLOW_ALL_ORIGINS = True
 
 ALLOWED_HOSTS = [
-    os.getenv('HEOKU_APP', ''),
     '127.0.0.1',
     '10.0.2.2',
     'localhost',
@@ -75,6 +74,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework',
     'rest_framework_simplejwt.token_blacklist',
+    'drf_yasg',
 ]
 
 MIDDLEWARE = [
