@@ -37,6 +37,8 @@ urlpatterns = [
     path('report_question/<int:question_id>/', question_views.report_question, name='report_question'),
     path('bookmark_question/<int:question_id>/', question_views.bookmark_question, name='bookmark_question'),
     path('remove_bookmark/<int:question_id>/', question_views.remove_bookmark, name='remove_bookmark'),
+    path('check_bookmark/<int:question_id>/', question_views.check_bookmark, name='check_bookmark'),
+
     path('get_random_reported_question/', question_views.fetch_random_reported_question, name='get_random_reported_question'),
     path('gel_all_questions/', question_views.get_all_questions, name='get_all_questions'),
 

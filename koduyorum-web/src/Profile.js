@@ -275,7 +275,7 @@ const Profile = () => {
                                             <PostPreview
                                                 key={q.id}
                                                 post={{
-                                                    post_id: q.id,
+                                                    id: q.id,
                                                     title: q.title,
                                                     description: q.details,
                                                     programmingLanguage: q.language,
@@ -300,7 +300,7 @@ const Profile = () => {
                                             <PostPreview
                                                 key={b.id}
                                                 post={{
-                                                    post_id: b.id,
+                                                    id: b.id,
                                                     title: b.title,
                                                     description: b.details,
                                                     programmingLanguage: b.language,
