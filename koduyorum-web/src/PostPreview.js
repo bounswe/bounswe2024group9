@@ -264,10 +264,11 @@ const PostPreview = ({ post, currentUser, onClick }) => {
 
                 <div className={"footer-book"}>
                     <button
-                        className="bg-green-600 text-white px-4 py-2 mt-4"
+                        className="bookmark"
                         onClick={(e) => handleBookmark(e)}
                     >
-                        <FontAwesomeIcon icon={faBookmark} style={{color: isBookmarked ? 'blue' : 'white'}}/>
+                        <FontAwesomeIcon icon={faBookmark} style={{color: isBookmarked ? 'blue' : 'a9a8a8'}}/>
+                        <span className="footer-text"> Bookmark </span>
                     </button>
 
                 </div>
