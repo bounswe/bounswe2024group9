@@ -171,45 +171,43 @@ const PostPreview = ({ post, currentUser, onClick }) => {
     const handleBookmark = async (e) => {
         e.stopPropagation();
         const token = localStorage.getItem('authToken');
-    if (isBookmarked){
-        fetch(`${process.env.REACT_APP_API_URL}/remove_bookmark/${post.id}/`, {
-            method: 'DELETE',
-            headers: {
-            'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}`,  // Add the token here
-            'User-ID': localStorage.getItem('user_id')
-    }
-        }).then(response => {
-            if (response.ok) {
-                alert("Bookmark removed successfully");
-                setIsBookmarked(false);
-            } else {
-                alert("Failed to remove bookmark");
+        if (isBookmarked){
+            fetch(`${process.env.REACT_APP_API_URL}/remove_bookmark/${post.id}/`, {
+                method: 'DELETE',
+                headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,  // Add the token here
+                'User-ID': localStorage.getItem('user_id')
+        }
+            }).then(response => {
+                if (response.ok) {
+                    setIsBookmarked(false);
+                } else {
+                    alert("Failed to remove bookmark");
+                }
             }
+            ).catch(error => {
+                console.error("Error removing bookmark:", error);
+            }
+            );
+        } else {
+            fetch(`${process.env.REACT_APP_API_URL}/bookmark_question/${post.id}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,  // Add the token here
+                'User-ID': localStorage.getItem('user_id')
+            }
+            }).then(response => {
+            if (response.ok) {
+                setIsBookmarked(true);
+            } else {
+                alert("Failed to add bookmark");
+            }
+            }).catch(error => {
+            console.error("Error adding bookmark:", error);
+            });
         }
-        ).catch(error => {
-            console.error("Error removing bookmark:", error);
-        }
-        );
-    } else {
-    fetch(`${process.env.REACT_APP_API_URL}/bookmark_question/${post.id}/`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,  // Add the token here
-        'User-ID': localStorage.getItem('user_id')
-      }
-    }).then(response => {
-      if (response.ok) {
-        alert("Bookmark added successfully");
-      } else {
-        alert("Failed to add bookmark");
-      }
-    }).catch(error => {
-      console.error("Error adding bookmark:", error);
-  });
-    }
-    setIsBookmarked(!isBookmarked);
     }
 
  
