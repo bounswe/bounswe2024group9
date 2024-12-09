@@ -1258,7 +1258,7 @@ def list_most_contributed_five_person(request: HttpRequest) -> JsonResponse:
 
 
 @swagger_auto_schema(
-    tags=['Search'],
+    tags=['Question'],
     method='get',
     operation_summary="Multi-Search",
     operation_description="Search across wiki, tags, and programming languages",

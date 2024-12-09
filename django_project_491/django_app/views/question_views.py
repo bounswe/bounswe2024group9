@@ -1525,7 +1525,7 @@ def fetch_search_results_at_once(request, wiki_id, language, page_number = 1):
     }, safe=False)
 
 @swagger_auto_schema(
-    tags=['Questions'],
+    tags=['Question'],
     method='post',
     operation_summary="Get Filtered Questions",
     operation_description="""
