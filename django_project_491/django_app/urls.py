@@ -8,7 +8,7 @@ urlpatterns = [
 
     path('wikipedia/', utilization_views.wikipedia_data_views, name='wikipedia'),
     path('search/<str:search_strings>', utilization_views.wiki_search, name='wiki_search'),
-    path('result/<str:wiki_id>', utilization_views.wiki_result, name='wiki_result'),
+    path('result/<str:wiki_id>', utilization_views.wiki_result_request, name='wiki_result'),
     path('get_api_languages/', utilization_views.get_run_coder_api_languages, name='get_run_coder_api_languages'),
                                                                                     
     path('login/', user_views.login_user, name='login'),
@@ -47,7 +47,7 @@ urlpatterns = [
     path('get_code_snippet_if_empty/<int:question_id>/', question_views.get_code_snippet_if_empty, name='get_code_snippet_if_empty'),
     
     path('list_questions_by_time/', question_views.list_questions_by_time, name='list_questions'),
-    path('list_questions_by_language/<str:language>/<int:page_number>', question_views.list_questions_by_language, name='list_questions'),
+    path('list_questions_by_language/<str:language>/<int:page_number>', question_views.list_questions_by_language_request, name='list_questions'),
     path('list_questions_by_tags/<str:tags>/<int:page_number>/', question_views.list_questions_by_tags, name='list_questions_by_tags'),
     path('list_questions_by_hotness/<int:page_number>', question_views.list_questions_by_hotness, name='list_questions_by_hotness'),
     path('random_questions/', question_views.random_questions, name='random_questions'),
@@ -66,7 +66,6 @@ urlpatterns = [
 
     path('run_code/<str:type>/<int:id>/', utilization_views.run_code_of_question_or_comment, name='run_code'),
 
-    path('list_questions/', question_views.list_questions_by_language, name='list_questions'),
     # path('run_code/', utilization_views.run_code_view, name='run_code'),
     path('code_execute/', utilization_views.post_sample_code, name='code_execute'),
     
@@ -78,7 +77,7 @@ urlpatterns = [
     path('create_annotation/', annotation_views.create_annotation, name='create_annotation'),
     path('delete_annotation/<int:annotation_id>/', annotation_views.delete_annotation, name='delete_annotation'),
     path('edit_annotation/<int:annotation_id>/', annotation_views.edit_annotation, name='edit_annotation'),
-    path('get_annotations_by_language_id/<int:language_qid>/', annotation_views.get_annotations_by_language, name='get_annotations_by_language_id'),
+    path('get_annotations_by_language_id/<int:language_qid>/', annotation_views.get_annotations_by_language_request, name='get_annotations_by_language_id'),
     path('annotations/all/', annotation_views.get_all_annotations, name='get_all_annotations'),
     path('multi_search/', user_views.multi_search, name='multi_search'),
     path('get_user_profile_by_id/<int:user_id>/', user_views.get_user_profile_by_id, name='get_user_profile_by_id'),

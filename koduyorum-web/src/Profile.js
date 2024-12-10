@@ -303,17 +303,7 @@ const Profile = () => {
                                         profileData.bookmarks.map((b) => (
                                             <PostPreview
                                                 key={b.id}
-                                                post={{
-                                                    id: b.id,
-                                                    title: b.title,
-                                                    description: b.details,
-                                                    programmingLanguage: b.language,
-                                                    topic: b.tags?.join(', '),
-                                                    tags: b.tags, 
-                                                    answered: b.answered,
-                                                    likes: b.upvotes,
-                                                    comments: b.comments?.length,
-                                                }}
+                                                post={b}
                                                 onClick={() => navigate(`/question/${b.id}`)}
                                             />
                                         ))
