@@ -304,7 +304,7 @@ const Profile = () => {
                                             <PostPreview
                                                 key={b.id}
                                                 post={{
-                                                    post_id: b.id,
+                                                    id: b.id,
                                                     title: b.title,
                                                     description: b.details,
                                                     programmingLanguage: b.language,

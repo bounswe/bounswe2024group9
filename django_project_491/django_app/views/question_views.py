@@ -664,7 +664,7 @@ def report_question(request, question_id : int) -> HttpResponse:
 @api_view(['GET'])
 @csrf_exempt
 @permission_classes([AllowAny])
-def list_questions_by_language(request, language: str, page_number = 1, return_data_only = False) -> HttpResponse:    
+def list_questions_by_language(request, user_id, language: str, page_number = 1, return_data_only = False) -> HttpResponse:    
     """
     List questions filtered by programming language with pagination.
     Args:
@@ -680,19 +680,28 @@ def list_questions_by_language(request, language: str, page_number = 1, return_d
 
     questions = Question.objects.filter(language__iexact=language)[10 * (page_number - 1): 10 * page_number]
 
-    questions_data = [{
-        'id': question._id,
+    user_votes = Question_Vote.objects.filter(user_id=user_id).values('question_id', 'vote_type')
+    user_votes_dict = {vote['question_id']: vote['vote_type'] for vote in user_votes}
+
+    questions_data = [{   
+        'id': question.pk,
         'title': question.title,
-        'programmingLanguage': question.language,
-        'tags': question.tags,
-        'details': question.details,
-        'code_snippet': question.code_snippet,
+        'description': question.details,
+        'user_id': question.author.pk,
+        'username': question.author.username,
         'upvotes': question.upvotes,
-        'author': question.author.username,
-        'creationDate': question.created_at .strftime('%Y-%m-%d %H:%M:%S'),
+        'comments_count': question.comments.count(),
+        'programmingLanguage': question.language,
+        'codeSnippet': question.code_snippet,
+        'tags': question.tags,
+        'answered': question.answered,
+        'is_upvoted': user_votes_dict.get(question.pk) == VoteType.UPVOTE.value,
+        'is_downvoted': user_votes_dict.get(question.pk) == VoteType.DOWNVOTE.value,
+        'created_at' : question.created_at.strftime('%Y-%m-%d %H:%M:%S')      
     } for question in questions]
 
     if return_data_only:
+        print("returning data only")
         return questions_data
 
     return JsonResponse({'questions': questions_data}, safe=False, status=200)
@@ -1146,8 +1155,31 @@ def fetch_random_reported_question(request: HttpRequest) -> HttpResponse:
     
     return JsonResponse({'question': question_data}, safe=False)
 
+def get_top_5_contributors():
+    contributors = (
+        User.objects.annotate(
+            question_points=Count('questions') * 2,
+            comment_points=Count('authored_comments', filter=Q(authored_comments__answer_of_the_question=False))
+            + Count('authored_comments', filter=Q(authored_comments__answer_of_the_question=True)) * 5,
+        )
+        .annotate(total_points=F('question_points') + F('comment_points'))
+        .order_by('-total_points')[:5]
+    )
+
+    return [
+        {
+            'username': user.username,
+            'email': user.email,
+            'name': user.name,
+            'surname': user.surname,
+            'contribution_points': user.total_points,
+        }
+        for user in contributors
+    ]
+
+
 @swagger_auto_schema(
-        tags=['Question'],
+    tags=['Question'],
    method='get',
    operation_summary="Fetch Complete User Feed",
    operation_description="""Retrieves a complete feed for a user including:
@@ -1310,28 +1342,6 @@ def fetch_all_feed_at_once(request, user_id: int):
 
         return question_data
 
-    def get_top_5_contributors():
-        contributors = (
-            User.objects.annotate(
-                question_points=Count('questions') * 2,
-                comment_points=Count('authored_comments', filter=Q(authored_comments__answer_of_the_question=False))
-                + Count('authored_comments', filter=Q(authored_comments__answer_of_the_question=True)) * 5,
-            )
-            .annotate(total_points=F('question_points') + F('comment_points'))
-            .order_by('-total_points')[:5]
-        )
-
-        return [
-            {
-                'username': user.username,
-                'email': user.email,
-                'name': user.name,
-                'surname': user.surname,
-                'contribution_points': user.total_points,
-            }
-            for user in contributors
-        ]
-
     # Fetch the data concurrently
     with ThreadPoolExecutor() as executor:
         future_questions = executor.submit(get_questions_for_user, user_id)
@@ -1420,108 +1430,115 @@ def get_code_snippet_if_empty(request, question_id: int) -> HttpResponse:
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
-@swagger_auto_schema(
-    tags=['Question'],
-    method='get',
-    operation_summary="Fetch Combined Search Results",
-    operation_description="""
-    Fetches and combines multiple types of search results concurrently:
-    - Wiki information for the specified ID
-    - Questions for the given language
-    - Annotations related to the wiki ID
-    """,
-    manual_parameters=[
-        openapi.Parameter(
-            name='wiki_id',
-            in_=openapi.IN_PATH,
-            type=openapi.TYPE_STRING,
-            description="Wiki identifier for the search",
-            required=True
-        ),
-        openapi.Parameter(
-            name='language',
-            in_=openapi.IN_PATH,
-            type=openapi.TYPE_STRING,
-            description="Programming language to filter questions",
-            required=True
-        ),
-        openapi.Parameter(
-            name='page_number',
-            in_=openapi.IN_PATH,
-            type=openapi.TYPE_INTEGER,
-            description="Page number for paginated results",
-            default=1
-        )
-    ],
-    responses={
-        200: openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            properties={
-                'information': openapi.Schema(
-                    type=openapi.TYPE_OBJECT,
-                    description="Wiki information results"
-                ),
-                'questions': openapi.Schema(
-                    type=openapi.TYPE_ARRAY,
-                    items=openapi.Schema(type=openapi.TYPE_OBJECT),
-                    description="Filtered questions for the specified language"
-                ),
-                'annotations': openapi.Schema(
-                    type=openapi.TYPE_ARRAY,
-                    items=openapi.Schema(type=openapi.TYPE_OBJECT),
-                    description="Related annotations for the wiki ID"
-                )
-            }
-        ),
-        404: openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            properties={
-                'error': openapi.Schema(
-                    type=openapi.TYPE_STRING,
-                    description="Error message when resources are not found"
-                )
-            }
-        ),
-        500: openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            properties={
-                'error': openapi.Schema(
-                    type=openapi.TYPE_STRING,
-                    description="Error message for concurrent execution failures"
-                )
-            }
-        )
-    }
-)
+# @swagger_auto_schema(
+#     tags=['Question'],
+#     method='get',
+#     operation_summary="Fetch Combined Search Results",
+#     operation_description="""
+#     Fetches and combines multiple types of search results concurrently:
+#     - Wiki information for the specified ID
+#     - Questions for the given language
+#     - Annotations related to the wiki ID
+#     """,
+#     manual_parameters=[
+#         openapi.Parameter(
+#             name='wiki_id',
+#             in_=openapi.IN_PATH,
+#             type=openapi.TYPE_STRING,
+#             description="Wiki identifier for the search",
+#             required=True
+#         ),
+#         openapi.Parameter(
+#             name='language',
+#             in_=openapi.IN_PATH,
+#             type=openapi.TYPE_STRING,
+#             description="Programming language to filter questions",
+#             required=True
+#         ),
+#         openapi.Parameter(
+#             name='page_number',
+#             in_=openapi.IN_PATH,
+#             type=openapi.TYPE_INTEGER,
+#             description="Page number for paginated results",
+#             default=1
+#         )
+#     ],
+#     responses={
+#         200: openapi.Schema(
+#             type=openapi.TYPE_OBJECT,
+#             properties={
+#                 'information': openapi.Schema(
+#                     type=openapi.TYPE_OBJECT,
+#                     description="Wiki information results"
+#                 ),
+#                 'questions': openapi.Schema(
+#                     type=openapi.TYPE_ARRAY,
+#                     items=openapi.Schema(type=openapi.TYPE_OBJECT),
+#                     description="Filtered questions for the specified language"
+#                 ),
+#                 'annotations': openapi.Schema(
+#                     type=openapi.TYPE_ARRAY,
+#                     items=openapi.Schema(type=openapi.TYPE_OBJECT),
+#                     description="Related annotations for the wiki ID"
+#                 )
+#             }
+#         ),
+#         404: openapi.Schema(
+#             type=openapi.TYPE_OBJECT,
+#             properties={
+#                 'error': openapi.Schema(
+#                     type=openapi.TYPE_STRING,
+#                     description="Error message when resources are not found"
+#                 )
+#             }
+#         ),
+#         500: openapi.Schema(
+#             type=openapi.TYPE_OBJECT,
+#             properties={
+#                 'error': openapi.Schema(
+#                     type=openapi.TYPE_STRING,
+#                     description="Error message for concurrent execution failures"
+#                 )
+#             }
+#         )
+#     }
+# )
 @api_view(['GET'])
 @permission_classes([AllowAny])
+@csrf_exempt
 def fetch_search_results_at_once(request, wiki_id, language, page_number = 1):
+    print("Fetching search results concurrently...")
     mock_request = HttpRequest()
     mock_request.method = 'GET'
     wiki_id_numerical_part = ''.join(filter(str.isdigit, wiki_id))
+    user_id = request.headers.get('User-ID', None)
 
     def get_info():
-        return wiki_result('', wiki_id, return_data_only=True)
+        return wiki_result(mock_request, wiki_id, return_data_only=True)
     
     def get_questions():
-        return list_questions_by_language('', language, page_number, return_data_only=True)
+        return list_questions_by_language(mock_request, user_id ,language, page_number, return_data_only=True)
     
     def get_annotations():
         return get_annotations_by_language(mock_request, wiki_id_numerical_part, return_data_only=True)
 
-    with ThreadPoolExecutor(max_workers=3) as executor:
+    with ThreadPoolExecutor(max_workers=4) as executor:
         info_future = executor.submit(get_info)
         questions_future = executor.submit(get_questions)
         annotations_future = executor.submit(get_annotations)
+        top_contributors_future = executor.submit(get_top_5_contributors)
 
         information_result = info_future.result()
         question_result = questions_future.result()
         annotation_result = annotations_future.result()
-
+        top_contributors_result = top_contributors_future.result()
+    
+    print("Search results fetched successfully.")
     return JsonResponse({
         'information': information_result,
         'questions': question_result,
-        'annotations': annotation_result
+        'annotations': annotation_result,
+        'top_contributors': top_contributors_result
     }, safe=False)
 
 @swagger_auto_schema(
@@ -1683,3 +1700,29 @@ def get_questions_according_to_filter(request):
         return JsonResponse({'questions': questions_data}, safe=False)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+
+@csrf_exempt
+def check_bookmark(request, question_id):
+    """
+    Check if a question is bookmarked by the user.
+    Args:
+        request (HttpRequest): The HTTP request object containing the User-ID in headers.
+        question_id (int): The ID of the question to check for bookmark.
+    Returns:
+        HttpResponse: A JSON response indicating whether the question is bookmarked by the user.
+    """
+    user_id = request.headers.get('User-ID', None)
+    if user_id is None:
+        return JsonResponse({'error': 'User ID parameter is required in the header'}, status=400)
+
+    user_id = int(user_id)
+
+    if not user_id:
+        return JsonResponse({'error': 'User ID parameter is required'}, status=400)
+
+    user = User.objects.get(pk=user_id)
+    question = Question.objects.get(_id=question_id)
+
+    is_bookmarked = user.bookmarks.filter(pk=question_id).exists()
+
+    return JsonResponse({'is_bookmarked': is_bookmarked}, status=200)

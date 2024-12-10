@@ -30,6 +30,7 @@ const SearchResults = () => {
   const [modalPosition, setModalPosition] = useState({ top: 0, left: 0 });
   const [languageId, setLanguageId] = useState(null);
   const [annotationId, setAnnotationId] = useState(null);
+  const [topContributors, setTopContributors] = useState([]); // Top Contributors state
 
 
   const { wiki_id, wiki_name} = useParams(); // Get wiki_id from the URL
@@ -163,8 +164,15 @@ const SearchResults = () => {
       // const questionResponse = await fetch(`${process.env.REACT_APP_API_URL}/list_questions_by_language/${encodeURIComponent(wikiName)}/1`);
       // const annotationResponse = await fetch(`${process.env.REACT_APP_API_URL}/get_annotations_by_language_id/${wikiId.slice(1)}/`);
       
-      const infoQuestionAnnotationResponse = await fetch(`${process.env.REACT_APP_API_URL}/fetch_search_results_at_once/${encodeURIComponent(wikiId)}/${encodeURIComponent(wikiName)}/${(1)}`); 
+      const userId = localStorage.getItem('user_id');
+      const infoQuestionAnnotationResponse = await fetch(`${process.env.REACT_APP_API_URL}/fetch_search_results_at_once/${encodeURIComponent(wikiId)}/${encodeURIComponent(wikiName)}/${(1)}`, {
+        headers: {
+          'Content-Type': 'application/json',
+          'User-ID': userId,
+        },
+      }); 
       // Feth all data and questions' first page. Because it is default and the user can go to other pages, if there are more than one page.
+
 
       if (!infoQuestionAnnotationResponse.ok) {
         throw new Error('Failed to load data');
@@ -178,10 +186,12 @@ const SearchResults = () => {
       const infoData = infoQuestionAnnotationData.information;
       const questionData = infoQuestionAnnotationData.questions;      
       const annotationData = infoQuestionAnnotationData.annotations;
+      const topContributors = infoQuestionAnnotationData.top_contributors; // Top Contributors data
 
       setInfoData(infoData || { mainInfo: [], instances: [], wikipedia: {} });
       setQuestionData(questionData || []);
       setAnnotationData(annotationData || []);
+      setTopContributors(topContributors || []);
     } catch (err) {
       console.error("Error fetching search data:", err);
       setError("Failed to load search data.");
@@ -476,7 +486,7 @@ const SearchResults = () => {
                 </div>
               )}
             </div>
-            <RightSidebar />
+            <RightSidebar topContributors={topContributors} />
           </div>
         </div>
       )}
