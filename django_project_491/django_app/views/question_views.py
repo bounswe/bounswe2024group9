@@ -1431,79 +1431,79 @@ def get_code_snippet_if_empty(request, question_id: int) -> HttpResponse:
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
-# @swagger_auto_schema(
-#     tags=['Question'],
-#     method='get',
-#     operation_summary="Fetch Combined Search Results",
-#     operation_description="""
-#     Fetches and combines multiple types of search results concurrently:
-#     - Wiki information for the specified ID
-#     - Questions for the given language
-#     - Annotations related to the wiki ID
-#     """,
-#     manual_parameters=[
-#         openapi.Parameter(
-#             name='wiki_id',
-#             in_=openapi.IN_PATH,
-#             type=openapi.TYPE_STRING,
-#             description="Wiki identifier for the search",
-#             required=True
-#         ),
-#         openapi.Parameter(
-#             name='language',
-#             in_=openapi.IN_PATH,
-#             type=openapi.TYPE_STRING,
-#             description="Programming language to filter questions",
-#             required=True
-#         ),
-#         openapi.Parameter(
-#             name='page_number',
-#             in_=openapi.IN_PATH,
-#             type=openapi.TYPE_INTEGER,
-#             description="Page number for paginated results",
-#             default=1
-#         )
-#     ],
-#     responses={
-#         200: openapi.Schema(
-#             type=openapi.TYPE_OBJECT,
-#             properties={
-#                 'information': openapi.Schema(
-#                     type=openapi.TYPE_OBJECT,
-#                     description="Wiki information results"
-#                 ),
-#                 'questions': openapi.Schema(
-#                     type=openapi.TYPE_ARRAY,
-#                     items=openapi.Schema(type=openapi.TYPE_OBJECT),
-#                     description="Filtered questions for the specified language"
-#                 ),
-#                 'annotations': openapi.Schema(
-#                     type=openapi.TYPE_ARRAY,
-#                     items=openapi.Schema(type=openapi.TYPE_OBJECT),
-#                     description="Related annotations for the wiki ID"
-#                 )
-#             }
-#         ),
-#         404: openapi.Schema(
-#             type=openapi.TYPE_OBJECT,
-#             properties={
-#                 'error': openapi.Schema(
-#                     type=openapi.TYPE_STRING,
-#                     description="Error message when resources are not found"
-#                 )
-#             }
-#         ),
-#         500: openapi.Schema(
-#             type=openapi.TYPE_OBJECT,
-#             properties={
-#                 'error': openapi.Schema(
-#                     type=openapi.TYPE_STRING,
-#                     description="Error message for concurrent execution failures"
-#                 )
-#             }
-#         )
-#     }
-# )
+@swagger_auto_schema(
+    tags=['Question'],
+    method='get',
+    operation_summary="Fetch Combined Search Results",
+    operation_description="""
+    Fetches and combines multiple types of search results concurrently:
+    - Wiki information for the specified ID
+    - Questions for the given language
+    - Annotations related to the wiki ID
+    """,
+    manual_parameters=[
+        openapi.Parameter(
+            name='wiki_id',
+            in_=openapi.IN_PATH,
+            type=openapi.TYPE_STRING,
+            description="Wiki identifier for the search",
+            required=True
+        ),
+        openapi.Parameter(
+            name='language',
+            in_=openapi.IN_PATH,
+            type=openapi.TYPE_STRING,
+            description="Programming language to filter questions",
+            required=True
+        ),
+        openapi.Parameter(
+            name='page_number',
+            in_=openapi.IN_PATH,
+            type=openapi.TYPE_INTEGER,
+            description="Page number for paginated results",
+            default=1
+        )
+    ],
+    responses={
+        200: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'information': openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    description="Wiki information results"
+                ),
+                'questions': openapi.Schema(
+                    type=openapi.TYPE_ARRAY,
+                    items=openapi.Schema(type=openapi.TYPE_OBJECT),
+                    description="Filtered questions for the specified language"
+                ),
+                'annotations': openapi.Schema(
+                    type=openapi.TYPE_ARRAY,
+                    items=openapi.Schema(type=openapi.TYPE_OBJECT),
+                    description="Related annotations for the wiki ID"
+                )
+            }
+        ),
+        404: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'error': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="Error message when resources are not found"
+                )
+            }
+        ),
+        500: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'error': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="Error message for concurrent execution failures"
+                )
+            }
+        )
+    }
+)
 @api_view(['GET'])
 @permission_classes([AllowAny])
 @csrf_exempt
