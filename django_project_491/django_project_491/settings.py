@@ -115,14 +115,21 @@ WSGI_APPLICATION = 'django_project_491.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'cmpe451',  # Replace with the actual database name
-        'USER': 'admin',  # Your RDS MySQL username
-        'PASSWORD': os.getenv('AWS_PASSWORD'),  # Your RDS MySQL password
-        'HOST': os.getenv('AWS_HOST'),  # Your RDS endpoint
-        'PORT': '3306',  # MySQL port
+        'NAME': 'cmpe451',
+        'USER': 'admin',
+        'PASSWORD': os.getenv('AWS_DEFAULT_PASSWORD'),
+        'HOST': os.getenv('AWS_DEFAULT_HOST'),
+        'PORT': '3306',
+    },
+    'annotations': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'annotations',
+        'USER': 'admin',
+        'PASSWORD': os.getenv('AWS_ANNOTATIONS_PASSWORD'),
+        'HOST': os.getenv('AWS_ANNOTATIONS_HOST'),
+        'PORT': '3306',
     }
 }
-
 
 
 # Password validation
@@ -213,3 +220,5 @@ EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
 EMAIL_PORT = 465  
 EMAIL_USE_SSL = True  
+
+DATABASE_ROUTERS = ['django_app.routers.AnnotationRouter']

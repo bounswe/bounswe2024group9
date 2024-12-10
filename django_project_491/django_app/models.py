@@ -326,7 +326,11 @@ class Annotation(models.Model):
 
     def __unicode__(self):
         return self.text
-        
+    
+    class Meta:
+        abstract = True
+        using = 'annotations'
+        app_label = 'django_app'
         
 class Topic(models.Model):
     name = models.CharField(max_length=100, unique=True)
