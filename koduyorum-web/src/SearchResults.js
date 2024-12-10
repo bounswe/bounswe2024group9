@@ -30,6 +30,7 @@ const SearchResults = () => {
   const [modalPosition, setModalPosition] = useState({ top: 0, left: 0 });
   const [languageId, setLanguageId] = useState(null);
   const [annotationId, setAnnotationId] = useState(null);
+  const [topContributors, setTopContributors] = useState([]); // Top Contributors state
 
 
   const { wiki_id, wiki_name} = useParams(); // Get wiki_id from the URL
@@ -185,10 +186,12 @@ const SearchResults = () => {
       const infoData = infoQuestionAnnotationData.information;
       const questionData = infoQuestionAnnotationData.questions;      
       const annotationData = infoQuestionAnnotationData.annotations;
+      const topContributors = infoQuestionAnnotationData.top_contributors; // Top Contributors data
 
       setInfoData(infoData || { mainInfo: [], instances: [], wikipedia: {} });
       setQuestionData(questionData || []);
       setAnnotationData(annotationData || []);
+      setTopContributors(topContributors || []);
     } catch (err) {
       console.error("Error fetching search data:", err);
       setError("Failed to load search data.");
@@ -483,7 +486,7 @@ const SearchResults = () => {
                 </div>
               )}
             </div>
-            <RightSidebar />
+            <RightSidebar topContributors={topContributors} />
           </div>
         </div>
       )}

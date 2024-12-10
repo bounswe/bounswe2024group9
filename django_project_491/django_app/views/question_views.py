@@ -824,6 +824,28 @@ def fetch_random_reported_question(request: HttpRequest) -> HttpResponse:
     
     return JsonResponse({'question': question_data}, safe=False)
 
+def get_top_5_contributors():
+    contributors = (
+        User.objects.annotate(
+            question_points=Count('questions') * 2,
+            comment_points=Count('authored_comments', filter=Q(authored_comments__answer_of_the_question=False))
+            + Count('authored_comments', filter=Q(authored_comments__answer_of_the_question=True)) * 5,
+        )
+        .annotate(total_points=F('question_points') + F('comment_points'))
+        .order_by('-total_points')[:5]
+    )
+
+    return [
+        {
+            'username': user.username,
+            'email': user.email,
+            'name': user.name,
+            'surname': user.surname,
+            'contribution_points': user.total_points,
+        }
+        for user in contributors
+    ]
+
 @csrf_exempt
 def fetch_all_feed_at_once(request, user_id: int):
     import time
@@ -900,28 +922,6 @@ def fetch_all_feed_at_once(request, user_id: int):
             cache.set(cache_key, question_data, timeout=seconds_until_midnight)
 
         return question_data
-
-    def get_top_5_contributors():
-        contributors = (
-            User.objects.annotate(
-                question_points=Count('questions') * 2,
-                comment_points=Count('authored_comments', filter=Q(authored_comments__answer_of_the_question=False))
-                + Count('authored_comments', filter=Q(authored_comments__answer_of_the_question=True)) * 5,
-            )
-            .annotate(total_points=F('question_points') + F('comment_points'))
-            .order_by('-total_points')[:5]
-        )
-
-        return [
-            {
-                'username': user.username,
-                'email': user.email,
-                'name': user.name,
-                'surname': user.surname,
-                'contribution_points': user.total_points,
-            }
-            for user in contributors
-        ]
 
     # Fetch the data concurrently
     with ThreadPoolExecutor() as executor:
@@ -1029,15 +1029,18 @@ def fetch_search_results_at_once(request, wiki_id, language, page_number = 1):
         info_future = executor.submit(get_info)
         questions_future = executor.submit(get_questions)
         annotations_future = executor.submit(get_annotations)
+        top_contributors_future = executor.submit(get_top_5_contributors)
 
         information_result = info_future.result()
         question_result = questions_future.result()
         annotation_result = annotations_future.result()
+        top_contributors_result = top_contributors_future.result()
 
     return JsonResponse({
         'information': information_result,
         'questions': question_result,
-        'annotations': annotation_result
+        'annotations': annotation_result,
+        'top_contributors': top_contributors_result
     }, safe=False)
 
 @csrf_exempt
