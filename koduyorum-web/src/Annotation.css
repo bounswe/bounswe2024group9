@@ -25,7 +25,8 @@
     border-radius: 3px;
     font-size: 12px;
     max-width: 300px; /* Limit width to prevent overflowing */
-    white-space: nowrap;
+    max-height: 150px; 
+    overflow-y: auto; 
     visibility: hidden; /* Hidden by default */
     z-index: 10;
     opacity: 0;
