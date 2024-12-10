@@ -1023,6 +1023,50 @@ def list_questions_according_to_the_user(request, user_id: int):
     } for question in personalized_questions]
     return JsonResponse({'questions': questions_data}, safe=False)
 
+
+@swagger_auto_schema(
+    tags=['Question'],
+    method='post',
+    operation_summary="Bookmark Question",
+    operation_description="Add a question to user's bookmarks",
+    manual_parameters=[
+        openapi.Parameter(
+            name='User-ID',
+            in_=openapi.IN_HEADER,
+            type=openapi.TYPE_INTEGER,
+            description="ID of the user bookmarking the question",
+            required=True
+        ),
+        openapi.Parameter(
+            name='question_id',
+            in_=openapi.IN_PATH,
+            type=openapi.TYPE_INTEGER,
+            description="ID of the question to bookmark",
+            required=True
+        )
+    ],
+    responses={
+        200: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'success': openapi.Schema(type=openapi.TYPE_STRING)
+            }
+        ),
+        400: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'error': openapi.Schema(type=openapi.TYPE_STRING)
+            }
+        ),
+        404: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'error': openapi.Schema(type=openapi.TYPE_STRING)
+            }
+        )
+    }
+)
+@api_view(['POST'])
 @csrf_exempt
 @permission_classes([AllowAny])
 def bookmark_question(request: HttpRequest, question_id: int) -> HttpResponse:
@@ -1057,6 +1101,50 @@ def bookmark_question(request: HttpRequest, question_id: int) -> HttpResponse:
     
     return JsonResponse({'success': 'Question bookmarked successfully'}, status=200)
 
+
+@swagger_auto_schema(
+    tags=['Question'],
+    method='delete',
+    operation_summary="Remove Bookmark",
+    operation_description="Remove a question from user's bookmarks",
+    manual_parameters=[
+        openapi.Parameter(
+            name='User-ID',
+            in_=openapi.IN_HEADER,
+            type=openapi.TYPE_INTEGER,
+            description="ID of the user removing the bookmark",
+            required=True
+        ),
+        openapi.Parameter(
+            name='question_id',
+            in_=openapi.IN_PATH,
+            type=openapi.TYPE_INTEGER,
+            description="ID of the question to remove from bookmarks",
+            required=True
+        )
+    ],
+    responses={
+        200: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'success': openapi.Schema(type=openapi.TYPE_STRING)
+            }
+        ),
+        400: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'error': openapi.Schema(type=openapi.TYPE_STRING)
+            }
+        ),
+        404: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'error': openapi.Schema(type=openapi.TYPE_STRING)
+            }
+        )
+    }
+)
+@api_view(['DELETE'])
 @csrf_exempt
 @permission_classes([AllowAny])
 def remove_bookmark(request: HttpRequest, question_id: int) -> HttpResponse:
@@ -1268,6 +1356,25 @@ def get_top_5_contributors():
 @permission_classes([AllowAny])
 @csrf_exempt
 def fetch_all_feed_at_once(request, user_id: int):
+    """
+    Fetches the complete feed for a user, including personalized questions, 
+    question of the day, and top contributors. The feed data is cached to 
+    improve performance.
+    Args:
+        request: The HTTP request object.
+        user_id (int): The ID of the user for whom the feed is being fetched.
+    Returns:
+        JsonResponse: A JSON response containing the feed data, which includes:
+            - personalized_questions: A list of questions tailored to the user's 
+              known languages and interested topics.
+            - question_of_the_day: A randomly selected question of the day.
+            - top_contributors: A list of the top 5 contributors.
+    Caches:
+        The feed data is cached for 1 hour (3600 seconds) using a cache key 
+        specific to the user.
+    Raises:
+        User.DoesNotExist: If the user with the given user_id does not exist.
+    """
     import time
     time_start = time.time()
     cache_key = f"feed_user_{user_id}"
@@ -1507,7 +1614,21 @@ def get_code_snippet_if_empty(request, question_id: int) -> HttpResponse:
 @api_view(['GET'])
 @permission_classes([AllowAny])
 @csrf_exempt
-def fetch_search_results_at_once(request, wiki_id, language, page_number = 1):
+def fetch_search_results_at_once(request, wiki_id, language, page_number=1):
+    """
+    Fetches search results including wiki information, questions, annotations, and top contributors concurrently.
+    Args:
+        request (HttpRequest): The HTTP request object containing headers and other request data.
+        wiki_id (str): The identifier for the wiki.
+        language (str): The language code for filtering questions and annotations.
+        page_number (int, optional): The page number for paginated questions. Defaults to 1.
+    Returns:
+        JsonResponse: A JSON response containing the following keys:
+            - 'information': The result of the wiki information fetch.
+            - 'questions': The list of questions filtered by language and page number.
+            - 'annotations': The annotations filtered by language.
+            - 'top_contributors': The top 5 contributors.
+    """
 
     wiki_id_numerical_part = ''.join(filter(str.isdigit, wiki_id))
     user_id = request.headers.get('User-ID', None)
@@ -1533,10 +1654,6 @@ def fetch_search_results_at_once(request, wiki_id, language, page_number = 1):
         top_contributors_result = top_contributors_future.result()
     
 
-    # print("i",information_result)
-    # print("q",question_result)
-    # print("a",annotation_result)
-    # print("t",top_contributors_result)
     return JsonResponse({
         'information': information_result,
         'questions': question_result,
@@ -1632,6 +1749,24 @@ def fetch_search_results_at_once(request, wiki_id, language, page_number = 1):
 @permission_classes([AllowAny])
 @csrf_exempt
 def get_questions_according_to_filter(request):
+    """
+    Retrieve a list of questions based on various filters provided in the request.
+    Args:
+        request (HttpRequest): The HTTP request object containing headers and body data.
+    Returns:
+        JsonResponse: A JSON response containing a list of filtered questions or an error message.
+    The function supports the following filters:
+    - status: Filter questions by their answered status ('answered' or 'unanswered'). Default is 'all'.
+    - language: Filter questions by programming language. Default is 'all'.
+    - tags: Filter questions by tags. Default is an empty list.
+    - startDate: Filter questions created on or after this date (format: 'YYYY-MM-DD').
+    - endDate: Filter questions created before this date (format: 'YYYY-MM-DD').
+    The function also limits the number of returned questions to 10 and includes additional metadata
+    such as upvotes, comments count, and user vote status (upvoted or downvoted).
+    Raises:
+        ValueError: If the date format for startDate or endDate is invalid.
+        Exception: For any other exceptions, returns a JSON response with an error message.
+    """
     try:
         user_id = request.headers.get('User-ID', None)
         user_votes = Question_Vote.objects.filter(user_id=user_id).values('question_id', 'vote_type')
@@ -1704,6 +1839,60 @@ def get_questions_according_to_filter(request):
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
+
+@swagger_auto_schema(
+    tags=['Question'],
+    method='get',
+    operation_summary="Check Bookmark Status",
+    operation_description="Check if a specific question is bookmarked by the user",
+    manual_parameters=[
+        openapi.Parameter(
+            name='User-ID',
+            in_=openapi.IN_HEADER,
+            type=openapi.TYPE_INTEGER,
+            description="ID of the user checking bookmark status",
+            required=True
+        ),
+        openapi.Parameter(
+            name='question_id',
+            in_=openapi.IN_PATH,
+            type=openapi.TYPE_INTEGER,
+            description="ID of the question to check bookmark status",
+            required=True
+        )
+    ],
+    responses={
+        200: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'is_bookmarked': openapi.Schema(
+                    type=openapi.TYPE_BOOLEAN,
+                    description="True if the question is bookmarked by the user, False otherwise"
+                )
+            }
+        ),
+        400: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'error': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="Error message when user ID is missing or invalid"
+                )
+            }
+        ),
+        404: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'error': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="Error message when question is not found"
+                )
+            }
+        )
+    }
+)
+@api_view(['GET'])
+@permission_classes([AllowAny])
 @csrf_exempt
 def check_bookmark(request, question_id):
     """
