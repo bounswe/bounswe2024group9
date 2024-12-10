@@ -24,6 +24,7 @@
     padding: 10px; /* Comfortable padding */
     border-radius: 3px;
     font-size: 12px;
+    width: 150px;
     max-width: 300px; /* Limit width to prevent overflowing */
     max-height: 150px; 
     overflow-y: auto; 
