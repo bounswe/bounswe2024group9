@@ -22,7 +22,7 @@ const LogoutButton = () => {
       });
   };
 
-  return <button className="px-4 py-2 text-white hover:bg-blue-200 rounded-md transition-colors" onClick={handleLogout}>Log Out</button>;
+  return <button className="px-4 py-2 text-white hover:bg-blue-200 rounded-md transition-colors" onClick={handleLogout}>LOGOUT</button>;
 };
 
 // Navbar Component with Search Functionality
