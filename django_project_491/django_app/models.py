@@ -328,8 +328,6 @@ class Annotation(models.Model):
         return self.text
     
     class Meta:
-        abstract = True
-        using = 'annotations'
         app_label = 'django_app'
         
 class Topic(models.Model):
