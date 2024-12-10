@@ -248,6 +248,7 @@ function PostQuestion() {
     const [language, setLanguage] = useState('');
     const [tags, setTags] = useState([]);
     const [availableLanguages, setAvailableLanguages] = useState([]); // Ensure it's initialized as an array
+    const [postType, setPostType] = useState('question'); // default to 'question'
     const navigate = useNavigate();
 
 
@@ -290,6 +291,7 @@ function PostQuestion() {
             details,
             code_snippet: codeSnippet,
             tags: tags,
+            post_type: postType
         };
 
         try {
@@ -327,7 +329,25 @@ function PostQuestion() {
     return (
         <div className="post-question-container">
             <NotificationCenter />
-            <h2>Create New Question</h2>
+            <h2>Create New Post</h2>
+
+            <div className="post-type-selection">
+                <label>Select Post Type:</label>
+                    <input
+                        type="radio"
+                        value="question"
+                        checked={postType === 'question'}
+                        onChange={() => setPostType('question')}
+                    />
+                    Question
+                    <input
+                        type="radio"
+                        value="discussion"
+                        checked={postType === 'discussion'}
+                        onChange={() => setPostType('discussion')}
+                    />
+                    Discussion
+            </div>
 
             <input
                 className="post-question-input"
