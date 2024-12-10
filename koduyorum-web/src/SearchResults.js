@@ -183,48 +183,64 @@ const fetchSearchResults = async (query) => {
   };
 
   const addAnnotations = (text, annotations) => {
-    console.log("Adding annotations to text:", text);
-    console.log("Annotations list:", annotations);
-
+    const loggedInUserId = localStorage.getItem('user_id'); 
+  
     let annotatedText = [];
     let lastIndex = 0;
-
+  
     // Sort annotations by starting point to avoid misplacement
     const sortedAnnotations = annotations.sort(
       (a, b) => a.annotation_starting_point - b.annotation_starting_point
     );
   
     sortedAnnotations.forEach((annotation) => {
-      const { annotation_starting_point, annotation_ending_point, text: annotationText , annotation_id: annotationId} = annotation;
-
+      const {
+        annotation_starting_point,
+        annotation_ending_point,
+        text: annotationText,
+        annotation_id: annotationId,
+        author_id: author_id, 
+      } = annotation;
+  
       console.log("Processing annotation:", annotation);
-      
+  
       if (lastIndex < annotation_starting_point) {
         annotatedText.push(text.slice(lastIndex, annotation_starting_point));
       }
-      
-      // Add annotated text with tooltip
+  
+      // Add annotated text with a tooltip
       annotatedText.push(
-        <dev class="annotation-container">
-        <span className="annotation" key={annotation_starting_point}>
-          <em>{text.slice(annotation_starting_point, annotation_ending_point)}</em>
-          <div className="annotation-tooltip">
-            {annotationText}  {/* This will show the annotation text */}
-            <button
-              className="edit-icon"
-              onClick={() => handleEditAnnotation(annotationId, annotation_starting_point, annotation_ending_point)} // Call edit handler
-            >
-              ✏️
-            </button>
-            <button
-              className="delete-icon"
-              onClick={() => handleDeleteAnnotation(annotationId)} // Replace annotationId with the actual ID
-            >
-              🗑️
-            </button>
-          </div>
-        </span>
-        </dev>
+        <div className="annotation-container" key={annotation_starting_point}>
+          <span className="annotation">
+            <em>{text.slice(annotation_starting_point, annotation_ending_point)}</em>
+            <div className="annotation-tooltip">
+              {annotationText} {/* Show the annotation text */}
+              {Number(author_id) === Number(loggedInUserId) ? (
+                <>
+                <br/>
+                  <button
+                    className="edit-icon"
+                    onClick={() =>
+                      handleEditAnnotation(
+                        annotationId,
+                        annotation_starting_point,
+                        annotation_ending_point
+                      )
+                    }
+                  >
+                    ✏️
+                  </button>
+                  <button
+                    className="delete-icon"
+                    onClick={() => handleDeleteAnnotation(annotationId)}
+                  >
+                    🗑️
+                  </button>
+                </>
+              ):null}
+            </div>
+          </span>
+        </div>
       );
   
       // Update the lastIndex to the end of the annotation
@@ -237,8 +253,8 @@ const fetchSearchResults = async (query) => {
     }
     console.log("Final annotated text:", annotatedText);
     return annotatedText;
-  };  
-
+  };
+  
   const handleEditAnnotation = async (annotationId, startOffset, endOffset) => {
     // Fetch the annotation to get its text
     const annotationToEdit = annotationData.find((annotation) => annotation.annotation_id === annotationId);
