@@ -1113,3 +1113,29 @@ def get_questions_according_to_filter(request):
         return JsonResponse({'questions': questions_data}, safe=False)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+
+@csrf_exempt
+def check_bookmark(request, question_id):
+    """
+    Check if a question is bookmarked by the user.
+    Args:
+        request (HttpRequest): The HTTP request object containing the User-ID in headers.
+        question_id (int): The ID of the question to check for bookmark.
+    Returns:
+        HttpResponse: A JSON response indicating whether the question is bookmarked by the user.
+    """
+    user_id = request.headers.get('User-ID', None)
+    if user_id is None:
+        return JsonResponse({'error': 'User ID parameter is required in the header'}, status=400)
+
+    user_id = int(user_id)
+
+    if not user_id:
+        return JsonResponse({'error': 'User ID parameter is required'}, status=400)
+
+    user = User.objects.get(pk=user_id)
+    question = Question.objects.get(_id=question_id)
+
+    is_bookmarked = user.bookmarks.filter(pk=question_id).exists()
+
+    return JsonResponse({'is_bookmarked': is_bookmarked}, status=200)
