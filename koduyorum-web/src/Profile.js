@@ -6,6 +6,7 @@ import PostPreview from './PostPreview';
 import './Profile.css';
 import { showNotification } from './NotificationCenter';
 import NotificationCenter from './NotificationCenter';
+import Comment from "./Comment";
 
 const Profile = () => {
     const { username } = useParams();
@@ -28,7 +29,7 @@ const Profile = () => {
                 );
                 if (response.ok) {
                     const data = await response.json();
-                    
+                    console.log('Profile data:', data);
                     setProfileData(data.user);
                     if (data.user['profile_pic'] != null) {    
                       const updatedProfilePictureUrl = `${process.env.REACT_APP_API_URL}${data.user['profile_pic']}`;
@@ -120,6 +121,7 @@ const Profile = () => {
     setError("");
     setSuccessMessage("");
   };
+
 
   // Handle editing profile
   const handleEditSubmit = async (event) => {
@@ -251,20 +253,32 @@ const Profile = () => {
                         </div>
 
                         {isOwner && (
-                        <div className="profile-tabs">
-                            <button
-                                className={`tab ${activeTab === 'questions' ? 'active' : ''}`}
-                                onClick={() => setActiveTab('questions')}
-                            >
-                                Questions
-                            </button>
-                            <button
-                                className={`tab ${activeTab === 'bookmarks' ? 'active' : ''}`}
-                                onClick={() => setActiveTab('bookmarks')}
-                            >
-                                Bookmarks
-                            </button>
-                        </div>
+                            <div className="profile-tabs">
+                                <button
+                                    className={`tab ${activeTab === 'questions' ? 'active' : ''}`}
+                                    onClick={() => setActiveTab('questions')}
+                                >
+                                    Questions
+                                </button>
+                                <button
+                                    className={`tab ${activeTab === 'comments' ? 'active' : ''}`}
+                                    onClick={() => setActiveTab('comments')}
+                                >
+                                    Comments
+                                </button>
+                                <button
+                                    className={`tab ${activeTab === 'annotations' ? 'active' : ''}`}
+                                    onClick={() => setActiveTab('annotations')}
+                                >
+                                    Annotations
+                                </button>
+                                <button
+                                    className={`tab ${activeTab === 'bookmarks' ? 'active' : ''}`}
+                                    onClick={() => setActiveTab('bookmarks')}
+                                >
+                                    Bookmarks
+                                </button>
+                            </div>
                         )}
 
                         <div className="profile-content">
@@ -274,17 +288,7 @@ const Profile = () => {
                                         profileData.questions.map((q) => (
                                             <PostPreview
                                                 key={q.id}
-                                                post={{
-                                                    id: q.id,
-                                                    title: q.title,
-                                                    description: q.details,
-                                                    programmingLanguage: q.language,
-                                                    topic: q.tags?.join(', '),
-                                                    tags: q.tags,
-                                                    answered: q.answered,
-                                                    likes: q.upvotes,
-                                                    comments: q.comments?.length,
-                                                }}
+                                                post={q}
                                                 onClick={() => navigate(`/question/${q.id}`)}
                                             />
                                         ))
@@ -315,6 +319,70 @@ const Profile = () => {
                                         ))
                                     ) : (
                                         <p>You do not have any bookmarks.</p>
+                                    )}
+                                </div>
+                            )}
+                            {activeTab === 'comments' && (
+                                <div className="content-list">
+                                    {profileData.comments.length > 0 ? (
+                                        profileData.comments.map((comment, index) => (
+                                            <React.Fragment key={index}>
+                                              <Comment
+                                                question_id={comment.question_id}
+                                                number={index + 1}
+                                                explanation={comment.details}
+                                                code={comment.code_snippet}
+                                                author={comment.user}
+                                                questionAuthor={""}
+                                                initialVotes={comment.upvotes}
+                                                language = {comment.language_id}
+                                                comment_id={comment.comment_id}
+                                                answer_of_the_question={comment.answer_of_the_question}
+                                                fetchComments={""}
+                                              />
+                                            </React.Fragment>
+                                          ))
+                                    ) : (
+                                        <p>You do not have any comments.</p>
+                                    )}
+                                </div>
+                            )}
+                            {activeTab === 'annotations' && (
+                                <div className="content-list">
+                                    {profileData.annotations.length > 0 ? (
+                                        <div className="annotations-list">
+                                            {profileData.annotations.map((annotation) => (
+                                                <div key={annotation.annotation_id} className="annotation-card">
+                                                    <div className="annotation-header">
+                                                        <span className="annotation-id">#{annotation.annotation_id}</span>
+                                                        <span className="annotation-date">
+                                                            {annotation.annotation_date}
+                                                        </span>
+                                                    </div>
+                                                    <div className="annotation-body">
+                                                        <p className="annotation-text">{annotation.text}</p>
+                                                        <div className="annotation-details">
+                                                            <div className="annotation-meta">
+                                                                <span className="label">Language ID:</span>
+                                                                <span className="value">{annotation.language_qid}</span>
+                                                            </div>
+                                                            <div className="annotation-range">
+                                                                <span className="label">Range:</span>
+                                                                <span className="value">
+                                                                    {annotation.annotation_starting_point} - {annotation.annotation_ending_point}
+                                                                </span>
+                                                            </div>
+                                                            <div className="annotation-author">
+                                                                <span className="label">Author:</span>
+                                                                <span className="value">{annotation.author}</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <p>You do not have any annotations.</p>
                                     )}
                                 </div>
                             )}

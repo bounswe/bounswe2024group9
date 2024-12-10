@@ -34,7 +34,7 @@ urlpatterns = [
     path('create_question/', question_views.create_question, name='create_question'),
     path('edit_question/<int:question_id>/', question_views.edit_question, name='edit_question'),
     path('delete_question/<int:question_id>/', question_views.delete_question, name='delete_question'),
-    path('mark_as_answered/<int:question_id>/', question_views.mark_as_answered, name='mark_as_answered'),
+    # path('mark_as_answered/<int:question_id>/', question_views.mark_as_answered, name='mark_as_answered'), # DO NOT USE THAT 
     path('report_question/<int:question_id>/', question_views.report_question, name='report_question'),
     path('bookmark_question/<int:question_id>/', question_views.bookmark_question, name='bookmark_question'),
     path('remove_bookmark/<int:question_id>/', question_views.remove_bookmark, name='remove_bookmark'),
@@ -51,7 +51,7 @@ urlpatterns = [
     path('list_questions_by_tags/<str:tags>/<int:page_number>/', question_views.list_questions_by_tags, name='list_questions_by_tags'),
     path('list_questions_by_hotness/<int:page_number>', question_views.list_questions_by_hotness, name='list_questions_by_hotness'),
     path('random_questions/', question_views.random_questions, name='random_questions'),
-
+    path('get_questions_according_to_filter',question_views.get_questions_according_to_filter, name='get_questions_according_to_filter'),
 
 
     path('upvote_object/<str:object_type>/<int:object_id>/', utilization_views.upvote_object, name='upvote_object'),
@@ -61,6 +61,8 @@ urlpatterns = [
     path('edit_comment/<int:comment_id>', comment_views.edit_comment, name='edit_comment'),
     path('delete_comment/<int:comment_id>', comment_views.delete_comment, name='delete_comment'),
     path('mark_comment_as_answer/<int:comment_id>', comment_views.mark_comment_as_answer, name='mark_comment_as_answer'),
+    path('unmark_comment_as_answer/<int:comment_id>', comment_views.unmark_comment_as_answer, name='unmark_comment_as_answer'),
+
 
     path('run_code/<str:type>/<int:id>/', utilization_views.run_code_of_question_or_comment, name='run_code'),
 
