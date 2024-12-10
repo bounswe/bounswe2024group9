@@ -326,6 +326,10 @@ function PostQuestion() {
         }
     };
 
+    const handleCancel = () => {
+        navigate('/feed'); // Redirect to Feed page
+    };
+
     return (
         <div className="post-question-container">
             <NotificationCenter />
@@ -392,6 +396,9 @@ function PostQuestion() {
             />
             <button className="post-question-submit" style={{ marginTop: '20px' }} onClick={handleSubmit}>
                 Submit Question
+            </button>
+            <button className="post-question-cancel" style={{ marginTop: '20px' }} onClick={handleCancel}>
+                    Cancel
             </button>
         </div>
     );

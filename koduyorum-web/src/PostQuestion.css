@@ -95,3 +95,19 @@
 .post-type-selection label:hover {
     color: #0077b6;
 }
+
+.post-question-cancel {
+    width: 100%;
+    padding: 0.75rem;
+    background-color: #e63946; /* Red for cancel */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.post-question-cancel:hover {
+    background-color: #c1272d; /* Darker red on hover */
+}
