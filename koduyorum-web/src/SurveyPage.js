@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './SurveyPage.css';
+import { showNotification } from './NotificationCenter';
+import NotificationCenter from './NotificationCenter';
 
 const SurveyPage = () => {
   const [languages, setLanguages] = useState({});
@@ -55,11 +57,13 @@ const handleSubmit = async (event) => {
       const result = await response.json();
       window.location.href = '/feed';
     } else {
-      alert('Submission failed');
+      showNotification('Submission failed');
+      // alert('Submission failed');
     }
   } catch (error) {
     console.error('Error submitting data:', error);
-    alert('An error occurred during submission');
+    showNotification('An error occurred during submission');
+    // alert('An error occurred during submission');
   } finally {
     setLoading(false);
   }
@@ -74,6 +78,7 @@ const handleSubmit = async (event) => {
 
   return (
     <div className="survey-container">
+      <NotificationCenter />
       <h2 className="survey-title">Tell us about yourself!</h2>
       <form onSubmit={handleSubmit} className="survey-form">
         

@@ -10,8 +10,8 @@ import { LoadingComponent } from '../LoadingPage';
 import PostComment from "../PostComment";
 import QuestionDetail from "../QuestionDetail";
 import Comment from "../Comment";
-
-
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faBookmark } from '@fortawesome/free-solid-svg-icons';
 
 export default function CodeExecution() {
 
@@ -19,6 +19,7 @@ export default function CodeExecution() {
   const [questionData, setQuestionData] = useState("");
   const [commentData, setCommentData] = useState("");
   const [isAnswered, setAnswered] = useState(false);
+  const [isBookmarked, setIsBookmarked] = useState(false);
 
   const [code, setCode] = useState(""); // State to store the user input (code)
 const [output, setOutput] = useState([]); // State to store the backend's response (output)
@@ -116,6 +117,27 @@ const [output, setOutput] = useState([]); // State to store the backend's respon
     }
   }
 
+  const get_bookmark = async () => {
+    try {
+      const token = localStorage.getItem('authToken');
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/check_bookmark/${question_id}/`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,  // Add the token here
+            'User-ID': localStorage.getItem('user_id')
+          }
+        }
+      );
+      const data = await response.json();
+      setIsBookmarked(data.is_bookmarked);
+    } catch (error) {
+      console.error('Error fetching bookmark:', error);
+    }
+  }
+
+
   const fetchLanguages = async () => {
     try {
       const token = localStorage.getItem('authToken');
@@ -142,6 +164,7 @@ const [output, setOutput] = useState([]); // State to store the backend's respon
       await fetchQuestion();
       await fetchComments();
       await fetchLanguages();
+      await get_bookmark();
     } catch (error) {
       console.error("Error fetching initial data:", error);
     } finally {
@@ -184,7 +207,51 @@ const [output, setOutput] = useState([]); // State to store the backend's respon
   };
 
 
+  function post_bookmark(id) {
+    const token = localStorage.getItem('authToken');
+    if (isBookmarked){
+        fetch(`${process.env.REACT_APP_API_URL}/remove_bookmark/${id}/`, {
+            method: 'DELETE',
+            headers: {
+            'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`,  // Add the token here
+            'User-ID': localStorage.getItem('user_id')
+    }
+        }).then(response => {
+            if (response.ok) {
+                alert("Bookmark removed successfully");
+                setIsBookmarked(false);
+            } else {
+                alert("Failed to remove bookmark");
+            }
+        }
+        ).catch(error => {
+            console.error("Error removing bookmark:", error);
+        }
+        );
+    } else {
+    fetch(`${process.env.REACT_APP_API_URL}/bookmark_question/${id}/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,  // Add the token here
+        'User-ID': localStorage.getItem('user_id')
+      }
+    }).then(response => {
+      if (response.ok) {
+        alert("Bookmark added successfully");
+      } else {
+        alert("Failed to add bookmark");
+      }
+    }).catch(error => {
+      console.error("Error adding bookmark:", error);
+  });
+    }
+    setIsBookmarked(!isBookmarked);
+    }
+
   // TODO Now there is only one output box, we need to create a separate output box for each code execution
+
   // TODO Need to check if the comment and the question has code_snippet, if there is not there shouldnt be a run code button
   return (<div>
 
@@ -202,30 +269,37 @@ const [output, setOutput] = useState([]); // State to store the backend's respon
           <div className="space-y-6">
 
             <QuestionDetail
-              inputType="Question"
-              explanation={questionData.details}
-              code={questionData.code_snippet}
-              author={questionData.author}
-              language={questionData.language}
-              tags={questionData.tags}
-              initialVotes={questionData.upvote_count}
-              question_id={question_id}
-              isAnswered={isAnswered}
-              title = {questionData.title}
-              fetchQuestion = {fetchQuestion}
+                inputType="Question"
+                explanation={questionData.details}
+                code={questionData.code_snippet}
+                author={questionData.author}
+                language={questionData.language}
+                tags={questionData.tags}
+                initialVotes={questionData.upvote_count}
+                question_id={question_id}
+                isAnswered={isAnswered}
+                title={questionData.title}
+                fetchQuestion={fetchQuestion}
 
             />
             {questionData.code_snippet && (
-              <button
-                className="bg-blue-600 text-white px-4 py-2 mt-4"
-                onClick={() => run_code('question', questionData.id)}
-              >
-                Run Code
-              </button>
+                <button
+                    className="bg-blue-600 text-white px-4 py-2 mt-4"
+                    onClick={() => run_code('question', questionData.id)}
+                >
+                  Run Code
+                </button>
             )}
+            <button
+                className="bg-green-600 text-white px-4 py-2 mt-4"
+                onClick={() => post_bookmark(questionData.id)}
+            >
+            <FontAwesomeIcon icon={faBookmark} style={{ color: isBookmarked ? 'blue' : 'white' }} />
+            </button>
+
           </div>
 
-          <Separator className="my-8 bg-gray-300" />
+          <Separator className="my-8 bg-gray-300"/>
 
           <div className="container mx-auto p-4 max-w-4xl">
             <div className="space-y-6">

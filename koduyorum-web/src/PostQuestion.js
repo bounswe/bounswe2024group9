@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Select from 'react-select';
 import './PostQuestion.css';
+import { showNotification } from './NotificationCenter';
+import NotificationCenter from './NotificationCenter';
 
 const predefinedTags = [
     // Programming Fundamentals
@@ -275,7 +277,8 @@ function PostQuestion() {
     // Submit question to backend
     const handleSubmit = async () => {
         if (!title || !details || !language) {
-            alert('All fields are required!');
+            // alert('All fields are required!');
+            showNotification('All fields are required!');
             return;
         }
         console.log('Tags:', tags);
@@ -301,20 +304,29 @@ function PostQuestion() {
             console.log('Response:', response);
 
             if (response.ok) {
-                alert('Question created successfully!');
-                navigate('/feed');
+                showNotification('Question created successfully!');
+                const data = await response.json();
+                console.log('Question created:', data);
+                const question_id = data['question_id'];
+                // alert('Question created successfully!');
+                setTimeout(() => {
+                    navigate(`/question/${question_id}`);
+                }, 2000);
             } else {
                 const data = await response.json();
-                alert(data.error || 'Failed to create question');
+                showNotification(data.error || 'Failed to create question');
+                // alert(data.error || 'Failed to create question');
             }
         } catch (error) {
-            alert('Failed to create question');
+            // alert('Failed to create question');
+            showNotification('Failed to create question');
             console.error('Error:', error);
         }
     };
 
     return (
         <div className="post-question-container">
+            <NotificationCenter />
             <h2>Create New Question</h2>
 
             <input

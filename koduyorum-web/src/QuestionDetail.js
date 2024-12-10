@@ -7,6 +7,8 @@ import { docco } from "react-syntax-highlighter/dist/esm/styles/hljs";
 import { faThumbsUp, faCommentDots, faThumbsDown } from '@fortawesome/free-solid-svg-icons';
 import './QuestionDetail.css';
 import EditQuestion from "./EditQuestion";
+import { showNotification } from "./NotificationCenter";
+import NotificationCenter from "./NotificationCenter";
 
 function QuestionDetail(props) {
 
@@ -114,6 +116,7 @@ function QuestionDetail(props) {
     }, [props.isAnswered]);
     return (
         <div className="p-4 border border-gray-300 rounded">
+            <NotificationCenter />
             <div className={`question-status-label ${isAnswered ? 'answered' : 'unanswered'}`}>
                 {isAnswered ? 'Answered' : 'Unanswered'}
             </div>
@@ -190,7 +193,7 @@ function QuestionDetail(props) {
                                 <div className="popup" >
                                     <div className="popup-content" ref={popupRef}>
                                         <EditQuestion
-                                            question_id={props.question_id}
+                                            question_id={Number(props.question_id)}
                                             fetchQuestion={props.fetchQuestion}
                                             closePopup={closePopup}
                                             title={props.title}
@@ -198,6 +201,7 @@ function QuestionDetail(props) {
                                             details={props.explanation}
                                             language={props.language}
                                             tags={props.tags.join(", ")}
+                                            showNotification={showNotification}
                                         />
                                     </div>
                                 </div>
