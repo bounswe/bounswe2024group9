@@ -505,55 +505,53 @@ def edit_annotation(request, annotation_id):
 @api_view(['GET'])
 @permission_classes([AllowAny])
 @csrf_exempt
-def get_annotations_by_language(request, language_qid, return_data_only=False):
+def get_annotations_by_language_request(request, language_qid):
     if request.method == 'GET':
         try:
             # Fetch all annotations with the given language_qid
-            annotations = Annotation.objects.filter(language_qid=language_qid)
-
-            if not annotations.exists():
-                return JsonResponse({'error': 'No annotations found for the given language_qid'}, status=404)
-
-            # Structure the data
-            annotations_data = []
-            for annotation in annotations:
-                annotation_data = {
-                    'annotation_id': annotation._id,
-                    'text': annotation.text,
-                    'language_qid': annotation.language_qid,
-                    'annotation_starting_point': annotation.annotation_starting_point,
-                    'annotation_ending_point': annotation.annotation_ending_point,
-                    'annotation_date': annotation.annotation_date,
-                    'author_id': annotation.author.user_id,
-                    'parent_id': annotation.parent_annotation._id if annotation.parent_annotation else None,
-                    'child_annotations': [
-                        {
-                            'annotation_id': child._id,
-                            'text': child.text,
-                            'language_qid': child.language_qid,
-                            'annotation_starting_point': child.annotation_starting_point,
-                            'annotation_ending_point': child.annotation_ending_point,
-                            'annotation_date': child.annotation_date,
-                            'author_id': child.author.user_id
-                        } for child in annotation.child_annotations.all()
-                    ]
-                }
-                annotations_data.append(annotation_data)
-
-            if return_data_only:
-                return annotations_data
+            annotations_data = get_annotations_by_language(language_qid)
 
             return JsonResponse({'success': 'Annotations retrieved', 'data': annotations_data}, status=200)
 
         except Exception as e:
-            if return_data_only:
-                return []
             return JsonResponse({'error': str(e)}, status=400)
-
-    if return_data_only:
-        return []
     return JsonResponse({'error': 'Invalid request method'}, status=405)
 
+
+def get_annotations_by_language(language_qid):
+    annotations = Annotation.objects.filter(language_qid=language_qid)
+
+    if not annotations.exists():
+        return []
+
+    # Structure the data
+    annotations_data = []
+    for annotation in annotations:
+        annotation_data = {
+            'annotation_id': annotation._id,
+            'text': annotation.text,
+            'language_qid': annotation.language_qid,
+            'annotation_starting_point': annotation.annotation_starting_point,
+            'annotation_ending_point': annotation.annotation_ending_point,
+            'annotation_date': annotation.annotation_date,
+            'author_id': annotation.author.user_id,
+            'parent_id': annotation.parent_annotation._id if annotation.parent_annotation else None,
+            'child_annotations': [
+                {
+                    'annotation_id': child._id,
+                    'text': child.text,
+                    'language_qid': child.language_qid,
+                    'annotation_starting_point': child.annotation_starting_point,
+                    'annotation_ending_point': child.annotation_ending_point,
+                    'annotation_date': child.annotation_date,
+                    'author_id': child.author.user_id
+                } for child in annotation.child_annotations.all()
+            ]
+        }
+        annotations_data.append(annotation_data)
+
+    
+    return annotations_data
 
 @swagger_auto_schema(
     tags=['Annotation'],

@@ -203,7 +203,9 @@ const SearchResults = () => {
   const addAnnotations = (text, annotations) => {
     console.log("Adding annotations to text:", text);
     console.log("Annotations list:", annotations);
-
+    if (!text || text.length === 0) {
+      return null;
+    }
     let annotatedText = [];
     let lastIndex = 0;
 

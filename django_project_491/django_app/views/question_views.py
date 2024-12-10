@@ -664,7 +664,7 @@ def report_question(request, question_id : int) -> HttpResponse:
 @api_view(['GET'])
 @csrf_exempt
 @permission_classes([AllowAny])
-def list_questions_by_language(request, user_id, language: str, page_number = 1, return_data_only = False) -> HttpResponse:    
+def list_questions_by_language_request(request, user_id, language: str, page_number = 1, return_data_only = False) -> HttpResponse:    
     """
     List questions filtered by programming language with pagination.
     Args:
@@ -678,12 +678,18 @@ def list_questions_by_language(request, user_id, language: str, page_number = 1,
     if not language:
         return JsonResponse({'error': 'Language parameter is required'}, status=400)
 
+    questions_data = list_questions_by_language(user_id, language)
+
+    return JsonResponse({'questions': questions_data}, safe=False, status=200)
+
+
+def list_questions_by_language(user_id: int, language: str, page_number = 1) -> List[Question]:
     questions = Question.objects.filter(language__iexact=language)[10 * (page_number - 1): 10 * page_number]
 
     user_votes = Question_Vote.objects.filter(user_id=user_id).values('question_id', 'vote_type')
     user_votes_dict = {vote['question_id']: vote['vote_type'] for vote in user_votes}
 
-    questions_data = [{   
+    return [{   
         'id': question.pk,
         'title': question.title,
         'description': question.details,
@@ -700,11 +706,6 @@ def list_questions_by_language(request, user_id, language: str, page_number = 1,
         'created_at' : question.created_at.strftime('%Y-%m-%d %H:%M:%S')      
     } for question in questions]
 
-    if return_data_only:
-        print("returning data only")
-        return questions_data
-
-    return JsonResponse({'questions': questions_data}, safe=False, status=200)
 
 
 @swagger_auto_schema(
@@ -1507,20 +1508,18 @@ def get_code_snippet_if_empty(request, question_id: int) -> HttpResponse:
 @permission_classes([AllowAny])
 @csrf_exempt
 def fetch_search_results_at_once(request, wiki_id, language, page_number = 1):
-    print("Fetching search results concurrently...")
-    mock_request = HttpRequest()
-    mock_request.method = 'GET'
+
     wiki_id_numerical_part = ''.join(filter(str.isdigit, wiki_id))
     user_id = request.headers.get('User-ID', None)
 
     def get_info():
-        return wiki_result(mock_request, wiki_id, return_data_only=True)
+        return wiki_result(wiki_id)
     
     def get_questions():
-        return list_questions_by_language(mock_request, user_id ,language, page_number, return_data_only=True)
+        return list_questions_by_language(user_id ,language, page_number)
     
     def get_annotations():
-        return get_annotations_by_language(mock_request, wiki_id_numerical_part, return_data_only=True)
+        return get_annotations_by_language(wiki_id_numerical_part)
 
     with ThreadPoolExecutor(max_workers=4) as executor:
         info_future = executor.submit(get_info)
@@ -1533,7 +1532,11 @@ def fetch_search_results_at_once(request, wiki_id, language, page_number = 1):
         annotation_result = annotations_future.result()
         top_contributors_result = top_contributors_future.result()
     
-    print("Search results fetched successfully.")
+
+    # print("i",information_result)
+    # print("q",question_result)
+    # print("a",annotation_result)
+    # print("t",top_contributors_result)
     return JsonResponse({
         'information': information_result,
         'questions': question_result,

@@ -205,7 +205,11 @@ def wiki_search(request, search_strings):
 )
 @api_view(['GET'])
 @permission_classes([AllowAny])
-def wiki_result(response, wiki_id, return_data_only=False):
+def wiki_result_request(response, wiki_id):
+    final_response = wiki_result(wiki_id)
+    return JsonResponse(final_response)
+
+def wiki_result(wiki_id):
     """
     Retrieve language information from Wikidata and return as a JSON response.
 
@@ -326,41 +330,9 @@ def wiki_result(response, wiki_id, return_data_only=False):
         'wikipedia': wikipedia_data
     }
 
-    if return_data_only:
-        return final_response
-    return JsonResponse(final_response)
+    return final_response
 
-@swagger_auto_schema(
-    tags=['Utilization'],
-    method='get',
-    operation_summary="Get Wikipedia Data",
-    operation_description="Retrieve and process Wikipedia data for a specific wiki ID",
-    manual_parameters=[
-        openapi.Parameter(
-            name='wiki_id',
-            in_=openapi.IN_PATH,
-            type=openapi.TYPE_INTEGER,
-            description="Wikipedia entry identifier",
-            required=True
-        )
-    ],
-    responses={
-        200: openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            description="Processed Wikipedia information"
-        ),
-        404: openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            properties={
-                'error': openapi.Schema(
-                    type=openapi.TYPE_STRING,
-                    description="Error message when wiki ID is not found"
-                )
-            }
-        )
-    }
-)
-@api_view(['GET'])
+
 @permission_classes([AllowAny])
 def wikipedia_data_views(wiki_id):
     """
