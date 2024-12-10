@@ -38,6 +38,7 @@ const PostPreview = ({ post, currentUser, onClick }) => {
         author,
         isUpvoted,
         isDownvoted,
+        postType,
     } = post;
 
     const [isUpvoting, setIsUpvoting] = useState(false);
@@ -213,8 +214,8 @@ const PostPreview = ({ post, currentUser, onClick }) => {
  
     return (
         <div className="post-card" onClick={onClick}>
-            <div className={`status-label ${answered ? 'answered' : 'unanswered'}`}>
-                {answered ? 'Answered' : 'Unanswered'}
+            <div className={`status-label ${postType === 'discussion' ? 'discussion' : answered ? 'answered' : 'unanswered'}`}>
+                {postType === 'discussion' ? 'Discussion' : answered ? 'Answered' : 'Unanswered'}
             </div>
 
             <h3 className="post-title">{title}</h3>

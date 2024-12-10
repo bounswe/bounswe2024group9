@@ -291,7 +291,7 @@ function PostQuestion() {
             details,
             code_snippet: codeSnippet,
             tags: tags,
-            post_type: postType
+            post_type: postType,
         };
 
         try {
