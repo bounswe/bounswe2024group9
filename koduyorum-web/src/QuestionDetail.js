@@ -115,105 +115,51 @@ function QuestionDetail(props) {
         setAnswered(props.isAnswered);
     }, [props.isAnswered]);
     return (
-        <div className="p-4 border border-gray-300 rounded">
-            <NotificationCenter />
-            <div className={`question-status-label ${isAnswered ? 'answered' : 'unanswered'}`}>
-                {isAnswered ? 'Answered' : 'Unanswered'}
+        <div className="question-post-card">
+        <div className={`status-indicator ${isAnswered ? 'answered' : 'unanswered'}`}>
+            <span className="status-text">{isAnswered ? 'Answered' : 'Unanswered'}</span>
+        </div>        
+        <h1 className="question-title">{props.title}</h1>
+    
+        {props.language && (
+            <div className="question-language">
+                <span className="language">{props.language}</span>
             </div>
-            <div className="flex flex-wrap gap-2 mt-1">
-
+        )}
+    
+        {props.tags && (
+            <div className="question-tags">
+                {props.tags.map((tag, index) => (
+                    <span key={index} className="label">{tag}</span>
+                ))}
             </div>
-
-
-            {props.language && (
-                <div className="mt-3">
-                    <div className="flex flex-wrap gap-2 mt-1">
-                        <span
-                            className="bg-green-100 text-green-800 text-xs font-semibold px-2 py-1 rounded"
-                        >
-                            {props.language}
-                        </span>
-
-                    </div>
+        )}
+    
+        <h3 className="question-input-type">{props.inputType}:</h3>
+        <p className="question-description">{props.explanation}</p>
+    
+        <SyntaxHighlighter language="javascript" style={docco}>
+            {props.code}
+        </SyntaxHighlighter>
+    
+        <div className="question-footer">
+            
+            <div className="footer-item" onClick={handlePostUpvote}>
+                <button className="vote-button">Upvote</button>
+                <span className="footer-text">{votes} Upvotes</span>
+            </div>
+            <div className="footer-item" onClick={handlePostDownvote}>
+                <button className="vote-button">Downvote</button>
+            </div>
+            {isOwner && (
+                <div className="owner-actions">
+                    <button onClick={handleEditQuestion} className="edit-button">Edit</button>
+                    <button onClick={handleDeleteQuestion} className="delete-button">Delete</button>
                 </div>
             )}
-            {props.tags && (
-                <div className="mt-3">
-
-                    <div className="flex flex-wrap gap-2 mt-1">
-                        {props.tags.map((tag, index) => (
-                            <span
-                                key={index}
-                                className="bg-blue-100 text-blue-800 text-xs font-semibold px-2 py-1 rounded"
-                            >
-                                {tag}
-                            </span>
-                        ))}
-                    </div>
-                </div>
-            )}
-            {
-                <>
-                    <h3 className="font-semibold text-gray-700">{props.inputType}</h3>
-                    <p className="mt-2 text-gray-600">{props.explanation}</p>
-                    <SyntaxHighlighter language="javascript" style={docco}>
-                        {props.code}
-                    </SyntaxHighlighter>
-                    <div className="flex items-center justify-between mt-4">
-                        <div className="flex items-center gap-2">
-                            <button
-                                className="px-4 py-2 bg-green-500 text-white text-sm font-semibold rounded hover:bg-green-600"
-                                onClick={handlePostUpvote}
-                            >
-                                Upvote
-                            </button>
-                            <span className="text-gray-700 font-semibold">{votes}</span>
-                            <button
-                                className="px-4 py-2 bg-red-500 text-white text-sm font-semibold rounded hover:bg-red-600"
-                                onClick={handlePostDownvote}
-                            >
-                                Downvote
-                            </button>
-                            {isOwner && (<>
-                                <button
-                                    className="px-4 py-2 bg-yellow-500 text-white text-sm font-semibold rounded hover:bg-red-600"
-                                    onClick={handleEditQuestion}
-                                >
-                                    Edit Question
-                                </button>
-                                <button
-                                    className="px-4 py-2 bg-red-500 text-white text-sm font-semibold rounded hover:bg-red-600"
-                                    onClick={handleDeleteQuestion}
-                                >
-                                    Delete Question
-                                </button>
-                            </>
-                            )}
-                            {isPopupVisible && (
-                                <div className="popup" >
-                                    <div className="popup-content" ref={popupRef}>
-                                        <EditQuestion
-                                            question_id={Number(props.question_id)}
-                                            fetchQuestion={props.fetchQuestion}
-                                            closePopup={closePopup}
-                                            title={props.title}
-                                            code_snippet={props.code}
-                                            details={props.explanation}
-                                            language={props.language}
-                                            tags={props.tags.join(", ")}
-                                            showNotification={showNotification}
-                                        />
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                        <button className="question-username" onClick = {redirectToProfile}>@{props.author}</button>
-                    </div>
-
-                </>
-            }
-
+            <button className="question-username" onClick={redirectToProfile}>@{props.author}</button>
         </div>
+    </div>
     );
 }
 
