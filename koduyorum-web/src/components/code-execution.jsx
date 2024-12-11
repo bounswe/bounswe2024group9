@@ -262,9 +262,7 @@ const [output, setOutput] = useState([]); // State to store the backend's respon
       <div className="min-h-screen bg-gray-100 text-gray-900">
         <Navbar />
         <div className="container mx-auto p-4 max-w-4xl">
-          <h1 className="text-2xl font-bold mb-4 text-gray-900">
-            {questionData.title}
-          </h1>
+          
 
           <div className="space-y-6">
 
