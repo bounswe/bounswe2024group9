@@ -138,7 +138,7 @@ function QuestionDetail(props) {
         <h3 className="question-input-type">{props.inputType}:</h3>
         <p className="question-description">{props.explanation}</p>
     
-        <SyntaxHighlighter language="javascript" style={docco}>
+        <SyntaxHighlighter language="javascript" style={docco} showLineNumbers>
             {props.code}
         </SyntaxHighlighter>
     
