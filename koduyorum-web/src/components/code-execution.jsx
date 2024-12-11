@@ -294,7 +294,16 @@ const [output, setOutput] = useState([]); // State to store the backend's respon
             >
             <FontAwesomeIcon icon={faBookmark} style={{ color: isBookmarked ? 'blue' : 'white' }} />
             </button>
-
+            <div className="mt-6">
+                <h2 className="text-xl font-semibold mb-2">Output:</h2>
+                <pre className="w-full p-4 bg-gray-200 text-gray-800 whitespace-pre-wrap">
+                    {loading ? "Waiting for output..." : (
+                      output.length > 0 ? output.map((line, index) => (
+                  <div key={index}>{line}</div>
+                  )) : "No output yet."
+                )}
+                </pre>
+              </div>
           </div>
 
           <Separator className="my-8 bg-gray-300"/>
@@ -384,16 +393,7 @@ const [output, setOutput] = useState([]); // State to store the backend's respon
                   {loading ? "Executing..." : "Execute Code"}
                 </button>
               </form>
-              <div className="mt-6">
-                <h2 className="text-xl font-semibold mb-2">Output:</h2>
-                <pre className="w-full p-4 bg-gray-200 text-gray-800 whitespace-pre-wrap">
-                    {loading ? "Waiting for output..." : (
-                      output.length > 0 ? output.map((line, index) => (
-                  <div key={index}>{line}</div>
-                  )) : "No output yet."
-                )}
-                </pre>
-              </div>
+              
             </div>
           </div>
         </div>
