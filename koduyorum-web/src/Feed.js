@@ -4,6 +4,7 @@ import { Navbar, LeftSidebar, RightSidebar } from "./PageComponents";
 import PostPreview from "./PostPreview";
 import { LoadingComponent } from "./LoadingPage"; // Importing the LoadingComponent
 import "./Feed.css";
+import NotificationCenter from './NotificationCenter';
 
 function Feed() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -113,17 +114,6 @@ function Feed() {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
       const data = await response.json();
-      // if (sort === "newest") {
-      //   try {
-      //     const newestPosts = await fetchPostsByTime();
-      //     setPosts(newestPosts);
-      //     console.log("Response:", newestPosts);
-      //   } catch (error) {
-      //     console.error("Error fetching posts by time:", error);
-      //   }
-      // } else {
-      //   setPosts(data.personalized_questions);
-      // }
       setPosts(data.personalized_questions);
       setQuestionOfTheDay(data.question_of_the_day);
       setTopContributors(data.top_contributors);
@@ -141,61 +131,6 @@ function Feed() {
     }
   }, []);
 
-  const fetchPosts = async () => {
-    const user_id = localStorage.getItem("user_id");
-    try {
-      const response = await fetch(
-        `${process.env.REACT_APP_API_URL}/specific_feed/${user_id}/`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            "User-ID": user_id,
-          },
-        }
-      );
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-      const data = await response.json();
-      setPosts(data.questions);
-    } catch (error) {
-      console.error("Error fetching posts:", error.message);
-      setError(
-        "Failed to load posts. Please check your network or server configuration."
-      );
-    }
-  };
-
-  const fetchQuestionOfTheDay = async () => {
-    try {
-      const response = await fetch(
-        `${process.env.REACT_APP_API_URL}/daily_question/`
-      );
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-      const data = await response.json();
-      setQuestionOfTheDay(data.question);
-    } catch (error) {
-      console.error("Error fetching Question of the Day:", error.message);
-    }
-  };
-
-  const fetchTopContributors = async () => {
-    try {
-      const response = await fetch(
-        `${process.env.REACT_APP_API_URL}/get_top_five_contributors/`
-      );
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-      const data = await response.json();
-      setTopContributors(data.users || []);
-    } catch (error) {
-      console.error("Error fetching top contributors:", error.message);
-    }
-  };
 
   const fetchPostsByTime = async () => {
     try {
@@ -221,11 +156,7 @@ function Feed() {
 
   const fetchSearchResults = async (query) => {
     try {
-      console.log("Original search string:", query);
-
       query = query.replace(/[^a-z0-9]/gi, "");
-
-      console.log("Alphanumeric search string:", query);
 
       if (query === "") {
         return [];
@@ -268,18 +199,7 @@ function Feed() {
     };
   }, [searched]);
 
-  const filteredPosts = posts.filter(
-    (post) =>
-      (filter === "all" ||
-        (filter === "answered" && post.answered === true) ||
-        (filter === "unanswered" && post.answered === false)) &&
-      (language === "all" ||
-        post.programmingLanguage?.toLowerCase() === language.toLowerCase()) &&
-      (post.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        post.preview?.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
-
-  const sortedPosts = filteredPosts.sort((a, b) => {
+  const sortedPosts = posts.sort((a, b) => {
     if (sort === "newest") {
       return new Date(b.created_at) - new Date(a.created_at);
     } else if (sort === "popular") {
@@ -309,10 +229,11 @@ function Feed() {
             searched={searched}
             handleSearchResultClick={handleSearchResultClick}
           />
+          <NotificationCenter />
 
           <div className="feed-content">
             {/* Left Edge - Popular Tags */}
-            <LeftSidebar handleTagClick={handleTagClick} />
+            <LeftSidebar handleTagClick={handleTagClick} setPosts={setPosts} language={''}/>
 
             {/* Middle - Posts */}
             <div className="posts-container">
@@ -330,26 +251,8 @@ function Feed() {
                 </div>
               )}
               <h2 className="section-title">Questions</h2>
-              <div className="filters">
-                <select
-                  className="filter-dropdown"
-                  value={filter}
-                  onChange={(e) => setFilter(e.target.value)}
-                >
-                  <option value="all">All Posts</option>
-                  <option value="answered">Answered</option>
-                  <option value="unanswered">Unanswered</option>
-                </select>
-                <select
-                  className="filter-dropdown"
-                  value={language}
-                  onChange={(e) => setLanguage(e.target.value)}
-                >
-                  <option value="all">All Languages</option>
-                  <option value="Python">Python</option>
-                  <option value="JavaScript">JavaScript</option>
-                  <option value="C++">C++</option>
-                </select>
+              <h5>Sort according to:</h5>
+              <div className="sorters">
                 <select
                   className="filter-dropdown"
                   value={sort}
@@ -359,7 +262,6 @@ function Feed() {
                   <option value="popular">Most Popular</option>
                 </select>
               </div>
-
               <div className="questions-list">
                 {sortedPosts.length > 0 ? (
                   sortedPosts.map((post) => (

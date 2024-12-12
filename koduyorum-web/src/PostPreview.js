@@ -1,25 +1,28 @@
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useNavigate } from 'react-router-dom';
-import { faThumbsUp, faCommentDots, faThumbsDown } from '@fortawesome/free-solid-svg-icons';
+import {faThumbsUp, faCommentDots, faThumbsDown, faBookmark} from '@fortawesome/free-solid-svg-icons';
 import './PostPreview.css';
 
 // list_questions_according_to_the_user
 /*
-questions_data = [{
-    'id': question._id,
-    'title': question.title,
-    'description': question.details,
-    'user_id': question.author.pk,
-    'upvotes': question.upvotes,
-    'comments_count': question.comments.count(),
-    'programmingLanguage': question.language,
-    'codeSnippet': question.code_snippet,
-    'tags': question.tags,
-    'answered': question.answered,
-    'topic': question.topic,
-    'author': question.author.username
-} for question in personalized_questions]
+    {
+        'id': q.pk,
+        'title': q.title,
+        'description': q.details,
+        'user_id': q.author.pk,
+        'username': q.author.username,
+        'upvotes': q.upvotes,
+        'comments_count': q.comments.count(),
+        'programmingLanguage': q.language,
+        'codeSnippet': q.code_snippet,
+        'tags': q.tags,
+        'answered': q.answered,
+        'is_upvoted': user_votes_dict.get(q.pk) == VoteType.UPVOTE.value,
+        'is_downvoted': user_votes_dict.get(q.pk) == VoteType.DOWNVOTE.value,
+        'created_at' : q.created_at.strftime('%Y-%m-%d %H:%M:%S')
+    }
+    for q in questions
  */
 const PostPreview = ({ post, currentUser, onClick }) => {
     const {
@@ -35,7 +38,7 @@ const PostPreview = ({ post, currentUser, onClick }) => {
         tags,
         topic,
         answered,
-        author,
+        username,
         isUpvoted,
         isDownvoted,
     } = post;
@@ -44,6 +47,7 @@ const PostPreview = ({ post, currentUser, onClick }) => {
     const [isDownvoting, setIsDownvoting] = useState(false);
     const [animateUpvote, setAnimateUpvote] = useState(false);
     const [animateDownvote, setAnimateDownvote] = useState(false);
+    const [isBookmarked, setIsBookmarked] = useState(false);
     const [upvote , setUpvote] = useState(upvotes);
     const navigate = useNavigate();
 
@@ -142,6 +146,73 @@ const PostPreview = ({ post, currentUser, onClick }) => {
             setIsDownvoting(false);
         }
     };
+
+    const get_bookmark = async () => {
+    try {
+      const token = localStorage.getItem('authToken');
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/check_bookmark/${post.id}/`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,  // Add the token here
+            'User-ID': localStorage.getItem('user_id')
+          }
+        }
+      );
+      const data = await response.json();
+      setIsBookmarked(data.is_bookmarked);
+    } catch (error) {
+      console.error('Error fetching bookmark:', error);
+    }
+  }
+  useEffect(() => {
+  get_bookmark();
+}, []);
+
+
+    const handleBookmark = async (e) => {
+        e.stopPropagation();
+        const token = localStorage.getItem('authToken');
+        if (isBookmarked){
+            fetch(`${process.env.REACT_APP_API_URL}/remove_bookmark/${post.id}/`, {
+                method: 'DELETE',
+                headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,  // Add the token here
+                'User-ID': localStorage.getItem('user_id')
+        }
+            }).then(response => {
+                if (response.ok) {
+                    setIsBookmarked(false);
+                } else {
+                    alert("Failed to remove bookmark");
+                }
+            }
+            ).catch(error => {
+                console.error("Error removing bookmark:", error);
+            }
+            );
+        } else {
+            fetch(`${process.env.REACT_APP_API_URL}/bookmark_question/${post.id}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,  // Add the token here
+                'User-ID': localStorage.getItem('user_id')
+            }
+            }).then(response => {
+            if (response.ok) {
+                setIsBookmarked(true);
+            } else {
+                alert("Failed to add bookmark");
+            }
+            }).catch(error => {
+            console.error("Error adding bookmark:", error);
+            });
+        }
+    }
+
  
     return (
         <div className="post-card" onClick={onClick}>
@@ -151,7 +222,7 @@ const PostPreview = ({ post, currentUser, onClick }) => {
 
             <h3 className="post-title">{title}</h3>
             <div className="username" onClick={(e) => {
-                        e.stopPropagation();}}>@ {author}</div> 
+                        e.stopPropagation();}}>@ {username}</div> 
 
             <div className="labels-container">
                 <div className="language" onClick={(e) => {
@@ -191,6 +262,18 @@ const PostPreview = ({ post, currentUser, onClick }) => {
                     <FontAwesomeIcon icon={faCommentDots} size="sm" color="#888" />
                     <span className="footer-text">{comments_count} Comments</span>
                 </div>
+
+                <div className={"footer-book"}>
+                    <button
+                        className="bookmark"
+                        onClick={(e) => handleBookmark(e)}
+                    >
+                        <FontAwesomeIcon icon={faBookmark} style={{color: isBookmarked ? 'blue' : 'a9a8a8'}}/>
+                        <span className="footer-text"> Bookmark </span>
+                    </button>
+
+                </div>
+
             </div>
         </div>
     );

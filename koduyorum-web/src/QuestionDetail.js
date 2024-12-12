@@ -7,17 +7,18 @@ import { docco } from "react-syntax-highlighter/dist/esm/styles/hljs";
 import { faThumbsUp, faCommentDots, faThumbsDown } from '@fortawesome/free-solid-svg-icons';
 import './QuestionDetail.css';
 import EditQuestion from "./EditQuestion";
+import { showNotification } from "./NotificationCenter";
+import NotificationCenter from "./NotificationCenter";
 
 function QuestionDetail(props) {
+  const [votes, setVotes] = useState(props.initialVotes);
+  const isOwner = localStorage.getItem("username") === props.author;
+  const [author] = useState(props.author);
+  const navigate = useNavigate();
 
-    const [votes, setVotes] = useState(props.initialVotes);
-    const isOwner = localStorage.getItem("username") === props.author;
-    const [author] = useState(props.author);
-    const navigate = useNavigate();
+  const [isAnswered, setAnswered] = useState(props.isAnswered);
 
-    const [isAnswered, setAnswered] = useState(props.isAnswered);
-
-    const [isPopupVisible, setIsPopupVisible] = useState(false);
+  const [isPopupVisible, setIsPopupVisible] = useState(false);
 
   const openPopup = () => setIsPopupVisible(true);
   const closePopup = () => setIsPopupVisible(false);
@@ -112,8 +113,10 @@ function QuestionDetail(props) {
     useEffect(() => {
         setAnswered(props.isAnswered);
     }, [props.isAnswered]);
+    
     return (
         <div className="p-4 border border-gray-300 rounded">
+            <NotificationCenter />
             <div className={`question-status-label ${isAnswered ? 'answered' : 'unanswered'}`}>
                 {isAnswered ? 'Answered' : 'Unanswered'}
             </div>
@@ -190,7 +193,7 @@ function QuestionDetail(props) {
                                 <div className="popup" >
                                     <div className="popup-content" ref={popupRef}>
                                         <EditQuestion
-                                            question_id={props.question_id}
+                                            question_id={Number(props.question_id)}
                                             fetchQuestion={props.fetchQuestion}
                                             closePopup={closePopup}
                                             title={props.title}
@@ -198,6 +201,7 @@ function QuestionDetail(props) {
                                             details={props.explanation}
                                             language={props.language}
                                             tags={props.tags.join(", ")}
+                                            showNotification={showNotification}
                                         />
                                     </div>
                                 </div>

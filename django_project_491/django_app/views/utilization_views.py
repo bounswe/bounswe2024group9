@@ -7,12 +7,78 @@ from django.views.decorators.csrf import csrf_exempt
 import json
 from ..models import Question, Comment, VoteType, Question_Vote, Comment_Vote, check_status
 from urllib.parse import quote
-from django.contrib.contenttypes.models import ContentType
-
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
 
 
 # Used for initial search - returns 5 best matching wiki id's
 # @login_required
+@swagger_auto_schema(
+    tags=['Utilization'],
+    method='get',
+    operation_summary="Search Languages",
+    operation_description="Perform a search on Wikidata for languages based on the given search strings",
+    manual_parameters=[
+        openapi.Parameter(
+            name='search_strings',
+            in_=openapi.IN_PATH,
+            type=openapi.TYPE_STRING,
+            description="Space-separated search terms for languages (e.g., 'english french')",
+            required=True
+        )
+    ],
+    responses={
+        200: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'head': openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        'vars': openapi.Schema(
+                            type=openapi.TYPE_ARRAY,
+                            items=openapi.Schema(type=openapi.TYPE_STRING)
+                        )
+                    }
+                ),
+                'results': openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        'bindings': openapi.Schema(
+                            type=openapi.TYPE_ARRAY,
+                            items=openapi.Schema(
+                                type=openapi.TYPE_OBJECT,
+                                properties={
+                                    'language': openapi.Schema(
+                                        type=openapi.TYPE_OBJECT,
+                                        properties={
+                                            'value': openapi.Schema(type=openapi.TYPE_STRING)
+                                        }
+                                    ),
+                                    'languageLabel': openapi.Schema(
+                                        type=openapi.TYPE_OBJECT,
+                                        properties={
+                                            'value': openapi.Schema(type=openapi.TYPE_STRING)
+                                        }
+                                    )
+                                }
+                            )
+                        )
+                    }
+                )
+            }
+        ),
+        500: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'error': openapi.Schema(type=openapi.TYPE_STRING)
+            }
+        )
+    }
+)
+@api_view(['GET'])
+@permission_classes([AllowAny])
 def wiki_search(request, search_strings):
     """
     Perform a search on Wikidata for languages based on the given search strings.
@@ -66,7 +132,84 @@ def wiki_search(request, search_strings):
 
 
 # Shows the resulting info of the chosen wiki item
-def wiki_result(response, wiki_id):
+@swagger_auto_schema(
+    tags=['Utilization'],
+    method='get',
+    operation_summary="Get Language Details",
+    operation_description="""
+    Retrieve comprehensive language information from Wikidata including:
+    - Main language information (labels, Wikipedia links, influences)
+    - Publication and inception dates
+    - Official website
+    - Language instances and related languages
+    - Wikipedia data
+    """,
+    manual_parameters=[
+        openapi.Parameter(
+            name='wiki_id',
+            in_=openapi.IN_PATH,
+            type=openapi.TYPE_STRING,
+            description="Wikidata identifier for the language (e.g., 'Q1234')",
+            required=True
+        )
+    ],
+    responses={
+        200: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'mainInfo': openapi.Schema(
+                    type=openapi.TYPE_ARRAY,
+                    items=openapi.Schema(
+                        type=openapi.TYPE_OBJECT,
+                        properties={
+                            'language': openapi.Schema(type=openapi.TYPE_OBJECT),
+                            'languageLabel': openapi.Schema(type=openapi.TYPE_OBJECT),
+                            'wikipediaLink': openapi.Schema(type=openapi.TYPE_OBJECT),
+                            'influencedByLabel': openapi.Schema(type=openapi.TYPE_OBJECT),
+                            'publicationDate': openapi.Schema(type=openapi.TYPE_OBJECT),
+                            'inceptionDate': openapi.Schema(type=openapi.TYPE_OBJECT),
+                            'website': openapi.Schema(type=openapi.TYPE_OBJECT)
+                        }
+                    )
+                ),
+                'instances': openapi.Schema(
+                    type=openapi.TYPE_ARRAY,
+                    items=openapi.Schema(
+                        type=openapi.TYPE_OBJECT,
+                        properties={
+                            'instance': openapi.Schema(type=openapi.TYPE_STRING),
+                            'instanceLabel': openapi.Schema(type=openapi.TYPE_STRING),
+                            'relatedLanguages': openapi.Schema(
+                                type=openapi.TYPE_ARRAY,
+                                items=openapi.Schema(
+                                    type=openapi.TYPE_OBJECT,
+                                    properties={
+                                        'relatedLanguage': openapi.Schema(type=openapi.TYPE_STRING),
+                                        'relatedLanguageLabel': openapi.Schema(type=openapi.TYPE_STRING)
+                                    }
+                                )
+                            )
+                        }
+                    )
+                ),
+                'wikipedia': openapi.Schema(type=openapi.TYPE_ARRAY, items=openapi.Schema(type=openapi.TYPE_OBJECT))
+            }
+        ),
+        500: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'error': openapi.Schema(type=openapi.TYPE_STRING)
+            }
+        )
+    }
+)
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def wiki_result_request(response, wiki_id):
+    final_response = wiki_result(wiki_id)
+    return JsonResponse(final_response)
+
+def wiki_result(wiki_id):
     """
     Retrieve language information from Wikidata and return as a JSON response.
 
@@ -187,9 +330,10 @@ def wiki_result(response, wiki_id):
         'wikipedia': wikipedia_data
     }
 
-    return JsonResponse(final_response)
+    return final_response
 
 
+@permission_classes([AllowAny])
 def wikipedia_data_views(wiki_id):
     """
     Retrieve and process Wikipedia data based on the provided wiki_id.
@@ -203,7 +347,34 @@ def wikipedia_data_views(wiki_id):
     info_object = modify_data(wiki_id)
     return info_object
 
-
+@swagger_auto_schema(
+    tags=['Utilization'],
+    method='get',
+    operation_summary="Get Available Programming Languages",
+    operation_description="Fetches the list of available programming languages from the Run Coder API",
+    responses={
+        200: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'languages': openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    description="Dictionary of available programming languages and their IDs"
+                )
+            }
+        ),
+        500: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'error': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="Error message if the fetch operation fails"
+                )
+            }
+        )
+    }
+)
+@api_view(['GET'])
+@permission_classes([AllowAny])
 def get_run_coder_api_languages(request):
     """
     Fetches the available programming languages from the Run Coder API and returns them in a JSON response.
@@ -220,7 +391,60 @@ def get_run_coder_api_languages(request):
     else:
         return JsonResponse({'error': 'Failed to fetch languages'}, status=500)
 
-
+@swagger_auto_schema(
+    tags=['Utilization'],
+    method='post',
+    operation_summary="Run Code Snippet",
+    operation_description="Execute the code snippet associated with a specific question or comment",
+    manual_parameters=[
+        openapi.Parameter(
+            name='type',
+            in_=openapi.IN_PATH,
+            type=openapi.TYPE_STRING,
+            description="Type of object containing the code snippet ('comment' or 'question')",
+            required=True,
+            enum=['comment', 'question']
+        ),
+        openapi.Parameter(
+            name='id',
+            in_=openapi.IN_PATH,
+            type=openapi.TYPE_INTEGER,
+            description="ID of the comment or question containing the code snippet",
+            required=True
+        )
+    ],
+    responses={
+        200: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'output': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="Output from the executed code snippet"
+                )
+            }
+        ),
+        400: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'error': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="Error message when invalid type is provided"
+                )
+            }
+        ),
+        404: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'error': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="Error message when comment or question is not found"
+                )
+            }
+        )
+    }
+)
+@api_view(['POST'])
+@permission_classes([AllowAny])
 @csrf_exempt
 def run_code_of_question_or_comment(request, type: str, id: int):
     """
@@ -246,6 +470,76 @@ def run_code_of_question_or_comment(request, type: str, id: int):
     return JsonResponse({'output': outs})
 
 
+@swagger_auto_schema(
+    tags=['Utilization'],
+    method='post',
+    operation_summary="Upvote Object",
+    operation_description="Upvote a question or comment. Handles new votes and vote changes.",
+    manual_parameters=[
+        openapi.Parameter(
+            name='User-ID',
+            in_=openapi.IN_HEADER,
+            type=openapi.TYPE_INTEGER,
+            description="ID of the user performing the upvote",
+            required=True
+        ),
+        openapi.Parameter(
+            name='object_type',
+            in_=openapi.IN_PATH,
+            type=openapi.TYPE_STRING,
+            description="Type of object to upvote",
+            required=True,
+            enum=['question', 'comment']
+        ),
+        openapi.Parameter(
+            name='object_id',
+            in_=openapi.IN_PATH,
+            type=openapi.TYPE_INTEGER,
+            description="ID of the object to upvote",
+            required=True
+        )
+    ],
+    responses={
+        200: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'success': openapi.Schema(
+                    type=openapi.TYPE_INTEGER,
+                    description="Updated upvote count"
+                )
+            }
+        ),
+        400: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'error': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="Error message for invalid requests"
+                )
+            }
+        ),
+        404: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'error': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="Error message when object is not found"
+                )
+            }
+        ),
+        409: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'error': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="Error message when vote already exists"
+                )
+            }
+        )
+    }
+)
+@api_view(['POST'])
+@permission_classes([AllowAny])
 @csrf_exempt
 def upvote_object(request, object_type: str, object_id: int):
     """
@@ -334,7 +628,67 @@ def upvote_object(request, object_type: str, object_id: int):
     else:
         return JsonResponse({'error': 'Invalid object type'}, status=400)
 
-
+@swagger_auto_schema(
+    tags=['Utilization'],
+    method='post',
+    operation_summary="Downvote Object",
+    operation_description="Downvote a question or comment. Handles new votes and vote changes.",
+    manual_parameters=[
+        openapi.Parameter(
+            name='User-ID',
+            in_=openapi.IN_HEADER,
+            type=openapi.TYPE_INTEGER,
+            description="ID of the user performing the downvote",
+            required=True
+        ),
+        openapi.Parameter(
+            name='object_type',
+            in_=openapi.IN_PATH,
+            type=openapi.TYPE_STRING,
+            description="Type of object to downvote",
+            required=True,
+            enum=['question', 'comment']
+        ),
+        openapi.Parameter(
+            name='object_id',
+            in_=openapi.IN_PATH,
+            type=openapi.TYPE_INTEGER,
+            description="ID of the object to downvote",
+            required=True
+        )
+    ],
+    responses={
+        200: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'success': openapi.Schema(
+                    type=openapi.TYPE_INTEGER,
+                    description="Updated upvote count"
+                )
+            }
+        ),
+        400: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'error': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="Error message for invalid requests or duplicate downvotes"
+                )
+            }
+        ),
+        404: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'error': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="Error message when object is not found"
+                )
+            }
+        )
+    }
+)
+@api_view(['POST'])
+@permission_classes([AllowAny])
 @csrf_exempt
 def downvote_object(request, object_type: str, object_id: int):
     """
@@ -425,11 +779,72 @@ def downvote_object(request, object_type: str, object_id: int):
         return JsonResponse({'error': 'Invalid object type'}, status=400)
 
 
+@swagger_auto_schema(
+    tags=['Utilization'],
+    method='get',
+    operation_summary="Home Page",
+    operation_description="Renders the home page template",
+    responses={
+        200: openapi.Response(
+            description="Successful response - renders home.html template"
+        )
+    }
+)
+@api_view(['GET'])
+@permission_classes([AllowAny])
 def home(request):
     return render(request, 'home.html')
 
 
 # Will be removed in the final version.
+@swagger_auto_schema(
+    tags=['Utilization'],
+    method='post',
+    operation_summary="Execute Sample Code",
+    operation_description="Executes provided source code using the specified programming language",
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        required=['source_code'],
+        properties={
+            'source_code': openapi.Schema(
+                type=openapi.TYPE_STRING, 
+                description="Source code to execute"
+            ),
+            'language_id': openapi.Schema(
+                type=openapi.TYPE_INTEGER, 
+                description="Language ID for execution (default: 71 for Python)",
+                default=71
+            )
+        }
+    ),
+    responses={
+        200: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'output': openapi.Schema(
+                    type=openapi.TYPE_ARRAY,
+                    items=openapi.Schema(type=openapi.TYPE_STRING),
+                    description="Array of output lines or error messages"
+                ),
+                'status': openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    description="Execution status information"
+                )
+            }
+        ),
+        400: openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'error': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    description="Error message if request is malformed"
+                )
+            }
+        )
+    }
+)
+@api_view(['POST'])
+@permission_classes([AllowAny])
 @csrf_exempt
 def post_sample_code(request):
     

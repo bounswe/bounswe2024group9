@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import * as PropTypes from "prop-types";
+import { showNotification } from './NotificationCenter';
+import NotificationCenter from './NotificationCenter';
 
 import './PostComment.css';
 
@@ -35,7 +37,8 @@ function EditComment(props) {
     // Submit comment to backend
     const handleSubmit = async () => {
         if (!details || !language) {
-            alert('All fields are required!');
+            showNotification('All fields are required!');
+            // alert('All fields are required!');
             return;
         }
 
@@ -57,14 +60,17 @@ function EditComment(props) {
             });
 
             if (response.ok) {
-                alert('Comment edited successfully!');
+                // alert('Comment edited successfully!');
+                showNotification('Comment edited successfully!');
                 props.fetchComments();
             } else {
                 const data = await response.json();
-                alert(data.error || 'Failed to edit comment');
+                showNotification(data.error || 'Failed to edit comment');
+                // alert(data.error || 'Failed to edit comment');
             }
         } catch (error) {
-            alert('Failed to edit comment');
+            showNotification('Failed to edit comment');
+            // alert('Failed to edit comment');
             console.error('Error:', error);
         } finally {
             props.closePopup()
@@ -74,6 +80,7 @@ function EditComment(props) {
     return (
 
         <div>
+            <NotificationCenter />
             <h2>Edit Comment</h2>
             <div className="post-comment-language">
                 <label>Select Language:</label>

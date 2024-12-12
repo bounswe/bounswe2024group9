@@ -37,7 +37,8 @@ export default function EditQuestion(props) {
     // Submit question to backend
     const handleSubmit = async () => {
         if (!title || !details || !language) {
-            alert('All fields are required!');
+            props.showNotification('All fields are required!');
+            // alert('All fields are required!');
             return;
         }
 
@@ -61,15 +62,19 @@ export default function EditQuestion(props) {
             });
 
             if (response.ok) {
+                props.showNotification('Question updated successfully!');
+
                 props.closePopup();
                 props.fetchQuestion();
-                alert('Question updated successfully!');
+                // alert('Question updated successfully!');
             } else {
                 const data = await response.json();
-                alert(data.error || 'Failed to updated question');
+                props.showNotification(data.error || 'Failed to updated question');
+                // alert(data.error || 'Failed to updated question');
             }
         } catch (error) {
-            alert('Failed to update question');
+            props.showNotification('Failed to update question');
+            // alert('Failed to update question');
             console.error('Error:', error);
         }
     };

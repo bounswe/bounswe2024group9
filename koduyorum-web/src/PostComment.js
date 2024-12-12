@@ -2,13 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import * as PropTypes from "prop-types";
 import './PostComment.css';
+import { showNotification } from './NotificationCenter';
+import NotificationCenter from './NotificationCenter';
 
 function PostComment(props) {
     const [details, setDetails] = useState('');
     const [codeSnippet, setCodeSnippet] = useState('');
     const [language, setLanguage] = useState('');
     const [availableLanguages, setAvailableLanguages] = useState([]); // Ensure it's initialized as an array
-    const navigate = useNavigate();
     PostComment.propTypes = {
         question_id: PropTypes.number
     }
@@ -36,8 +37,13 @@ function PostComment(props) {
 
     // Submit comment to backend
     const handleSubmit = async () => {
-        if (!details || !language) {
-            alert('All fields are required!');
+        if (!details) {
+            showNotification('You must write a comment!');
+            return;
+        }
+        
+        if (codeSnippet.trim() && !language) {
+            showNotification('You must select a language for the written code!');
             return;
         }
 
@@ -59,14 +65,17 @@ function PostComment(props) {
             });
 
             if (response.ok) {
-                alert('Comment created successfully!');
+                showNotification('Comment created successfully!');
+                // alert('Comment created successfully!');
                 props.fetchComments();
             } else {
                 const data = await response.json();
-                alert(data.error || 'Failed to create comment');
+                showNotification(data.error || 'Failed to create comment');
+                // alert(data.error || 'Failed to create comment');
             }
         } catch (error) {
-            alert('Failed to create comment');
+            showNotification('Failed to create comment');
+            // alert('Failed to create comment');
             console.error('Error:', error);
         } finally {
             props.closePopup()
@@ -74,8 +83,8 @@ function PostComment(props) {
     };
 
     return (
-
         <div>
+            <NotificationCenter />
             <h2>Create New Comment</h2>
             <div className="post-comment-language">
                 <label>Select Language:</label>
