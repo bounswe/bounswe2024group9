@@ -200,6 +200,7 @@ const fetchSearchResults = async (query) => {
         text: annotationText,
         annotation_id: annotationId,
         author_id: author_id, 
+        author_name: author_name, 
       } = annotation;
   
       console.log("Processing annotation:", annotation);
@@ -215,6 +216,10 @@ const fetchSearchResults = async (query) => {
             <em>{text.slice(annotation_starting_point, annotation_ending_point)}</em>
             <div className="annotation-tooltip">
               {annotationText} {/* Show the annotation text */}
+              <div className="annotation-tooltip-author">
+                <br/>
+              <em>by {author_name}</em>
+            </div>
               {Number(author_id) === Number(loggedInUserId) ? (
                 <>
                 <br/>
