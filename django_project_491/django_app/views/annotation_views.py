@@ -524,31 +524,33 @@ def get_annotations_by_language(language_qid):
     if not annotations.exists():
         return []
 
-    # Structure the data
-    annotations_data = []
-    for annotation in annotations:
-        annotation_data = {
-            'annotation_id': annotation._id,
-            'text': annotation.text,
-            'language_qid': annotation.language_qid,
-            'annotation_starting_point': annotation.annotation_starting_point,
-            'annotation_ending_point': annotation.annotation_ending_point,
-            'annotation_date': annotation.annotation_date,
-            'author_id': annotation.author.user_id,
-            'parent_id': annotation.parent_annotation._id if annotation.parent_annotation else None,
-            'child_annotations': [
-                {
-                    'annotation_id': child._id,
-                    'text': child.text,
-                    'language_qid': child.language_qid,
-                    'annotation_starting_point': child.annotation_starting_point,
-                    'annotation_ending_point': child.annotation_ending_point,
-                    'annotation_date': child.annotation_date,
-                    'author_id': child.author.user_id
-                } for child in annotation.child_annotations.all()
-            ]
-        }
-        annotations_data.append(annotation_data)
+            # Structure the data
+            annotations_data = []
+            for annotation in annotations:
+                annotation_data = {
+                    'annotation_id': annotation._id,
+                    'text': annotation.text,
+                    'language_qid': annotation.language_qid,
+                    'annotation_starting_point': annotation.annotation_starting_point,
+                    'annotation_ending_point': annotation.annotation_ending_point,
+                    'annotation_date': annotation.annotation_date,
+                    'author_id': annotation.author.user_id,
+                    "author_name": annotation.author.username,
+                    'parent_id': annotation.parent_annotation._id if annotation.parent_annotation else None,
+                    'child_annotations': [
+                        {
+                            'annotation_id': child._id,
+                            'text': child.text,
+                            'language_qid': child.language_qid,
+                            'annotation_starting_point': child.annotation_starting_point,
+                            'annotation_ending_point': child.annotation_ending_point,
+                            'annotation_date': child.annotation_date,
+                            'author_id': child.author.user_id,
+                            "author_name": child.author.username
+                        } for child in annotation.child_annotations.all()
+                    ]
+                }
+                annotations_data.append(annotation_data)
 
     
     return annotations_data
