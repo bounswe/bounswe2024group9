@@ -31,6 +31,7 @@ const SearchResults = () => {
   const [languageId, setLanguageId] = useState(null);
   const [annotationId, setAnnotationId] = useState(null);
   const [topContributors, setTopContributors] = useState([]); // Top Contributors state
+  const [originalText, setOriginalText] = useState(null);
 
 
   const { wiki_id, wiki_name} = useParams(); // Get wiki_id from the URL
@@ -187,6 +188,8 @@ const SearchResults = () => {
       const questionData = infoQuestionAnnotationData.questions;      
       const annotationData = infoQuestionAnnotationData.annotations;
       const topContributors = infoQuestionAnnotationData.top_contributors; // Top Contributors data
+      setOriginalText(infoData.wikipedia.info);
+
 
       setInfoData(infoData || { mainInfo: [], instances: [], wikipedia: {} });
       setQuestionData(questionData || []);
@@ -201,48 +204,71 @@ const SearchResults = () => {
   };
 
   const addAnnotations = (text, annotations) => {
-    console.log("Adding annotations to text:", text);
-    console.log("Annotations list:", annotations);
-    if (!text || text.length === 0) {
+    const loggedInUserId = localStorage.getItem('user_id'); 
+      if (!text || text.length === 0) {
       return null;
     }
     let annotatedText = [];
     let lastIndex = 0;
-
+  
     // Sort annotations by starting point to avoid misplacement
     const sortedAnnotations = annotations.sort(
       (a, b) => a.annotation_starting_point - b.annotation_starting_point
     );
   
     sortedAnnotations.forEach((annotation) => {
-      const { annotation_starting_point, annotation_ending_point, text: annotationText , annotation_id: annotationId} = annotation;
-
+      const {
+        annotation_starting_point,
+        annotation_ending_point,
+        text: annotationText,
+        annotation_id: annotationId,
+        author_id: author_id, 
+        author_name: author_name, 
+      } = annotation;
+  
       console.log("Processing annotation:", annotation);
-      
+  
       if (lastIndex < annotation_starting_point) {
         annotatedText.push(text.slice(lastIndex, annotation_starting_point));
       }
-      
-      // Add annotated text with tooltip
+  
+      // Add annotated text with a tooltip
       annotatedText.push(
-        <span className="annotation" key={annotationId}>
-          <em>{text.slice(annotation_starting_point, annotation_ending_point)}</em>
-          <div className="annotation-tooltip">
-            {annotationText}  {/* This will show the annotation text */}
-            <button
-              className="edit-icon"
-              onClick={() => handleEditAnnotation(annotationId, annotation_starting_point, annotation_ending_point)} // Call edit handler
-            >
-              ✏️
-            </button>
-            <button
-              className="delete-icon"
-              onClick={() => handleDeleteAnnotation(annotationId)} // Replace annotationId with the actual ID
-            >
-              🗑️
-            </button>
-          </div>
-        </span>
+        <div className="annotation-container" key={annotation_starting_point}>
+          <span className="annotation">
+            <em>{text.slice(annotation_starting_point, annotation_ending_point)}</em>
+            <div className="annotation-tooltip">
+              {annotationText} {/* Show the annotation text */}
+              <div className="annotation-tooltip-author">
+                <br/>
+              <em>by {author_name}</em>
+            </div>
+              {Number(author_id) === Number(loggedInUserId) ? (
+                <>
+                <br/>
+                  <button
+                    className="edit-icon"
+                    onClick={() =>
+                      handleEditAnnotation(
+                        annotationId,
+                        annotation_starting_point,
+                        annotation_ending_point
+                      )
+                    }
+                  >
+                    ✏️
+                  </button>
+                  <button
+                    className="delete-icon"
+                    onClick={() => handleDeleteAnnotation(annotationId)}
+                  >
+                    🗑️
+                  </button>
+                </>
+              ):null}
+            </div>
+          </span>
+        </div>
       );
   
       // Update the lastIndex to the end of the annotation
@@ -255,8 +281,8 @@ const SearchResults = () => {
     }
     console.log("Final annotated text:", annotatedText);
     return annotatedText;
-  };  
-
+  };
+  
   const handleEditAnnotation = async (annotationId, startOffset, endOffset) => {
     // Fetch the annotation to get its text
     const annotationToEdit = annotationData.find((annotation) => annotation.annotation_id === annotationId);
@@ -308,21 +334,25 @@ const SearchResults = () => {
 
   const handleTextSelection = (e) => {
     const selection = window.getSelection();
-    if (selection && selection.rangeCount > 0 && selection.toString().trim() !== '') {
-      const range = selection.getRangeAt(0); // Get the selected range
   
-      const startOffset = range.startOffset; // Start of the selection in the container
-      const endOffset = range.endOffset; // End of the selection in the container
+    if (selection && selection.rangeCount > 0 && selection.toString().trim() !== '') {
+      const range = selection.getRangeAt(0);
+      const selectedText = selection.toString();
+      const plainText = originalText; // Use the original full text
+      const startOffset = plainText.indexOf(selectedText);
+      const endOffset = startOffset + selectedText.length;
+  
+      if (startOffset === -1 || endOffset > plainText.length) {
+        console.error("Error calculating offsets. Selection might span across multiple elements or annotations.");
+        return;
+      }
+  
+      setSelectedText(selectedText);
+      setStartIndex(startOffset);
+      setEndIndex(endOffset);
   
       const mouseX = e.clientX;
       const mouseY = e.clientY;
-
-      console.log("Text selected:", selection.toString());
-      console.log("Selection start index:", startOffset, "end index:", endOffset);
-
-      setSelectedText(selection.toString());
-      setStartIndex(startOffset);
-      setEndIndex(endOffset);
       setModalVisible(true);
       setModalPosition({ top: mouseY, left: mouseX });
     } else {

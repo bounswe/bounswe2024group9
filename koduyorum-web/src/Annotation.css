@@ -1,3 +1,8 @@
+.annotation-container {
+  position: relative;
+  display: inline-block; /* Keep annotation and tooltip grouped */
+}
+
 .annotation {
     position: relative;
     cursor: pointer;
@@ -12,23 +17,30 @@
   
   .annotation-tooltip {
     position: absolute;
-    top: 120%;
+    top: 100%;
     left: 20%;
     background-color: rgba(0, 0, 0, 0.7);
     color: white;
     padding: 10px; /* Comfortable padding */
     border-radius: 3px;
     font-size: 12px;
+    width: 150px;
     max-width: 300px; /* Limit width to prevent overflowing */
-    white-space: nowrap;
+    max-height: 150px; 
+    overflow-y: auto; 
+    visibility: hidden; /* Hidden by default */
     z-index: 10;
     opacity: 0;
-    transition: opacity 0.2s;
+    pointer-events: none; /* Ignore pointer events when hidden */
+    transition: opacity 0.2s, visibility 0.2s;
   }
   
-  .annotation:hover .annotation-tooltip {
+  .annotation-container:hover .annotation-tooltip {
     opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
   }
+  
   .edit-icon, .delete-icon {
     background: none;
     border: none;
