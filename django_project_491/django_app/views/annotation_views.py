@@ -1,4 +1,5 @@
-from ..models import Question, Comment, UserType, User, Annotation
+from ..models import Question, Comment, UserType, User
+from annotations_app.models import Annotation
 from django.http import HttpRequest, HttpResponse, JsonResponse
 import json
 from django.views.decorators.csrf import csrf_exempt

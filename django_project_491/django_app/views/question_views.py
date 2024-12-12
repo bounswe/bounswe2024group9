@@ -1,5 +1,5 @@
 
-from ..models import Question, Comment, UserType, User, VoteType, Question_Vote, Topic
+from ..models import Question, Comment, UserType, User, VoteType, Question_Vote
 from django.db.models import Count, Q, F
 from django.http import HttpRequest, HttpResponse, JsonResponse
 import json
