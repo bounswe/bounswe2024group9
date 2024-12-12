@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 
 const CreateAnnotation = ({ visible, selectedText, startIndex, endIndex, language_id, annotationId, onClose }) => {
   const [annotationText, setAnnotationText] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false); // Loading state for form submission
+
 
   if (!visible) {
     return null; // Do not render anything if the modal is not visible
@@ -20,6 +22,7 @@ const CreateAnnotation = ({ visible, selectedText, startIndex, endIndex, languag
         console.error('Annotation text required')
         return;
     }
+    setIsSubmitting(true);
 
     try {
         const user_id = localStorage.getItem('user_id');
@@ -50,9 +53,11 @@ const CreateAnnotation = ({ visible, selectedText, startIndex, endIndex, languag
         } else {
             const data = await response.json();
             console.error('Error adding annotation:', data);
-        }
+        } 
     } catch (error) {
         console.error('Error adding annotation:', error);
+    } finally {
+      setIsSubmitting(false); 
     }
   }
 
@@ -70,6 +75,7 @@ const CreateAnnotation = ({ visible, selectedText, startIndex, endIndex, languag
         <button
           className={annotationId ? "save-button" : "create-button"}
           onClick={handleSubmit}
+          disabled={isSubmitting}
         >
           {annotationId ? "Save Changes" : "Create"}
         </button>
@@ -145,6 +151,10 @@ const CreateAnnotation = ({ visible, selectedText, startIndex, endIndex, languag
             border: none;
             border-radius: 4px;
             cursor: pointer;
+          }
+             button:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
           }
         `}
       </style>
