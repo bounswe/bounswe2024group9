@@ -3,7 +3,7 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from enum import Enum
 from typing import List
 from .Utils.utils import *
-
+from annotations_app.models import Annotation
 
 # After editing the models do not forget to run the following commands:
 # python manage.py makemigrations
@@ -135,18 +135,6 @@ class Question(models.Model):
         # Check and promote user after saving the question
         self.author.check_and_promote()
 
-    def get_topic_info(self):
-            if self.topic:
-                try:
-                    topic_obj = Topic.objects.get(name__iexact=self.topic)
-                    return {
-                        'label': topic_obj.name,
-                        'url': topic_obj.related_url,
-                    }
-                except Topic.DoesNotExist:
-                    return {'label': self.topic, 'url': None}
-            return {'label': None, 'url': None}
-
 
 class UserManager(BaseUserManager):
     def create_user(self, username, email, password=None, userType: UserType = UserType.USER):
@@ -269,8 +257,8 @@ class User(AbstractBaseUser):
             'created_at' : bookmark.created_at.strftime('%Y-%m-%d %H:%M:%S'),
         } for bookmark in self.bookmarks.all()]
 
-    # TODO: SHOULD BE CHANGED ACCORDING TO THE NEW ANNOTATION MODEL
     def get_annotation_details(self):
+        annotations = Annotation.objects.using('annotations').filter(author_id=self.user_id)
         return [{
             'annotation_id': annotation._id,
             'text': annotation.text,
@@ -278,8 +266,8 @@ class User(AbstractBaseUser):
             'annotation_starting_point': annotation.annotation_starting_point,
             'annotation_ending_point': annotation.annotation_ending_point,
             'annotation_date': annotation.annotation_date.strftime('%Y-%m-%d %H:%M:%S'),
-            'author': annotation.author.username,
-        } for annotation in self.annotations.all()]
+            'author': self.username,
+        } for annotation in annotations]
 
     def calculate_total_points(self):
         question_points = self.questions.count() * 2
@@ -299,50 +287,4 @@ class User(AbstractBaseUser):
             self.save()
         
         return self.userType
-    
-
-# TODO: Language name should be added to the Annotation model
-class Annotation(models.Model):
-    _id = models.AutoField(primary_key=True)
-    text = models.TextField()
-    language_qid = models.IntegerField(default=0)  # QID of the question example : Q24582
-    annotation_starting_point = models.IntegerField(default=0) 
-    annotation_ending_point = models.IntegerField(default=0)
-    annotation_date = models.DateTimeField(auto_now_add=True)
-    author = models.ForeignKey('User', on_delete=models.CASCADE, related_name='annotations')
-    parent_annotation = models.ForeignKey(
-        'self',
-        on_delete=models.CASCADE,
-        related_name='child_annotations',
-        null=True,
-        blank=True
-    )
-
-    def __str__(self):
-        return self.text
-
-    def __repr__(self):
-        return self.text
-
-    def __unicode__(self):
-        return self.text
-        
-        
-class Topic(models.Model):
-    name = models.CharField(max_length=100, unique=True)
-    related_url = models.URLField()
-
-    def __str__(self):
-        return self.name
-
-    @staticmethod
-    def get_all_topics():
-        return Topic.objects.all()
-
-    @staticmethod
-    def get_url_for_topic(topic_name):
-        try:
-            topic = Topic.objects.get(name__iexact=topic_name)
-            return topic.related_url
-        except Topic.DoesNotExist:
-            return None
+  
