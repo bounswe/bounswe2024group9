@@ -188,8 +188,9 @@ const SearchResults = () => {
       const questionData = infoQuestionAnnotationData.questions;      
       const annotationData = infoQuestionAnnotationData.annotations;
       const topContributors = infoQuestionAnnotationData.top_contributors; // Top Contributors data
-
       setOriginalText(infoData.wikipedia.info);
+
+
       setInfoData(infoData || { mainInfo: [], instances: [], wikipedia: {} });
       setQuestionData(questionData || []);
       setAnnotationData(annotationData || []);
