@@ -11,15 +11,14 @@ import { showNotification } from "./NotificationCenter";
 import NotificationCenter from "./NotificationCenter";
 
 function QuestionDetail(props) {
+  const [votes, setVotes] = useState(props.initialVotes);
+  const isOwner = localStorage.getItem("username") === props.author;
+  const [author] = useState(props.author);
+  const navigate = useNavigate();
 
-    const [votes, setVotes] = useState(props.initialVotes);
-    const isOwner = localStorage.getItem("username") === props.author;
-    const [author] = useState(props.author);
-    const navigate = useNavigate();
+  const [isAnswered, setAnswered] = useState(props.isAnswered);
 
-    const [isAnswered, setAnswered] = useState(props.isAnswered);
-
-    const [isPopupVisible, setIsPopupVisible] = useState(false);
+  const [isPopupVisible, setIsPopupVisible] = useState(false);
 
   const openPopup = () => setIsPopupVisible(true);
   const closePopup = () => setIsPopupVisible(false);
@@ -114,6 +113,7 @@ function QuestionDetail(props) {
     useEffect(() => {
         setAnswered(props.isAnswered);
     }, [props.isAnswered]);
+    
     return (
         <div className="question-post-card">
         <div className={`status-indicator ${isAnswered ? 'answered' : 'unanswered'}`}>

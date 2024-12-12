@@ -37,9 +37,13 @@ function PostComment(props) {
 
     // Submit comment to backend
     const handleSubmit = async () => {
-        if (!details || !language) {
-            showNotification('All fields are required!');
-            // alert('All fields are required!');
+        if (!details) {
+            showNotification('You must write a comment!');
+            return;
+        }
+        
+        if (codeSnippet.trim() && !language) {
+            showNotification('You must select a language for the written code!');
             return;
         }
 

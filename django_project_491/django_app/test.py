@@ -19,7 +19,7 @@ from unittest.mock import patch
 from io import BytesIO
 
 from .Utils.utils import run_code
-from .views.utilization_views import wiki_result, wiki_search
+from .views.utilization_views import wiki_result_request, wiki_search
 from .models import User, Comment, Question, Comment_Vote, Question_Vote, UserType, VoteType
 from django.urls import reverse
 from unittest.mock import patch, MagicMock

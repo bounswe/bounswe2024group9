@@ -3,7 +3,7 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from enum import Enum
 from typing import List
 from .Utils.utils import *
-
+from annotations_app.models import Annotation
 
 # After editing the models do not forget to run the following commands:
 # python manage.py makemigrations
@@ -97,7 +97,7 @@ class Question(models.Model):
     _id = models.AutoField(primary_key=True)
     title = models.CharField(max_length=200)
     language = models.CharField(max_length=200)  # programmingLanguage field like python
-    language_id = models.IntegerField(default=71)  # Language ID for Python like 71
+    language_id = models.IntegerField(default=-1)   # Language ID for Python like 71
     tags = models.JSONField(blank=True, default=list)  # Example: ['tag1', 'tag2']
     details = models.TextField()
     code_snippet = models.TextField()
@@ -134,18 +134,6 @@ class Question(models.Model):
         super().save(*args, **kwargs)
         # Check and promote user after saving the question
         self.author.check_and_promote()
-
-    def get_topic_info(self):
-            if self.topic:
-                try:
-                    topic_obj = Topic.objects.get(name__iexact=self.topic)
-                    return {
-                        'label': topic_obj.name,
-                        'url': topic_obj.related_url,
-                    }
-                except Topic.DoesNotExist:
-                    return {'label': self.topic, 'url': None}
-            return {'label': None, 'url': None}
 
 
 class UserManager(BaseUserManager):
@@ -215,47 +203,71 @@ class User(AbstractBaseUser):
         return self.userType == UserType.ADMIN
 
     def get_question_details(self):
+        user_votes = Question_Vote.objects.filter(user_id=self.user_id).values('question_id', 'vote_type')
+        user_votes_dict = {vote['question_id']: vote['vote_type'] for vote in user_votes}
         return [{
-            'id': question._id,
-            'title': question.title,
-            'language': question.language,
-            'tags': question.tags,
-            'details': question.details,
-            'code_snippet': question.code_snippet,
-            'upvotes': question.upvotes,
-            'creationDate': question.created_at.strftime('%Y-%m-%d %H:%M:%S'),
-            'answered': question.answered,
-            'author': question.author.username,
-            'reported_by': [user.username for user in question.reported_by.all()],
-            'upvoted_by': [vote.user.username for vote in question.votes.filter(vote_type=VoteType.UPVOTE.value)],
-            'downvoted_by': [vote.user.username for vote in question.votes.filter(vote_type=VoteType.DOWNVOTE.value)],            
-        } for question in self.questions.all()]
+            'id': q.pk,
+            'title': q.title,
+            'description': q.details,
+            'user_id': q.author.pk,
+            'username': q.author.username,
+            'upvotes': q.upvotes,
+            'comments_count': q.comments.count(),
+            'programmingLanguage': q.language,
+            'codeSnippet': q.code_snippet,
+            'tags': q.tags,
+            'answered': q.answered,
+            'is_upvoted': user_votes_dict.get(q.pk) == VoteType.UPVOTE.value,
+            'is_downvoted': user_votes_dict.get(q.pk) == VoteType.DOWNVOTE.value,
+            'created_at' : q.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+        } for q in self.questions.all()]
 
     def get_comment_details(self):
         return [{
+            'question_id': comment.question.pk,
             'comment_id': comment._id,
             'details': comment.details,
             'user': comment.author.username,
             'upvotes': comment.upvotes,
             'code_snippet': comment.code_snippet,
-            'language': comment.language,  
+            'language': comment.language_id,
             'creationDate': comment.created_at.strftime('%Y-%m-%d %H:%M:%S'),
             'upvoted_by': [vote.user.username for vote in comment.votes.filter(vote_type=VoteType.UPVOTE.value)],
             'downvoted_by': [vote.user.username for vote in comment.votes.filter(vote_type=VoteType.DOWNVOTE.value)],
-            'answer_of_the_question': comment.answer_of_the_question,
+            'answer_of_the_question': comment.answer_of_the_question
         } for comment in self.authored_comments.all()]
 
     def get_bookmark_details(self):
+        user_votes = Question_Vote.objects.filter(user_id=self.user_id).values('question_id', 'vote_type')
+        user_votes_dict = {vote['question_id']: vote['vote_type'] for vote in user_votes}
         return [{
-            'id': bookmark._id,
+            'id': bookmark.pk,
             'title': bookmark.title,
-            'language': bookmark.language,
-            'tags': bookmark.tags,
-            'details': bookmark.details,
-            'code_snippet': bookmark.code_snippet,
+            'description': bookmark.details,
+            'user_id': bookmark.author.pk,
+            'username': bookmark.author.username,
             'upvotes': bookmark.upvotes,
-            'creationDate': bookmark.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+            'comments_count': bookmark.comments.count(),
+            'programmingLanguage': bookmark.language,
+            'codeSnippet': bookmark.code_snippet,
+            'tags': bookmark.tags,
+            'answered': bookmark.answered,
+            'is_upvoted': user_votes_dict.get(bookmark.pk) == VoteType.UPVOTE.value,
+            'is_downvoted': user_votes_dict.get(bookmark.pk) == VoteType.DOWNVOTE.value,
+            'created_at' : bookmark.created_at.strftime('%Y-%m-%d %H:%M:%S'),
         } for bookmark in self.bookmarks.all()]
+
+    def get_annotation_details(self):
+        annotations = Annotation.objects.using('annotations').filter(author_id=self.user_id)
+        return [{
+            'annotation_id': annotation._id,
+            'text': annotation.text,
+            'language_qid': annotation.language_qid,
+            'annotation_starting_point': annotation.annotation_starting_point,
+            'annotation_ending_point': annotation.annotation_ending_point,
+            'annotation_date': annotation.annotation_date.strftime('%Y-%m-%d %H:%M:%S'),
+            'author': self.username,
+        } for annotation in annotations]
 
     def calculate_total_points(self):
         question_points = self.questions.count() * 2
@@ -275,49 +287,4 @@ class User(AbstractBaseUser):
             self.save()
         
         return self.userType
-    
-
-class Annotation(models.Model):
-    _id = models.AutoField(primary_key=True)
-    text = models.TextField()
-    language_qid = models.IntegerField(default=0)  # QID of the question example : Q24582
-    annotation_starting_point = models.IntegerField(default=0) 
-    annotation_ending_point = models.IntegerField(default=0)
-    annotation_date = models.DateTimeField(auto_now_add=True)
-    author = models.ForeignKey('User', on_delete=models.CASCADE, related_name='annotations')
-    parent_annotation = models.ForeignKey(
-        'self',
-        on_delete=models.CASCADE,
-        related_name='child_annotations',
-        null=True,
-        blank=True
-    )
-
-    def __str__(self):
-        return self.text
-
-    def __repr__(self):
-        return self.text
-
-    def __unicode__(self):
-        return self.text
-        
-        
-class Topic(models.Model):
-    name = models.CharField(max_length=100, unique=True)
-    related_url = models.URLField()
-
-    def __str__(self):
-        return self.name
-
-    @staticmethod
-    def get_all_topics():
-        return Topic.objects.all()
-
-    @staticmethod
-    def get_url_for_topic(topic_name):
-        try:
-            topic = Topic.objects.get(name__iexact=topic_name)
-            return topic.related_url
-        except Topic.DoesNotExist:
-            return None
+  

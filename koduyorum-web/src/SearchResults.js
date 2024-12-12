@@ -30,6 +30,8 @@ const SearchResults = () => {
   const [modalPosition, setModalPosition] = useState({ top: 0, left: 0 });
   const [languageId, setLanguageId] = useState(null);
   const [annotationId, setAnnotationId] = useState(null);
+  const [topContributors, setTopContributors] = useState([]); // Top Contributors state
+  const [originalText, setOriginalText] = useState(null);
 
 
   const { wiki_id, wiki_name} = useParams(); // Get wiki_id from the URL
@@ -69,7 +71,7 @@ const SearchResults = () => {
       const wikiIdName = await fetchWikiIdAndName(result.languageLabel.value);
       const wikiId = wikiIdName[0];
       const wikiName = wikiIdName[1];
-      console.log("Wiki ID and Name:", wikiId, wikiName);
+      // console.log("Wiki ID and Name:", wikiId, wikiName);
       if (wikiId) {
           console.log("Navigating to:", `/result/${wikiId}/${encodeURIComponent(wikiName)}`);
           setSearched(false);
@@ -158,14 +160,20 @@ const SearchResults = () => {
     try {
       setLoading(true);
       setError(null);
-      console.log("Fetching search data for wiki ID:", encodeURIComponent(wikiId), wikiId.slice(1));
 
       // const infoResponse = await fetch(`${process.env.REACT_APP_API_URL}/result/${encodeURIComponent(wikiId)}`);
       // const questionResponse = await fetch(`${process.env.REACT_APP_API_URL}/list_questions_by_language/${encodeURIComponent(wikiName)}/1`);
       // const annotationResponse = await fetch(`${process.env.REACT_APP_API_URL}/get_annotations_by_language_id/${wikiId.slice(1)}/`);
       
-      const infoQuestionAnnotationResponse = await fetch(`${process.env.REACT_APP_API_URL}/fetch_search_results_at_once/${encodeURIComponent(wikiId)}/${encodeURIComponent(wikiName)}/${(1)}`); 
+      const userId = localStorage.getItem('user_id');
+      const infoQuestionAnnotationResponse = await fetch(`${process.env.REACT_APP_API_URL}/fetch_search_results_at_once/${encodeURIComponent(wikiId)}/${encodeURIComponent(wikiName)}/${(1)}`, {
+        headers: {
+          'Content-Type': 'application/json',
+          'User-ID': userId,
+        },
+      }); 
       // Feth all data and questions' first page. Because it is default and the user can go to other pages, if there are more than one page.
+
 
       if (!infoQuestionAnnotationResponse.ok) {
         throw new Error('Failed to load data');
@@ -179,11 +187,14 @@ const SearchResults = () => {
       const infoData = infoQuestionAnnotationData.information;
       const questionData = infoQuestionAnnotationData.questions;      
       const annotationData = infoQuestionAnnotationData.annotations;
+      const topContributors = infoQuestionAnnotationData.top_contributors; // Top Contributors data
+      setOriginalText(infoData.wikipedia.info);
 
-      console.log("annotationData data:", annotationData);
+
       setInfoData(infoData || { mainInfo: [], instances: [], wikipedia: {} });
       setQuestionData(questionData || []);
       setAnnotationData(annotationData || []);
+      setTopContributors(topContributors || []);
     } catch (err) {
       console.error("Error fetching search data:", err);
       setError("Failed to load search data.");
@@ -193,46 +204,71 @@ const SearchResults = () => {
   };
 
   const addAnnotations = (text, annotations) => {
-    console.log("Adding annotations to text:", text);
-    console.log("Annotations list:", annotations);
-
+    const loggedInUserId = localStorage.getItem('user_id'); 
+      if (!text || text.length === 0) {
+      return null;
+    }
     let annotatedText = [];
     let lastIndex = 0;
-
+  
     // Sort annotations by starting point to avoid misplacement
     const sortedAnnotations = annotations.sort(
       (a, b) => a.annotation_starting_point - b.annotation_starting_point
     );
   
     sortedAnnotations.forEach((annotation) => {
-      const { annotation_starting_point, annotation_ending_point, text: annotationText , annotation_id: annotationId} = annotation;
-
+      const {
+        annotation_starting_point,
+        annotation_ending_point,
+        text: annotationText,
+        annotation_id: annotationId,
+        author_id: author_id, 
+        author_name: author_name, 
+      } = annotation;
+  
       console.log("Processing annotation:", annotation);
-      
+  
       if (lastIndex < annotation_starting_point) {
         annotatedText.push(text.slice(lastIndex, annotation_starting_point));
       }
-      
-      // Add annotated text with tooltip
+  
+      // Add annotated text with a tooltip
       annotatedText.push(
-        <span className="annotation" key={annotationId}>
-          <em>{text.slice(annotation_starting_point, annotation_ending_point)}</em>
-          <div className="annotation-tooltip">
-            {annotationText}  {/* This will show the annotation text */}
-            <button
-              className="edit-icon"
-              onClick={() => handleEditAnnotation(annotationId, annotation_starting_point, annotation_ending_point)} // Call edit handler
-            >
-              ✏️
-            </button>
-            <button
-              className="delete-icon"
-              onClick={() => handleDeleteAnnotation(annotationId)} // Replace annotationId with the actual ID
-            >
-              🗑️
-            </button>
-          </div>
-        </span>
+        <div className="annotation-container" key={annotation_starting_point}>
+          <span className="annotation">
+            <em>{text.slice(annotation_starting_point, annotation_ending_point)}</em>
+            <div className="annotation-tooltip">
+              {annotationText} {/* Show the annotation text */}
+              <div className="annotation-tooltip-author">
+                <br/>
+              <em>by {author_name}</em>
+            </div>
+              {Number(author_id) === Number(loggedInUserId) ? (
+                <>
+                <br/>
+                  <button
+                    className="edit-icon"
+                    onClick={() =>
+                      handleEditAnnotation(
+                        annotationId,
+                        annotation_starting_point,
+                        annotation_ending_point
+                      )
+                    }
+                  >
+                    ✏️
+                  </button>
+                  <button
+                    className="delete-icon"
+                    onClick={() => handleDeleteAnnotation(annotationId)}
+                  >
+                    🗑️
+                  </button>
+                </>
+              ):null}
+            </div>
+          </span>
+        </div>
       );
   
       // Update the lastIndex to the end of the annotation
@@ -245,8 +281,8 @@ const SearchResults = () => {
     }
     console.log("Final annotated text:", annotatedText);
     return annotatedText;
-  };  
-
+  };
+  
   const handleEditAnnotation = async (annotationId, startOffset, endOffset) => {
     // Fetch the annotation to get its text
     const annotationToEdit = annotationData.find((annotation) => annotation.annotation_id === annotationId);
@@ -298,21 +334,25 @@ const SearchResults = () => {
 
   const handleTextSelection = (e) => {
     const selection = window.getSelection();
-    if (selection && selection.rangeCount > 0 && selection.toString().trim() !== '') {
-      const range = selection.getRangeAt(0); // Get the selected range
   
-      const startOffset = range.startOffset; // Start of the selection in the container
-      const endOffset = range.endOffset; // End of the selection in the container
+    if (selection && selection.rangeCount > 0 && selection.toString().trim() !== '') {
+      const range = selection.getRangeAt(0);
+      const selectedText = selection.toString();
+      const plainText = originalText; // Use the original full text
+      const startOffset = plainText.indexOf(selectedText);
+      const endOffset = startOffset + selectedText.length;
+  
+      if (startOffset === -1 || endOffset > plainText.length) {
+        console.error("Error calculating offsets. Selection might span across multiple elements or annotations.");
+        return;
+      }
+  
+      setSelectedText(selectedText);
+      setStartIndex(startOffset);
+      setEndIndex(endOffset);
   
       const mouseX = e.clientX;
       const mouseY = e.clientY;
-
-      console.log("Text selected:", selection.toString());
-      console.log("Selection start index:", startOffset, "end index:", endOffset);
-
-      setSelectedText(selection.toString());
-      setStartIndex(startOffset);
-      setEndIndex(endOffset);
       setModalVisible(true);
       setModalPosition({ top: mouseY, left: mouseX });
     } else {
@@ -363,7 +403,7 @@ const SearchResults = () => {
           />
           <NotificationCenter />
           <div className="feed-content">
-            <LeftSidebar handleTagClick={handleTagClick} />
+            <LeftSidebar handleTagClick={handleTagClick} setPosts={setQuestionData} language={wiki_name}/>
 
             <div className="info-container">
  
@@ -478,7 +518,7 @@ const SearchResults = () => {
                 </div>
               )}
             </div>
-            <RightSidebar />
+            <RightSidebar topContributors={topContributors} />
           </div>
         </div>
       )}
