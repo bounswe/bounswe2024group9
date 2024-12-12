@@ -9,6 +9,7 @@ import { Navbar, LeftSidebar, RightSidebar } from '../PageComponents';
 import { LoadingComponent } from '../LoadingPage';
 import PostComment from "../PostComment";
 import QuestionDetail from "../QuestionDetail";
+import "../QuestionDetail.css";
 import Comment from "../Comment";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBookmark } from '@fortawesome/free-solid-svg-icons';
@@ -281,13 +282,21 @@ const [output, setOutput] = useState([]); // State to store the backend's respon
 
             />
             {questionData.code_snippet && (
-                <button
-                    className="bg-blue-600 text-white px-4 py-2 mt-4"
+                <div className="flex gap-4 mt-4">
+                  <button
+                    className="run-button"
                     onClick={() => run_code('question', questionData.id)}
-                >
-                  Run Code
-                </button>
-            )}
+                  >
+                    Run Code
+                  </button>
+                  <button
+                    className="comment-button"
+                    onClick={() => openPopup()}
+                  >
+                    Comment
+                  </button>
+                </div>
+              )}
             <button
                 className="bg-green-600 text-white px-4 py-2 mt-4"
                 onClick={() => post_bookmark(questionData.id)}
@@ -340,9 +349,7 @@ const [output, setOutput] = useState([]); // State to store the backend's respon
               ) : (
                 <p className="text-gray-600">No comments available.</p>
               )}
-              <button className="floating-button" onClick={() => openPopup()}>
-                +
-              </button>
+          
                 {isPopupVisible && (
                   <div className="popup" >
                     <div className="popup-content" ref={popupRef}>
@@ -355,15 +362,16 @@ const [output, setOutput] = useState([]); // State to store the backend's respon
                   </div>
                 )}
             </div>
+            <Separator className="my-8 bg-gray-300"/>
 
-            <div className="my-8">
-              <h2 className="text-xl font-semibold text-gray-800">Try Your Own Code</h2>
+            <div className="code-execution-box">
+              <h2 className="code-execution-title">Try Your Own Code</h2>
               <form onSubmit={handleSubmit}>
-                <label className="block mb-2">Select Language:</label>
+                <label className="code-execution-label">Select Language:</label>
                 <select
                   value={languageId}
                   onChange={(e) => setLanguageId(e.target.value)}
-                  className="w-full p-2 mb-4 bg-gray-200 text-gray-800"
+                  className="code-execution-select"
                 >
                   <option value="">Select a language</option>
                   {Object.entries(languages).map(([name, id]) => (
@@ -373,27 +381,26 @@ const [output, setOutput] = useState([]); // State to store the backend's respon
                   ))}
                 </select>
 
-                <label className="block mb-2">Enter your code:</label>
+                <label className="code-execution-label">Enter your code:</label>
                 <textarea
                   value={code}
                   onChange={(e) => setCode(e.target.value)}
                   rows="10"
-                  className="w-full p-2 mb-4 bg-gray-200 text-gray-800"
+                  className="code-editor"
                 ></textarea>
 
-                <SyntaxHighlighter language="javascript" style={docco}>
+                <SyntaxHighlighter language="javascript" style={docco} className="syntax-highlight-box">
                   {code}
                 </SyntaxHighlighter>
 
                 <button
                   type="submit"
-                  className="bg-blue-600 text-white px-4 py-2"
+                  className="run-button"
                   disabled={loading || !languageId}
                 >
                   {loading ? "Executing..." : "Execute Code"}
                 </button>
               </form>
-              
             </div>
           </div>
         </div>
