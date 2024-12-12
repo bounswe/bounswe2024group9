@@ -1,4 +1,5 @@
-from ..models import Question, Comment, UserType, User, Annotation
+from ..models import Question, Comment, UserType, User
+from annotations_app.models import Annotation
 from django.http import HttpRequest, HttpResponse, JsonResponse
 import json
 from django.views.decorators.csrf import csrf_exempt
@@ -78,15 +79,14 @@ def create_annotation(request):
             if user_id is None:
                 return JsonResponse({'error': 'User ID parameter is required in the header'}, status=400)
             user_id = int(user_id)
-            user = User.objects.get(pk=user_id)
 
             # Create the annotation
-            annotation = Annotation.objects.create(
+            annotation : Annotation = Annotation.objects.create(
                 text=data.get('text'),
                 language_qid=data.get('language_qid', 0),
                 annotation_starting_point=data.get('annotation_starting_point', 0),
                 annotation_ending_point=data.get('annotation_ending_point', 0),
-                author=user,
+                author_id=user_id,
             )
 
             # Handle child annotation
@@ -222,7 +222,6 @@ def delete_annotation(request, annotation_id):
             if user_id is None:
                 return JsonResponse({'error': 'User ID parameter is required in the header'}, status=400)
             user_id = int(user_id)
-            user = User.objects.get(pk=user_id)
 
             # Fetch the annotation
             try:
@@ -231,7 +230,7 @@ def delete_annotation(request, annotation_id):
                 return JsonResponse({'error': 'Annotation not found'}, status=404)
 
             # Check if the user is the author of the annotation
-            if annotation.author != user:
+            if annotation.author_id != user_id:
                 return JsonResponse({'error': 'Permission denied: You are not the author of this annotation'}, status=403)
 
             # Delete the annotation
@@ -358,7 +357,7 @@ def edit_annotation(request, annotation_id):
             if user_id is None:
                 return JsonResponse({'error': 'User ID parameter is required in the header'}, status=400)
             user_id = int(user_id)
-            user = User.objects.get(pk=user_id)
+            User.objects.get(pk=user_id) # Check if the user exists even though it is not used
 
             # Fetch the annotation
             try:
@@ -367,7 +366,7 @@ def edit_annotation(request, annotation_id):
                 return JsonResponse({'error': 'Annotation not found'}, status=404)
 
             # Check if the user is the author of the annotation
-            if annotation.author != user:
+            if annotation.author_id != user_id:
                 return JsonResponse({'error': 'Permission denied: You are not the author of this annotation'}, status=403)
 
             # Update the annotation fields
@@ -534,8 +533,7 @@ def get_annotations_by_language(language_qid):
             'annotation_starting_point': annotation.annotation_starting_point,
             'annotation_ending_point': annotation.annotation_ending_point,
             'annotation_date': annotation.annotation_date,
-            'author_id': annotation.author.user_id,
-            "author_name": annotation.author.username,
+            'author_id': annotation.author_id,
             'parent_id': annotation.parent_annotation._id if annotation.parent_annotation else None,
             'child_annotations': [
                 {
@@ -545,8 +543,7 @@ def get_annotations_by_language(language_qid):
                     'annotation_starting_point': child.annotation_starting_point,
                     'annotation_ending_point': child.annotation_ending_point,
                     'annotation_date': child.annotation_date,
-                    'author_id': child.author.user_id,
-                    "author_name": child.author.username
+                    'author_id': child.author_id
                 } for child in annotation.child_annotations.all()
             ]
         }
@@ -681,8 +678,7 @@ def get_all_annotations(request):
                     'annotation_starting_point': annotation.annotation_starting_point,
                     'annotation_ending_point': annotation.annotation_ending_point,
                     'annotation_date': annotation.annotation_date,
-                    'author_id': annotation.author.user_id,
-                    "author_name": annotation.author.username,
+                    'author_id': annotation.author_id,
                     'parent_id': annotation.parent_annotation._id if annotation.parent_annotation else None,
                     'child_annotations': [
                         {
@@ -692,8 +688,7 @@ def get_all_annotations(request):
                             'annotation_starting_point': child.annotation_starting_point,
                             'annotation_ending_point': child.annotation_ending_point,
                             'annotation_date': child.annotation_date,
-                            'author_id': child.author.user_id,
-                            "author_name": child.author.username
+                            'author_id': child.author_id,
                         } for child in annotation.child_annotations.all()
                     ]
                 }
