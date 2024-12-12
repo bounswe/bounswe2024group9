@@ -3,7 +3,7 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from enum import Enum
 from typing import List
 from .Utils.utils import *
-
+from annotations_app.models import Annotation
 
 # After editing the models do not forget to run the following commands:
 # python manage.py makemigrations
@@ -257,8 +257,8 @@ class User(AbstractBaseUser):
             'created_at' : bookmark.created_at.strftime('%Y-%m-%d %H:%M:%S'),
         } for bookmark in self.bookmarks.all()]
 
-    # TODO: SHOULD BE CHANGED ACCORDING TO THE NEW ANNOTATION MODEL
     def get_annotation_details(self):
+        annotations = Annotation.objects.using('annotations').filter(author_id=self.user_id)
         return [{
             'annotation_id': annotation._id,
             'text': annotation.text,
@@ -266,8 +266,8 @@ class User(AbstractBaseUser):
             'annotation_starting_point': annotation.annotation_starting_point,
             'annotation_ending_point': annotation.annotation_ending_point,
             'annotation_date': annotation.annotation_date.strftime('%Y-%m-%d %H:%M:%S'),
-            'author': annotation.author.username,
-        } for annotation in self.annotations.all()]
+            'author': self.username,
+        } for annotation in annotations]
 
     def calculate_total_points(self):
         question_points = self.questions.count() * 2
