@@ -38,12 +38,13 @@ DEBUG = True
 CORS_ALLOW_ALL_ORIGINS = True
 
 ALLOWED_HOSTS = [
-    os.getenv('HEOKU_APP', ''),
     '127.0.0.1',
     '10.0.2.2',
     'localhost',
-    'https://clownfish-app-brdp5.ondigitalocean.app',  # Add your backend domain here
-    'https://oyster-app-8k7np.ondigitalocean.app'    
+    'https://clownfish-app-brdp5.ondigitalocean.app', 
+    'https://oyster-app-8k7np.ondigitalocean.app',
+    'clownfish-app-brdp5.ondigitalocean.app',  
+    'oyster-app-8k7np.ondigitalocean.app'
 ]
 
 CORS_ALLOWED_ORIGINS = [
@@ -72,9 +73,11 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_app',
+    'annotations_app',
     'corsheaders',
     'rest_framework',
     'rest_framework_simplejwt.token_blacklist',
+    'drf_yasg',
 ]
 
 MIDDLEWARE = [
@@ -115,14 +118,21 @@ WSGI_APPLICATION = 'django_project_491.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'cmpe451',  # Replace with the actual database name
-        'USER': 'admin',  # Your RDS MySQL username
-        'PASSWORD': os.getenv('AWS_PASSWORD'),  # Your RDS MySQL password
-        'HOST': os.getenv('AWS_HOST'),  # Your RDS endpoint
-        'PORT': '3306',  # MySQL port
+        'NAME': 'cmpe451',
+        'USER': 'admin',
+        'PASSWORD': os.getenv('AWS_DEFAULT_PASSWORD'),
+        'HOST': os.getenv('AWS_DEFAULT_HOST'),
+        'PORT': '3306',
+    },
+    'annotations': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'annotations',
+        'USER': 'admin',
+        'PASSWORD': os.getenv('AWS_ANNOTATIONS_PASSWORD'),
+        'HOST': os.getenv('AWS_ANNOTATIONS_HOST'),
+        'PORT': '3306',
     }
 }
-
 
 
 # Password validation
@@ -200,7 +210,7 @@ AUTHENTICATION_BACKENDS = [
 
 CACHES = {
     'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',  # Use a local memory cache for demonstration
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache', 
         'LOCATION': 'unique-snowflake',
     }
 }
@@ -213,3 +223,5 @@ EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
 EMAIL_PORT = 465  
 EMAIL_USE_SSL = True  
+
+DATABASE_ROUTERS = ['django_app.routers.AnnotationRouter']
