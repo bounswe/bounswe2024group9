@@ -1394,11 +1394,10 @@ def fetch_all_feed_at_once(request, user_id: int):
             )
             .distinct()[:10]
         )
-
         if len(questions) < 10:
             general_questions = Question.objects.exclude(
-                pk__in=[q.pk for q in questions]
-            ).order_by('?')[:10 - len(questions)]
+            pk__in=[q.pk for q in questions]
+            ).order_by('-created_at')[:10 - len(questions)]
             questions = list(questions) + list(general_questions)
 
         return [
