@@ -154,16 +154,16 @@ function QuestionDetail(props) {
             )}
             {
                 <>
-                    <h3 className="font-semibold text-gray-700">{props.inputType}</h3>
-                    <p className="mt-2 text-gray-600"
-                       onMouseUp={(e) => props.onTextSelection(e, 'question_details')}>{props.explanation}</p>
+                    <div className="mt-2 text-gray-600" onMouseUp={(e) => props.onTextSelection(e, 'question_details')}>
+                        {props.addAnnotations(props.explanation, props.annotations)}
+                    </div>
                     <SyntaxHighlighter language="javascript" style={docco}
                                        onMouseUp={(e) => props.onCodeSelection(e, 'question_code')}>
-                        {props.code}
+                        {props.addAnnotations(props.code, props.annotations)}
                     </SyntaxHighlighter>
                     <div className="flex items-center justify-between mt-4">
-                    <div className="flex items-center gap-2">
-                            <button
+                        <div className="flex items-center gap-2">
+                        <button
                                 className="px-4 py-2 bg-green-500 text-white text-sm font-semibold rounded hover:bg-green-600"
                                 onClick={handlePostUpvote}
                             >
@@ -232,7 +232,7 @@ QuestionDetail.propTypes = {
     onTextSelection: PropTypes.func.isRequired,
     onCodeSelection: PropTypes.func.isRequired,
     annotations: PropTypes.array.isRequired,
-
+    addAnnotations: PropTypes.func.isRequired,
 
 };
 

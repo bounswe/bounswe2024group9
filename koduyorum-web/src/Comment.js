@@ -135,12 +135,14 @@ function Comment(props) {
         </div>
       )}
       <h3 className="font-semibold text-gray-700">Answer {props.number}</h3>
-      <p className="text-gray-600" onMouseUp={(e) => props.onTextSelection(e, 'comment_details')}>{props.explanation}</p>
-      {props.code && (
-        <SyntaxHighlighter language="javascript" style={docco} onMouseUp={(e) => props.onCodeSelection(e, 'comment_code')}>
-          {props.code}
-        </SyntaxHighlighter>
-      )}
+      <div className="text-gray-600" onMouseUp={(e) => props.onTextSelection(e, 'comment_details')}>
+  {props.addAnnotations(props.explanation, props.annotations)}
+</div>
+{props.code && (
+  <SyntaxHighlighter language="javascript" style={docco} onMouseUp={(e) => props.onCodeSelection(e, 'comment_code')}>
+    {props.addAnnotations(props.code, props.annotations)}
+  </SyntaxHighlighter>
+)}
       <div className="flex items-center justify-between mt-4">
         <div className="flex items-center gap-2">
           <button
@@ -214,6 +216,8 @@ Comment.propTypes = {
   onCodeSelection: PropTypes.func.isRequired,
   fetchComments: PropTypes.func.isRequired,
   questionAuthor: PropTypes.string.isRequired,
+  addAnnotations: PropTypes.func.isRequired,
+  annotations: PropTypes.array.isRequired,
 };
 
 export default Comment;

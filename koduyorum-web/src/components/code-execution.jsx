@@ -36,6 +36,7 @@ export default function CodeExecution() {
   const [isPopupVisible, setIsPopupVisible] = useState(false);
   const popupRef = useRef(null);
   const [annotationData, setAnnotationData] = useState([]);
+  const [comment_annotations, setCommentAnnotations] = useState([]);
 
 
   const openPopup = () => setIsPopupVisible(true);
@@ -71,7 +72,8 @@ export default function CodeExecution() {
       setQuestionData(data.question);
       setLanguageId(data.question.language_id);
       setLoading(false);
-      setAnnotationData(data.annotations || []);
+      setAnnotationData(data.question.annotations || []);
+      console.log("annot", data.question.annotations);
     } catch (err) {
       setError(err.message);
       setLoading(false);
@@ -91,6 +93,7 @@ export default function CodeExecution() {
       const data = await response.json();
       setCommentData(data.comments);
       setAnswered(data.comments.some(c => c.answer_of_the_question));
+      setCommentAnnotations(data.comments.map(comment => comment.annotations));
       setLoading(false);
     } catch (err) {
       setError(err.message);
@@ -456,6 +459,8 @@ const handleTextSelection = (e, type, id) => {
                 fetchQuestion={fetchQuestion}
                 onTextSelection={(e) => handleTextSelection(e, 'question_details', question_id)}
                 onCodeSelection={(e) => handleTextSelection(e, 'question_code', question_id)}
+                annotations={annotationData}
+                addAnnotations={addAnnotations}
               />
               {questionData.code_snippet && (
                 <button
@@ -494,6 +499,8 @@ const handleTextSelection = (e, type, id) => {
                         fetchComments={fetchComments}
                         onTextSelection={(e) => handleTextSelection(e, 'comment_details', comment.comment_id)}
                         onCodeSelection={(e) => handleTextSelection(e, 'comment_code', comment.comment_id)}
+                        annotations={comment_annotations[index]}
+                        addAnnotations={addAnnotations}
                       />
                       {comment.code_snippet && (
                         <button
