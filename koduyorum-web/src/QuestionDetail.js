@@ -113,7 +113,7 @@ function QuestionDetail(props) {
     useEffect(() => {
         setAnswered(props.isAnswered);
     }, [props.isAnswered]);
-    
+
     return (
         <div className="p-4 border border-gray-300 rounded">
             <NotificationCenter />
@@ -155,12 +155,14 @@ function QuestionDetail(props) {
             {
                 <>
                     <h3 className="font-semibold text-gray-700">{props.inputType}</h3>
-                    <p className="mt-2 text-gray-600">{props.explanation}</p>
-                    <SyntaxHighlighter language="javascript" style={docco}>
+                    <p className="mt-2 text-gray-600"
+                       onMouseUp={(e) => props.onTextSelection(e, 'question_details')}>{props.explanation}</p>
+                    <SyntaxHighlighter language="javascript" style={docco}
+                                       onMouseUp={(e) => props.onCodeSelection(e, 'question_code')}>
                         {props.code}
                     </SyntaxHighlighter>
                     <div className="flex items-center justify-between mt-4">
-                        <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2">
                             <button
                                 className="px-4 py-2 bg-green-500 text-white text-sm font-semibold rounded hover:bg-green-600"
                                 onClick={handlePostUpvote}
@@ -226,7 +228,12 @@ QuestionDetail.propTypes = {
     initialVotes: PropTypes.number,
     comment_id: PropTypes.number,
     author: PropTypes.string,
-    answer_of_the_question: PropTypes.bool
+    answer_of_the_question: PropTypes.bool,
+    onTextSelection: PropTypes.func.isRequired,
+    onCodeSelection: PropTypes.func.isRequired,
+    annotations: PropTypes.array.isRequired,
+
+
 };
 
 export default QuestionDetail;

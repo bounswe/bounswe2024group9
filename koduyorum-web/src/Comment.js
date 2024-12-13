@@ -1,15 +1,13 @@
-import React, { useState,useRef, useEffect } from "react";
-import { Navigate, useParams } from "react-router-dom";
+import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from 'react-router-dom';
 import * as PropTypes from "prop-types";
 import SyntaxHighlighter from "react-syntax-highlighter";
 import { docco } from "react-syntax-highlighter/dist/esm/styles/hljs";
-import { faThumbsUp, faCommentDots, faThumbsDown } from '@fortawesome/free-solid-svg-icons';
+import { faThumbsUp, faThumbsDown } from '@fortawesome/free-solid-svg-icons';
 import './QuestionDetail.css';
-import EditComment from "./EditComment"
+import EditComment from "./EditComment";
 
 function Comment(props) {
-
   const [votes, setVotes] = useState(props.initialVotes);
   const isQuestionOwner = localStorage.getItem("username") === props.questionAuthor;
   const isCommentOwner = localStorage.getItem("username") === props.author;
@@ -23,8 +21,23 @@ function Comment(props) {
   const popupRef = useRef(null);
 
   const redirectToProfile = () => navigate(`/profile/${props.author}`);
-  
-  // Vote handlers
+
+  useEffect(() => {
+    const handleClickOutside = event => {
+      if (popupRef.current && !popupRef.current.contains(event.target)) {
+        setIsPopupVisible(false);
+      }
+    };
+
+    if (isPopupVisible) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isPopupVisible]);
+
   const handleCommentUpvote = async () => {
     const token = localStorage.getItem('authToken');
     try {
@@ -38,7 +51,6 @@ function Comment(props) {
       });
 
       if (response.ok) {
-
         const data = await response.json();
         setVotes(data.success);
       }
@@ -60,17 +72,18 @@ function Comment(props) {
       });
 
       if (response.ok) {
-
         const data = await response.json();
         setVotes(data.success);
       }
     } catch (error) {
-      console.error('Error upvoting:', error);
+      console.error('Error downvoting:', error);
     }
   };
+
   const handleEditComment = async () => {
     openPopup();
   };
+
   const handleDeleteComment = async () => {
     const token = localStorage.getItem('authToken');
     try {
@@ -84,12 +97,11 @@ function Comment(props) {
       });
 
       if (response.ok) {
-
         const data = await response.json();
         props.fetchComments();
       }
     } catch (error) {
-      console.error('Error upvoting:', error);
+      console.error('Error deleting comment:', error);
     }
   };
 
@@ -106,13 +118,12 @@ function Comment(props) {
       });
 
       if (response.ok) {
-
         const data = await response.json();
         setAnswer(true);
         props.fetchComments();
       }
     } catch (error) {
-      console.error('Error upvoting:', error);
+      console.error('Error marking comment as answer:', error);
     }
   };
 
@@ -124,9 +135,9 @@ function Comment(props) {
         </div>
       )}
       <h3 className="font-semibold text-gray-700">Answer {props.number}</h3>
-      <p className="text-gray-600">{props.explanation}</p>
+      <p className="text-gray-600" onMouseUp={(e) => props.onTextSelection(e, 'comment_details')}>{props.explanation}</p>
       {props.code && (
-        <SyntaxHighlighter language="javascript" style={docco}>
+        <SyntaxHighlighter language="javascript" style={docco} onMouseUp={(e) => props.onCodeSelection(e, 'comment_code')}>
           {props.code}
         </SyntaxHighlighter>
       )}
@@ -145,22 +156,23 @@ function Comment(props) {
           >
             Downvote
           </button>
-          {isCommentOwner && (<>
-            <button
-              className="px-4 py-2 bg-yellow-500 text-white text-sm font-semibold rounded hover:bg-yellow-600"
-              onClick={handleEditComment}
-            >
-              Edit Comment
-            </button>
-            <button
-              className="px-4 py-2 bg-red-500 text-white text-sm font-semibold rounded hover:bg-red-600"
-              onClick={handleDeleteComment}
-            >
-              Delete Comment
-            </button>
-          </>
+          {isCommentOwner && (
+            <>
+              <button
+                className="px-4 py-2 bg-yellow-500 text-white text-sm font-semibold rounded hover:bg-yellow-600"
+                onClick={handleEditComment}
+              >
+                Edit Comment
+              </button>
+              <button
+                className="px-4 py-2 bg-red-500 text-white text-sm font-semibold rounded hover:bg-red-600"
+                onClick={handleDeleteComment}
+              >
+                Delete Comment
+              </button>
+            </>
           )}
-          {(isQuestionOwner && !isAnswer) && (
+          {isQuestionOwner && !isAnswer && (
             <button
               className="px-4 py-2 bg-green-500 text-white text-sm font-semibold rounded hover:bg-green-600"
               onClick={toggleAnswer}
@@ -172,12 +184,12 @@ function Comment(props) {
         <p className="question-username" onClick={redirectToProfile}>@{props.author}</p>
       </div>
       {isPopupVisible && (
-        <div className="popup" >
+        <div className="popup">
           <div className="popup-content" ref={popupRef}>
             <EditComment
               comment_id={props.comment_id}
               language={props.language}
-              codeSnippet = {props.code}
+              codeSnippet={props.code}
               details={props.explanation}
               fetchComments={props.fetchComments}
               closePopup={closePopup}
@@ -186,7 +198,6 @@ function Comment(props) {
         </div>
       )}
     </div>
-
   );
 }
 
@@ -199,5 +210,10 @@ Comment.propTypes = {
   comment_id: PropTypes.number,
   author: PropTypes.string,
   answer_of_the_question: PropTypes.bool,
+  onTextSelection: PropTypes.func.isRequired,
+  onCodeSelection: PropTypes.func.isRequired,
+  fetchComments: PropTypes.func.isRequired,
+  questionAuthor: PropTypes.string.isRequired,
 };
+
 export default Comment;
