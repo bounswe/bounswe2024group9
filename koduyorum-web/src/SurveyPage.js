@@ -2,13 +2,17 @@ import React, { useState, useEffect } from 'react';
 import './SurveyPage.css';
 import { showNotification } from './NotificationCenter';
 import NotificationCenter from './NotificationCenter';
+import { predefinedTags } from './constants/tags';
 
 const SurveyPage = () => {
   const [languages, setLanguages] = useState({});
   const [selectedLanguages, setSelectedLanguages] = useState([]);
 
   const [selectedInterests, setSelectedInterests] = useState([]);
-  const [interestsOptions] = useState(['Machine Learning', 'Gaming', 'Computer Vision', 'NLP', 'Web Development', 'Data Science', 'Recursion']);
+  const [interestsOptions] = useState(() => {
+    const shuffled = predefinedTags.sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, 10);
+  });
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {

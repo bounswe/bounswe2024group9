@@ -41,8 +41,10 @@ ALLOWED_HOSTS = [
     '127.0.0.1',
     '10.0.2.2',
     'localhost',
-    'https://clownfish-app-brdp5.ondigitalocean.app',  # Add your backend domain here
-    'https://oyster-app-8k7np.ondigitalocean.app'    
+    'https://clownfish-app-brdp5.ondigitalocean.app', 
+    'https://oyster-app-8k7np.ondigitalocean.app',
+    'clownfish-app-brdp5.ondigitalocean.app',  
+    'oyster-app-8k7np.ondigitalocean.app'
 ]
 
 CORS_ALLOWED_ORIGINS = [
@@ -208,7 +210,7 @@ AUTHENTICATION_BACKENDS = [
 
 CACHES = {
     'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',  # Use a local memory cache for demonstration
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache', 
         'LOCATION': 'unique-snowflake',
     }
 }

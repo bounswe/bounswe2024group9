@@ -472,7 +472,7 @@ def run_code_of_question_or_comment(request, type: str, id: int):
 
 @swagger_auto_schema(
     tags=['Utilization'],
-    method='post',
+    method='GET',
     operation_summary="Upvote Object",
     operation_description="Upvote a question or comment. Handles new votes and vote changes.",
     manual_parameters=[
@@ -538,7 +538,7 @@ def run_code_of_question_or_comment(request, type: str, id: int):
         )
     }
 )
-@api_view(['POST'])
+@api_view(['GET'])
 @permission_classes([AllowAny])
 @csrf_exempt
 def upvote_object(request, object_type: str, object_id: int):
@@ -630,7 +630,7 @@ def upvote_object(request, object_type: str, object_id: int):
 
 @swagger_auto_schema(
     tags=['Utilization'],
-    method='post',
+    method='GET',
     operation_summary="Downvote Object",
     operation_description="Downvote a question or comment. Handles new votes and vote changes.",
     manual_parameters=[
@@ -687,7 +687,7 @@ def upvote_object(request, object_type: str, object_id: int):
         )
     }
 )
-@api_view(['POST'])
+@api_view(['GET'])
 @permission_classes([AllowAny])
 @csrf_exempt
 def downvote_object(request, object_type: str, object_id: int):
@@ -781,7 +781,7 @@ def downvote_object(request, object_type: str, object_id: int):
 
 @swagger_auto_schema(
     tags=['Utilization'],
-    method='get',
+    method='GET',
     operation_summary="Home Page",
     operation_description="Renders the home page template",
     responses={

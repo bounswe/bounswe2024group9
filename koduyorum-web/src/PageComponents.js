@@ -4,6 +4,7 @@ import './Feed.css';
 import Select from 'react-select';
 import { predefinedTags } from './constants/tags';
 import { showNotification } from './NotificationCenter';
+import { languages } from './constants/tags';
 
 // LogoutButton Component
 const LogoutButton = () => {
@@ -193,13 +194,15 @@ export const LeftSidebar = ({ tags, handleTagClick, setPosts, language }) => {
           disabled={language !== ""}
           style={{ marginBottom: '0', opacity: language !== "" ? 0.7 : 1 }}
         >
-          {language !== "" && !["all", "python", "javascript", "cpp"].includes(language) && (
+          {language !== "" && !["all", ...languages].includes(language) && (
             <option value={language}>{language}</option>
           )}
           <option value="all">All Languages</option>
-          <option value="python">Python</option>
-          <option value="javascript">JavaScript</option>
-          <option value="cpp">C++</option>
+          {languages.map((lang) => (
+            <option key={lang} value={lang}>
+              {lang}
+            </option>
+          ))}
         </select>
 
         <div className="tag-filter-container">

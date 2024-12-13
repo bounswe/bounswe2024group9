@@ -129,11 +129,11 @@ const PostPreview = ({ post, currentUser, onClick }) => {
         setTimeout(() => setAnimateDownvote(false), 500); // Reset animation after 500ms
     
         try {
-            const response = await fetch(`${process.env.REACT_APP_API_URL}/downvote_question/${post.id}`, {
-                method: 'POST',
+            const response = await fetch(`${process.env.REACT_APP_API_URL}/downvote_object/question/${post.id}/`, {
+                method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
-                    'User-ID': currentUser.id,
+                    'User-ID': localStorage.getItem('user_id'),
                 },
             });
     
