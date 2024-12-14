@@ -21,6 +21,7 @@ export default function CodeExecution() {
   const [commentData, setCommentData] = useState("");
   const [isAnswered, setAnswered] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false);
+  const [isUpvoted, setIsUpvoted] = useState(false);
 
   const [code, setCode] = useState(""); // State to store the user input (code)
 const [output, setOutput] = useState([]); // State to store the backend's response (output)
@@ -67,6 +68,16 @@ const [output, setOutput] = useState([]); // State to store the backend's respon
       setQuestionData(data.question);
       setLanguageId(data.question.language_id);
       setLoading(false);
+      let upvoted_by = data.question.upvoted_by;
+      const user_id = localStorage.getItem('user_id');
+      // get username from id using get_user_profile_by_id
+      // if upvoted_by includes username set isUpvoted to true
+      const response2 = await fetch(`${process.env.REACT_APP_API_URL}/get_user_profile_by_id/${user_id}/`);
+      const data2 = await response2.json();
+      const username = data2.user.username;
+      if (upvoted_by.includes(username)) {
+        setIsUpvoted(true);
+      }
     } catch (err) {
       setError(err.message);
       setLoading(false);
@@ -278,6 +289,7 @@ const [output, setOutput] = useState([]); // State to store the backend's respon
                 question_id={question_id}
                 isAnswered={isAnswered}
                 title={questionData.title}
+                isUpvoted={isUpvoted}
                 fetchQuestion={fetchQuestion}
 
             />
