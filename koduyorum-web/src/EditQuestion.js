@@ -36,8 +36,8 @@ export default function EditQuestion(props) {
 
     // Submit question to backend
     const handleSubmit = async () => {
-        if (!title || !details || !language) {
-            props.showNotification('All fields are required!');
+        if (!title || !details) {
+            props.showNotification('Title and details are required!');
             // alert('All fields are required!');
             return;
         }
@@ -51,12 +51,13 @@ export default function EditQuestion(props) {
         };
 
         try {
-            const user_id = localStorage.getItem('user_id');
+            const token = localStorage.getItem('authToken');
             const response = await fetch(`${process.env.REACT_APP_API_URL}/edit_question/${props.question_id}/`, {
-                method: 'POST',
+                method: 'PUT',
                 headers: { 'Content-Type': 'application/json',
-                    'USER-ID': user_id,
-
+                    'Content-Type': 'application/json',
+                    'User-ID': localStorage.getItem('user_id'),
+                    'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify(postData),
             });

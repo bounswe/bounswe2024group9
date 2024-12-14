@@ -14,6 +14,7 @@ function PostQuestion() {
     const [language, setLanguage] = useState('');
     const [tags, setTags] = useState([]);
     const [availableLanguages, setAvailableLanguages] = useState([]); // Ensure it's initialized as an array
+    const [postType, setPostType] = useState('question'); // default to 'question'
     const navigate = useNavigate();
 
 
@@ -40,6 +41,14 @@ function PostQuestion() {
         fetchLanguages();
     }, []);
 
+
+
+
+    useEffect(() => {
+        console.log(postType);
+    }, [postType]);
+            
+
     // Submit question to backend
     const handleSubmit = async () => {
         if (!title || !details) {
@@ -60,6 +69,7 @@ function PostQuestion() {
             details,
             code_snippet: codeSnippet,
             tags: tags,
+            post_type: postType,
         };
 
         try {
@@ -92,10 +102,32 @@ function PostQuestion() {
         }
     };
 
+    const handleCancel = () => {
+        navigate('/feed'); // Redirect to Feed page
+    };
+
     return (
         <div className="post-question-container">
             <NotificationCenter />
-            <h2>Create New Question</h2>
+            <h2>Create New Post</h2>
+
+            <div className="post-type-selection">
+                <label>Select Post Type:</label>
+                    <input
+                        type="radio"
+                        value="question"
+                        checked={postType === 'question'}
+                        onChange={() => setPostType('question')}
+                    />
+                    Question
+                    <input
+                        type="radio"
+                        value="discussion"
+                        checked={postType === 'discussion'}
+                        onChange={() => setPostType('discussion')}
+                    />
+                    Discussion
+            </div>
 
             <input
                 className="post-question-input"
@@ -105,19 +137,6 @@ function PostQuestion() {
                 onChange={(e) => setTitle(e.target.value)}
             />
 
-            <div className="post-question-language">
-                <label>Select Language:</label>
-                <select
-                    value={language}
-                    onChange={(e) => setLanguage(e.target.value)}
-                >
-                    <option value="">Choose Language</option>
-                    {availableLanguages.map((lang, index) => (
-                        <option key={index} value={lang}>{lang}</option>
-                    ))}
-                </select>
-            </div>
-
             <textarea
                 className="post-question-textarea"
                 placeholder="Details"
@@ -125,12 +144,32 @@ function PostQuestion() {
                 onChange={(e) => setDetails(e.target.value)}
             />
 
-            <textarea
-                className="post-question-textarea code-snippet"
-                placeholder="Code Snippet (optional)"
-                value={codeSnippet}
-                onChange={(e) => setCodeSnippet(e.target.value)}
-            />
+            {postType === 'question' && (
+                <>
+                    <div className="post-question-language">
+                        <label>Select Language:</label>
+                        <select
+                            value={language}
+                            onChange={(e) => setLanguage(e.target.value)}
+                        >
+                            <option value="">Choose Language</option>
+                            {availableLanguages.map((lang, index) => (
+                                <option key={index} value={lang}>{lang}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <textarea
+                        className="post-question-textarea code-snippet"
+                        placeholder="Code Snippet (optional)"
+                        value={codeSnippet}
+                        onChange={(e) => setCodeSnippet(e.target.value)}
+                    />
+                </>
+            )}
+
+
+
             <Select
                 isMulti
                 options={predefinedTags.map(tag => ({ value: tag, label: tag }))}
@@ -139,7 +178,10 @@ function PostQuestion() {
                 placeholder="Select Tags"
             />
             <button className="post-question-submit" style={{ marginTop: '20px' }} onClick={handleSubmit}>
-                Submit Question
+                Submit {postType === 'question' ? 'Question' : 'Discussion'}
+            </button>
+            <button className="post-question-cancel" style={{ marginTop: '20px' }} onClick={handleCancel}>
+                Cancel
             </button>
         </div>
     );

@@ -94,7 +94,7 @@ function QuestionDetail(props) {
         const token = localStorage.getItem('authToken');
         try {
             const response = await fetch(`${process.env.REACT_APP_API_URL}/delete_question/${props.question_id}/`, {
-                method: 'GET',
+                method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
                     'User-ID': localStorage.getItem('user_id'),

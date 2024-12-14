@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useNavigate } from 'react-router-dom';
 import {faThumbsUp, faCommentDots, faThumbsDown, faBookmark} from '@fortawesome/free-solid-svg-icons';
 import './PostPreview.css';
+import { showNotification } from './NotificationCenter';
 
 // list_questions_according_to_the_user
 /*
@@ -20,7 +21,9 @@ import './PostPreview.css';
         'answered': q.answered,
         'is_upvoted': user_votes_dict.get(q.pk) == VoteType.UPVOTE.value,
         'is_downvoted': user_votes_dict.get(q.pk) == VoteType.DOWNVOTE.value,
-        'created_at' : q.created_at.strftime('%Y-%m-%d %H:%M:%S')
+        'is_bookmarked': user.bookmarks.filter(pk=q.pk).exists(),
+        'created_at' : q.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+        'post_type': q.type
     }
     for q in questions
  */
@@ -31,7 +34,6 @@ const PostPreview = ({ post, currentUser, onClick }) => {
         description,
         user_id,
         upvotes,
-        downvotes,
         comments_count,
         programmingLanguage,
         codeSnippet,
@@ -39,8 +41,10 @@ const PostPreview = ({ post, currentUser, onClick }) => {
         topic,
         answered,
         username,
-        isUpvoted,
-        isDownvoted,
+        is_upvoted,
+        is_downvoted,
+        is_bookmarked,
+        post_type,
     } = post;
 
     const [isUpvoting, setIsUpvoting] = useState(false);
@@ -48,9 +52,12 @@ const PostPreview = ({ post, currentUser, onClick }) => {
     const [animateUpvote, setAnimateUpvote] = useState(false);
     const [animateDownvote, setAnimateDownvote] = useState(false);
     const [isBookmarked, setIsBookmarked] = useState(false);
+    const [isUpvoted, setIsUpvoted] = useState(is_upvoted);
+    const [isDownvoted, setIsDownvoted] = useState(is_downvoted);
+
     const [upvote , setUpvote] = useState(upvotes);
     const navigate = useNavigate();
-
+    console.log("Post:", post);
 
     const fetchWikiIdAndName = async (tag) => {
         try {
@@ -108,8 +115,19 @@ const PostPreview = ({ post, currentUser, onClick }) => {
             });
     
             if (response.ok) {
-                setUpvote(upvote + 1);
+                if (isDownvoted) {
+                    setUpvote(upvote + 2);
+                    setIsUpvoted(true);
+                } if (!isUpvoted) {
+                    setUpvote(upvote + 1);
+                    setIsUpvoted(true);
+                } if (isUpvoted) {
+                    setUpvote(upvote - 1);
+                    setIsUpvoted(false);
+                }
+                setIsDownvoted(false);
                 const data = await response.json();
+                showNotification('Post upvoted successfully!');
             }
         } catch (error) {
             console.error('Error upvoting:', error);
@@ -129,16 +147,28 @@ const PostPreview = ({ post, currentUser, onClick }) => {
         setTimeout(() => setAnimateDownvote(false), 500); // Reset animation after 500ms
     
         try {
-            const response = await fetch(`${process.env.REACT_APP_API_URL}/downvote_question/${post.id}`, {
-                method: 'POST',
+            const response = await fetch(`${process.env.REACT_APP_API_URL}/downvote_object/question/${post.id}/`, {
+                method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
-                    'User-ID': currentUser.id,
+                    'User-ID': localStorage.getItem('user_id'),
                 },
             });
     
             if (response.ok) {
+                if (isUpvoted) {
+                    setUpvote(upvote - 2);
+                    setIsDownvoted(true);
+                } if (!isDownvoted) {
+                    setUpvote(upvote - 1);
+                    setIsDownvoted(true);
+                } if (isDownvoted) {
+                    setUpvote(upvote + 1);
+                    setIsDownvoted(false);
+                }
+                setIsUpvoted(false);
                 const data = await response.json();
+                showNotification('Post downvoted successfully!');
             }
         } catch (error) {
             console.error('Error downvoting:', error);
@@ -146,29 +176,11 @@ const PostPreview = ({ post, currentUser, onClick }) => {
             setIsDownvoting(false);
         }
     };
-
-    const get_bookmark = async () => {
-    try {
-      const token = localStorage.getItem('authToken');
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/check_bookmark/${post.id}/`,
-        {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,  // Add the token here
-            'User-ID': localStorage.getItem('user_id')
-          }
-        }
-      );
-      const data = await response.json();
-      setIsBookmarked(data.is_bookmarked);
-    } catch (error) {
-      console.error('Error fetching bookmark:', error);
-    }
-  }
-  useEffect(() => {
-  get_bookmark();
-}, []);
+    useEffect(() => {
+        setIsBookmarked(is_bookmarked);
+        setIsUpvoted(is_upvoted);
+        setIsDownvoted(is_downvoted);
+    }, []);
 
 
     const handleBookmark = async (e) => {
@@ -184,6 +196,7 @@ const PostPreview = ({ post, currentUser, onClick }) => {
         }
             }).then(response => {
                 if (response.ok) {
+                    showNotification('Bookmark removed successfully!');
                     setIsBookmarked(false);
                 } else {
                     alert("Failed to remove bookmark");
@@ -203,6 +216,7 @@ const PostPreview = ({ post, currentUser, onClick }) => {
             }
             }).then(response => {
             if (response.ok) {
+                showNotification('Bookmark added successfully!');
                 setIsBookmarked(true);
             } else {
                 alert("Failed to add bookmark");
@@ -216,8 +230,8 @@ const PostPreview = ({ post, currentUser, onClick }) => {
  
     return (
         <div className="post-card" onClick={onClick}>
-            <div className={`status-label ${answered ? 'answered' : 'unanswered'}`}>
-                {answered ? 'Answered' : 'Unanswered'}
+            <div className={`status-label ${post_type === 'discussion' ? 'discussion' : answered ? 'answered' : 'unanswered'}`}>
+                {post_type === 'discussion' ? 'Discussion' : answered ? 'Answered' : 'Unanswered'}
             </div>
 
             <h3 className="post-title">{title}</h3>
@@ -225,15 +239,16 @@ const PostPreview = ({ post, currentUser, onClick }) => {
                         e.stopPropagation();}}>@ {username}</div> 
 
             <div className="labels-container">
-                <div className="language" onClick={(e) => {
-                        e.stopPropagation(); // Prevent the click event from propagating to the outer box
-                        handleSearchResultClick(
-                            { languageLabel: { value: programmingLanguage } },
-                            fetchWikiIdAndName,
-                            navigate
-                        );
-                    }
-                    }>{programmingLanguage}</div>
+                {post_type !== 'discussion' && (<div className="language" onClick={(e) => {
+                            e.stopPropagation(); // Prevent the click event from propagating to the outer box
+                            handleSearchResultClick(
+                                { languageLabel: { value: programmingLanguage } },
+                                fetchWikiIdAndName,
+                                navigate
+                            );
+                        }
+                        }>{programmingLanguage}</div>
+                )}
                 <div className="tags">
                     {tags.map((tag, index) => (
                         <span key={index} className="label">{tag}</span>
@@ -244,36 +259,40 @@ const PostPreview = ({ post, currentUser, onClick }) => {
             <p className="post-description">{description}</p>
 
             <div className="post-footer">
-                <div
-                    className={`footer-item ${animateUpvote ? 'upvote-animate' : ''} ${isUpvoted ? 'upvoted' : ''}`}
-                    onClick={handleUpvote}
-                >
-                    <FontAwesomeIcon icon={faThumbsUp} size="sm"  />
-                    <span className="footer-text">{upvote} Upvotes</span>
+                <div className="vote-group">
+                    <div
+                        className={`footer-item ${animateUpvote ? 'upvote-animate' : ''} ${isUpvoted ? 'upvoted' : ''}`}
+                        onClick={handleUpvote}
+                    >
+                        <FontAwesomeIcon icon={faThumbsUp} size="sm" />
+                        <span className="footer-text">Upvote</span>
+                    </div>
+                    
+                    <span className="vote-count">{upvotes}</span>
+                    
+                    <div
+                        className={`footer-item ${animateDownvote ? 'downvote-animate' : ''} ${isDownvoted ? 'downvoted' : ''}`}
+                        onClick={handleDownvote}
+                    >
+                        <FontAwesomeIcon icon={faThumbsDown} size="sm" />
+                        <span className="footer-text">Downvote</span>
+                    </div>
                 </div>
-                <div
-                    className={`footer-item ${animateDownvote ? 'downvote-animate' : ''}`}
-                    onClick={handleDownvote}
-                >
-                    <FontAwesomeIcon icon={faThumbsDown} size="sm" />
-                    <span className="footer-text">{upvotes} Downvotes</span>
-                </div>
+
                 <div className="footer-item">
                     <FontAwesomeIcon icon={faCommentDots} size="sm" color="#888" />
                     <span className="footer-text">{comments_count} Comments</span>
                 </div>
 
-                <div className={"footer-book"}>
+                <div className="footer-book">
                     <button
                         className="bookmark"
                         onClick={(e) => handleBookmark(e)}
                     >
-                        <FontAwesomeIcon icon={faBookmark} style={{color: isBookmarked ? 'blue' : 'a9a8a8'}}/>
-                        <span className="footer-text"> Bookmark </span>
+                        <FontAwesomeIcon icon={faBookmark} style={{color: isBookmarked ? 'blue' : '#a9a8a8'}}/>
+                        <span className="footer-text">Bookmark</span>
                     </button>
-
                 </div>
-
             </div>
         </div>
     );
