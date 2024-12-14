@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Alert, Modal } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Alert } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import SyntaxHighlighter from 'react-native-syntax-highlighter';
 import { atomOneDark } from 'react-native-syntax-highlighter';
+import CustomSyntaxHighlighter from './CustomSyntaxHighlighter';
 
 const PostDetail = ({ route }) => {
     const { post, user_id, username } = route.params;
@@ -14,12 +15,6 @@ const PostDetail = ({ route }) => {
     const [availableLanguages, setAvailableLanguages] = useState([]);
     const [selectedLanguage, setSelectedLanguage] = useState('');
     const [codeOutput, setCodeOutput] = useState('');
-    const [annotations, setAnnotations] = useState([]);
-    const [startIndex, setStartIndex] = useState(null);
-    const [endIndex, setEndIndex] = useState(null);
-    const [annotationModalVisible, setAnnotationModalVisible] = useState(false);
-    const [annotationText, setAnnotationText] = useState('');
-    const [selectedAnnotationTarget, setSelectedAnnotationTarget] = useState(null);
 
     useEffect(() => {
         const fetchComments = async () => {
@@ -136,152 +131,37 @@ const PostDetail = ({ route }) => {
             Alert.alert('Error', 'Failed to run code');
         }
     };
-    
-    const handleWordPress = (index, target) => {
-        setSelectedAnnotationTarget(target);
-        if (startIndex === null) {
-            setStartIndex(index);
-            setEndIndex(index);
-        } else if (index < startIndex) {
-            setStartIndex(index);
-        } else {
-            setEndIndex(index);
-            setAnnotationModalVisible(true);
-        }
-    };
-    
-
-    const handleAddAnnotation = async () => {
-        if (startIndex === null || endIndex === null || !annotationText.trim()) {
-            Alert.alert('Error', 'Please select text and add annotation text.');
-            return;
-        }
-    
-        const selectedText =
-            selectedAnnotationTarget === 'description'
-                ? (post.description || '').split(' ').slice(startIndex, endIndex + 1).join(' ')
-                : selectedAnnotationTarget === 'codeSnippet'
-                ? (codeSnippetState || '').split(' ').slice(startIndex, endIndex + 1).join(' ')
-                : (comments[selectedAnnotationTarget]?.details || '')
-                      .split(' ')
-                      .slice(startIndex, endIndex + 1)
-                      .join(' ');
-    
-        try {
-            const annotationData = {
-                text: annotationText,
-                target: selectedAnnotationTarget,
-                language_qid: post.language_id,
-                annotation_starting_point: selectedText,
-                annotation_ending_point: selectedText,
-                type: 'annotation',
-            };
-    
-            const response = await fetch('http://10.0.2.2:8000/create_annotation/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'User-ID': user_id,
-                },
-                body: JSON.stringify(annotationData),
-            });
-    
-            if (response.status === 201) {
-                Alert.alert('Success', 'Annotation added successfully');
-                setAnnotations([
-                    ...annotations,
-                    { startIndex, endIndex, text: annotationText, target: selectedAnnotationTarget },
-                ]);
-                setAnnotationModalVisible(false);
-                setAnnotationText('');
-                setStartIndex(null);
-                setEndIndex(null);
-            } else {
-                const data = await response.json();
-                Alert.alert('Error', data.error || 'Failed to add annotation');
-            }
-        } catch (error) {
-            console.error('Error adding annotation:', error);
-            Alert.alert('Error', 'Failed to add annotation');
-        }
-    };
-    
-    const renderAnnotatedText = (text, target) => {
-        if (!text) {
-            return <Text style={styles.description}>No text available</Text>;
-        }
-    
-        const words = text.split(' '); // Safe to call `split` since `text` is validated
-        return (
-            <Text style={styles.description}>
-                {words.map((word, index) => (
-                    <Text key={index} onPress={() => handleWordPress(index, target)}>
-                        <Text
-                            style={[
-                                styles.textWord,
-                                index >= startIndex &&
-                                    index <= endIndex &&
-                                    selectedAnnotationTarget === target &&
-                                    styles.selectedWord,
-                                annotations.some(
-                                    (annotation) =>
-                                        index >= annotation.startIndex &&
-                                        index <= annotation.endIndex &&
-                                        annotation.target === target
-                                ) && styles.annotatedWord,
-                            ]}
-                        >
-                            {word}
-                        </Text>
-                        <Text> </Text>
-                    </Text>
-                ))}
-            </Text>
-        );
-    };
 
     return (
         <ScrollView contentContainerStyle={styles.container}>
+            {/* Post Title */}
             <Text style={styles.title}>{post.title}</Text>
     
-            {/* Render Annotated Description */}
-            {renderAnnotatedText(post.description, 'description')}
+            {/* Post Description */}
+            {post.description && (
+                <Text style={styles.description}>{post.description}</Text>
+            )}
     
+            {/* Additional Metadata (Optional) */}
+            {post.author && (
+                <Text style={styles.metadata}>
+                    Author: <Text style={styles.metadataValue}>{post.author}</Text>
+                </Text>
+            )}
+            {post.date && (
+                <Text style={styles.metadata}>
+                    Posted on: <Text style={styles.metadataValue}>{post.date}</Text>
+                </Text>
+            )}
+    
+            {/* Code Snippet Section */}
             <View style={styles.codeContainer}>
                 <Text style={styles.codeTitle}>Code Snippet:</Text>
-                <SyntaxHighlighter
-                    language={post.programmingLanguage}
-                    style={atomOneDark}
+                <CustomSyntaxHighlighter
+                    language={post.programmingLanguage || 'javascript'}
                 >
-                    {(codeSnippetState || '')
-                        .split(' ')
-                        .map((word, index) => {
-                            // Check if this word is part of an annotation
-                            const isAnnotated = annotations.some(
-                                (annotation) =>
-                                    index >= annotation.startIndex &&
-                                    index <= annotation.endIndex &&
-                                    annotation.target === 'codeSnippet'
-                            );
-
-                            // Highlight the selected word visually (optional)
-                            if (
-                                index >= startIndex &&
-                                index <= endIndex &&
-                                selectedAnnotationTarget === 'codeSnippet'
-                            ) {
-                                return `<span style="background-color: yellow">${word}</span>`;
-                            }
-
-                            // Italicize annotated words
-                            if (isAnnotated) {
-                                return `<i>${word}</i>`;
-                            }
-
-                            return word;
-                        })
-                        .join(' ')}
-                </SyntaxHighlighter>
+                    {codeSnippetState || ''}
+                </CustomSyntaxHighlighter>
             </View>
     
             {/* Run Code Button */}
@@ -289,25 +169,27 @@ const PostDetail = ({ route }) => {
                 <Text style={styles.runButtonText}>Run Code</Text>
             </TouchableOpacity>
     
-            {/* Display Code Output */}
+            {/* Code Output */}
             {codeOutput ? (
                 <View style={styles.outputContainer}>
                     <Text style={styles.outputTitle}>Output:</Text>
-                    <Text style={styles.outputText}>{codeOutput}</Text>
+                    <Text>{String(codeOutput)}</Text>
                 </View>
             ) : null}
     
+            {/* Comments Section */}
             <View style={styles.commentsContainer}>
                 <Text style={styles.commentHeader}>Comments:</Text>
-                {/* Render Annotated Comments */}
                 {comments.map((comment, index) => (
                     <View key={index} style={styles.comment}>
                         <Text style={styles.commentUser}>{comment.user}:</Text>
-                        {renderAnnotatedText(comment.details, `comment-${index}`)}
+                        <Text style={styles.commentText}>{comment.details}</Text>
                         {comment.code_snippet ? (
-                            <SyntaxHighlighter language={selectedLanguage || 'javascript'} style={atomOneDark}>
+                            <CustomSyntaxHighlighter
+                                language={comment.language || 'javascript'}
+                            >
                                 {comment.code_snippet}
-                            </SyntaxHighlighter>
+                            </CustomSyntaxHighlighter>
                         ) : null}
                     </View>
                 ))}
@@ -325,15 +207,13 @@ const PostDetail = ({ route }) => {
                 ))}
             </Picker>
     
-            {/* Input for comment details */}
+            {/* Add Comment Inputs */}
             <TextInput
                 style={styles.input}
                 placeholder="Add a comment..."
                 value={newComment}
                 onChangeText={setNewComment}
             />
-    
-            {/* Input for code snippet */}
             <TextInput
                 style={styles.codeInput}
                 placeholder="Add a code snippet..."
@@ -342,50 +222,13 @@ const PostDetail = ({ route }) => {
                 multiline={true}
             />
     
+            {/* Submit Comment Button */}
             <TouchableOpacity style={styles.addButton} onPress={handleAddComment}>
                 <Text style={styles.addButtonText}>Submit Comment</Text>
             </TouchableOpacity>
-    
-            {/* Annotation Modal */}
-            <Modal visible={annotationModalVisible} animationType="slide" transparent>
-                <View style={styles.modalContainer}>
-                    <View style={styles.modalContent}>
-                        <Text style={styles.modalTitle}>Add Annotation</Text>
-                        {/* Display the selected text */}
-                        <Text style={styles.selectedText}>
-                            {selectedAnnotationTarget === 'description' && post.description.split(' ').slice(startIndex, endIndex + 1).join(' ')}
-                            {selectedAnnotationTarget === 'codeSnippet' && codeSnippetState.split(' ').slice(startIndex, endIndex + 1).join(' ')}
-                            {selectedAnnotationTarget?.startsWith('comment-') && 
-                                comments[parseInt(selectedAnnotationTarget.split('-')[1])].details
-                                    .split(' ')
-                                    .slice(startIndex, endIndex + 1)
-                                    .join(' ')}
-                        </Text>
-                        <TextInput
-                            style={styles.input}
-                            placeholder="Enter annotation text..."
-                            value={annotationText}
-                            onChangeText={setAnnotationText}
-                        />
-                        <TouchableOpacity style={styles.addButton} onPress={handleAddAnnotation}>
-                            <Text style={styles.addButtonText}>Submit</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            style={styles.cancelButton}
-                            onPress={() => {
-                                setAnnotationModalVisible(false);
-                                setStartIndex(null);
-                                setEndIndex(null);
-                                setAnnotationText('');
-                            }}
-                        >
-                            <Text style={styles.cancelButtonText}>Cancel</Text>
-                        </TouchableOpacity>
-                    </View>
-                </View>
-            </Modal>
         </ScrollView>
     );
+    
 };
 
 
