@@ -136,11 +136,11 @@ function Comment(props) {
       )}
       <h3 className="font-semibold text-gray-700">Answer {props.number}</h3>
       <div className="text-gray-600" onMouseUp={(e) => props.onTextSelection(e, 'comment_details')}>
-  {props.addAnnotations(props.explanation, props.annotations)}
+  {props.addAnnotations(props.explanation, props.annotations, 0)}
 </div>
 {props.code && (
   <SyntaxHighlighter language="javascript" style={docco} onMouseUp={(e) => props.onCodeSelection(e, 'comment_code')}>
-    {props.addAnnotations(props.code, props.annotations)}
+    {props.addAnnotations(props.code, props.annotations, props.explanation.length).join('')}
   </SyntaxHighlighter>
 )}
       <div className="flex items-center justify-between mt-4">

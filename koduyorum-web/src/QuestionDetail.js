@@ -155,11 +155,11 @@ function QuestionDetail(props) {
             {
                 <>
                     <div className="mt-2 text-gray-600" onMouseUp={(e) => props.onTextSelection(e, 'question_details')}>
-                        {props.addAnnotations(props.explanation, props.annotations)}
+                        {props.addAnnotations(props.explanation, props.annotations, 0)}
                     </div>
                     <SyntaxHighlighter language="javascript" style={docco}
                                        onMouseUp={(e) => props.onCodeSelection(e, 'question_code')}>
-                        {props.addAnnotations(props.code, props.annotations)}
+                        {props.addAnnotations(props.code, props.annotations, props.explanation.length).join("")}
                     </SyntaxHighlighter>
                     <div className="flex items-center justify-between mt-4">
                         <div className="flex items-center gap-2">
