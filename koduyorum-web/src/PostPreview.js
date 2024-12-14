@@ -44,7 +44,7 @@ const PostPreview = ({ post, currentUser, onClick }) => {
         is_upvoted,
         is_downvoted,
         is_bookmarked,
-        postType,
+        post_type,
     } = post;
 
     const [isUpvoting, setIsUpvoting] = useState(false);
@@ -230,8 +230,8 @@ const PostPreview = ({ post, currentUser, onClick }) => {
  
     return (
         <div className="post-card" onClick={onClick}>
-            <div className={`status-label ${postType === 'discussion' ? 'discussion' : answered ? 'answered' : 'unanswered'}`}>
-                {postType === 'discussion' ? 'Discussion' : answered ? 'Answered' : 'Unanswered'}
+            <div className={`status-label ${post_type === 'discussion' ? 'discussion' : answered ? 'answered' : 'unanswered'}`}>
+                {post_type === 'discussion' ? 'Discussion' : answered ? 'Answered' : 'Unanswered'}
             </div>
 
             <h3 className="post-title">{title}</h3>
@@ -239,15 +239,16 @@ const PostPreview = ({ post, currentUser, onClick }) => {
                         e.stopPropagation();}}>@ {username}</div> 
 
             <div className="labels-container">
-                <div className="language" onClick={(e) => {
-                        e.stopPropagation(); // Prevent the click event from propagating to the outer box
-                        handleSearchResultClick(
-                            { languageLabel: { value: programmingLanguage } },
-                            fetchWikiIdAndName,
-                            navigate
-                        );
-                    }
-                    }>{programmingLanguage}</div>
+                {post_type !== 'discussion' && (<div className="language" onClick={(e) => {
+                            e.stopPropagation(); // Prevent the click event from propagating to the outer box
+                            handleSearchResultClick(
+                                { languageLabel: { value: programmingLanguage } },
+                                fetchWikiIdAndName,
+                                navigate
+                            );
+                        }
+                        }>{programmingLanguage}</div>
+                )}
                 <div className="tags">
                     {tags.map((tag, index) => (
                         <span key={index} className="label">{tag}</span>

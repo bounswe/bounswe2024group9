@@ -210,6 +210,7 @@ class User(AbstractBaseUser):
     def get_question_details(self):
         user_votes = Question_Vote.objects.filter(user_id=self.user_id).values('question_id', 'vote_type')
         user_votes_dict = {vote['question_id']: vote['vote_type'] for vote in user_votes}
+        
         return [{
             'id': q.pk,
             'title': q.title,
@@ -224,7 +225,9 @@ class User(AbstractBaseUser):
             'answered': q.answered,
             'is_upvoted': user_votes_dict.get(q.pk) == VoteType.UPVOTE.value,
             'is_downvoted': user_votes_dict.get(q.pk) == VoteType.DOWNVOTE.value,
+            'is_bookmarked': self.bookmarks.filter(pk=q.pk).exists(),
             'created_at' : q.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+            'post_type': q.type
         } for q in self.questions.all()]
 
     def get_comment_details(self):
@@ -259,7 +262,9 @@ class User(AbstractBaseUser):
             'answered': bookmark.answered,
             'is_upvoted': user_votes_dict.get(bookmark.pk) == VoteType.UPVOTE.value,
             'is_downvoted': user_votes_dict.get(bookmark.pk) == VoteType.DOWNVOTE.value,
+            'is_bookmarked': self.bookmarks.filter(pk=bookmark.pk).exists(),
             'created_at' : bookmark.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+            'post_type': bookmark.type
         } for bookmark in self.bookmarks.all()]
 
     def get_annotation_details(self):

@@ -23,6 +23,9 @@ from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
+from django.db.models import Count
+from itertools import chain
+from collections import Counter
 
 def invalidate_user_cache(cache_key_prefix='feed_user'):
     """
@@ -660,8 +663,17 @@ def list_questions_by_language_request(request, user_id, language: str, page_num
 
 
 def list_questions_by_language(user_id: int, language: str, page_number = 1) -> List[Question]:
-    questions = Question.objects.filter(language__iexact=language)[10 * (page_number - 1): 10 * page_number]
+    questions = Question.objects.filter(language__istartswith=language)[10 * (page_number - 1): 10 * page_number]
 
+    if not questions.exists():
+        # Case insensitive search in JSON array
+        questions = Question.objects.filter(tags__contains=[language.title()])
+        if not questions.exists():
+            questions = Question.objects.filter(tags__contains=[language.lower()])           
+        if not questions.exists():
+            questions = Question.objects.filter(tags__contains=[language.upper()])
+
+    user = User.objects.get(pk=user_id)
     user_votes = Question_Vote.objects.filter(user_id=user_id).values('question_id', 'vote_type')
     user_votes_dict = {vote['question_id']: vote['vote_type'] for vote in user_votes}
 
@@ -679,7 +691,9 @@ def list_questions_by_language(user_id: int, language: str, page_number = 1) -> 
         'answered': question.answered,
         'is_upvoted': user_votes_dict.get(question.pk) == VoteType.UPVOTE.value,
         'is_downvoted': user_votes_dict.get(question.pk) == VoteType.DOWNVOTE.value,
-        'created_at' : question.created_at.strftime('%Y-%m-%d %H:%M:%S')      
+        'is_bookmarked': user.bookmarks.filter(pk=question.pk).exists(),
+        'created_at' : question.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+        'post_type': question.type    
     } for question in questions]
 
 
@@ -1434,16 +1448,19 @@ def fetch_all_feed_at_once(request, user_id: int):
         future_questions = executor.submit(get_questions_for_user, user_id)
         future_question_of_the_day = executor.submit(get_question_of_the_day)
         future_top_contributors = executor.submit(get_top_5_contributors)
+        future_top_tags = executor.submit(get_most_popular_tags)
 
         questions = future_questions.result()
         question_of_the_day = future_question_of_the_day.result()
         top_contributors = future_top_contributors.result()
+        top_tags = future_top_tags.result()
 
     # Combine all data
     feed_data = {
         'personalized_questions': questions,
         'question_of_the_day': question_of_the_day,
-        'top_contributors': top_contributors
+        'top_contributors': top_contributors,
+        'top_tags': top_tags,
     }
 
     # Cache the feed data for a specified amount of time
@@ -1473,17 +1490,6 @@ def get_all_questions(request):
 
     return JsonResponse({'questions': questions_data}, safe=False)
     
-def get_topic_url(request, topic_name: str):
-    related_url = Topic.get_url_for_topic(topic_name)
-    if related_url:
-        return JsonResponse({'topic': topic_name, 'url': related_url}, status=200)
-    return JsonResponse({'error': f'Topic "{topic_name}" not found'}, status=404)
-
-
-def list_all_topics(request):
-    topics = Topic.get_all_topics()
-    topics_data = [{'name': topic.name, 'url': topic.related_url} for topic in topics]
-    return JsonResponse({'topics': topics_data}, status=200)
 
 
 def fetch_question_label_info(request, question_id: int):
@@ -1621,23 +1627,28 @@ def fetch_search_results_at_once(request, wiki_id, language, page_number=1):
     def get_annotations():
         return get_annotations_by_language(wiki_id_numerical_part)
 
+
     with ThreadPoolExecutor(max_workers=4) as executor:
         info_future = executor.submit(get_info)
         questions_future = executor.submit(get_questions)
         annotations_future = executor.submit(get_annotations)
         top_contributors_future = executor.submit(get_top_5_contributors)
+        top_tags_future = executor.submit(get_most_popular_tags)
+
 
         information_result = info_future.result()
         question_result = questions_future.result()
         annotation_result = annotations_future.result()
         top_contributors_result = top_contributors_future.result()
+        top_tags_result = top_tags_future.result()
     
 
     return JsonResponse({
         'information': information_result,
         'questions': question_result,
         'annotations': annotation_result,
-        'top_contributors': top_contributors_result
+        'top_contributors': top_contributors_result,
+        'top_tags': top_tags_result
     }, safe=False)
 
 @swagger_auto_schema(
@@ -1750,7 +1761,7 @@ def get_questions_according_to_filter(request):
         user_id = request.headers.get('User-ID', None)
         user_votes = Question_Vote.objects.filter(user_id=user_id).values('question_id', 'vote_type')
         user_votes_dict = {vote['question_id']: vote['vote_type'] for vote in user_votes}
-
+        user = User.objects.get(pk=user_id)
         # Parse the request body
         data = json.loads(request.body)
         status = data.get('status', 'all')
@@ -1764,7 +1775,11 @@ def get_questions_according_to_filter(request):
         
         # Apply status filter
         if status != 'all':
-            questions = questions.filter(answered=(status == 'answered'))
+            if status == 'discussion':
+                questions = questions.filter(type=QuestionType.DISCUSSION.value)
+            else:
+                questions = questions.filter(type=QuestionType.QUESTION.value)
+                questions = questions.filter(answered=(status == 'answered'))
             
         # Apply language filter
         if language != 'all':
@@ -1773,7 +1788,7 @@ def get_questions_according_to_filter(request):
         # Apply tags filter 
         if tags:
             lowercase_tags = [tag.lower() for tag in tags]
-            questions = questions.filter(tags__iregex=r'(?i)' + '|'.join(tags))
+            questions = questions.filter(tags__iregex=r'(?i)' + '|'.join(lowercase_tags))
 
         # Apply date filters only 
         if start_date and start_date != "":
@@ -1811,7 +1826,9 @@ def get_questions_according_to_filter(request):
             'answered': q.answered,
             'is_upvoted': user_votes_dict.get(q.pk) == VoteType.UPVOTE.value,
             'is_downvoted': user_votes_dict.get(q.pk) == VoteType.DOWNVOTE.value,
-            'created_at' : q.created_at.strftime('%Y-%m-%d %H:%M:%S')
+            'is_bookmarked': user.bookmarks.filter(pk=q.pk).exists(),
+            'created_at' : q.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+            'post_type': q.type
         } for q in questions]
         
         return JsonResponse({'questions': questions_data}, safe=False)
@@ -1897,3 +1914,17 @@ def check_bookmark(request, question_id):
     is_bookmarked = user.bookmarks.filter(pk=question_id).exists()
 
     return JsonResponse({'is_bookmarked': is_bookmarked}, status=200)
+
+def get_most_popular_tags():
+    questions = Question.objects.values_list('tags', flat=True)
+    all_tags = list(chain.from_iterable(questions))
+    tag_counts = Counter(all_tags)
+    
+    # Sort by count (descending) and get top 5
+    most_common_tags = sorted(
+        tag_counts.items(),
+        key=lambda x: (-x[1], x[0])  
+    )[:5]
+    
+    # Return just the tags (without counts)
+    return [tag for tag, count in most_common_tags]
