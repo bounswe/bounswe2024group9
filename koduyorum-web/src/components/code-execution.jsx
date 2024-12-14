@@ -209,7 +209,7 @@ const addAnnotations = (text, annotations, detail_length) => {
 
     // Add annotated text with a tooltip
     annotatedText.push(
-      <div className="annotation-container" key={annotation_starting_point}>
+      <div className="annotation-container" key={`${annotation_starting_point}-${annotationId}`}>
         <span className="annotation">
           <em>{text.slice(annotation_starting_point, annotation_ending_point)}</em>
           <div className="annotation-tooltip">

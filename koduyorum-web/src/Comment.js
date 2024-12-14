@@ -139,74 +139,77 @@ function Comment(props) {
   {props.addAnnotations(props.explanation, props.annotations, 0)}
 </div>
 {props.code && (
-  <SyntaxHighlighter language="javascript" style={docco} onMouseUp={(e) => props.onCodeSelection(e, 'comment_code')}>
-    {props.addAnnotations(props.code, props.annotations, props.explanation.length).join('')}
-  </SyntaxHighlighter>
-)}
+    <div className="text-gray-600" onMouseUp={(e) => props.onCodeSelection(e, 'comment_code')}>
+      {/*// <SyntaxHighlighter language="javascript" style={docco}*/}
+      {/*                      onMouseUp={(e) => props.onCodeSelection(e, 'comment_code')}>*/}
+      {props.addAnnotations(props.code, props.annotations, props.explanation.length)}
+    {/*</SyntaxHighlighter>*/}
+    </div>
+      )}
       <div className="flex items-center justify-between mt-4">
         <div className="flex items-center gap-2">
           <button
-            className="px-4 py-2 bg-green-500 text-white text-sm font-semibold rounded hover:bg-green-600"
-            onClick={handleCommentUpvote}
+              className="px-4 py-2 bg-green-500 text-white text-sm font-semibold rounded hover:bg-green-600"
+              onClick={handleCommentUpvote}
           >
             Upvote
           </button>
           <span className="text-gray-700 font-semibold">{votes}</span>
           <button
-            className="px-4 py-2 bg-red-500 text-white text-sm font-semibold rounded hover:bg-red-600"
-            onClick={handleCommentDownvote}
+              className="px-4 py-2 bg-red-500 text-white text-sm font-semibold rounded hover:bg-red-600"
+              onClick={handleCommentDownvote}
           >
             Downvote
           </button>
           {isCommentOwner && (
-            <>
-              <button
-                className="px-4 py-2 bg-yellow-500 text-white text-sm font-semibold rounded hover:bg-yellow-600"
-                onClick={handleEditComment}
-              >
-                Edit Comment
-              </button>
-              <button
-                className="px-4 py-2 bg-red-500 text-white text-sm font-semibold rounded hover:bg-red-600"
-                onClick={handleDeleteComment}
-              >
-                Delete Comment
-              </button>
-            </>
+              <>
+                <button
+                    className="px-4 py-2 bg-yellow-500 text-white text-sm font-semibold rounded hover:bg-yellow-600"
+                    onClick={handleEditComment}
+                >
+                  Edit Comment
+                </button>
+                <button
+                    className="px-4 py-2 bg-red-500 text-white text-sm font-semibold rounded hover:bg-red-600"
+                    onClick={handleDeleteComment}
+                >
+                  Delete Comment
+                </button>
+              </>
           )}
           {isQuestionOwner && !isAnswer && (
-            <button
-              className="px-4 py-2 bg-green-500 text-white text-sm font-semibold rounded hover:bg-green-600"
-              onClick={toggleAnswer}
-            >
-              Mark As Answer
-            </button>
+              <button
+                  className="px-4 py-2 bg-green-500 text-white text-sm font-semibold rounded hover:bg-green-600"
+                  onClick={toggleAnswer}
+              >
+                Mark As Answer
+              </button>
           )}
         </div>
         <p className="question-username" onClick={redirectToProfile}>@{props.author}</p>
       </div>
       {isPopupVisible && (
-        <div className="popup">
-          <div className="popup-content" ref={popupRef}>
-            <EditComment
-              comment_id={props.comment_id}
-              language={props.language}
-              codeSnippet={props.code}
-              details={props.explanation}
-              fetchComments={props.fetchComments}
-              closePopup={closePopup}
-            />
+          <div className="popup">
+            <div className="popup-content" ref={popupRef}>
+              <EditComment
+                  comment_id={props.comment_id}
+                  language={props.language}
+                  codeSnippet={props.code}
+                  details={props.explanation}
+                  fetchComments={props.fetchComments}
+                  closePopup={closePopup}
+              />
+            </div>
           </div>
-        </div>
       )}
     </div>
-  );
+);
 }
 
-Comment.propTypes = {
-  language: PropTypes.string,
-  code: PropTypes.string,
-  explanation: PropTypes.string,
+      Comment.propTypes = {
+      language: PropTypes.string,
+      code: PropTypes.string,
+      explanation: PropTypes.string,
   number: PropTypes.number,
   initialVotes: PropTypes.number,
   comment_id: PropTypes.number,
