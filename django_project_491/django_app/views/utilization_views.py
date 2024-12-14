@@ -11,6 +11,29 @@ from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
+from functools import wraps
+
+def invalidate_user_cache(cache_key_prefix='feed_user'):
+    """
+    A decorator to invalidate the cache for a given user_id.
+    """
+    def decorator(func):
+        @wraps(func)
+        def wrapper(request, *args, **kwargs):
+            user_id = request.headers.get('User-ID')
+
+            if user_id:
+                # Invalidate the user's cache
+                cache_key = f"{cache_key_prefix}_{user_id}"
+                cache.delete(cache_key)
+
+            # Call the original function
+            response = func(request, *args, **kwargs)
+
+            return response
+
+        return wrapper
+    return decorator
 
 
 # Used for initial search - returns 5 best matching wiki id's
@@ -526,21 +549,13 @@ def run_code_of_question_or_comment(request, type: str, id: int):
                     description="Error message when object is not found"
                 )
             }
-        ),
-        409: openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            properties={
-                'error': openapi.Schema(
-                    type=openapi.TYPE_STRING,
-                    description="Error message when vote already exists"
-                )
-            }
         )
     }
 )
 @api_view(['GET'])
 @permission_classes([AllowAny])
 @csrf_exempt
+@invalidate_user_cache()
 def upvote_object(request, object_type: str, object_id: int):
     """
     Handles the upvoting of a specified object (question or comment) by a user.
@@ -577,7 +592,10 @@ def upvote_object(request, object_type: str, object_id: int):
         existing_vote = Question_Vote.objects.filter(user=user, question=question).first()
         if existing_vote:
             if existing_vote.vote_type == VoteType.UPVOTE.value:
-                return JsonResponse({'error': 'You have already upvoted this question'}, status=409)
+                existing_vote.delete()
+                question.upvotes -= 1
+                question.save()
+                return JsonResponse({'success': question.upvotes}, status=200)
             else:
                 # Change existing downvote to upvote 
                 existing_vote.vote_type = VoteType.UPVOTE.value
@@ -606,7 +624,10 @@ def upvote_object(request, object_type: str, object_id: int):
         existing_vote = Comment_Vote.objects.filter(user=user, comment=comment).first()
         if existing_vote:
             if existing_vote.vote_type == VoteType.UPVOTE.value:
-                return JsonResponse({'error': 'You have already upvoted this comment'}, status=409)
+                existing_vote.delete()
+                comment.upvotes -= 1
+                comment.save()
+                return JsonResponse({'success': comment.upvotes}, status=200)
             else:
                 # Change existing downvote to upvote
                 existing_vote.vote_type = VoteType.UPVOTE.value
@@ -690,9 +711,11 @@ def upvote_object(request, object_type: str, object_id: int):
 @api_view(['GET'])
 @permission_classes([AllowAny])
 @csrf_exempt
+@invalidate_user_cache()
 def downvote_object(request, object_type: str, object_id: int):
     """
     Handles the downvoting of an object (question or comment) by a user.
+    If the user has already downvoted, removes their downvote.
     Args:
         request (HttpRequest): The HTTP request object containing headers and other request data.
         object_type (str): The type of object to downvote ('question' or 'comment').
@@ -703,7 +726,6 @@ def downvote_object(request, object_type: str, object_id: int):
         JsonResponse: If the object_id is not provided, returns a 400 error.
         JsonResponse: If the User-ID header is not provided, returns a 400 error.
         JsonResponse: If the object (question or comment) does not exist, returns a 404 error.
-        JsonResponse: If the user has already downvoted the object, returns a 400 error.
         JsonResponse: If the object type is invalid, returns a 400 error.
     """
     if not object_id:
@@ -727,7 +749,10 @@ def downvote_object(request, object_type: str, object_id: int):
         existing_vote = Question_Vote.objects.filter(user=user, question=question).first()
         if existing_vote:
             if existing_vote.vote_type == VoteType.DOWNVOTE.value:
-                return JsonResponse({'error': 'You have already downvoted this question'}, status=400)
+                existing_vote.delete()
+                question.upvotes += 1
+                question.save()
+                return JsonResponse({'success': question.upvotes}, status=200)
             else:
                 # Change existing upvote to downvote
                 existing_vote.vote_type = VoteType.DOWNVOTE.value
@@ -756,7 +781,11 @@ def downvote_object(request, object_type: str, object_id: int):
         existing_vote = Comment_Vote.objects.filter(user=user, comment=comment).first()
         if existing_vote:
             if existing_vote.vote_type == VoteType.DOWNVOTE.value:
-                return JsonResponse({'error': 'You have already downvoted this comment'}, status=400)
+                existing_vote.delete()
+                comment.upvotes += 1
+                comment.save()
+                return JsonResponse({'success': comment.upvotes}, status=200)
+
             else:
                 # Change existing upvote to downvote
                 existing_vote.vote_type = VoteType.DOWNVOTE.value

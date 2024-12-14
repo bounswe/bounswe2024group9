@@ -93,12 +93,17 @@ class Comment(models.Model):
         # Check and promote user after saving the comment
         self.author.check_and_promote()
 
+class QuestionType(Enum):
+    QUESTION = "question"
+    DISCUSSION = "discussion"
+
 class Question(models.Model):
     _id = models.AutoField(primary_key=True)
     title = models.CharField(max_length=200)
     language = models.CharField(max_length=200)  # programmingLanguage field like python
     language_id = models.IntegerField(default=-1)   # Language ID for Python like 71
     tags = models.JSONField(blank=True, default=list)  # Example: ['tag1', 'tag2']
+    type = models.CharField(max_length=20, choices=[(tag.value, tag.value) for tag in QuestionType], default=QuestionType.QUESTION.value)
     details = models.TextField()
     code_snippet = models.TextField()
     upvotes = models.IntegerField(default=0)
@@ -111,7 +116,7 @@ class Question(models.Model):
     def __str__(self):
         return f"{self.title} ({self.language})"
     
-    def run_snippet(self): # TODO
+    def run_snippet(self):
         result = run_code(self.code_snippet, self.language_id)
         if result['stderr']:
             return [result['stderr']]
@@ -125,7 +130,7 @@ class Question(models.Model):
         else:
             return result['stdout'].split('\n')
 
-    def mark_as_answered(self, comment_id): # TODO
+    def mark_as_answered(self, comment_id):
         self.answered = True
         self.save()
 

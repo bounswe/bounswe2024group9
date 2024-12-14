@@ -132,28 +132,6 @@ function Feed() {
   }, []);
 
 
-  const fetchPostsByTime = async () => {
-    try {
-      const response = await fetch(
-        `${process.env.REACT_APP_API_URL}/list_questions_by_time/`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      if (response.ok) {
-        const data = await response.json();
-        return data.questions;
-      } else {
-        console.error("Error fetching questions:", response.statusText);
-      }
-    } catch (error) {
-      console.error("Error fetching questions:", error);
-    }
-  };
-
   const fetchSearchResults = async (query) => {
     try {
       query = query.replace(/[^a-z0-9]/gi, "");

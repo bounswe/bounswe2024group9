@@ -1,5 +1,5 @@
 
-from ..models import Question, Comment, UserType, User, VoteType, Question_Vote
+from ..models import Question, Comment, UserType, User, VoteType, Question_Vote, QuestionType
 from django.db.models import Count, Q, F
 from django.http import HttpRequest, HttpResponse, JsonResponse
 import json
@@ -191,7 +191,12 @@ def get_question_comments(request, question_id):
                ),
                description="List of tags associated with the question",
                default=[]
-           )
+           ),'type': openapi.Schema(
+                type=openapi.TYPE_STRING,
+                description="Type of the question",
+                default=QuestionType.QUESTION.value,
+                enum=[QuestionType.QUESTION.value, QuestionType.DISCUSSION.value]
+            )
        }
    ),
    responses={
@@ -255,23 +260,28 @@ def create_question(request: HttpRequest) -> HttpResponse:
     """
     if request.method == 'POST':
         try:
-            user_id = request.headers.get('User-ID', None)
-
             data = json.loads(request.body)
             title = data.get('title')
             language = data.get('language', "")
             details = data.get('details')
             code_snippet = data.get('code_snippet', '')  # There may not be a code snippet
             tags = data.get('tags', [])  # There may not be any tags
+            question_type = data.get('post_type', QuestionType.QUESTION.value) 
 
-            user = User.objects.get(pk=user_id)
-            if not language:
+            if question_type not in [tag.value for tag in QuestionType]:
+                return JsonResponse({'error': 'Invalid question type'}, status=400)
+
+            if question_type == QuestionType.DISCUSSION.value:
+                code_snippet = ""
                 language_id = -1
             else:
-                Lang2ID = get_languages()
-                language_id = Lang2ID.get(language, None)
-                if language_id is None:
-                    return JsonResponse({'error': 'Invalid language'}, status=400)
+                if not language:
+                    return JsonResponse({'error': 'For Code Questions add a language.'}, status=400)
+                else:
+                    Lang2ID = get_languages()
+                    language_id = Lang2ID.get(language, None)
+                    if language_id is None:
+                        return JsonResponse({'error': 'Invalid language'}, status=400)
 
             user = User.objects.get(pk=request.headers.get('User-ID', None))
 
@@ -291,6 +301,7 @@ def create_question(request: HttpRequest) -> HttpResponse:
                 details=details,
                 code_snippet=code_snippet,
                 tags=tags,
+                type=question_type,
                 author=user
             )
             
@@ -416,7 +427,7 @@ def edit_question(request: HttpRequest, question_id: int) -> HttpResponse:
         question.title = data.get('title', question.title)
         language = data.get('language', question.language)
         question.language = language
-        question.language_id = Lang2ID.get(language)
+        question.language_id = Lang2ID.get(language, -1)
         question.details = data.get('details', question.details)
         question.code_snippet = data.get('code_snippet', question.code_snippet)
 
@@ -538,43 +549,8 @@ def delete_question(request: HttpRequest, question_id: int) -> HttpResponse:
         return JsonResponse({'error': f'An error occurred: {str(e)}'}, status=500)
 
 
-@csrf_exempt
-@invalidate_user_cache()
-@permission_classes([AllowAny])
-def mark_as_answered(request, question_id : int) -> HttpResponse:
-    """
-    Marks a question as answered.
-    Args:
-        request (HttpRequest): The HTTP request object containing headers and other request data.
-        question_id (int): The ID of the question to be marked as answered.
-    Returns:
-        HttpResponse: A JSON response indicating the success or failure of the operation.
-            - 200: If the question is successfully marked as answered.
-            - 400: If the question ID or User ID is missing.
-            - 403: If the request user is not the author of the question.
-    Raises:
-        Question.DoesNotExist: If the question with the given ID does not exist.
-    """
-    if not question_id:
-        return JsonResponse({'error': 'Question ID parameter is required'}, status=400)
-
-    request_user_id = request.headers.get('User-ID', None)
-    if request_user_id is None:
-        return JsonResponse({'error': 'User ID parameter is required in the header'}, status=400)
-    
-    request_user_id = int(request_user_id)
-
-    question = Question.objects.get(_id=question_id)
-    author: User = question.author
-    if author.user_id != request_user_id:
-        return JsonResponse({'error': 'Only the owner of the question can mark it as answered'}, status=403)
-    
-    # question.mark_as_answered() #TODO ADD COMMENT ID HERE
-
-    return JsonResponse({'success': 'Question marked as answered successfully'}, status=200)
 
 
-# TODO: FIND OUT WHAT TO DO WITH REPORTED QUESTIONS
 @csrf_exempt
 @permission_classes([AllowAny])
 def report_question(request, question_id : int) -> HttpResponse:    
@@ -1069,6 +1045,7 @@ def list_questions_according_to_the_user(request, user_id: int):
 @api_view(['POST'])
 @csrf_exempt
 @permission_classes([AllowAny])
+@invalidate_user_cache()
 def bookmark_question(request: HttpRequest, question_id: int) -> HttpResponse:
     """
     Bookmark a question for a user.
@@ -1147,6 +1124,7 @@ def bookmark_question(request: HttpRequest, question_id: int) -> HttpResponse:
 @api_view(['DELETE'])
 @csrf_exempt
 @permission_classes([AllowAny])
+@invalidate_user_cache()
 def remove_bookmark(request: HttpRequest, question_id: int) -> HttpResponse:
     """
     Remove a question from a user's bookmarks.
@@ -1415,7 +1393,9 @@ def fetch_all_feed_at_once(request, user_id: int):
                 'answered': q.answered,
                 'is_upvoted': user_votes_dict.get(q.pk) == VoteType.UPVOTE.value,
                 'is_downvoted': user_votes_dict.get(q.pk) == VoteType.DOWNVOTE.value,
-                'created_at' : q.created_at.strftime('%Y-%m-%d %H:%M:%S')
+                'is_bookmarked': user.bookmarks.filter(pk=q.pk).exists(),
+                'created_at' : q.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+                'post_type': q.type
             }
             for q in questions
         ]
