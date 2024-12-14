@@ -4,8 +4,10 @@ import { useNavigate } from 'react-router-dom';
 import * as PropTypes from "prop-types";
 import SyntaxHighlighter from "react-syntax-highlighter";
 import { docco } from "react-syntax-highlighter/dist/esm/styles/hljs";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faThumbsUp, faCommentDots, faThumbsDown } from '@fortawesome/free-solid-svg-icons';
 import './QuestionDetail.css';
+import './PostPreview.css'
 import EditQuestion from "./EditQuestion";
 import { showNotification } from "./NotificationCenter";
 import NotificationCenter from "./NotificationCenter";
@@ -144,13 +146,27 @@ function QuestionDetail(props) {
     
         <div className="question-footer">
             
-            <div className="footer-item" onClick={handlePostUpvote}>
+            {/* <div className="footer-item" onClick={handlePostUpvote}>
                 <button className="vote-button">Upvote</button>
                 <span className="footer-text">{votes} Upvotes</span>
-            </div>
-            <div className="footer-item" onClick={handlePostDownvote}>
+            </div> */}
+            <div
+                    className={`footer-item  ${props.isUpvoted ? 'upvoted' : ''}`}
+                    onClick={handlePostUpvote}
+                >
+                    <FontAwesomeIcon icon={faThumbsUp} size="lg"  />
+                    <span className="footer-text">{votes} Upvotes</span>
+                </div>
+            {/* <div className="footer-item" onClick={handlePostDownvote}>
                 <button className="vote-button">Downvote</button>
-            </div>
+            </div> */}
+            <div
+                    className={`footer-item`}
+                    onClick={handlePostDownvote}
+                >
+                    <FontAwesomeIcon icon={faThumbsDown} size="lg" />
+                    <span className="footer-text">{votes} Downvotes</span>
+                </div>
             {isOwner && (
                 <div className="owner-actions">
                     <button onClick={handleEditQuestion} className="edit-button">Edit</button>
