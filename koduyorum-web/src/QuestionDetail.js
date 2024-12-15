@@ -140,9 +140,11 @@ function QuestionDetail(props) {
         <h3 className="question-input-type">{props.inputType}:</h3>
         <p className="question-description">{props.explanation}</p>
     
+        {props.code?.trim() && ( // If code is not empty
         <SyntaxHighlighter language="javascript" style={docco} showLineNumbers>
             {props.code}
         </SyntaxHighlighter>
+        )}
     
         <div className="question-footer">
             
