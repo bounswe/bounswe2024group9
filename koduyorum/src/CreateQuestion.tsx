@@ -13,6 +13,7 @@ const CreateQuestion = ({ route, navigation }) => {
     const [language, setLanguage] = useState('');
     const [tags, setTags] = useState('');
     const [availableLanguages, setAvailableLanguages] = useState([]);
+    const [postType, setPostType] = useState('question'); // Default to 'question'
 
     useEffect(() => {
         const fetchLanguages = async () => {
@@ -30,19 +31,20 @@ const CreateQuestion = ({ route, navigation }) => {
     }, []);
 
     const handleSubmit = async () => {
-        if (!title || !details || !language) {
-            Alert.alert('All fields are required!');
+        if (!title || !details || (postType === 'question' && !language)) {
+            Alert.alert('All required fields must be filled!');
             return;
         }
 
         const postData = {
             title,
-            language,
+            language: postType === 'question' ? language : '', // Only include language for questions
             details,
-            code_snippet: codeSnippet,
+            code_snippet: postType === 'question' ? codeSnippet : '', // Only include code snippet for questions
             tags: tags.split(',').map(tag => tag.trim()),
+            post_type: postType,
         };
-    
+
         try {
             const response = await fetch('http://10.0.2.2:8000/create_question/', {
                 method: 'POST',
@@ -52,23 +54,34 @@ const CreateQuestion = ({ route, navigation }) => {
                 },
                 body: JSON.stringify(postData),
             });
-    
+
             const data = await response.json();
-    
+
             if (response.status === 201) {
-                Alert.alert('Success', 'Question created successfully');
+                Alert.alert('Success', 'Post created successfully');
                 navigation.goBack();
             } else {
-                Alert.alert('Error', data.error);
+                Alert.alert('Error', data.error || 'Failed to create post');
             }
         } catch (error) {
-            Alert.alert('Error', 'Failed to create question');
+            Alert.alert('Error', 'Failed to create post');
         }
     };
 
     return (
         <ScrollView contentContainerStyle={styles.container}>
-            <Text style={styles.title}>Create New Question</Text>
+            <Text style={styles.title}>Create New Post</Text>
+
+            <View style={styles.typePicker}>
+                <Text style={styles.label}>Select Post Type:</Text>
+                <Picker
+                    selectedValue={postType}
+                    onValueChange={(itemValue) => setPostType(itemValue)}
+                >
+                    <Picker.Item label="Question" value="question" />
+                    <Picker.Item label="Discussion" value="discussion" />
+                </Picker>
+            </View>
 
             <TextInput
                 style={styles.input}
@@ -77,17 +90,19 @@ const CreateQuestion = ({ route, navigation }) => {
                 onChangeText={setTitle}
             />
 
-            <View style={styles.languagePicker}>
-                <Text style={styles.label}>Select Language:</Text>
-                <Picker
-                    selectedValue={language}
-                    onValueChange={(itemValue) => setLanguage(itemValue)}
-                >
-                    {availableLanguages.map((lang, index) => (
-                        <Picker.Item key={index} label={lang} value={lang} />
-                    ))}
-                </Picker>
-            </View>
+            {postType === 'question' && (
+                <View style={styles.languagePicker}>
+                    <Text style={styles.label}>Select Language:</Text>
+                    <Picker
+                        selectedValue={language}
+                        onValueChange={(itemValue) => setLanguage(itemValue)}
+                    >
+                        {availableLanguages.map((lang, index) => (
+                            <Picker.Item key={index} label={lang} value={lang} />
+                        ))}
+                    </Picker>
+                </View>
+            )}
 
             <TextInput
                 style={styles.input}
@@ -97,19 +112,21 @@ const CreateQuestion = ({ route, navigation }) => {
                 multiline
             />
 
-            <View style={styles.codeContainer}>
-                <Text style={styles.codeTitle}>Code Snippet (optional):</Text>
-                <SyntaxHighlighter language={language.toLowerCase()} style={atomOneDark}>
-                    {codeSnippet || 'Write your code here...'}
-                </SyntaxHighlighter>
-                <TextInput
-                    style={styles.input}
-                    placeholder="Add your code here"
-                    value={codeSnippet}
-                    onChangeText={setCodeSnippet}
-                    multiline
-                />
-            </View>
+            {postType === 'question' && (
+                <View style={styles.codeContainer}>
+                    <Text style={styles.codeTitle}>Code Snippet (optional):</Text>
+                    <SyntaxHighlighter language={language.toLowerCase()} style={atomOneDark}>
+                        {codeSnippet || 'Write your code here...'}
+                    </SyntaxHighlighter>
+                    <TextInput
+                        style={styles.input}
+                        placeholder="Add your code here"
+                        value={codeSnippet}
+                        onChangeText={setCodeSnippet}
+                        multiline
+                    />
+                </View>
+            )}
 
             <TextInput
                 style={styles.input}
@@ -119,7 +136,7 @@ const CreateQuestion = ({ route, navigation }) => {
             />
 
             <TouchableOpacity style={styles.addButton} onPress={handleSubmit}>
-                <Text style={styles.addButtonText}>Submit Question</Text>
+                <Text style={styles.addButtonText}>Submit {postType === 'question' ? 'Question' : 'Discussion'}</Text>
             </TouchableOpacity>
         </ScrollView>
     );
@@ -143,6 +160,9 @@ const styles = StyleSheet.create({
         marginTop: 10,
         marginBottom: 10,
         backgroundColor: '#fff',
+    },
+    typePicker: {
+        marginBottom: 20,
     },
     languagePicker: {
         marginBottom: 20,
