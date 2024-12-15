@@ -259,3 +259,25 @@
     background-color: #003f7f; /* Even darker blue */
     transform: translateY(0); /* Reset on click */
   }
+
+
+  .bookmark-button {
+    background-color: #727374; /* Match Run Code button */
+    color: #fff; /* White text */
+    font-size: 16px;
+    font-weight: bold;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+  }
+  
+  .bookmark-button:hover {
+    background-color: #d0d0d0;
+  }
+  
+  .bookmark-button .fa-icon {
+    margin-right: 8px;
+  }

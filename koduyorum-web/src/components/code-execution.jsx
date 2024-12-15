@@ -302,29 +302,31 @@ export default function CodeExecution() {
                 fetchQuestion={fetchQuestion}
 
             />
-            {questionData.code_snippet && (
+            
                 <div className="flex gap-4 mt-4">
-                  <button
+                {questionData.code_snippet && ( <button
                     className="run-button"
                     onClick={() => run_code('question', questionData.id)}
                   >
                     Run Code
-                  </button>
+                  </button> )}
                   <button
                     className="comment-button"
                     onClick={() => openPopup()}
                   >
                     Comment
                   </button>
+                  <button
+                  className="bookmark-button flex items-center bg-gray-300 text-gray-800 px-4 py-2 rounded hover:bg-gray-400 transition"
+                  onClick={() => post_bookmark(questionData.id)}
+                >
+                  <FontAwesomeIcon icon={faBookmark} className="mr-2" />
+                  Bookmark
+                </button>
                 </div>
-              )}
-            <button
-                className="bg-green-600 text-white px-4 py-2 mt-4"
-                onClick={() => post_bookmark(questionData.id)}
-            >
-            <FontAwesomeIcon icon={faBookmark} style={{ color: isBookmarked ? 'blue' : 'white' }} />
-            </button>
-            <div className="mt-6">
+              
+                
+            {questionData.code_snippet &&  (<div className="mt-6">
                 <h2 className="text-xl font-semibold mb-2">Output:</h2>
                 <pre className="w-full p-4 bg-gray-200 text-gray-800 whitespace-pre-wrap">
                     {loading ? "Waiting for output..." : (
@@ -333,7 +335,7 @@ export default function CodeExecution() {
                   )) : "No output yet."
                 )}
                 </pre>
-              </div>
+              </div>)}
           </div>
 
           <Separator className="my-8 bg-gray-300"/>
