@@ -61,3 +61,53 @@
 .post-question-submit:hover {
     background-color: #005f8d;
 }
+
+.post-type-selection {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 1rem 0;
+    padding: 0.75rem;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+
+.post-type-selection label {
+    display: flex;
+    align-items: center;
+    font-weight: bold;
+    color: #333;
+    cursor: pointer;
+}
+
+.post-type-selection input[type="radio"] {
+    margin-right: 10px;
+    cursor: pointer;
+}
+
+.post-type-selection input[type="radio"]:focus {
+    outline: 2px solid #0077b6;
+    outline-offset: 2px;
+}
+
+.post-type-selection label:hover {
+    color: #0077b6;
+}
+
+.post-question-cancel {
+    width: 100%;
+    padding: 0.75rem;
+    background-color: #e63946; /* Red for cancel */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.post-question-cancel:hover {
+    background-color: #c1272d; /* Darker red on hover */
+}

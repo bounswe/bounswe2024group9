@@ -93,12 +93,17 @@ class Comment(models.Model):
         # Check and promote user after saving the comment
         self.author.check_and_promote()
 
+class QuestionType(Enum):
+    QUESTION = "question"
+    DISCUSSION = "discussion"
+
 class Question(models.Model):
     _id = models.AutoField(primary_key=True)
     title = models.CharField(max_length=200)
     language = models.CharField(max_length=200)  # programmingLanguage field like python
     language_id = models.IntegerField(default=-1)   # Language ID for Python like 71
     tags = models.JSONField(blank=True, default=list)  # Example: ['tag1', 'tag2']
+    type = models.CharField(max_length=20, choices=[(tag.value, tag.value) for tag in QuestionType], default=QuestionType.QUESTION.value)
     details = models.TextField()
     code_snippet = models.TextField()
     upvotes = models.IntegerField(default=0)
@@ -111,7 +116,7 @@ class Question(models.Model):
     def __str__(self):
         return f"{self.title} ({self.language})"
     
-    def run_snippet(self): # TODO
+    def run_snippet(self):
         result = run_code(self.code_snippet, self.language_id)
         if result['stderr']:
             return [result['stderr']]
@@ -125,7 +130,7 @@ class Question(models.Model):
         else:
             return result['stdout'].split('\n')
 
-    def mark_as_answered(self, comment_id): # TODO
+    def mark_as_answered(self, comment_id):
         self.answered = True
         self.save()
 
@@ -205,6 +210,7 @@ class User(AbstractBaseUser):
     def get_question_details(self):
         user_votes = Question_Vote.objects.filter(user_id=self.user_id).values('question_id', 'vote_type')
         user_votes_dict = {vote['question_id']: vote['vote_type'] for vote in user_votes}
+        
         return [{
             'id': q.pk,
             'title': q.title,
@@ -219,7 +225,9 @@ class User(AbstractBaseUser):
             'answered': q.answered,
             'is_upvoted': user_votes_dict.get(q.pk) == VoteType.UPVOTE.value,
             'is_downvoted': user_votes_dict.get(q.pk) == VoteType.DOWNVOTE.value,
+            'is_bookmarked': self.bookmarks.filter(pk=q.pk).exists(),
             'created_at' : q.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+            'post_type': q.type
         } for q in self.questions.all()]
 
     def get_comment_details(self):
@@ -254,7 +262,9 @@ class User(AbstractBaseUser):
             'answered': bookmark.answered,
             'is_upvoted': user_votes_dict.get(bookmark.pk) == VoteType.UPVOTE.value,
             'is_downvoted': user_votes_dict.get(bookmark.pk) == VoteType.DOWNVOTE.value,
+            'is_bookmarked': self.bookmarks.filter(pk=bookmark.pk).exists(),
             'created_at' : bookmark.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+            'post_type': bookmark.type
         } for bookmark in self.bookmarks.all()]
 
     def get_annotation_details(self):

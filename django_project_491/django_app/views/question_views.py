@@ -1,5 +1,5 @@
 
-from ..models import Question, Comment, UserType, User, VoteType, Question_Vote
+from ..models import Question, Comment, UserType, User, VoteType, Question_Vote, QuestionType
 from django.db.models import Count, Q, F
 from django.http import HttpRequest, HttpResponse, JsonResponse
 import json
@@ -23,6 +23,9 @@ from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
+from django.db.models import Count
+from itertools import chain
+from collections import Counter
 
 def invalidate_user_cache(cache_key_prefix='feed_user'):
     """
@@ -191,7 +194,12 @@ def get_question_comments(request, question_id):
                ),
                description="List of tags associated with the question",
                default=[]
-           )
+           ),'type': openapi.Schema(
+                type=openapi.TYPE_STRING,
+                description="Type of the question",
+                default=QuestionType.QUESTION.value,
+                enum=[QuestionType.QUESTION.value, QuestionType.DISCUSSION.value]
+            )
        }
    ),
    responses={
@@ -255,23 +263,28 @@ def create_question(request: HttpRequest) -> HttpResponse:
     """
     if request.method == 'POST':
         try:
-            user_id = request.headers.get('User-ID', None)
-
             data = json.loads(request.body)
             title = data.get('title')
             language = data.get('language', "")
             details = data.get('details')
             code_snippet = data.get('code_snippet', '')  # There may not be a code snippet
             tags = data.get('tags', [])  # There may not be any tags
+            question_type = data.get('post_type', QuestionType.QUESTION.value) 
 
-            user = User.objects.get(pk=user_id)
-            if not language:
+            if question_type not in [tag.value for tag in QuestionType]:
+                return JsonResponse({'error': 'Invalid question type'}, status=400)
+
+            if question_type == QuestionType.DISCUSSION.value:
+                code_snippet = ""
                 language_id = -1
             else:
-                Lang2ID = get_languages()
-                language_id = Lang2ID.get(language, None)
-                if language_id is None:
-                    return JsonResponse({'error': 'Invalid language'}, status=400)
+                if not language:
+                    return JsonResponse({'error': 'For Code Questions add a language.'}, status=400)
+                else:
+                    Lang2ID = get_languages()
+                    language_id = Lang2ID.get(language, None)
+                    if language_id is None:
+                        return JsonResponse({'error': 'Invalid language'}, status=400)
 
             user = User.objects.get(pk=request.headers.get('User-ID', None))
 
@@ -291,6 +304,7 @@ def create_question(request: HttpRequest) -> HttpResponse:
                 details=details,
                 code_snippet=code_snippet,
                 tags=tags,
+                type=question_type,
                 author=user
             )
             
@@ -416,7 +430,7 @@ def edit_question(request: HttpRequest, question_id: int) -> HttpResponse:
         question.title = data.get('title', question.title)
         language = data.get('language', question.language)
         question.language = language
-        question.language_id = Lang2ID.get(language)
+        question.language_id = Lang2ID.get(language, -1)
         question.details = data.get('details', question.details)
         question.code_snippet = data.get('code_snippet', question.code_snippet)
 
@@ -538,43 +552,8 @@ def delete_question(request: HttpRequest, question_id: int) -> HttpResponse:
         return JsonResponse({'error': f'An error occurred: {str(e)}'}, status=500)
 
 
-@csrf_exempt
-@invalidate_user_cache()
-@permission_classes([AllowAny])
-def mark_as_answered(request, question_id : int) -> HttpResponse:
-    """
-    Marks a question as answered.
-    Args:
-        request (HttpRequest): The HTTP request object containing headers and other request data.
-        question_id (int): The ID of the question to be marked as answered.
-    Returns:
-        HttpResponse: A JSON response indicating the success or failure of the operation.
-            - 200: If the question is successfully marked as answered.
-            - 400: If the question ID or User ID is missing.
-            - 403: If the request user is not the author of the question.
-    Raises:
-        Question.DoesNotExist: If the question with the given ID does not exist.
-    """
-    if not question_id:
-        return JsonResponse({'error': 'Question ID parameter is required'}, status=400)
-
-    request_user_id = request.headers.get('User-ID', None)
-    if request_user_id is None:
-        return JsonResponse({'error': 'User ID parameter is required in the header'}, status=400)
-    
-    request_user_id = int(request_user_id)
-
-    question = Question.objects.get(_id=question_id)
-    author: User = question.author
-    if author.user_id != request_user_id:
-        return JsonResponse({'error': 'Only the owner of the question can mark it as answered'}, status=403)
-    
-    # question.mark_as_answered() #TODO ADD COMMENT ID HERE
-
-    return JsonResponse({'success': 'Question marked as answered successfully'}, status=200)
 
 
-# TODO: FIND OUT WHAT TO DO WITH REPORTED QUESTIONS
 @csrf_exempt
 @permission_classes([AllowAny])
 def report_question(request, question_id : int) -> HttpResponse:    
@@ -684,8 +663,17 @@ def list_questions_by_language_request(request, user_id, language: str, page_num
 
 
 def list_questions_by_language(user_id: int, language: str, page_number = 1) -> List[Question]:
-    questions = Question.objects.filter(language__iexact=language)[10 * (page_number - 1): 10 * page_number]
+    questions = Question.objects.filter(language__istartswith=language)[10 * (page_number - 1): 10 * page_number]
 
+    if not questions.exists():
+        # Case insensitive search in JSON array
+        questions = Question.objects.filter(tags__contains=[language.title()])
+        if not questions.exists():
+            questions = Question.objects.filter(tags__contains=[language.lower()])           
+        if not questions.exists():
+            questions = Question.objects.filter(tags__contains=[language.upper()])
+
+    user = User.objects.get(pk=user_id)
     user_votes = Question_Vote.objects.filter(user_id=user_id).values('question_id', 'vote_type')
     user_votes_dict = {vote['question_id']: vote['vote_type'] for vote in user_votes}
 
@@ -703,7 +691,9 @@ def list_questions_by_language(user_id: int, language: str, page_number = 1) -> 
         'answered': question.answered,
         'is_upvoted': user_votes_dict.get(question.pk) == VoteType.UPVOTE.value,
         'is_downvoted': user_votes_dict.get(question.pk) == VoteType.DOWNVOTE.value,
-        'created_at' : question.created_at.strftime('%Y-%m-%d %H:%M:%S')      
+        'is_bookmarked': user.bookmarks.filter(pk=question.pk).exists(),
+        'created_at' : question.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+        'post_type': question.type    
     } for question in questions]
 
 
@@ -1069,6 +1059,7 @@ def list_questions_according_to_the_user(request, user_id: int):
 @api_view(['POST'])
 @csrf_exempt
 @permission_classes([AllowAny])
+@invalidate_user_cache()
 def bookmark_question(request: HttpRequest, question_id: int) -> HttpResponse:
     """
     Bookmark a question for a user.
@@ -1147,6 +1138,7 @@ def bookmark_question(request: HttpRequest, question_id: int) -> HttpResponse:
 @api_view(['DELETE'])
 @csrf_exempt
 @permission_classes([AllowAny])
+@invalidate_user_cache()
 def remove_bookmark(request: HttpRequest, question_id: int) -> HttpResponse:
     """
     Remove a question from a user's bookmarks.
@@ -1415,7 +1407,9 @@ def fetch_all_feed_at_once(request, user_id: int):
                 'answered': q.answered,
                 'is_upvoted': user_votes_dict.get(q.pk) == VoteType.UPVOTE.value,
                 'is_downvoted': user_votes_dict.get(q.pk) == VoteType.DOWNVOTE.value,
-                'created_at' : q.created_at.strftime('%Y-%m-%d %H:%M:%S')
+                'is_bookmarked': user.bookmarks.filter(pk=q.pk).exists(),
+                'created_at' : q.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+                'post_type': q.type
             }
             for q in questions
         ]
@@ -1454,16 +1448,19 @@ def fetch_all_feed_at_once(request, user_id: int):
         future_questions = executor.submit(get_questions_for_user, user_id)
         future_question_of_the_day = executor.submit(get_question_of_the_day)
         future_top_contributors = executor.submit(get_top_5_contributors)
+        future_top_tags = executor.submit(get_most_popular_tags)
 
         questions = future_questions.result()
         question_of_the_day = future_question_of_the_day.result()
         top_contributors = future_top_contributors.result()
+        top_tags = future_top_tags.result()
 
     # Combine all data
     feed_data = {
         'personalized_questions': questions,
         'question_of_the_day': question_of_the_day,
-        'top_contributors': top_contributors
+        'top_contributors': top_contributors,
+        'top_tags': top_tags,
     }
 
     # Cache the feed data for a specified amount of time
@@ -1493,17 +1490,6 @@ def get_all_questions(request):
 
     return JsonResponse({'questions': questions_data}, safe=False)
     
-def get_topic_url(request, topic_name: str):
-    related_url = Topic.get_url_for_topic(topic_name)
-    if related_url:
-        return JsonResponse({'topic': topic_name, 'url': related_url}, status=200)
-    return JsonResponse({'error': f'Topic "{topic_name}" not found'}, status=404)
-
-
-def list_all_topics(request):
-    topics = Topic.get_all_topics()
-    topics_data = [{'name': topic.name, 'url': topic.related_url} for topic in topics]
-    return JsonResponse({'topics': topics_data}, status=200)
 
 
 def fetch_question_label_info(request, question_id: int):
@@ -1641,23 +1627,28 @@ def fetch_search_results_at_once(request, wiki_id, language, page_number=1):
     def get_annotations():
         return get_annotations_by_language(wiki_id_numerical_part)
 
+
     with ThreadPoolExecutor(max_workers=4) as executor:
         info_future = executor.submit(get_info)
         questions_future = executor.submit(get_questions)
         annotations_future = executor.submit(get_annotations)
         top_contributors_future = executor.submit(get_top_5_contributors)
+        top_tags_future = executor.submit(get_most_popular_tags)
+
 
         information_result = info_future.result()
         question_result = questions_future.result()
         annotation_result = annotations_future.result()
         top_contributors_result = top_contributors_future.result()
+        top_tags_result = top_tags_future.result()
     
 
     return JsonResponse({
         'information': information_result,
         'questions': question_result,
         'annotations': annotation_result,
-        'top_contributors': top_contributors_result
+        'top_contributors': top_contributors_result,
+        'top_tags': top_tags_result
     }, safe=False)
 
 @swagger_auto_schema(
@@ -1770,7 +1761,7 @@ def get_questions_according_to_filter(request):
         user_id = request.headers.get('User-ID', None)
         user_votes = Question_Vote.objects.filter(user_id=user_id).values('question_id', 'vote_type')
         user_votes_dict = {vote['question_id']: vote['vote_type'] for vote in user_votes}
-
+        user = User.objects.get(pk=user_id)
         # Parse the request body
         data = json.loads(request.body)
         status = data.get('status', 'all')
@@ -1784,7 +1775,11 @@ def get_questions_according_to_filter(request):
         
         # Apply status filter
         if status != 'all':
-            questions = questions.filter(answered=(status == 'answered'))
+            if status == 'discussion':
+                questions = questions.filter(type=QuestionType.DISCUSSION.value)
+            else:
+                questions = questions.filter(type=QuestionType.QUESTION.value)
+                questions = questions.filter(answered=(status == 'answered'))
             
         # Apply language filter
         if language != 'all':
@@ -1793,7 +1788,7 @@ def get_questions_according_to_filter(request):
         # Apply tags filter 
         if tags:
             lowercase_tags = [tag.lower() for tag in tags]
-            questions = questions.filter(tags__iregex=r'(?i)' + '|'.join(tags))
+            questions = questions.filter(tags__iregex=r'(?i)' + '|'.join(lowercase_tags))
 
         # Apply date filters only 
         if start_date and start_date != "":
@@ -1831,7 +1826,9 @@ def get_questions_according_to_filter(request):
             'answered': q.answered,
             'is_upvoted': user_votes_dict.get(q.pk) == VoteType.UPVOTE.value,
             'is_downvoted': user_votes_dict.get(q.pk) == VoteType.DOWNVOTE.value,
-            'created_at' : q.created_at.strftime('%Y-%m-%d %H:%M:%S')
+            'is_bookmarked': user.bookmarks.filter(pk=q.pk).exists(),
+            'created_at' : q.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+            'post_type': q.type
         } for q in questions]
         
         return JsonResponse({'questions': questions_data}, safe=False)
@@ -1917,3 +1914,17 @@ def check_bookmark(request, question_id):
     is_bookmarked = user.bookmarks.filter(pk=question_id).exists()
 
     return JsonResponse({'is_bookmarked': is_bookmarked}, status=200)
+
+def get_most_popular_tags():
+    questions = Question.objects.values_list('tags', flat=True)
+    all_tags = list(chain.from_iterable(questions))
+    tag_counts = Counter(all_tags)
+    
+    # Sort by count (descending) and get top 5
+    most_common_tags = sorted(
+        tag_counts.items(),
+        key=lambda x: (-x[1], x[0])  
+    )[:5]
+    
+    # Return just the tags (without counts)
+    return [tag for tag, count in most_common_tags]
