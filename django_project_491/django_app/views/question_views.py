@@ -949,18 +949,19 @@ def list_questions_according_to_the_user(request, user_id: int):
     4. If still fewer than 10 questions are found, fills the remaining slots with general questions.
     5. Constructs a list of question data dictionaries to be returned in the JSON response.
 
-    The question data dictionary includes:
+    Each question data dictionary includes:
         - id: The question's unique identifier.
         - title: The title of the question.
         - description: The details of the question.
         - user_id: The ID of the user who authored the question.
-        - likes: The number of upvotes the question has received.
+        - upvotes: The number of upvotes the question has received.
         - comments_count: The number of comments on the question.
         - programmingLanguage: The programming language associated with the question.
         - codeSnippet: The code snippet included in the question.
         - tags: The tags associated with the question.
         - answered: Whether the question has been answered.
-        - topic: The topic of the question.
+        - post_type: The type of the post (e.g., 'question', 'discussion').
+        - author: The username of the author.
     """
     unique_question_ids = set()
     personalized_questions = []
@@ -1007,10 +1008,12 @@ def list_questions_according_to_the_user(request, user_id: int):
         'codeSnippet': question.code_snippet,
         'tags': question.tags,
         'answered': question.answered,
+        'post_type': question.type,  # Include the post type
         'author': question.author.username,
         'upvoted_by': [vote.user.username for vote in question.votes.filter(vote_type=VoteType.UPVOTE.value)],
         'downvoted_by': [vote.user.username for vote in question.votes.filter(vote_type=VoteType.DOWNVOTE.value)],
     } for question in personalized_questions]
+
     return JsonResponse({'questions': questions_data}, safe=False)
 
 

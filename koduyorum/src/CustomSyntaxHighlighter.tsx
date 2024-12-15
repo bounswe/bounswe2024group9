@@ -3,11 +3,9 @@ import { Text, ScrollView } from 'react-native';
 import SyntaxHighlighter from 'react-native-syntax-highlighter';
 import { atomOneDark } from 'react-native-syntax-highlighter';
 
-const CustomSyntaxHighlighter = ({ language = 'javascript', children }) => {
-    // Validate language prop
+const CustomSyntaxHighlighter = ({ language = 'javascript', children = '' }) => {
     const validLanguage = typeof language === 'string' && language.trim() !== '' ? language : 'javascript';
 
-    // Helper to add line numbers
     const addLineNumbers = (code) => {
         return code
             .split('\n')
@@ -19,7 +17,7 @@ const CustomSyntaxHighlighter = ({ language = 'javascript', children }) => {
         <ScrollView horizontal>
             <Text>
                 <SyntaxHighlighter
-                    language={validLanguage} // Use the validated language
+                    language={validLanguage}
                     style={atomOneDark}
                 >
                     {addLineNumbers(children)}
