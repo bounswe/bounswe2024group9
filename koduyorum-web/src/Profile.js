@@ -329,6 +329,7 @@ const Profile = () => {
                                                 comment_id={comment.comment_id}
                                                 answer_of_the_question={comment.answer_of_the_question}
                                                 fetchComments={""}
+                                                onClick={() => navigate(`/question/${comment.question_id}`)}
                                               />
                                             </React.Fragment>
                                           ))

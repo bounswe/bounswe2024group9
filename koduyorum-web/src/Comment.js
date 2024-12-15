@@ -8,7 +8,7 @@ import { faThumbsUp, faCommentDots, faThumbsDown } from '@fortawesome/free-solid
 import './QuestionDetail.css';
 import EditComment from "./EditComment"
 
-function Comment(props) {
+function Comment({ onClick, ...props }) {
 
   const [votes, setVotes] = useState(props.initialVotes);
   const isQuestionOwner = localStorage.getItem("username") === props.questionAuthor;
@@ -117,7 +117,8 @@ function Comment(props) {
   };
 
   return (
-    <div className="p-4 border border-gray-300 rounded">
+    <div className="p-4 border border-gray-300 rounded"
+    onClick={onClick}>
       {isAnswer && (
         <div className={`question-status-label answered`}>
           Answer
