@@ -24,7 +24,8 @@ export default function CodeExecution() {
   const [isUpvoted, setIsUpvoted] = useState(false);
 
   const [code, setCode] = useState(""); // State to store the user input (code)
-const [output, setOutput] = useState([]); // State to store the backend's response (output)
+  const [questionOutput, setQuestionOutput] = useState([]); // For question output
+  const [commentOutput, setCommentOutput] = useState([]); // For comment outputs (keyed by comment ID)
   const [isloading, setIsLoading] = useState(true); // State to manage opening page
 
   const [loading, setLoading] = useState(false); // State to manage loading state
@@ -120,10 +121,18 @@ const [output, setOutput] = useState([]); // State to store the backend's respon
         body: JSON.stringify({ source_code: code, language_id: languageId }),  // Send code and language ID as JSON
       });
       const data = await response.json();  // Parse the JSON response
-      setOutput(data.output);  // Set the output from backend
-
+      
+      if (type === 'question') {
+        setQuestionOutput(data.output); // Update the question output
+      } else if (type === 'comment') {
+        setCommentOutput(data.output);
+      }
     } catch (error) {
-      setOutput("Error: Could not execute the code."); // Handle errors
+      if (type === 'question') {
+        setQuestionOutput(["Error: Could not execute the code."]);
+      } else if (type === 'comment') {
+        setCommentOutput(["Error: Could not execute the code."]);
+      }
     } finally {
       setLoading(false); // Turn off loading state after the request completes
     }
@@ -209,10 +218,10 @@ const [output, setOutput] = useState([]); // State to store the backend's respon
         body: JSON.stringify({ source_code: code, language_id: languageId }),  // Send code and language ID as JSON
       });
       const data = await response.json();  // Parse the JSON response
-      setOutput(data.output);  // Set the output from backend
+      setCommentOutput(data.output);  // Set the output from backend
 
     } catch (error) {
-      setOutput("Error: Could not execute the code."); // Handle errors
+      setCommentOutput("Error: Could not execute the code."); // Handle errors
     } finally {
       setLoading(false); // Turn off loading state after the request completes
     }
@@ -319,7 +328,7 @@ const [output, setOutput] = useState([]); // State to store the backend's respon
                 <h2 className="text-xl font-semibold mb-2">Output:</h2>
                 <pre className="w-full p-4 bg-gray-200 text-gray-800 whitespace-pre-wrap">
                     {loading ? "Waiting for output..." : (
-                      output.length > 0 ? output.map((line, index) => (
+                      questionOutput.length > 0 ? questionOutput.map((line, index) => (
                   <div key={index}>{line}</div>
                   )) : "No output yet."
                 )}
@@ -413,6 +422,17 @@ const [output, setOutput] = useState([]); // State to store the backend's respon
                   {loading ? "Executing..." : "Execute Code"}
                 </button>
               </form>
+
+              <div className="mt-6">
+                <h2 className="text-xl font-semibold mb-2">Output:</h2>
+                <pre className="w-full p-4 bg-gray-200 text-gray-800 whitespace-pre-wrap">
+                    {loading ? "Waiting for output..." : (
+                      commentOutput.length > 0 ? commentOutput.map((line, index) => (
+                  <div key={index}>{line}</div>
+                  )) : "No output yet."
+                )}
+                </pre>
+              </div>
             </div>
           </div>
         </div>
