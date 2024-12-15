@@ -22,6 +22,7 @@ export default function CodeExecution() {
   const [isAnswered, setAnswered] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [isUpvoted, setIsUpvoted] = useState(false);
+  const [isDownvoted, setIsDownvoted] = useState(false);
 
   const [code, setCode] = useState(""); // State to store the user input (code)
   const [questionOutput, setQuestionOutput] = useState([]); // For question output
@@ -78,6 +79,10 @@ export default function CodeExecution() {
       const username = data2.user.username;
       if (upvoted_by.includes(username)) {
         setIsUpvoted(true);
+      }
+      let downvoted_by = data.question.downvoted_by;
+      if (downvoted_by.includes(username)) {
+        setIsDownvoted(true);
       }
     } catch (err) {
       setError(err.message);
@@ -294,11 +299,13 @@ export default function CodeExecution() {
                 author={questionData.author}
                 language={questionData.language}
                 tags={questionData.tags}
-                initialVotes={questionData.upvote_count}
+                upvotes={questionData.upvote_count}
+                downvotes={questionData.downvoted_by.length}
                 question_id={question_id}
                 isAnswered={isAnswered}
                 title={questionData.title}
                 isUpvoted={isUpvoted}
+                isDownvoted={isDownvoted}
                 fetchQuestion={fetchQuestion}
 
             />

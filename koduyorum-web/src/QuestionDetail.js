@@ -13,7 +13,8 @@ import { showNotification } from "./NotificationCenter";
 import NotificationCenter from "./NotificationCenter";
 
 function QuestionDetail(props) {
-  const [votes, setVotes] = useState(props.initialVotes);
+  const [votes, setVotes] = useState(props.upvotes);
+  const [downvotes, setDownvotes] = useState(props.downvotes);
   const isOwner = localStorage.getItem("username") === props.author;
   const [author] = useState(props.author);
   const navigate = useNavigate();
@@ -81,7 +82,7 @@ function QuestionDetail(props) {
             if (response.ok) {
 
                 const data = await response.json();
-                setVotes(data.success);
+                setDownvotes(data.success);
             }
         } catch (error) {
             console.error('Error downvoting:', error);
@@ -167,7 +168,7 @@ function QuestionDetail(props) {
                     onClick={handlePostDownvote}
                 >
                     <FontAwesomeIcon icon={faThumbsDown} size="lg" />
-                    <span className="footer-text">{votes} Downvotes</span>
+                    <span className="footer-text">{downvotes} Downvotes</span>
                 </div>
             {isOwner && (
                 <div className="owner-actions">
