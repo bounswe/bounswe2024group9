@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import FontAwesome from 'react-native-vector-icons/FontAwesome'; // For bookmark icons
 import { useNavigation } from '@react-navigation/native';
 
 const QuestionCard = ({ post, currentUser, onPress }) => {
@@ -17,22 +17,51 @@ const QuestionCard = ({ post, currentUser, onPress }) => {
         answered,
         upvoted_by = [],
         downvoted_by = [],
+        post_type,
     } = post;
 
     const [likes, setLikes] = useState(initialLikes);
     const [hasUpvoted, setHasUpvoted] = useState(false);
     const [hasDownvoted, setHasDownvoted] = useState(false);
+    const [isBookmarked, setIsBookmarked] = useState(false);
 
     useEffect(() => {
         setHasUpvoted(upvoted_by.includes(currentUser.username));
         setHasDownvoted(downvoted_by.includes(currentUser.username));
-    }, [upvoted_by, downvoted_by, currentUser.username]);
+
+        // Fetch bookmark status
+        const fetchBookmarkStatus = async () => {
+            try {
+                const response = await fetch(
+                    `http://10.0.2.2:8000/check_bookmark/${id}/`,
+                    {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'User-ID': currentUser.id,
+                        },
+                    }
+                );
+                const data = await response.json();
+                if (response.ok) {
+                    setIsBookmarked(data.is_bookmarked);
+                } else {
+                    console.error('Error checking bookmark status:', data.error);
+                }
+            } catch (error) {
+                console.error('Error checking bookmark status:', error);
+            }
+        };
+
+        fetchBookmarkStatus();
+    }, [id, currentUser.id, currentUser.username]);
 
     const handleVote = async (voteType) => {
         try {
-            const endpoint = voteType === 'UPVOTE'
-                ? `http://10.0.2.2:8000/upvote_object/question/${id}/`
-                : `http://10.0.2.2:8000/downvote_object/question/${id}/`;
+            const endpoint =
+                voteType === 'UPVOTE'
+                    ? `http://10.0.2.2:8000/upvote_object/question/${id}/`
+                    : `http://10.0.2.2:8000/downvote_object/question/${id}/`;
 
             const response = await fetch(endpoint, {
                 method: 'POST',
@@ -59,6 +88,32 @@ const QuestionCard = ({ post, currentUser, onPress }) => {
             }
         } catch (error) {
             console.error('Error voting:', error);
+        }
+    };
+
+    const handleBookmarkToggle = async () => {
+        try {
+            const endpoint = isBookmarked
+                ? `http://10.0.2.2:8000/remove_bookmark/${id}/`
+                : `http://10.0.2.2:8000/bookmark_question/${id}/`;
+
+            const response = await fetch(endpoint, {
+                method: isBookmarked ? 'DELETE' : 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'User-ID': currentUser.id,
+                },
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                setIsBookmarked(!isBookmarked);
+            } else {
+                console.error('Bookmark toggle failed:', data.error);
+            }
+        } catch (error) {
+            console.error('Error toggling bookmark:', error);
         }
     };
 
@@ -109,8 +164,8 @@ const QuestionCard = ({ post, currentUser, onPress }) => {
                     style={styles.footerItem}
                     onPress={() => handleVote('UPVOTE')}
                 >
-                    <MaterialIcons
-                        name="arrow-upward"
+                    <FontAwesome
+                        name="arrow-up"
                         size={24}
                         color={hasUpvoted ? '#007bff' : '#888'}
                     />
@@ -119,10 +174,21 @@ const QuestionCard = ({ post, currentUser, onPress }) => {
                     style={styles.footerItem}
                     onPress={() => handleVote('DOWNVOTE')}
                 >
-                    <MaterialIcons
-                        name="arrow-downward"
+                    <FontAwesome
+                        name="arrow-down"
                         size={24}
                         color={hasDownvoted ? '#dc3545' : '#888'}
+                    />
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                    style={styles.footerItem}
+                    onPress={handleBookmarkToggle}
+                >
+                    <FontAwesome
+                        name={isBookmarked ? 'bookmark' : 'bookmark-o'}
+                        size={24}
+                        color={isBookmarked ? '#007bff' : '#888'}
                     />
                 </TouchableOpacity>
             </View>
@@ -173,11 +239,6 @@ const styles = StyleSheet.create({
     },
     footerItem: {
         marginRight: 15,
-    },
-    voteCount: {
-        fontSize: 14,
-        fontWeight: 'bold',
-        color: '#333',
     },
     answeredLabel: {
         position: 'absolute',

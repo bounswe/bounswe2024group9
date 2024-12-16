@@ -26,7 +26,7 @@ const LogoutButton = () => {
       });
   };
 
-  return <button className="px-4 py-2 text-white hover:bg-blue-200 rounded-md transition-colors" onClick={handleLogout}>Log Out</button>;
+  return <button className="px-4 py-2 text-white hover:bg-blue-200 rounded-md transition-colors" onClick={handleLogout}>LOGOUT</button>;
 };
 
 // Navbar Component with Search Functionality
@@ -106,7 +106,7 @@ export const Navbar = ({
 };
 
 // LeftSidebar Component
-export const LeftSidebar = ({ tags, handleTagClick, setPosts, language }) => {
+export const LeftSidebar = ({ tags, handleTagClick, setPosts, language, top_tags }) => {
   const [filters, setFilters] = useState({
     status: 'all',
     language: language == "" ? "all" : language,
@@ -160,18 +160,16 @@ export const LeftSidebar = ({ tags, handleTagClick, setPosts, language }) => {
       <div className="tags-container">
         <h3 className="section-title">Popular Tags</h3>
         <ul className="tags-list">
-          <li>
-            <button onClick={() => handleTagClick('javascript')} className="tag-link">JavaScript</button>
-          </li>
-          <li>
-            <button onClick={() => handleTagClick('python')} className="tag-link">Python</button>
-          </li>
-          <li>
-            <button onClick={() => handleTagClick('react')} className="tag-link">React</button>
-          </li>
-          <li>
-            <button onClick={() => handleTagClick('algorithms')} className="tag-link">Algorithms</button>
-          </li>
+          {top_tags.map((tag) => (
+            <li key={tag}>
+              <button 
+                onClick={() => handleTagClick(tag.toLowerCase())} 
+                className="tag-link"
+              >
+                {tag}
+              </button>
+            </li>
+          ))}
         </ul>
       </div>
       
@@ -185,6 +183,7 @@ export const LeftSidebar = ({ tags, handleTagClick, setPosts, language }) => {
           <option value="all">All Posts</option>
           <option value="answered">Answered</option>
           <option value="unanswered">Unanswered</option>
+          <option value="discussion">Discussion</option>
         </select>
         
         <select

@@ -1342,7 +1342,12 @@ def multi_search(request):
 
         # Wiki Search
         try:
-            wiki_response = wiki_search(request, query)  # Call the wiki_search function
+            # Convert DRF request to Django HttpRequest
+            django_request = HttpRequest()
+            django_request.method = request.method
+            django_request.GET = request.GET
+
+            wiki_response = wiki_search(django_request, query)  # Call the wiki_search function
             if isinstance(wiki_response, JsonResponse):
                 wiki_data = json.loads(wiki_response.content)
                 if 'results' in wiki_data:

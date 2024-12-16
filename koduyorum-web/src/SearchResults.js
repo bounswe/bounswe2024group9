@@ -32,7 +32,7 @@ const SearchResults = () => {
   const [annotationId, setAnnotationId] = useState(null);
   const [topContributors, setTopContributors] = useState([]); // Top Contributors state
   const [originalText, setOriginalText] = useState(null);
-
+  const [topTags, setTopTags] = useState([]); // Top Tags state
 
   const { wiki_id, wiki_name} = useParams(); // Get wiki_id from the URL
   const navigate = useNavigate();
@@ -188,6 +188,7 @@ const SearchResults = () => {
       const questionData = infoQuestionAnnotationData.questions;      
       const annotationData = infoQuestionAnnotationData.annotations;
       const topContributors = infoQuestionAnnotationData.top_contributors; // Top Contributors data
+      const topTags = infoQuestionAnnotationData.top_tags; // Top Tags data
       setOriginalText(infoData.wikipedia.info);
 
 
@@ -195,6 +196,7 @@ const SearchResults = () => {
       setQuestionData(questionData || []);
       setAnnotationData(annotationData || []);
       setTopContributors(topContributors || []);
+      setTopTags(topTags || []);
     } catch (err) {
       console.error("Error fetching search data:", err);
       setError("Failed to load search data.");
@@ -282,6 +284,7 @@ const SearchResults = () => {
     console.log("Final annotated text:", annotatedText);
     return annotatedText;
   };
+
   
   const handleEditAnnotation = async (annotationId, startOffset, endOffset) => {
     // Fetch the annotation to get its text
@@ -403,7 +406,7 @@ const SearchResults = () => {
           />
           <NotificationCenter />
           <div className="feed-content">
-            <LeftSidebar handleTagClick={handleTagClick} setPosts={setQuestionData} language={wiki_name}/>
+            <LeftSidebar handleTagClick={handleTagClick} setPosts={setQuestionData} language={wiki_name} top_tags={topTags}/>
 
             <div className="info-container">
  
@@ -428,6 +431,7 @@ const SearchResults = () => {
                     selectedText={selectedText}
                     startIndex={startIndex}
                     endIndex={endIndex}
+                    annotation_type={"wiki"}
                     language_id={wiki_id}
                     annotationId={annotationId}
                     onClose={() => setModalVisible(false)}

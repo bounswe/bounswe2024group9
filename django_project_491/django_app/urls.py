@@ -77,7 +77,9 @@ urlpatterns = [
     path('create_annotation/', annotation_views.create_annotation, name='create_annotation'),
     path('delete_annotation/<int:annotation_id>/', annotation_views.delete_annotation, name='delete_annotation'),
     path('edit_annotation/<int:annotation_id>/', annotation_views.edit_annotation, name='edit_annotation'),
-    path('get_annotations_by_language_id/<int:language_qid>/', annotation_views.get_annotations_by_language_request, name='get_annotations_by_language_id'),
+
+    path('get_annotations/<str:annotation_type>/<int:language_qid>/', annotation_views.get_annotations_by_component, name='get_annotations'),
+    # path('get_annotations_by_language_id/<int:language_qid>/', annotation_views.get_annotations_by_language_request, name='get_annotations_by_language_id'),
     path('annotations/all/', annotation_views.get_all_annotations, name='get_all_annotations'),
     path('multi_search/', user_views.multi_search, name='multi_search'),
     path('get_user_profile_by_id/<int:user_id>/', user_views.get_user_profile_by_id, name='get_user_profile_by_id'),
@@ -85,7 +87,4 @@ urlpatterns = [
     
     # Static label related functions
     path('questions/<int:question_id>/label-info/', question_views.fetch_question_label_info, name='fetch_question_label'),
-    path('questions/<int:question_id>/topic/', question_views.get_topic_url, name='get_topic_url'),
-    path('topics/', question_views.list_all_topics, name='list_all_topics'),
-
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

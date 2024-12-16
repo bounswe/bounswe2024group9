@@ -19,6 +19,7 @@ function Feed() {
   const [questionOfTheDay, setQuestionOfTheDay] = useState(null);
   const [loading, setLoading] = useState(true); // Adding a loading state
   const [topContributors, setTopContributors] = useState([]); // Top Contributors state
+  const [topTags, setTopTags] = useState([]); // Top Tags state
   const hasFetchedData = useRef(false);
   const searchDisplayRef = useRef(null);
   const navigate = useNavigate();
@@ -117,6 +118,7 @@ function Feed() {
       setPosts(data.personalized_questions);
       setQuestionOfTheDay(data.question_of_the_day);
       setTopContributors(data.top_contributors);
+      setTopTags(data.top_tags);
     } catch (error) {
       console.error("Error fetching initial data:", error);
     } finally {
@@ -131,28 +133,6 @@ function Feed() {
     }
   }, []);
 
-
-  const fetchPostsByTime = async () => {
-    try {
-      const response = await fetch(
-        `${process.env.REACT_APP_API_URL}/list_questions_by_time/`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      if (response.ok) {
-        const data = await response.json();
-        return data.questions;
-      } else {
-        console.error("Error fetching questions:", response.statusText);
-      }
-    } catch (error) {
-      console.error("Error fetching questions:", error);
-    }
-  };
 
   const fetchSearchResults = async (query) => {
     try {
@@ -233,7 +213,7 @@ function Feed() {
 
           <div className="feed-content">
             {/* Left Edge - Popular Tags */}
-            <LeftSidebar handleTagClick={handleTagClick} setPosts={setPosts} language={''}/>
+            <LeftSidebar handleTagClick={handleTagClick} setPosts={setPosts} language={''} top_tags={topTags}/>
 
             {/* Middle - Posts */}
             <div className="posts-container">
