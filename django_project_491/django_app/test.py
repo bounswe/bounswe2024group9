@@ -561,283 +561,297 @@ class UserModelTest(TestCase):
         self.assertEqual(annotation_details[0]['text'], "Sample annotation")
         self.assertEqual(annotation_details[0]['author'], self.user.username)
 
-# class UserViewsTests(TestCase):
-#     databases = {'default', 'annotations'}  # Allow queries to 'annotations' database
-#     def setUp(self):
-#         self.username = 'testuser'
-#         self.password = 'testpassword123'
-#         self.email = 'testuser@example.com'
-#         self.user = get_user_model().objects.create_user(
-#             username=self.username,
-#             email=self.email,
-#             password=self.password
-#         )
+class UserViewsTests(TestCase):
+    databases = {'default', 'annotations'}  # Allow queries to 'annotations' database
+    def setUp(self):
+        self.username = 'testuser'
+        self.password = 'testpassword123'
+        self.email = 'testuser@example.com'
+        self.user = get_user_model().objects.create_user(
+            username=self.username,
+            email=self.email,
+            password=self.password
+        )
 
-#         self.user.known_languages = ['Python', 'JavaScript']
-#         self.user.interested_topics = ['AI', 'Web Development']
-#         self.user.save()
+        self.user.known_languages = ['Python', 'JavaScript']
+        self.user.interested_topics = ['AI', 'Web Development']
+        self.user.save()
         
-#         self.admin = get_user_model().objects.create_superuser(
-#             username='admin',
-#             email='admin@example.com',
-#             password='adminpassword123'
-#         )
-#         self.client = APIClient()
-#         # Generate tokens for the user
-#         self.refresh_token = RefreshToken.for_user(self.user)
-#         self.access_token = str(AccessToken.for_user(self.user))
+        self.admin = get_user_model().objects.create_superuser(
+            username='admin',
+            email='admin@example.com',
+            password='adminpassword123'
+        )
+        self.client = APIClient()
+        # Generate tokens for the user
+        self.refresh_token = RefreshToken.for_user(self.user)
+        self.access_token = str(AccessToken.for_user(self.user))
 
-#     def test_get_user_profile_by_username(self):
-#         """Test retrieving user profile by username."""
-#         url = reverse('get_user_profile_by_username', args=[self.username])
-#         response = self.client.get(url)
-#         self.assertEqual(response.status_code, status.HTTP_200_OK)
-#         self.assertIn('user', response.json())
-#         self.assertEqual(response.json()['user']['username'], self.username)
+    def test_get_user_profile_by_username(self):
+        """Test retrieving user profile by username."""
+        url = reverse('get_user_profile_by_username', args=[self.username])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn('user', response.json())
+        self.assertEqual(response.json()['user']['username'], self.username)
 
-#     def test_get_user_profile_by_id(self):
-#         """Test retrieving user profile by user ID."""
-#         url = reverse('user_profile_by_id', args=[self.user.pk])
-#         response = self.client.get(url)
-#         self.assertEqual(response.status_code, status.HTTP_200_OK)
-#         self.assertEqual(response.json()['user']['username'], self.username)
+    def test_get_user_profile_by_id(self):
+        """Test retrieving user profile by user ID."""
+        url = reverse('user_profile_by_id', args=[self.user.pk])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.json()['user']['username'], self.username)
 
-#     def test_edit_user_profile(self):
-#         """Test editing user profile."""
-#         url = reverse('edit_user_profile', args=[self.user.pk])
-#         self.client.login(username=self.username, password=self.password)
-#         headers = {'HTTP_USER_ID': str(self.user.pk)}
-#         data = {
-#             'username': 'newusername',
-#             'email': 'newemail@example.com',
-#             'bio': 'Updated bio'
-#         }
-#         response = self.client.post(url, json.dumps(data), content_type="application/json", **headers)
-#         self.assertEqual(response.status_code, status.HTTP_200_OK)
-#         self.user.refresh_from_db()
-#         self.assertEqual(self.user.username, 'newusername')
-#         self.assertEqual(self.user.email, 'newemail@example.com')
+    def test_edit_user_profile(self):
+        """Test editing user profile."""
+        url = reverse('edit_user_profile', args=[self.user.pk])
 
-    # def test_delete_user_profile(self):
-    #     """Test deleting user profile."""
-    #     url = reverse('delete_user_profile', args=[self.user.pk])
-    #     self.client.login(username=self.username, password=self.password)
-    #     headers = {'HTTP_USER_ID': str(self.user.pk)}
-    #     response = self.client.delete(url, **headers)
-    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
-    #     with self.assertRaises(get_user_model().DoesNotExist):
-    #         self.user.refresh_from_db()  # Ensure user is deleted
+        # Authenticate using the generated access token
+        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self.access_token}")
 
-    # def test_signup(self):
-    #     """Test user signup."""
-    #     url = reverse('signup')
-    #     data = {
-    #         'username': 'newuser',
-    #         'email': 'newuser@example.com',
-    #         'password1': 'newpassword123',
-    #         'password2': 'newpassword123'
-    #     }
-    #     response = self.client.post(url, json.dumps(data), content_type="application/json")
-    #     self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-    #     self.assertIn('token', response.json())  # Check that JWT token is returned
+        # Set the User-ID header
+        headers = {'HTTP_USER_ID': str(self.user.pk)}
 
-    # def test_login_user(self):
-    #     """Test user login."""
-    #     url = reverse('login')
-    #     data = {
-    #         'username': self.username,
-    #         'password': self.password
-    #     }
-    #     response = self.client.post(url, json.dumps(data), content_type="application/json")
-    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
-    #     self.assertIn('token', response.json())  # Check for the JWT token in response
+        # Data to update the user profile
+        data = {
+            'username': 'newusername',
+            'email': 'newemail@example.com',
+            'bio': 'Updated bio'
+        }
 
-    # def test_add_interested_languages_for_a_user(self):
-    #     """Test updating user's interested languages."""
-    #     url = reverse('interested_languages')
-    #     data = {
-    #         'user_id': self.user.pk,
-    #         'interested_topics': ['Python', 'Django'],
-    #         'known_languages': ['English', 'Spanish']
-    #     }
-    #     response = self.client.post(url, json.dumps(data), content_type="application/json")
-    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
-    #     self.user.refresh_from_db()
-    #     self.assertEqual(self.user.interested_topics, ['Python', 'Django'])
-    #     self.assertEqual(self.user.known_languages, ['English', 'Spanish'])
+        # Send PUT request with headers and data
+        response = self.client.put(url, json.dumps(data), content_type="application/json", **headers)
 
-    # def test_get_user_preferred_languages(self):
-    #     """Test retrieving user's preferred languages and interested topics."""
-    #     url = reverse('preferred_languages')  # Update with the actual URL name/path
-    #     response = self.client.post(
-    #         url,
-    #         data=json.dumps({'user_id': self.user.pk}),
-    #         content_type='application/json'
-    #     )
-    #     self.assertEqual(response.status_code, 200)
-    #     response_data = response.json()
-    #     self.assertEqual(response_data['known_languages'], ['Python', 'JavaScript'])
-    #     self.assertEqual(response_data['interested_topics'], ['AI', 'Web Development'])
+        # Assertions
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.username, 'newusername')
+        self.assertEqual(self.user.email, 'newemail@example.com')
 
-    # def test_logout_user(self):
-    #     # Authenticate the client with the access token
-    #     self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {self.access_token}')
 
-    #     # Send the POST request with the refresh token
-    #     response = self.client.post(
-    #         reverse('logout'),
-    #         data=json.dumps({'token': str(self.refresh_token)}),
-    #         content_type='application/json',
-    #     )
+    def test_delete_user_profile(self):
+        """Test deleting user profile."""
+        url = reverse('delete_user_profile', args=[self.user.pk])
+        self.client.login(username=self.username, password=self.password)
+        headers = {'HTTP_USER_ID': str(self.user.pk)}
+        response = self.client.delete(url, **headers)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        with self.assertRaises(get_user_model().DoesNotExist):
+            self.user.refresh_from_db()  # Ensure user is deleted
 
-    #     # Assert the status code and response content
-    #     self.assertEqual(response.status_code, 200, f"Response data: {response.content}")
-    #     response_data = response.json()
-    #     self.assertEqual(response_data['status'], 'success')
-    #     self.assertEqual(response_data['message'], 'User logged out successfully')
+    def test_signup(self):
+        """Test user signup."""
+        url = reverse('signup')
+        data = {
+            'username': 'newuser',
+            'email': 'newuser@example.com',
+            'password1': 'newpassword123',
+            'password2': 'newpassword123'
+        }
+        response = self.client.post(url, json.dumps(data), content_type="application/json")
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertIn('token', response.json())  # Check that JWT token is returned
 
-    # def test_check_token(self):
-    #     """Test checking the validity of a token."""
-    #     url = reverse('check_token')  # Update with the actual URL name/path
-    #     self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {self.access_token}')
-    #     response = self.client.get(url)
-    #     self.assertEqual(response.status_code, 200)
-    #     self.assertEqual(response.json()['status'], 'Token is valid')
+    def test_login_user(self):
+        """Test user login."""
+        url = reverse('login')
+        data = {
+            'username': self.username,
+            'password': self.password
+        }
+        response = self.client.post(url, json.dumps(data), content_type="application/json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn('token', response.json())  # Check for the JWT token in response
 
-    #     # Test with an invalid token
-    #     self.client.credentials(HTTP_AUTHORIZATION='Bearer invalidtoken')
-    #     response = self.client.get(url)
-    #     self.assertEqual(response.status_code, 401)
+    def test_add_interested_languages_for_a_user(self):
+        """Test updating user's interested languages."""
+        url = reverse('interested_languages')
+        data = {
+            'user_id': self.user.pk,
+            'interested_topics': ['Python', 'Django'],
+            'known_languages': ['English', 'Spanish']
+        }
+        response = self.client.post(url, json.dumps(data), content_type="application/json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.interested_topics, ['Python', 'Django'])
+        self.assertEqual(self.user.known_languages, ['English', 'Spanish'])
 
-    # # def test_upload_profile_pic(self):
-    # #     """Test uploading a profile picture."""
-    # #     url = reverse('upload_profile_pic')  # Update with the actual URL name/path
-    # #     image = BytesIO()
-    # #     image.write(b'test image content')
-    # #     image.seek(0)
-    # #     uploaded_file = SimpleUploadedFile("test.jpg", image.read(), content_type="image/jpeg")
+    def test_get_user_preferred_languages(self):
+        """Test retrieving user's preferred languages and interested topics."""
+        url = reverse('preferred_languages')  # Update with the actual URL name/path
+        response = self.client.post(
+            url,
+            data=json.dumps({'user_id': self.user.pk}),
+            content_type='application/json'
+        )
+        self.assertEqual(response.status_code, 200)
+        response_data = response.json()
+        self.assertEqual(response_data['known_languages'], ['Python', 'JavaScript'])
+        self.assertEqual(response_data['interested_topics'], ['AI', 'Web Development'])
 
-    # #     # Test valid upload
-    # #     response = self.client.post(
-    # #         url,
-    # #         {'profile_pic': uploaded_file},
-    # #         HTTP_User_ID=str(self.user.pk)  # Include the user ID in the header
-    # #     )
-    # #     self.assertEqual(response.status_code, 200)
-    # #     response_data = response.json()
-    # #     self.assertEqual(response_data['success'], 'Profile picture uploaded successfully')
-    # #     self.assertIn('url', response_data)
+    def test_logout_user(self):
+        # Authenticate the client with the access token
+        self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {self.access_token}')
 
-    # #     # Test missing user ID header
-    # #     response = self.client.post(
-    # #         url,
-    # #         {'profile_pic': uploaded_file}
-    # #     )
-    # #     self.assertEqual(response.status_code, 400)
-    # #     self.assertEqual(response.json()['error'], 'User ID parameter is required in the header')
+        # Send the POST request with the refresh token
+        response = self.client.post(
+            reverse('logout'),
+            data=json.dumps({'token': str(self.refresh_token)}),
+            content_type='application/json',
+        )
 
-    # #     # Test invalid request method
-    # #     response = self.client.get(url)
-    # #     self.assertEqual(response.status_code, 405)
-    # #     self.assertEqual(response.json()['error'], 'Invalid request method')
+        # Assert the status code and response content
+        self.assertEqual(response.status_code, 200, f"Response data: {response.content}")
+        response_data = response.json()
+        self.assertEqual(response_data['status'], 'success')
+        self.assertEqual(response_data['message'], 'User logged out successfully')
+
+    def test_check_token(self):
+        """Test checking the validity of a token."""
+        url = reverse('check_token')  # Update with the actual URL name/path
+        self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {self.access_token}')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['status'], 'Token is valid')
+
+        # Test with an invalid token
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer invalidtoken')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 401)
+
+    def test_upload_profile_pic(self):
+        """Test uploading a profile picture."""
+        url = reverse('upload_profile_pic')  # Update with the actual URL name/path
+        image = BytesIO()
+        image.write(b'test image content')
+        image.seek(0)
+        uploaded_file = SimpleUploadedFile("test.jpg", image.read(), content_type="image/jpeg")
+
+        # Test valid upload
+        self.client.credentials(HTTP_User_ID=str(self.user.pk))  # Include the user ID in the header
+        response = self.client.post(
+            url,
+            {'profile_pic': uploaded_file}
+        )
+        self.assertEqual(response.status_code, 200)
+        response_data = response.json()
+        self.assertEqual(response_data['success'], 'Profile picture uploaded successfully')
+        self.assertIn('url', response_data)
+
+        # Test missing user ID header
+        self.client.credentials()  # Clear credentials
+        response = self.client.post(
+            url,
+            {'profile_pic': uploaded_file}
+        )
+        self.assertEqual(response.status_code, 400)
+        response_data = response.json()
+        self.assertEqual(response_data['error'], 'User ID parameter is required in the header')
+
+        # Test invalid request method
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 405)  # Ensure the status code is 405
+        self.assertEqual(response.reason_phrase, 'Method Not Allowed')  # Validate the response reason
+
     
-    # def test_reset_password_request(self):
-    #     """Test password reset request email functionality."""
-    #     # Create a user
-    #     user = get_user_model().objects.create_user(
-    #         username='testuserpwres',
-    #         email='testuserpwres@example.com',
-    #         password='testpassword123'
-    #     )
+    def test_reset_password_request(self):
+        """Test password reset request email functionality."""
+        # Create a user
+        user = get_user_model().objects.create_user(
+            username='testuserpwres',
+            email='testuserpwres@example.com',
+            password='testpassword123'
+        )
 
-    #     # Mock a POST request with the user's email
-    #     response = self.client.post(
-    #         reverse('reset_password'),  # Replace with the actual URL name
-    #         data=json.dumps({'email': 'testuserpwres@example.com'}),
-    #         content_type="application/json"
-    #     )
+        # Mock a POST request with the user's email
+        response = self.client.post(
+            reverse('reset_password'),  # Replace with the actual URL name
+            data=json.dumps({'email': 'testuserpwres@example.com'}),
+            content_type="application/json"
+        )
 
-    #     # Assert that the response is OK
-    #     self.assertEqual(response.status_code, 200)
+        # Assert that the response is OK
+        self.assertEqual(response.status_code, 200)
 
-    #     # Assert that an email was sent
-    #     self.assertEqual(len(mail.outbox), 1)  # Verify that exactly one email was sent
+        # Assert that an email was sent
+        self.assertEqual(len(mail.outbox), 1)  # Verify that exactly one email was sent
 
-    #     # Check the reset link in the HTML content
-    #     email_html = mail.outbox[0].alternatives[0][0]  # HTML version is stored here
-    #     self.assertIn('reset_password', email_html)  # Verify the reset link is in the email HTML content
+        # Check the reset link in the HTML content
+        email_html = mail.outbox[0].alternatives[0][0]  # HTML version is stored here
+        self.assertIn('reset_password', email_html)  # Verify the reset link is in the email HTML content
 
 
-    # @patch('django_app.views.user_views.default_token_generator.check_token', return_value=True)  # Mock valid token
-    # def test_reset_password_view(self, mock_check_token):
-    #     """Test password reset functionality with valid data."""
-    #     # Create a user
-    #     user = get_user_model().objects.create_user(
-    #         username='testuserpwres',
-    #         email='testuserpwres@example.com',
-    #         password='oldpassword123'
-    #     )
+    @patch('django_app.views.user_views.default_token_generator.check_token', return_value=True)  # Mock valid token
+    def test_reset_password_view(self, mock_check_token):
+        """Test password reset functionality with valid data."""
+        # Create a user
+        user = get_user_model().objects.create_user(
+            username='testuserpwres',
+            email='testuserpwres@example.com',
+            password='oldpassword123'
+        )
 
-    #     # Generate UID and token
-    #     uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
-    #     token = default_token_generator.make_token(user)
+        # Generate UID and token
+        uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
+        token = default_token_generator.make_token(user)
 
-    #     # Prepare the POST request
-    #     response = self.client.post(
-    #         reverse('reset_password', args=[uidb64, token]),  # Adjust URL name if needed
-    #         data=json.dumps({
-    #             'new_password': 'newpassword123',
-    #             'confirm_password': 'newpassword123',
-    #         }),
-    #         content_type="application/json"
-    #     )
+        # Prepare the POST request
+        response = self.client.post(
+            reverse('reset_password', args=[uidb64, token]),  # Adjust URL name if needed
+            data=json.dumps({
+                'new_password': 'newpassword123',
+                'confirm_password': 'newpassword123',
+            }),
+            content_type="application/json"
+        )
 
-    #     # Debug response if the test fails
-    #     if response.status_code != 200:
-    #         print(f"Response Status Code: {response.status_code}")
-    #         print(f"Response Content: {response.json()}")
+        # Debug response if the test fails
+        if response.status_code != 200:
+            print(f"Response Status Code: {response.status_code}")
+            print(f"Response Content: {response.json()}")
 
-    #     # Assert the response is OK
-    #     self.assertEqual(response.status_code, 200)
+        # Assert the response is OK
+        self.assertEqual(response.status_code, 200)
 
-    #     # Refresh user data and verify password change
-    #     user.refresh_from_db()
-    #     self.assertTrue(user.check_password('newpassword123'))  # Confirm password is updated
+        # Refresh user data and verify password change
+        user.refresh_from_db()
+        self.assertTrue(user.check_password('newpassword123'))  # Confirm password is updated
 
-    # def test_list_most_contributed_five_person(self):
-    #     """Test listing the top 5 users by contributions."""
+    def test_list_most_contributed_five_person(self):
+        """Test listing the top 5 users by contributions."""
         
-    #     # Create users and simulate contributions
-    #     user2 = get_user_model().objects.create_user(username='user2', email='user2@example.com', password='testpassword123')
-    #     user3 = get_user_model().objects.create_user(username='user3', email='user3@example.com', password='testpassword123')
-    #     user4 = get_user_model().objects.create_user(username='user4', email='user4@example.com', password='testpassword123')
-    #     user5 = get_user_model().objects.create_user(username='user5', email='user5@example.com', password='testpassword123')
+        # Create users and simulate contributions
+        user2 = get_user_model().objects.create_user(username='user2', email='user2@example.com', password='testpassword123')
+        user3 = get_user_model().objects.create_user(username='user3', email='user3@example.com', password='testpassword123')
+        user4 = get_user_model().objects.create_user(username='user4', email='user4@example.com', password='testpassword123')
+        user5 = get_user_model().objects.create_user(username='user5', email='user5@example.com', password='testpassword123')
 
-    #     # Simulate contributions
-    #     question1 = self.user.questions.create(title='Question 1', details='Details 1')  # 2 points
-    #     question2 = self.user.questions.create(title='Question 2', details='Details 2')  # 2 points
-    #     self.user.authored_comments.create(details='Answer1', answer_of_the_question=True, question=question1)  # 5 points
-    #     user2.authored_comments.create(details='Answer2', answer_of_the_question=True, question=question2)  # 5 points
-    #     question3 = user3.questions.create(title='Question 3', details='Details 3')  # 2 points
-    #     user3.authored_comments.create(details='Answer3', answer_of_the_question=True, question=question3)  # 5 points
-    #     user4.questions.create(title='Question 4', details='Details 4')  # 2 points
-    #     user4.questions.create(title='Question 5', details='Details 5')  # 2 points
-    #     user5.questions.create(title='Question 6', details='Details 6')  # 2 points
+        # Simulate contributions
+        question1 = self.user.questions.create(title='Question 1', details='Details 1')  # 2 points
+        question2 = self.user.questions.create(title='Question 2', details='Details 2')  # 2 points
+        self.user.authored_comments.create(details='Answer1', answer_of_the_question=True, question=question1)  # 5 points
+        user2.authored_comments.create(details='Answer2', answer_of_the_question=True, question=question2)  # 5 points
+        question3 = user3.questions.create(title='Question 3', details='Details 3')  # 2 points
+        user3.authored_comments.create(details='Answer3', answer_of_the_question=True, question=question3)  # 5 points
+        user4.questions.create(title='Question 4', details='Details 4')  # 2 points
+        user4.questions.create(title='Question 5', details='Details 5')  # 2 points
+        user5.questions.create(title='Question 6', details='Details 6')  # 2 points
 
-    #     # Now, call the endpoint to get top contributors
-    #     url = reverse('get_top_five_contributors')
-    #     response = self.client.get(url)
+        # Now, call the endpoint to get top contributors
+        url = reverse('get_top_five_contributors')
+        response = self.client.get(url)
 
-    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    #     users = response.json()['users']
+        users = response.json()['users']
 
-    #     # Assert that the order is correct
-    #     self.assertEqual(users[0]['username'], 'testuser')  # Highest contribution (9 points)
-    #     self.assertEqual(users[1]['username'], 'user3') # 7 points
-    #     self.assertEqual(users[2]['username'], 'user2') # 5 points
-    #     self.assertEqual(users[3]['username'], 'user4') # 4 points
-    #     self.assertEqual(users[4]['username'], 'user5') # 2 points
+        # Assert that the order is correct
+        self.assertEqual(users[0]['username'], 'testuser')  # Highest contribution (9 points)
+        self.assertEqual(users[1]['username'], 'user3') # 7 points
+        self.assertEqual(users[2]['username'], 'user2') # 5 points
+        self.assertEqual(users[3]['username'], 'user4') # 4 points
+        self.assertEqual(users[4]['username'], 'user5') # 2 points
 
 # class QuestionViewTests(TestCase):
 #     def setUp(self):
