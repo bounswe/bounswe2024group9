@@ -35,8 +35,11 @@ export default function CodeExecution() {
   const [annotationType, setAnnotationType] = useState('');
   const [isPopupVisible, setIsPopupVisible] = useState(false);
   const popupRef = useRef(null);
-  const [annotationData, setAnnotationData] = useState([]);
-  const [comment_annotations, setCommentAnnotations] = useState([]);
+  const [annotationDetailsData, setAnnotationDetailsData] = useState([]);
+  const [comment_annotations_details, setCommentAnnotationsDetails] = useState([]);
+  const [annotation_component_id, setAnnotationComponentId] = useState(null);
+  const [annotationCodeData, setAnnotationCodeData] = useState([]);
+  const [comment_annotations_code, setCommentAnnotationsCode] = useState([]);
 
 
   const openPopup = () => setIsPopupVisible(true);
@@ -72,8 +75,10 @@ export default function CodeExecution() {
       setQuestionData(data.question);
       setLanguageId(data.question.language_id);
       setLoading(false);
-      setAnnotationData(data.question.annotations || []);
+      setAnnotationDetailsData(data.question.annotations || []);
+      setAnnotationCodeData(data.question.annotation_codes || []);
       console.log("annot", data.question.annotations);
+        console.log("annotcode", data.question.annotation_codes);
     } catch (err) {
       setError(err.message);
       setLoading(false);
@@ -93,7 +98,8 @@ export default function CodeExecution() {
       const data = await response.json();
       setCommentData(data.comments);
       setAnswered(data.comments.some(c => c.answer_of_the_question));
-      setCommentAnnotations(data.comments.map(comment => comment.annotations));
+      setCommentAnnotationsDetails(data.comments.map(comment => comment.annotations));
+      setCommentAnnotationsCode(data.comments.map(comment => comment.annotation_codes));
       setLoading(false);
     } catch (err) {
       setError(err.message);
@@ -174,7 +180,7 @@ export default function CodeExecution() {
     fetchInitialData();
   }, []);
 
-const addAnnotations = (text, annotations, detail_length) => {
+const addAnnotations = (text, annotations) => {
   const loggedInUserId = localStorage.getItem('user_id');
   if (!text || text.length === 0) {
     return null;
@@ -188,20 +194,20 @@ const addAnnotations = (text, annotations, detail_length) => {
   );
 
   sortedAnnotations.forEach((annotation) => {
+    console.log("annotation", annotation);
     let {
       annotation_starting_point,
       annotation_ending_point,
       text: annotationText,
-      annotation_id: annotationId,
       author_id: author_id,
       author_name: author_name,
-    } = annotation;
+        annotation_id: annotationId,
+        annotation_type: annotationType,
+        lanquage_qid: language_qid
 
-    // Adjust the offsets for code annotations
-    if (detail_length > 0) {
-      annotation_starting_point -= detail_length;
-      annotation_ending_point -= detail_length;
-    }
+    } = annotation;
+    console.log("annotationType", annotationType);
+    console.log("annotationId", annotationId);
 
     if (lastIndex < annotation_starting_point) {
       annotatedText.push(text.slice(lastIndex, annotation_starting_point));
@@ -227,7 +233,9 @@ const addAnnotations = (text, annotations, detail_length) => {
                     handleEditAnnotation(
                       annotationId,
                       annotation_starting_point,
-                      annotation_ending_point
+                      annotation_ending_point,
+                        annotationType,
+                        language_qid
                     )
                   }
                 >
@@ -257,9 +265,25 @@ const addAnnotations = (text, annotations, detail_length) => {
 
   return annotatedText;
 };
-const handleEditAnnotation = async (annotationId, startOffset, endOffset) => {
+const handleEditAnnotation = async (annotationId, startOffset, endOffset,  annotation_type, language_qid) => {
   // Fetch the annotation to get its text
-  const annotationToEdit = annotationData.find((annotation) => annotation.annotation_id === annotationId);
+  console.log("annottion type in edit", annotation_type);
+  console.log("annotationId in edit", annotationId);
+    console.log("annotation details", annotationDetailsData);
+  console.log( "comment annotation types", comment_annotations_details);
+  let annotationToEdit;
+if (annotation_type === 'question') {
+  annotationToEdit = annotationDetailsData.find((annotation) => annotation.annotation_id === annotationId);
+} else if (annotation_type === 'question_code') {
+  annotationToEdit = annotationCodeData.find((annotation) => annotation.annotation_id === annotationId);
+} else if (annotation_type === 'comment') {
+  annotationToEdit = comment_annotations_details.flat().find((annotation) => annotation.annotation_id === annotationId);
+} else if (annotation_type === 'comment_code') {
+  annotationToEdit = comment_annotations_code.flat().find((annotation) => annotation.annotation_id === annotationId);
+} else {
+    console.error("Invalid annotation type.");
+    return;
+}
   if (annotationToEdit) {
       console.log("Editing annotation:", annotationToEdit);
       setSelectedText(annotationToEdit.text); // Set selected text from the annotation
@@ -267,6 +291,8 @@ const handleEditAnnotation = async (annotationId, startOffset, endOffset) => {
       setEndIndex(endOffset);
       setModalVisible(true);
       setAnnotationId(annotationId);
+      setAnnotationComponentId(language_qid);
+
   } else {
       console.error("Annotation not found for editing.");
   }
@@ -286,9 +312,30 @@ const handleDeleteAnnotation = async (annotationId) => {
 
     if (response.ok) {
       // Update the state to remove the deleted annotation
-      setAnnotationData((prevAnnotations) =>
-        prevAnnotations.filter((annotation) => annotation.annotation_id !== annotationId)
-      );
+
+      if (annotationDetailsData.some(annotation => annotation.annotation_id === annotationId)) {
+        setAnnotationDetailsData((prevAnnotations) =>
+          prevAnnotations.filter((annotation) => annotation.annotation_id !== annotationId)
+        );
+      } else if (annotationCodeData.some(annotation => annotation.annotation_id === annotationId)) {
+        setAnnotationCodeData((prevAnnotations) =>
+          prevAnnotations.filter((annotation) => annotation.annotation_id !== annotationId)
+        );
+      } else if (comment_annotations_details.flat().some(annotation => annotation.annotation_id === annotationId)) {
+        setCommentAnnotationsDetails((prevAnnotations) =>
+          prevAnnotations.map(commentAnnotations =>
+            commentAnnotations.filter(annotation => annotation.annotation_id !== annotationId)
+          )
+        );
+      } else if (comment_annotations_code.flat().some(annotation => annotation.annotation_id === annotationId)) {
+        setCommentAnnotationsCode((prevAnnotations) =>
+          prevAnnotations.map(commentAnnotations =>
+            commentAnnotations.filter(annotation => annotation.annotation_id !== annotationId)
+          )
+        );
+      }else {
+        console.error("Annotation not found for deletion.");
+      }
       // alert('Annotation deleted successfully.');
       showNotification('Annotation deleted successfully.');
       // Optional: Trigger a re-fetch of annotations or update state to reflect the deletion
@@ -305,64 +352,105 @@ const handleDeleteAnnotation = async (annotationId) => {
   }
 };
 
-
-const handleTextSelection = (e, type, id) => {
+const handleTextSelection = (e, type, id, original_text) => {
   const selection = window.getSelection();
   if (selection && selection.rangeCount > 0 && selection.toString().trim() !== '') {
-    const range = selection.getRangeAt(0);
-    const selectedText = selection.toString();
-    let plainText;
-    let startOffset = 0;
-    let endOffset;
-
+    console.log("selection", selection);
     console.log(type);
-    // Determine the appropriate plainText based on the type
-       if (type === 'question_details') {
-         type = 'question';
-         plainText = questionData.details;
-    } else if (type === 'question_code') {
-         type = 'question';
-         startOffset = questionData.details.length;
-         plainText = questionData.code_snippet;
-    } else if (type === 'comment_details') {
-         type = 'comment';
-      const comment = commentData.find(comment => comment.comment_id === id);
-      plainText = comment ? comment.details : '';
-    } else if (type === 'comment_code') {
-         type = 'comment';
-         const comment = commentData.find(comment => comment.comment_id === id);
-         startOffset = comment ? comment.details.length : 0;
-      plainText = comment ? comment.code_snippet : '';
-    } else {
-      console.error("Invalid type parameter.");
-      return;
-    }
 
-    // Ensure plainText is defined before proceeding
-    if (!plainText) {
-      console.error("plainText is undefined.");
-      return;
-    }
+    const selectedText = selection.toString();
+    const plainText = original_text; // Use the original full text
+    console.log("plainText", plainText);
+    console.log("selectedText", selectedText);
+    const startOffset = plainText.indexOf(selectedText);
+    const endOffset = startOffset + selectedText.length;
 
-    startOffset += plainText.indexOf(selectedText);
-    endOffset = startOffset + selectedText.length;
-
-    if (startOffset === -1)  {
+    if (startOffset === -1 || endOffset > plainText.length) {
       console.error("Error calculating offsets. Selection might span across multiple elements or annotations.");
       return;
     }
+
+    // if (selection.anchorOffset < selection.focusOffset) {
+    //     startOffset = selection.anchorOffset;
+    //     endOffset = selection.focusOffset;
+    // }else {
+    //     startOffset = selection.focusOffset;
+    //     endOffset = selection.anchorOffset;
+    // }
+
+    // let selectedText = selection.toString();
 
     setSelectedText(selectedText);
     setStartIndex(startOffset);
     setEndIndex(endOffset);
     setAnnotationType(type);
-    setLanguageId(id);
+
+    setAnnotationComponentId(id);
+
 
     setModalVisible(true);
   } else {
     console.log('No text selected.');
   }
-};
+}
+// const handleTextSelection = (e, type, id) => {
+//   const selection = window.getSelection();
+//   if (selection && selection.rangeCount > 0 && selection.toString().trim() !== '') {
+//     console.log("selection", selection);
+//     const range = selection.getRangeAt(0);
+//     const selectedText = selection.toString();
+//     let plainText;
+//     let startOffset = 0;
+//     let endOffset;
+//
+//     console.log(type);
+//     // Determine the appropriate plainText based on the type
+//        if (type === 'question_details') {
+//          type = 'question';
+//          plainText = questionData.details;
+//     } else if (type === 'question_code') {
+//          type = 'question';
+//          startOffset = questionData.details.length;
+//          plainText = questionData.code_snippet;
+//     } else if (type === 'comment_details') {
+//          type = 'comment';
+//       const comment = commentData.find(comment => comment.comment_id === id);
+//       plainText = comment ? comment.details : '';
+//     } else if (type === 'comment_code') {
+//          type = 'comment';
+//          const comment = commentData.find(comment => comment.comment_id === id);
+//          startOffset = comment ? comment.details.length : 0;
+//       plainText = comment ? comment.code_snippet : '';
+//     } else {
+//       console.error("Invalid type parameter.");
+//       return;
+//     }
+//
+//     // Ensure plainText is defined before proceeding
+//     if (!plainText) {
+//       console.error("plainText is undefined.");
+//       return;
+//     }
+//
+//     startOffset += plainText.indexOf(selectedText);
+//     endOffset = startOffset + selectedText.length;
+//
+//     if (startOffset === -1)  {
+//       console.error("Error calculating offsets. Selection might span across multiple elements or annotations.");
+//       return;
+//     }
+//
+//     setSelectedText(selectedText);
+//     setStartIndex(startOffset);
+//     setEndIndex(endOffset);
+//     setAnnotationType(type);
+//     setLanguageId(id);
+//
+//     setModalVisible(true);
+//   } else {
+//     console.log('No text selected.');
+//   }
+// };
 
   const handleSubmit = async (e) => {
     e.preventDefault(); // Prevent page reload on form submit
@@ -445,7 +533,7 @@ const handleTextSelection = (e, type, id) => {
                 startIndex={startIndex}
                 endIndex={endIndex}
                 annotation_type={annotationType}
-                language_id={languageId}
+                language_qid={annotation_component_id}
                 annotationId={annotationId}
                 onClose={() => setModalVisible(false)}
               />
@@ -461,9 +549,11 @@ const handleTextSelection = (e, type, id) => {
                 isAnswered={isAnswered}
                 title={questionData.title}
                 fetchQuestion={fetchQuestion}
-                onTextSelection={(e) => handleTextSelection(e, 'question_details', question_id)}
-                onCodeSelection={(e) => handleTextSelection(e, 'question_code', question_id)}
-                annotations={annotationData}
+                onTextSelection={(e) => handleTextSelection(e, 'question', question_id, questionData.details)}
+                onCodeSelection={(e) => handleTextSelection(e, 'question_code', question_id, questionData.code_snippet)}
+                annotations_detail={annotationDetailsData}
+                annotations_code={annotationCodeData}
+
                 addAnnotations={addAnnotations}
               />
               {questionData.code_snippet && (
@@ -501,9 +591,11 @@ const handleTextSelection = (e, type, id) => {
                         comment_id={comment.comment_id}
                         answer_of_the_question={comment.answer_of_the_question}
                         fetchComments={fetchComments}
-                        onTextSelection={(e) => handleTextSelection(e, 'comment_details', comment.comment_id)}
-                        onCodeSelection={(e) => handleTextSelection(e, 'comment_code', comment.comment_id)}
-                        annotations={comment_annotations[index]}
+                        onTextSelection={(e) => handleTextSelection(e, 'comment', comment.comment_id, comment.details)}
+                        onCodeSelection={(e) => handleTextSelection(e, 'comment_code', comment.comment_id, comment.code_snippet)}
+                        // annotations={comment_annotations[index]}
+                        annotations_code={comment_annotations_code[index]}
+                        annotations_detail={comment_annotations_details[index]}
                         addAnnotations={addAnnotations}
                       />
                       {comment.code_snippet && (

@@ -154,14 +154,15 @@ function QuestionDetail(props) {
             )}
             {
                 <>
-                    <div className="mt-2 text-gray-600" onMouseUp={(e) => props.onTextSelection(e, 'question_details')}>
-                        {props.addAnnotations(props.explanation, props.annotations, 0)}
+                    <div className="mt-2 text-gray-600" onMouseUp={(e) => props.onTextSelection(e, 'question')}>
+                        {props.addAnnotations(props.explanation, props.annotations_detail)}
                     </div>
-                    <div className="mt-2 text-gray-600" onMouseUp={(e) => props.onTextSelection(e, 'question_code')}>
-                        {/*<SyntaxHighlighter language="javascript" style={docco}*/}
-                        {props.addAnnotations(props.code, props.annotations, props.explanation.length)}
-                        {/*</SyntaxHighlighter>*/}
-                    </div>
+                    {props.code &&
+                        <pre className="mt-2 text-gray-600" onMouseUp={(e) => props.onCodeSelection(e, 'question_code')}>
+                            {props.addAnnotations(props.code, props.annotations_code)}
+                        </pre>
+                    }
+
                         <div className="flex items-center justify-between mt-4">
                             <div className="flex items-center gap-2">
                                 <button
@@ -232,8 +233,9 @@ function QuestionDetail(props) {
     answer_of_the_question: PropTypes.bool,
     onTextSelection: PropTypes.func.isRequired,
     onCodeSelection: PropTypes.func.isRequired,
-    annotations: PropTypes.array.isRequired,
     addAnnotations: PropTypes.func.isRequired,
+    annotations_detail: PropTypes.array,
+    annotations_code: PropTypes.array,
 
 };
 

@@ -13,3 +13,4 @@ django-ratelimit==4.1.0
 langchain-core==0.3.19
 google-generativeai==0.8.3
 drf-yasg==1.21.8
+pygments==2.18.0
