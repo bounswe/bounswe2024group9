@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useNavigate } from 'react-router-dom';
-import {faThumbsUp, faCommentDots, faThumbsDown, faBookmark} from '@fortawesome/free-solid-svg-icons';
+import {faThumbsUp, faCommentDots, faThumbsDown, faBookmark, faCheck} from '@fortawesome/free-solid-svg-icons';
 import './PostPreview.css';
 import { showNotification } from './NotificationCenter';
 
@@ -261,15 +261,19 @@ const PostPreview = ({ post, currentUser, onClick }) => {
             <div className="post-footer">
                 <div className="vote-group">
                     <div
+                    className='footer-item'>
+                        <FontAwesomeIcon icon={faCheck} size="sm" />
+                    <h4 className="footer-text">Votes: {upvote}</h4>
+                    </div>
+                    
+                    <div
                         className={`footer-item ${animateUpvote ? 'upvote-animate' : ''} ${isUpvoted ? 'upvoted' : ''}`}
                         onClick={handleUpvote}
                     >
                         <FontAwesomeIcon icon={faThumbsUp} size="sm" />
                         <span className="footer-text">Upvote</span>
                     </div>
-                    
-                    <span className="vote-count">{upvotes}</span>
-                    
+                                        
                     <div
                         className={`footer-item ${animateDownvote ? 'downvote-animate' : ''} ${isDownvoted ? 'downvoted' : ''}`}
                         onClick={handleDownvote}
