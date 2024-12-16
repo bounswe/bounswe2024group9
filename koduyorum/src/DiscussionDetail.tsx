@@ -185,16 +185,15 @@ const DiscussionDetail = ({ route }) => {
         }
 
         const commentData = {
-            post_id: post.id,
-            user_id,
-            text: newComment,
+            details: newComment,
         };
 
         try {
-            const response = await fetch(`http://10.0.2.2:8000/question/${post.id}/comments/`, {
+            const response = await fetch(`http://10.0.2.2:8000/create_comment/${post.id}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'User-ID': user_id,
                 },
                 body: JSON.stringify(commentData),
             });
@@ -246,8 +245,8 @@ const DiscussionDetail = ({ route }) => {
                 <Text style={styles.commentHeader}>Comments:</Text>
                 {comments.map((comment, index) => (
                     <View key={index} style={styles.comment}>
-                        <Text style={styles.commentUser}>{comment.username}</Text>
-                        <Text style={styles.commentText}>{comment.text}</Text>
+                        <Text style={styles.commentUser}>{comment.user}</Text>
+                        <Text style={styles.commentText}>{comment.details}</Text>
                     </View>
                 ))}
 
