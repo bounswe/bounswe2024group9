@@ -1795,7 +1795,6 @@ def get_questions_according_to_filter(request, page_number):
         tags = data.get('tags', [])
         start_date = data.get('startDate') 
         end_date = data.get('endDate')
-        print(data)
         # Start with all questions, ordered by creation date
         questions = Question.objects.all().order_by('-created_at')
         
@@ -1844,7 +1843,6 @@ def get_questions_according_to_filter(request, page_number):
         offset = (page_number - 1) * 10
 
         total_count = questions.count()
-        print(total_count)
         total_pages = (total_count + 9) // 10
 
         # Apply pagination
