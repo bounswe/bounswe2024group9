@@ -28,13 +28,14 @@ const CreateAnnotation = ({ visible, selectedText, startIndex, endIndex, languag
     try {
         const user_id = localStorage.getItem('user_id');
         if (annotation_type==='wiki'){
+
             language_qid =language_qid.replace('Q','');
         }
 
         const annotationData = {
             text: annotationText,
             annotation_type: annotation_type,
-            language_qid : language_qid, // Removes the 'Q' at the beginning
+            language_qid : language_qid,
             annotation_starting_point:startIndex, 
             annotation_ending_point:endIndex,
         };

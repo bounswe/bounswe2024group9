@@ -429,7 +429,7 @@ const SearchResults = () => {
                     startIndex={startIndex}
                     endIndex={endIndex}
                     annotation_type={"wiki"}
-                    language_id={wiki_id}
+                    language_qid={wiki_id}
                     annotationId={annotationId}
                     onClose={() => setModalVisible(false)}
                   />

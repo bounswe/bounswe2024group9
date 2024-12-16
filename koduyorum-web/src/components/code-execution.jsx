@@ -202,7 +202,8 @@ const addAnnotations = (text, annotations) => {
       author_id: author_id,
       author_name: author_name,
         annotation_id: annotationId,
-        annotation_type: annotationType
+        annotation_type: annotationType,
+        lanquage_qid: language_qid
 
     } = annotation;
     console.log("annotationType", annotationType);
@@ -233,7 +234,8 @@ const addAnnotations = (text, annotations) => {
                       annotationId,
                       annotation_starting_point,
                       annotation_ending_point,
-                        annotationType
+                        annotationType,
+                        language_qid
                     )
                   }
                 >
@@ -263,7 +265,7 @@ const addAnnotations = (text, annotations) => {
 
   return annotatedText;
 };
-const handleEditAnnotation = async (annotationId, startOffset, endOffset,  annotation_type) => {
+const handleEditAnnotation = async (annotationId, startOffset, endOffset,  annotation_type, language_qid) => {
   // Fetch the annotation to get its text
   console.log("annottion type in edit", annotation_type);
   console.log("annotationId in edit", annotationId);
@@ -275,9 +277,9 @@ if (annotation_type === 'question') {
 } else if (annotation_type === 'question_code') {
   annotationToEdit = annotationCodeData.find((annotation) => annotation.annotation_id === annotationId);
 } else if (annotation_type === 'comment') {
-  annotationToEdit = comment_annotations_details.find((annotation) => annotation.annotation_id === annotationId);
+  annotationToEdit = comment_annotations_details.flat().find((annotation) => annotation.annotation_id === annotationId);
 } else if (annotation_type === 'comment_code') {
-  annotationToEdit = comment_annotations_code.find((annotation) => annotation.annotation_id === annotationId);
+  annotationToEdit = comment_annotations_code.flat().find((annotation) => annotation.annotation_id === annotationId);
 } else {
     console.error("Invalid annotation type.");
     return;
@@ -289,6 +291,8 @@ if (annotation_type === 'question') {
       setEndIndex(endOffset);
       setModalVisible(true);
       setAnnotationId(annotationId);
+      setAnnotationComponentId(language_qid);
+
   } else {
       console.error("Annotation not found for editing.");
   }
@@ -344,23 +348,33 @@ const handleDeleteAnnotation = async (annotationId) => {
   }
 };
 
-const handleTextSelection = (e, type, id) => {
+const handleTextSelection = (e, type, id, original_text) => {
   const selection = window.getSelection();
   if (selection && selection.rangeCount > 0 && selection.toString().trim() !== '') {
     console.log("selection", selection);
     console.log(type);
 
-    let startOffset;
-    let endOffset;
-    if (selection.anchorOffset < selection.focusOffset) {
-        startOffset = selection.anchorOffset;
-        endOffset = selection.focusOffset;
-    }else {
-        startOffset = selection.focusOffset;
-        endOffset = selection.anchorOffset;
+    const selectedText = selection.toString();
+    const plainText = original_text; // Use the original full text
+    console.log("plainText", plainText);
+    console.log("selectedText", selectedText);
+    const startOffset = plainText.indexOf(selectedText);
+    const endOffset = startOffset + selectedText.length;
+
+    if (startOffset === -1 || endOffset > plainText.length) {
+      console.error("Error calculating offsets. Selection might span across multiple elements or annotations.");
+      return;
     }
 
-    let selectedText = selection.toString();
+    // if (selection.anchorOffset < selection.focusOffset) {
+    //     startOffset = selection.anchorOffset;
+    //     endOffset = selection.focusOffset;
+    // }else {
+    //     startOffset = selection.focusOffset;
+    //     endOffset = selection.anchorOffset;
+    // }
+
+    // let selectedText = selection.toString();
 
     setSelectedText(selectedText);
     setStartIndex(startOffset);
@@ -531,8 +545,8 @@ const handleTextSelection = (e, type, id) => {
                 isAnswered={isAnswered}
                 title={questionData.title}
                 fetchQuestion={fetchQuestion}
-                onTextSelection={(e) => handleTextSelection(e, 'question', question_id)}
-                onCodeSelection={(e) => handleTextSelection(e, 'question_code', question_id)}
+                onTextSelection={(e) => handleTextSelection(e, 'question', question_id, questionData.details)}
+                onCodeSelection={(e) => handleTextSelection(e, 'question_code', question_id, questionData.code_snippet)}
                 annotations_detail={annotationDetailsData}
                 annotations_code={annotationCodeData}
 
@@ -573,8 +587,8 @@ const handleTextSelection = (e, type, id) => {
                         comment_id={comment.comment_id}
                         answer_of_the_question={comment.answer_of_the_question}
                         fetchComments={fetchComments}
-                        onTextSelection={(e) => handleTextSelection(e, 'comment', comment.comment_id)}
-                        onCodeSelection={(e) => handleTextSelection(e, 'comment_code', comment.comment_id)}
+                        onTextSelection={(e) => handleTextSelection(e, 'comment', comment.comment_id, comment.details)}
+                        onCodeSelection={(e) => handleTextSelection(e, 'comment_code', comment.comment_id, comment.code_snippet)}
                         // annotations={comment_annotations[index]}
                         annotations_code={comment_annotations_code[index]}
                         annotations_detail={comment_annotations_details[index]}
