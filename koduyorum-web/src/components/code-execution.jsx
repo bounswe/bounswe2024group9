@@ -13,7 +13,7 @@ import Comment from "../Comment";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBookmark } from '@fortawesome/free-solid-svg-icons';
 import CreateAnnotation from "../CreateAnnotation";
-import {showNotification} from "../NotificationCenter";
+import { showNotification } from "../NotificationCenter";
 
 export default function CodeExecution() {
   const { question_id } = useParams(); // Extract the questionId from the URL
@@ -97,7 +97,7 @@ export default function CodeExecution() {
       setAnnotationDetailsData(data.question.annotations || []);
       setAnnotationCodeData(data.question.annotation_codes || []);
       console.log("annot", data.question.annotations);
-        console.log("annotcode", data.question.annotation_codes);
+      console.log("annotcode", data.question.annotation_codes);
     } catch (err) {
       setError(err.message);
       setLoading(false);
@@ -140,7 +140,7 @@ export default function CodeExecution() {
       const data = await response.json();  // Parse the JSON response
       setQuestionOutput(data.output); // Update the question output
     } catch (error) {
-        setQuestionOutput(["Error: Could not execute the code."]);
+      setQuestionOutput(["Error: Could not execute the code."]);
     } finally {
       setLoading(false); // Turn off loading state after the request completes
     }
@@ -199,111 +199,111 @@ export default function CodeExecution() {
     fetchInitialData();
   }, []);
 
-const addAnnotations = (text, annotations) => {
-  const loggedInUserId = localStorage.getItem('user_id');
-  if (!text || text.length === 0) {
-    return null;
-  }
-  let annotatedText = [];
-  let lastIndex = 0;
+  const addAnnotations = (text, annotations) => {
+    const loggedInUserId = localStorage.getItem('user_id');
+    if (!text || text.length === 0) {
+      return null;
+    }
+    let annotatedText = [];
+    let lastIndex = 0;
 
-  // Sort annotations by starting point to avoid misplacement
-  const sortedAnnotations = annotations.sort(
-    (a, b) => a.annotation_starting_point - b.annotation_starting_point
-  );
+    // Sort annotations by starting point to avoid misplacement
+    const sortedAnnotations = annotations.sort(
+      (a, b) => a.annotation_starting_point - b.annotation_starting_point
+    );
 
-  sortedAnnotations.forEach((annotation) => {
-    console.log("annotation", annotation);
-    let {
-      annotation_starting_point,
-      annotation_ending_point,
-      text: annotationText,
-      author_id: author_id,
-      author_name: author_name,
+    sortedAnnotations.forEach((annotation) => {
+      console.log("annotation", annotation);
+      let {
+        annotation_starting_point,
+        annotation_ending_point,
+        text: annotationText,
+        author_id: author_id,
+        author_name: author_name,
         annotation_id: annotationId,
         annotation_type: annotationType,
         lanquage_qid: language_qid
 
-    } = annotation;
-    console.log("annotationType", annotationType);
-    console.log("annotationId", annotationId);
+      } = annotation;
+      console.log("annotationType", annotationType);
+      console.log("annotationId", annotationId);
 
-    if (lastIndex < annotation_starting_point) {
-      annotatedText.push(text.slice(lastIndex, annotation_starting_point));
-    }
+      if (lastIndex < annotation_starting_point) {
+        annotatedText.push(text.slice(lastIndex, annotation_starting_point));
+      }
 
-    // Add annotated text with a tooltip
-    annotatedText.push(
-      <div className="annotation-container" key={`${annotation_starting_point}-${annotationId}`}>
-        <span className="annotation">
-          <em>{text.slice(annotation_starting_point, annotation_ending_point)}</em>
-          <div className="annotation-tooltip">
-            {annotationText}
-            <div className="annotation-tooltip-author">
-              <br/>
-              <em>by {author_name}</em>
-            </div>
-            {Number(author_id) === Number(loggedInUserId) ? (
-              <>
-                <br/>
-                <button
-                  className="edit-icon"
-                  onClick={() =>
-                    handleEditAnnotation(
-                      annotationId,
-                      annotation_starting_point,
-                      annotation_ending_point,
+      // Add annotated text with a tooltip
+      annotatedText.push(
+        <div className="annotation-container" key={`${annotation_starting_point}-${annotationId}`}>
+          <span className="annotation">
+            <em>{text.slice(annotation_starting_point, annotation_ending_point)}</em>
+            <div className="annotation-tooltip">
+              {annotationText}
+              <div className="annotation-tooltip-author">
+                <br />
+                <em>by {author_name}</em>
+              </div>
+              {Number(author_id) === Number(loggedInUserId) ? (
+                <>
+                  <br />
+                  <button
+                    className="edit-icon"
+                    onClick={() =>
+                      handleEditAnnotation(
+                        annotationId,
+                        annotation_starting_point,
+                        annotation_ending_point,
                         annotationType,
                         language_qid
-                    )
-                  }
-                >
-                  ✏️
-                </button>
-                <button
-                  className="delete-icon"
-                  onClick={() => handleDeleteAnnotation(annotationId)}
-                >
-                  🗑️
-                </button>
-              </>
-            ) : null}
-          </div>
-        </span>
-      </div>
-    );
+                      )
+                    }
+                  >
+                    ✏️
+                  </button>
+                  <button
+                    className="delete-icon"
+                    onClick={() => handleDeleteAnnotation(annotationId)}
+                  >
+                    🗑️
+                  </button>
+                </>
+              ) : null}
+            </div>
+          </span>
+        </div>
+      );
 
-    // Update the lastIndex to the end of the annotation
-    lastIndex = annotation_ending_point;
-  });
+      // Update the lastIndex to the end of the annotation
+      lastIndex = annotation_ending_point;
+    });
 
-  // Add the remaining text after the last annotation
-  if (lastIndex < text.length) {
-    annotatedText.push(text.slice(lastIndex));
-  }
+    // Add the remaining text after the last annotation
+    if (lastIndex < text.length) {
+      annotatedText.push(text.slice(lastIndex));
+    }
 
-  return annotatedText;
-};
-const handleEditAnnotation = async (annotationId, startOffset, endOffset,  annotation_type, language_qid) => {
-  // Fetch the annotation to get its text
-  console.log("annottion type in edit", annotation_type);
-  console.log("annotationId in edit", annotationId);
+    return annotatedText;
+  };
+  const handleEditAnnotation = async (annotationId, startOffset, endOffset, annotation_type, language_qid) => {
+    // Fetch the annotation to get its text
+    console.log("annottion type in edit", annotation_type);
+    console.log("annotationId in edit", annotationId);
     console.log("annotation details", annotationDetailsData);
-  console.log( "comment annotation types", comment_annotations_details);
-  let annotationToEdit;
-if (annotation_type === 'question') {
-  annotationToEdit = annotationDetailsData.find((annotation) => annotation.annotation_id === annotationId);
-} else if (annotation_type === 'question_code') {
-  annotationToEdit = annotationCodeData.find((annotation) => annotation.annotation_id === annotationId);
-} else if (annotation_type === 'comment') {
-  annotationToEdit = comment_annotations_details.flat().find((annotation) => annotation.annotation_id === annotationId);
-} else if (annotation_type === 'comment_code') {
-  annotationToEdit = comment_annotations_code.flat().find((annotation) => annotation.annotation_id === annotationId);
-} else {
-    console.error("Invalid annotation type.");
-    return;
-}
-  if (annotationToEdit) {
+    console.log("comment annotation types", comment_annotations_details);
+    let annotationToEdit;
+    if (annotation_type === 'question') {
+      annotationToEdit = annotationDetailsData.find((annotation) => annotation.annotation_id === annotationId);
+    } else if (annotation_type === 'question_code') {
+      annotationToEdit = annotationCodeData.find((annotation) => annotation.annotation_id === annotationId);
+    } else if (annotation_type === 'comment') {
+      annotationToEdit = comment_annotations_details.flat().find((annotation) => annotation.annotation_id === annotationId);
+    } else if (annotation_type === 'comment_code') {
+      annotationToEdit = comment_annotations_code.flat().find((annotation) => annotation.annotation_id === annotationId);
+    } else {
+      console.error("Invalid annotation type.");
+      return;
+    }
+    if (annotationToEdit) {
       console.log("Editing annotation:", annotationToEdit);
       setSelectedText(annotationToEdit.text); // Set selected text from the annotation
       setStartIndex(startOffset);
@@ -312,97 +312,97 @@ if (annotation_type === 'question') {
       setAnnotationId(annotationId);
       setAnnotationComponentId(language_qid);
 
-  } else {
-      console.error("Annotation not found for editing.");
-  }
-};
-
-
-const handleDeleteAnnotation = async (annotationId) => {
-  try {
-    const userId = localStorage.getItem('user_id');
-    const response = await fetch(`${process.env.REACT_APP_API_URL}/delete_annotation/${annotationId}/`, {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-        'User-ID': userId,
-      },
-    });
-
-    if (response.ok) {
-      // Update the state to remove the deleted annotation
-
-      if (annotationDetailsData.some(annotation => annotation.annotation_id === annotationId)) {
-        setAnnotationDetailsData((prevAnnotations) =>
-          prevAnnotations.filter((annotation) => annotation.annotation_id !== annotationId)
-        );
-      } else if (annotationCodeData.some(annotation => annotation.annotation_id === annotationId)) {
-        setAnnotationCodeData((prevAnnotations) =>
-          prevAnnotations.filter((annotation) => annotation.annotation_id !== annotationId)
-        );
-      } else if (comment_annotations_details.flat().some(annotation => annotation.annotation_id === annotationId)) {
-        setCommentAnnotationsDetails((prevAnnotations) =>
-          prevAnnotations.map(commentAnnotations =>
-            commentAnnotations.filter(annotation => annotation.annotation_id !== annotationId)
-          )
-        );
-      } else if (comment_annotations_code.flat().some(annotation => annotation.annotation_id === annotationId)) {
-        setCommentAnnotationsCode((prevAnnotations) =>
-          prevAnnotations.map(commentAnnotations =>
-            commentAnnotations.filter(annotation => annotation.annotation_id !== annotationId)
-          )
-        );
-      }else {
-        console.error("Annotation not found for deletion.");
-      }
-      // alert('Annotation deleted successfully.');
-      showNotification('Annotation deleted successfully.');
-      // Optional: Trigger a re-fetch of annotations or update state to reflect the deletion
     } else {
-      const errorData = await response.json();
-      console.error('Error deleting annotation:', errorData);
-      showNotification('Failed to delete annotation.');
-      // alert('Failed to delete annotation.');
+      console.error("Annotation not found for editing.");
     }
-  } catch (error) {
-    console.error('Error during annotation deletion:', error);
-    showNotification('An unexpected error occurred.');
-    // alert('An unexpected error occurred.');
-  }
-};
+  };
 
-const handleTextSelection = (e, type, id, original_text) => {
-  const selection = window.getSelection();
-  if (selection && selection.rangeCount > 0 && selection.toString().trim() !== '') {
-    console.log("selection", selection);
-    console.log(type);
 
-    const selectedText = selection.toString();
-    const plainText = original_text; // Use the original full text
-    console.log("plainText", plainText);
-    console.log("selectedText", selectedText);
-    const startOffset = plainText.indexOf(selectedText);
-    const endOffset = startOffset + selectedText.length;
+  const handleDeleteAnnotation = async (annotationId) => {
+    try {
+      const userId = localStorage.getItem('user_id');
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/delete_annotation/${annotationId}/`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'User-ID': userId,
+        },
+      });
 
-    if (startOffset === -1 || endOffset > plainText.length) {
-      console.error("Error calculating offsets. Selection might span across multiple elements or annotations.");
-      return;
+      if (response.ok) {
+        // Update the state to remove the deleted annotation
+
+        if (annotationDetailsData.some(annotation => annotation.annotation_id === annotationId)) {
+          setAnnotationDetailsData((prevAnnotations) =>
+            prevAnnotations.filter((annotation) => annotation.annotation_id !== annotationId)
+          );
+        } else if (annotationCodeData.some(annotation => annotation.annotation_id === annotationId)) {
+          setAnnotationCodeData((prevAnnotations) =>
+            prevAnnotations.filter((annotation) => annotation.annotation_id !== annotationId)
+          );
+        } else if (comment_annotations_details.flat().some(annotation => annotation.annotation_id === annotationId)) {
+          setCommentAnnotationsDetails((prevAnnotations) =>
+            prevAnnotations.map(commentAnnotations =>
+              commentAnnotations.filter(annotation => annotation.annotation_id !== annotationId)
+            )
+          );
+        } else if (comment_annotations_code.flat().some(annotation => annotation.annotation_id === annotationId)) {
+          setCommentAnnotationsCode((prevAnnotations) =>
+            prevAnnotations.map(commentAnnotations =>
+              commentAnnotations.filter(annotation => annotation.annotation_id !== annotationId)
+            )
+          );
+        } else {
+          console.error("Annotation not found for deletion.");
+        }
+        // alert('Annotation deleted successfully.');
+        showNotification('Annotation deleted successfully.');
+        // Optional: Trigger a re-fetch of annotations or update state to reflect the deletion
+      } else {
+        const errorData = await response.json();
+        console.error('Error deleting annotation:', errorData);
+        showNotification('Failed to delete annotation.');
+        // alert('Failed to delete annotation.');
+      }
+    } catch (error) {
+      console.error('Error during annotation deletion:', error);
+      showNotification('An unexpected error occurred.');
+      // alert('An unexpected error occurred.');
     }
+  };
+
+  const handleTextSelection = (e, type, id, original_text) => {
+    const selection = window.getSelection();
+    if (selection && selection.rangeCount > 0 && selection.toString().trim() !== '') {
+      console.log("selection", selection);
+      console.log(type);
+
+      const selectedText = selection.toString();
+      const plainText = original_text; // Use the original full text
+      console.log("plainText", plainText);
+      console.log("selectedText", selectedText);
+      const startOffset = plainText.indexOf(selectedText);
+      const endOffset = startOffset + selectedText.length;
+
+      if (startOffset === -1 || endOffset > plainText.length) {
+        console.error("Error calculating offsets. Selection might span across multiple elements or annotations.");
+        return;
+      }
 
 
-    setSelectedText(selectedText);
-    setStartIndex(startOffset);
-    setEndIndex(endOffset);
-    setAnnotationType(type);
+      setSelectedText(selectedText);
+      setStartIndex(startOffset);
+      setEndIndex(endOffset);
+      setAnnotationType(type);
 
-    setAnnotationComponentId(id);
+      setAnnotationComponentId(id);
 
 
-    setModalVisible(true);
-  } else {
-    console.log('No text selected.');
+      setModalVisible(true);
+    } else {
+      console.log('No text selected.');
+    }
   }
-}
 
 
   const handleSubmit = async (e) => {
@@ -435,26 +435,26 @@ const handleTextSelection = (e, type, id, original_text) => {
 
   function post_bookmark(id) {
     const token = localStorage.getItem('authToken');
-    if (isBookmarked){
-        fetch(`${process.env.REACT_APP_API_URL}/remove_bookmark/${id}/`, {
-            method: 'DELETE',
-            headers: {
-            'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}`,  // Add the token here
-            'User-ID': localStorage.getItem('user_id')
-    }
-        }).then(response => {
-            if (response.ok) {
-                alert("Bookmark removed successfully");
-                setIsBookmarked(false);
-            } else {
-                alert("Failed to remove bookmark"); 
-            }
+    if (isBookmarked) {
+      fetch(`${process.env.REACT_APP_API_URL}/remove_bookmark/${id}/`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,  // Add the token here
+          'User-ID': localStorage.getItem('user_id')
         }
-        ).catch(error => {
-            console.error("Error removing bookmark:", error);
+      }).then(response => {
+        if (response.ok) {
+          alert("Bookmark removed successfully");
+          setIsBookmarked(false);
+        } else {
+          alert("Failed to remove bookmark");
         }
-        );
+      }
+      ).catch(error => {
+        console.error("Error removing bookmark:", error);
+      }
+      );
     } else {
       fetch(`${process.env.REACT_APP_API_URL}/bookmark_question/${id}/`, {
         method: 'POST',
@@ -521,39 +521,39 @@ const handleTextSelection = (e, type, id, original_text) => {
 
                 addAnnotations={addAnnotations}
               />
-              {questionData.code_snippet && (
-                <button
-                  className="bg-blue-600 text-white px-4 py-2 mt-4"
+              <div className="flex gap-4 mt-4">
+                {questionData.code_snippet && (<button
+                  className="run-button"
                   onClick={() => run_code('question', questionData.id)}
                 >
                   Run Code
+                </button>)}
+                <button
+                  className="comment-button"
+                  onClick={() => openPopup()}
+                >
+                  Comment
                 </button>
-              )}
-              <button
-                    className="comment-button"
-                    onClick={() => openPopup()}
-                  >
-                    Comment
-                  </button>
-              
-              <button
-                className="bg-green-600 text-white px-4 py-2 mt-4"
-                onClick={() => post_bookmark(questionData.id)}
-              >
-                <FontAwesomeIcon icon={faBookmark} style={{ color: isBookmarked ? 'blue' : 'white' }} />
-              </button>
+                <button
+                  className="bookmark-button flex items-center bg-gray-300 text-gray-800 px-4 py-2 rounded hover:bg-gray-400 transition"
+                  onClick={() => post_bookmark(questionData.id)}
+                >
+                  <FontAwesomeIcon icon={faBookmark} className="mr-2" />
+                  Bookmark
+                </button>
+              </div>
             </div>
-            {questionData.code_snippet &&  (<div className="mt-6">
-                <h2 className="text-xl font-semibold mb-2">Output:</h2>
-                <pre className="w-full p-4 bg-gray-200 text-gray-800 whitespace-pre-wrap">
-                    {loading ? "Waiting for output..." : (
-                      questionOutput.length > 0 ? questionOutput.map((line, index) => (
-                  <div key={index}>{line}</div>
+            {questionData.code_snippet && (<div className="mt-6">
+              <h2 className="text-xl font-semibold mb-2">Output:</h2>
+              <pre className="w-full p-4 bg-gray-200 text-gray-800 whitespace-pre-wrap">
+                {loading ? "Waiting for output..." : (
+                  questionOutput.length > 0 ? questionOutput.map((line, index) => (
+                    <div key={index}>{line}</div>
                   )) : "No output yet."
                 )}
-            <Separator className="my-8 bg-gray-300" />
-                </pre>
-              </div>)}
+                <Separator className="my-8 bg-gray-300" />
+              </pre>
+            </div>)}
             <div className="container mx-auto p-4 max-w-4xl">
               <div className="space-y-6">
                 <h2 className="text-xl font-semibold text-gray-800">Comments</h2>
@@ -582,13 +582,13 @@ const handleTextSelection = (e, type, id, original_text) => {
                         annotations_detail={comment_annotations_details[index]}
                         addAnnotations={addAnnotations}
                       />
-                      
+
                     </React.Fragment>
                   ))
                 ) : (
                   <p className="text-gray-600">No comments available.</p>
                 )}
-                
+
                 {isPopupVisible && (
                   <div className="popup">
                     <div className="popup-content" ref={popupRef}>
@@ -600,63 +600,63 @@ const handleTextSelection = (e, type, id, original_text) => {
                     </div>
                   </div>
                 )}
-            </div>
-            <Separator className="my-8 bg-gray-300"/>
+              </div>
+              <Separator className="my-8 bg-gray-300" />
 
-            <div className="code-execution-box">
-              <h2 className="code-execution-title">Try Your Own Code</h2>
-              <form onSubmit={handleSubmit}>
-                <label className="code-execution-label">Select Language:</label>
-                <select
-                  value={languageId}
-                  onChange={(e) => setLanguageId(e.target.value)}
-                  className="code-execution-select"
-                >
-                  <option value="">Select a language</option>
-                  {Object.entries(languages).map(([name, id]) => (
-                    <option key={id} value={id}>
-                      {name}
-                    </option>
-                  ))}
-                </select>
+              <div className="code-execution-box">
+                <h2 className="code-execution-title">Try Your Own Code</h2>
+                <form onSubmit={handleSubmit}>
+                  <label className="code-execution-label">Select Language:</label>
+                  <select
+                    value={languageId}
+                    onChange={(e) => setLanguageId(e.target.value)}
+                    className="code-execution-select"
+                  >
+                    <option value="">Select a language</option>
+                    {Object.entries(languages).map(([name, id]) => (
+                      <option key={id} value={id}>
+                        {name}
+                      </option>
+                    ))}
+                  </select>
 
-                <label className="code-execution-label">Enter your code:</label>
-                <textarea
-                  value={code}
-                  onChange={(e) => setCode(e.target.value)}
-                  rows="10"
-                  className="code-editor"
-                ></textarea>
+                  <label className="code-execution-label">Enter your code:</label>
+                  <textarea
+                    value={code}
+                    onChange={(e) => setCode(e.target.value)}
+                    rows="10"
+                    className="code-editor"
+                  ></textarea>
 
-                <SyntaxHighlighter language="javascript" style={docco} className="syntax-highlight-box">
-                  {code}
-                </SyntaxHighlighter>
+                  <SyntaxHighlighter language="javascript" style={docco} className="syntax-highlight-box">
+                    {code}
+                  </SyntaxHighlighter>
 
-                <button
-                  type="submit"
-                  className="run-button"
-                  disabled={loading || !languageId}
-                >
-                  {loading ? "Executing..." : "Execute Code"}
-                </button>
-              </form>
+                  <button
+                    type="submit"
+                    className="run-button"
+                    disabled={loading || !languageId}
+                  >
+                    {loading ? "Executing..." : "Execute Code"}
+                  </button>
+                </form>
 
-              <div className="mt-6">
-                <h2 className="text-xl font-semibold mb-2">Output:</h2>
-                <pre className="w-full p-4 bg-gray-200 text-gray-800 whitespace-pre-wrap">
+                <div className="mt-6">
+                  <h2 className="text-xl font-semibold mb-2">Output:</h2>
+                  <pre className="w-full p-4 bg-gray-200 text-gray-800 whitespace-pre-wrap">
                     {loading ? "Waiting for output..." : (
                       commentOutput.length > 0 ? commentOutput.map((line, index) => (
-                  <div key={index}>{line}</div>
-                  )) : "No output yet."
-                )}
-                </pre>
+                        <div key={index}>{line}</div>
+                      )) : "No output yet."
+                    )}
+                  </pre>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
 
-    )}
-  </div>
+      )}
+    </div>
   );
 }
