@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { redirect, useNavigate } from "react-router-dom";
 import { Navbar, LeftSidebar, RightSidebar } from "./PageComponents";
 import PostPreview from "./PostPreview";
 import { LoadingComponent } from "./LoadingPage"; // Importing the LoadingComponent
@@ -17,6 +17,7 @@ function Feed() {
   const [sort, setSort] = useState("newest");
   const [language, setLanguage] = useState("all");
   const [error, setError] = useState(null);
+  const [searchType, setSearchType] = useState("current");
   const [questionOfTheDay, setQuestionOfTheDay] = useState(null);
   const [loading, setLoading] = useState(true); // Adding a loading state
   const [topContributors, setTopContributors] = useState([]); // Top Contributors state
@@ -63,15 +64,14 @@ function Feed() {
   };
 
   const handleSearchResultClick = async (result) => {
+    if (searchType === "user") {
+      window.location.href = `${process.env.REACT_APP_FRONTEND_URL}/profile/${result}`;
+      return;
+    }
     const wikiIdName = await fetchWikiIdAndName(result.languageLabel.value);
     const wikiId = wikiIdName[0];
     const wikiName = wikiIdName[1];
-    console.log("Wiki ID and Name:", wikiId, wikiName);
     if (wikiId) {
-      console.log(
-        "Navigating to:",
-        `/result/${wikiId}/${encodeURIComponent(wikiName)}`
-      );
       setSearched(false);
       setSearchQuery("");
       setSearchResults([]);
@@ -84,7 +84,6 @@ function Feed() {
   const handleSearchQueryChange = async (e) => {
     const query = e.target.value;
     setSearchQuery(query);
-
     if (query) {
       setIsLoading(true);
       const results = await fetchSearchResults(query);
@@ -146,6 +145,14 @@ function Feed() {
 
 
   const fetchSearchResults = async (query) => {
+    if (searchType === "user") {
+      const response = await searchAnotherUser(query) ;
+      console.log( 'response is following : ',response);
+      if (response && response.usernames) {
+        return response.usernames;
+      }
+      return [];
+    }
     try {
       query = query.replace(/[^a-z0-9]/gi, "");
 
@@ -167,7 +174,7 @@ function Feed() {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
       const data = await response.json();
-      console.log(data.results.bindings);
+      console.log('data are following  ',data.results.bindings);
       return data.results.bindings;
     } catch (error) {
       console.error("Error fetching search results:", error);
@@ -178,6 +185,40 @@ function Feed() {
     }
   };
 
+  const searchAnotherUser = async (query) => {
+      try{ 
+        // const response = await fetch(
+        //   `${process.env.REACT_APP_API_URL}/get_user_profile_by_username/${username}/`,
+        //   {
+        //     method: "GET",
+        //     headers: {
+        //       "Content-Type": "application/json",
+        //       Authorization: "Bearer " + localStorage.getItem("authToken"),
+        //     },
+        //   }
+        // );
+        const response = await fetch( `${process.env.REACT_APP_API_URL}/search_users/${query}/`, 
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + localStorage.getItem("authToken"),
+          },
+        }
+        );
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        const data = await response.json();
+        return data;
+      } catch (error) {
+        console.error("Error fetching search results:", error);
+        setError(
+          "Failed to load search results. Please check your network or server configuration."
+        );
+        return [];
+      }
+  }
   const handleApplyFilters = async (page_number = 1) => {
     if (filters.endDate && filters.startDate && filters.endDate < filters.startDate) {
       showNotification('End date cannot be before start date');
@@ -248,27 +289,31 @@ function Feed() {
       ) : (
         <>
           <Navbar
-            searchQuery={searchQuery}
-            handleSearchQueryChange={handleSearchQueryChange}
-            handleSearch={handleSearch}
-            handleEnter={handleEnter}
-            searchResults={searchResults}
-            isLoading={isLoading}
-            searched={searched}
-            handleSearchResultClick={handleSearchResultClick}
+        searchQuery={searchQuery}
+        handleSearchQueryChange={handleSearchQueryChange}
+        handleSearch={handleSearch}
+        handleEnter={handleEnter}
+        searchResults={searchResults}
+        isLoading={isLoading}
+        searched={searched}
+        handleSearchResultClick={handleSearchResultClick}
+        setSearchType={setSearchType}
           />
           <NotificationCenter />
 
+        <select
+        value={searchType}
+        onChange={(e) => setSearchType(e.target.value)}
+        className="search-type-dropdown"
+          >
+        <option value="current">Search for Wikidata</option>
+        <option value="user">Search for Another User</option>
+          </select>
+
           <div className="feed-content">
-            {/* Left Edge - Popular Tags */}
-            <LeftSidebar 
-            handleTagClick={handleTagClick} 
-            language={''} 
-            top_tags={topTags}
-            filters={filters}
-            setFilters={setFilters}
-            handleApplyFilters={handleApplyFilters}
-            />
+        {/* Left Edge - Popular Tags */}
+            <LeftSidebar handleTagClick={handleTagClick} setPosts={setPosts} language={''} top_tags={topTags}/>
+
 
             {/* Middle - Posts */}
             <div className="posts-container">
