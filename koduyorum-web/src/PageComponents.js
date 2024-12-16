@@ -39,9 +39,11 @@ export const Navbar = ({
   isLoading,
   searched,
   handleSearchResultClick,
+  searchType
 }) => {
   const navigate = useNavigate();
   const [username, setUsername] = useState(null);
+  const [searchTypeValue, setSearchTypeValue] = useState(searchType);
 
   const handleProfileClick = () => {
     const storedUsername = localStorage.getItem('username');
@@ -92,7 +94,8 @@ export const Navbar = ({
                   className="search-suggestion"
                   onClick={() => handleSearchResultClick(result)}
                 >
-                  {result.languageLabel.value}
+                  {result.language ? 
+                  result.languageLabel.value  : result}
                 </div>
               ))
             )}

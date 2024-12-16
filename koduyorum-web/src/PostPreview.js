@@ -57,7 +57,6 @@ const PostPreview = ({ post, currentUser, onClick }) => {
 
     const [upvote , setUpvote] = useState(upvotes);
     const navigate = useNavigate();
-    console.log("Post:", post);
 
     const fetchWikiIdAndName = async (tag) => {
         try {
