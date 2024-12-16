@@ -168,7 +168,7 @@ function Comment({ onClick, ...props }) {
   {props.addAnnotations(props.explanation, props.annotations_detail)}
 </div>
       {props.code && (
-        <pre className="text-gray-600" onMouseUp={(e) => props.onCodeSelection(e, 'comment_code')}>
+        <pre className="code-block" onMouseUp={(e) => props.onCodeSelection(e, 'comment_code')}>
         {props.addAnnotations(props.code, props.annotations_code)}
    </pre>
       )}

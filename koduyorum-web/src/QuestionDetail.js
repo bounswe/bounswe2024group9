@@ -189,7 +189,7 @@ function QuestionDetail(props) {
                         {props.addAnnotations(props.explanation, props.annotations_detail)}
                     </div>
                     {props.code &&
-                        <pre className="mt-2 text-gray-600" onMouseUp={(e) => props.onCodeSelection(e, 'question_code')}>
+                        <pre className="code-block" onMouseUp={(e) => props.onCodeSelection(e, 'question_code')}>
                             {props.addAnnotations(props.code, props.annotations_code)}
                         </pre>
                     }
