@@ -144,7 +144,7 @@ function Comment({ onClick, ...props }) {
     }
   }
   return (
-    <div className="p-4 border border-gray-300 rounded"
+    <div className="question-post-card"
       onClick={onClick}>
       {isAnswer && (
         <div className={`question-status-label answered`}>
