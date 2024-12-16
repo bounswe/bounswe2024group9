@@ -17,7 +17,7 @@ const BookmarksPage = ({ route }) => {
     const navigation = useNavigation();
 
     useEffect(() => {
-        if (!bookmarksData) {
+        
             const fetchBookmarks = async () => {
                 try {
                     const response = await fetch(`http://10.0.2.2:8000/get_user_profile_by_id/${user_id}/`);
@@ -35,7 +35,7 @@ const BookmarksPage = ({ route }) => {
             };
 
             fetchBookmarks();
-        }
+        
     }, [user_id, bookmarksData]);
 
     const handlePostPress = (post) => {

@@ -64,7 +64,7 @@ const QuestionCard = ({ post, currentUser, onPress }) => {
                     : `http://10.0.2.2:8000/downvote_object/question/${id}/`;
 
             const response = await fetch(endpoint, {
-                method: 'POST',
+                method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
                     'User-ID': currentUser.id,
