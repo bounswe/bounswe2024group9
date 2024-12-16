@@ -39,7 +39,7 @@ const Profile = () => {
                           profilePicture: updatedProfilePictureUrl,
                       }));
                     }
-
+                    
                     // Check ownership
                     const loggedInUsername = localStorage.getItem('username');
                     setIsOwner(loggedInUsername === data.user.username);
@@ -210,6 +210,7 @@ const Profile = () => {
                 showNotification('A password update link has been sent to your email.');
             } else {
                 console.error('Failed to send password reset link');
+                showNotification('Failed to send password reset link. Please control your email address.');
             }
         } catch (error) {
             console.error('Error sending password reset link:', error);
@@ -353,8 +354,14 @@ const Profile = () => {
                                                         <p className="annotation-text">{annotation.text}</p>
                                                         <div className="annotation-details">
                                                             <div className="annotation-meta">
-                                                                <span className="label">Language ID:</span>
-                                                                <span className="value">{annotation.language_qid}</span>
+                                                                <span className="label">Annotation Type:</span>
+                                                                <span className="value">
+                                                                    {annotation.annotation_type === 'question' && 'Question'}
+                                                                    {annotation.annotation_type === 'question_code' && 'Question Code'}
+                                                                    {annotation.annotation_type === 'comment' && 'Comment'}
+                                                                    {annotation.annotation_type === 'comment_code' && 'Comment Code'}
+                                                                    {annotation.annotation_type === 'wiki' && 'Wiki'}
+                                                                </span>
                                                             </div>
                                                             <div className="annotation-range">
                                                                 <span className="label">Range:</span>
@@ -363,8 +370,35 @@ const Profile = () => {
                                                                 </span>
                                                             </div>
                                                             <div className="annotation-author">
-                                                                <span className="label">Author:</span>
-                                                                <span className="value">{annotation.author}</span>
+                                                            {(annotation.annotation_type === 'question' || annotation.annotation_type === 'question_code') && (
+                                                                <button 
+                                                                    onClick={() => navigate(`/question/${annotation.language_qid}`)}
+                                                                    className="px-4 py-2 rounded-md bg-blue-500 hover:bg-blue-600 text-white font-medium transition-colors duration-200 shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                                                                >
+                                                                    Go to question {annotation.language_qid}
+                                                                </button>
+                                                            )}
+                                                            </div>
+                                                            <div className="annotation-delete">
+                                                            <button
+                                                                onClick={async () => {
+                                                                    try {
+                                                                    await fetch(`${process.env.REACT_APP_API_URL}/delete_annotation/${annotation.annotation_id}/`, {
+                                                                        method: 'DELETE',
+                                                                        headers: {
+                                                                            'User-ID': localStorage.getItem('user_id'),  
+                                                                        }
+                                                                    });
+                                                                      showNotification('Annotation deleted successfully!');
+                                                                    } catch (error) {
+                                                                        console.error('Error deleting annotation:', error);
+                                                                     showNotification('Error deleting annotation:', error);
+                                                                    }
+                                                                }}
+                                                                className="px-4 py-2 rounded-md bg-red-500 hover:bg-red-600 text-white font-medium transition-colors duration-200 shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+                                                                >
+                                                                Delete annotation
+                                                            </button>
                                                             </div>
                                                         </div>
                                                     </div>

@@ -6,8 +6,8 @@ from pygments.lexer import default
 class Annotation(models.Model):
     _id = models.AutoField(primary_key=True)
     text = models.TextField()
-    annotation_type = models.CharField(default='wiki', max_length=100)
-    language_qid = models.IntegerField(default=0)  # QID of the question example : Q24582
+    annotation_type = models.CharField(default='wiki', max_length=100)  # One of: question question_code comment comment_code wiki
+    language_qid = models.IntegerField(default=0)  # QID of the question example : Q24582 or question id, commend_id
     annotation_starting_point = models.IntegerField(default=0)
     annotation_ending_point = models.IntegerField(default=0)
     annotation_date = models.DateTimeField(auto_now_add=True)
