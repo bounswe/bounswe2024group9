@@ -389,15 +389,6 @@ const handleTextSelection = (e, type, id, original_text) => {
       return;
     }
 
-    // if (selection.anchorOffset < selection.focusOffset) {
-    //     startOffset = selection.anchorOffset;
-    //     endOffset = selection.focusOffset;
-    // }else {
-    //     startOffset = selection.focusOffset;
-    //     endOffset = selection.anchorOffset;
-    // }
-
-    // let selectedText = selection.toString();
 
     setSelectedText(selectedText);
     setStartIndex(startOffset);
@@ -412,64 +403,7 @@ const handleTextSelection = (e, type, id, original_text) => {
     console.log('No text selected.');
   }
 }
-// const handleTextSelection = (e, type, id) => {
-//   const selection = window.getSelection();
-//   if (selection && selection.rangeCount > 0 && selection.toString().trim() !== '') {
-//     console.log("selection", selection);
-//     const range = selection.getRangeAt(0);
-//     const selectedText = selection.toString();
-//     let plainText;
-//     let startOffset = 0;
-//     let endOffset;
-//
-//     console.log(type);
-//     // Determine the appropriate plainText based on the type
-//        if (type === 'question_details') {
-//          type = 'question';
-//          plainText = questionData.details;
-//     } else if (type === 'question_code') {
-//          type = 'question';
-//          startOffset = questionData.details.length;
-//          plainText = questionData.code_snippet;
-//     } else if (type === 'comment_details') {
-//          type = 'comment';
-//       const comment = commentData.find(comment => comment.comment_id === id);
-//       plainText = comment ? comment.details : '';
-//     } else if (type === 'comment_code') {
-//          type = 'comment';
-//          const comment = commentData.find(comment => comment.comment_id === id);
-//          startOffset = comment ? comment.details.length : 0;
-//       plainText = comment ? comment.code_snippet : '';
-//     } else {
-//       console.error("Invalid type parameter.");
-//       return;
-//     }
-//
-//     // Ensure plainText is defined before proceeding
-//     if (!plainText) {
-//       console.error("plainText is undefined.");
-//       return;
-//     }
-//
-//     startOffset += plainText.indexOf(selectedText);
-//     endOffset = startOffset + selectedText.length;
-//
-//     if (startOffset === -1)  {
-//       console.error("Error calculating offsets. Selection might span across multiple elements or annotations.");
-//       return;
-//     }
-//
-//     setSelectedText(selectedText);
-//     setStartIndex(startOffset);
-//     setEndIndex(endOffset);
-//     setAnnotationType(type);
-//     setLanguageId(id);
-//
-//     setModalVisible(true);
-//   } else {
-//     console.log('No text selected.');
-//   }
-// };
+
 
   const handleSubmit = async (e) => {
     e.preventDefault(); // Prevent page reload on form submit
@@ -595,6 +529,7 @@ const handleTextSelection = (e, type, id, original_text) => {
                   Run Code
                 </button>
               )}
+              
               <button
                 className="bg-green-600 text-white px-4 py-2 mt-4"
                 onClick={() => post_bookmark(questionData.id)}
@@ -602,7 +537,17 @@ const handleTextSelection = (e, type, id, original_text) => {
                 <FontAwesomeIcon icon={faBookmark} style={{ color: isBookmarked ? 'blue' : 'white' }} />
               </button>
             </div>
+            {questionData.code_snippet &&  (<div className="mt-6">
+                <h2 className="text-xl font-semibold mb-2">Output:</h2>
+                <pre className="w-full p-4 bg-gray-200 text-gray-800 whitespace-pre-wrap">
+                    {loading ? "Waiting for output..." : (
+                      questionOutput.length > 0 ? questionOutput.map((line, index) => (
+                  <div key={index}>{line}</div>
+                  )) : "No output yet."
+                )}
             <Separator className="my-8 bg-gray-300" />
+                </pre>
+              </div>)}
             <div className="container mx-auto p-4 max-w-4xl">
               <div className="space-y-6">
                 <h2 className="text-xl font-semibold text-gray-800">Answers</h2>
