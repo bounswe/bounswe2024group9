@@ -164,14 +164,22 @@ function Comment({ onClick, ...props }) {
         </div>
       )}
       <h3 className="font-semibold text-gray-700">Comment {props.number}</h3>
-      <div className="text-gray-600" onMouseUp={(e) => props.onTextSelection(e, 'comment')}>
-  {props.addAnnotations(props.explanation, props.annotations_detail)}
+      <div className="text-gray-600" onMouseUp={(e) => props.onTextSelection ? props.onTextSelection(e, 'comment') : null}>
+    {props.addAnnotations ? props.addAnnotations(props.explanation, props.annotations_detail) : props.explanation}
 </div>
-      {props.code && (
-        <pre className="code-block" onMouseUp={(e) => props.onCodeSelection(e, 'comment_code')}>
-        {props.addAnnotations(props.code, props.annotations_code)}
-   </pre>
+{props.code && (
+     <pre className="text-gray-600" onMouseUp={(e) => props.onCodeSelection ? props.onCodeSelection(e, 'comment_code') : null}>
+        {props.addAnnotations ? props.addAnnotations(props.code, props.annotations_code) : props.code}
+    </pre>
+
+    // <div className="text-gray-600" onMouseUp={(e) => props.onCodeSelection(e, 'comment_code')}>
+    //   {/*// <SyntaxHighlighter language="javascript" style={docco}*/}
+    //   {/*                      onMouseUp={(e) => props.onCodeSelection(e, 'comment_code')}>*/}
+    //   {props.addAnnotations(props.code, props.annotations, props.explanation.length)}
+    // {/*</SyntaxHighlighter>*/}
+    // </div>
       )}
+)}
       <div className="flex items-center justify-between mt-4">
         <div className="flex items-center gap-2">
           <h3 className="font-semibold text-gray-700"> Votes: {votes} </h3>
@@ -261,11 +269,11 @@ function Comment({ onClick, ...props }) {
   comment_id: PropTypes.number,
   author: PropTypes.string,
   answer_of_the_question: PropTypes.bool,
-  onTextSelection: PropTypes.func.isRequired,
-  onCodeSelection: PropTypes.func.isRequired,
+  onTextSelection: PropTypes.func,
+  onCodeSelection: PropTypes.func,
   fetchComments: PropTypes.func.isRequired,
   questionAuthor: PropTypes.string.isRequired,
-  addAnnotations: PropTypes.func.isRequired,
+  addAnnotations: PropTypes.func,
     annotations_detail: PropTypes.array,
     annotations_code: PropTypes.array,
 };
