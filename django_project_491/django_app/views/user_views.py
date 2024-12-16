@@ -22,6 +22,7 @@ from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
+from django.forms.models import model_to_dict
 
 @swagger_auto_schema(
     tags=['Profile'],
@@ -1368,18 +1369,28 @@ def multi_search(request):
 
         # Tag-based search
         try:
+            # Fetch questions that match the query
             tag_questions = Question.objects.filter(tags__icontains=query).distinct()
-            results['tag_results'] = [
-                {
-                    'id': question._id,
-                    'title': question.title,
-                    'details': question.details,
-                    'tags': question.tags
-                }
-                for question in tag_questions
-            ]
+
+            # Prepare results in the specified format
+            results['tag_results'] = [{
+                'id': q.pk,
+                'title': q.title,
+                'description': q.details,
+                'user_id': q.author.pk,
+                'username': q.author.username,
+                'upvotes': q.upvotes,
+                'comments_count': q.comments.count(),
+                'programmingLanguage': q.language,
+                'codeSnippet': q.code_snippet,
+                'tags': q.tags,
+                'answered': q.answered,
+                'created_at': q.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+                'post_type': q.type
+            } for q in tag_questions]
         except Exception as e:
             print(f"Tag search error: {e}")
+
 
         # Language-based search
         try:
@@ -1389,7 +1400,8 @@ def multi_search(request):
                     'id': question._id,
                     'title': question.title,
                     'details': question.details,
-                    'language': question.language
+                    'language': question.language,
+                    'post_type': question.type
                 }
                 for question in language_questions
             ]

@@ -5,6 +5,7 @@ import PostPreview from "./PostPreview";
 import { LoadingComponent } from "./LoadingPage"; // Importing the LoadingComponent
 import "./Feed.css";
 import NotificationCenter from './NotificationCenter';
+import { showNotification } from './NotificationCenter';
 
 function Feed() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -21,8 +22,17 @@ function Feed() {
   const [loading, setLoading] = useState(true); // Adding a loading state
   const [topContributors, setTopContributors] = useState([]); // Top Contributors state
   const [topTags, setTopTags] = useState([]); // Top Tags state
+  const [pageCount, setPageCount] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1);
   const hasFetchedData = useRef(false);
   const searchDisplayRef = useRef(null);
+  const [filters, setFilters] = useState({
+    status: 'all',
+    language: language == "" ? "all" : language,
+    tags: [],
+    startDate: '',
+    endDate: ''
+  });
   const navigate = useNavigate();
 
   // Navbar Functions
@@ -118,13 +128,14 @@ function Feed() {
       setQuestionOfTheDay(data.question_of_the_day);
       setTopContributors(data.top_contributors);
       setTopTags(data.top_tags);
+      setPageCount(data.page_count)
     } catch (error) {
       console.error("Error fetching initial data:", error);
     } finally {
       setLoading(false);
     }
   }, []);
-
+  
   useEffect(() => {
     if (!hasFetchedData.current) {
       fetchInitialData();
@@ -208,6 +219,42 @@ function Feed() {
         return [];
       }
   }
+  const handleApplyFilters = async (page_number = 1) => {
+    if (filters.endDate && filters.startDate && filters.endDate < filters.startDate) {
+      showNotification('End date cannot be before start date');
+      return;
+    }
+    try {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/get_questions_according_to_filter/${page_number}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'User-ID': localStorage.getItem('user_id'),
+        },
+        body: JSON.stringify({
+          status: filters.status,
+          language: filters.language,
+          tags: filters.tags,
+          date_range: {
+            start_date: filters.startDate,
+            end_date: filters.endDate
+          }
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Filtered questions:', data);
+        setPosts(data.questions);
+        setPageCount(data.total_pages)
+        setCurrentPage(page_number)
+      }
+    } catch (error) {
+      console.error('Error fetching filtered questions:', error);
+    }
+  };
+
+
 
   useEffect(() => {
     if (searched) {
@@ -267,6 +314,7 @@ function Feed() {
         {/* Left Edge - Popular Tags */}
             <LeftSidebar handleTagClick={handleTagClick} setPosts={setPosts} language={''} top_tags={topTags}/>
 
+
             {/* Middle - Posts */}
             <div className="posts-container">
               <h2 className="section-title">Question of the Day</h2>
@@ -295,14 +343,54 @@ function Feed() {
                 </select>
               </div>
               <div className="questions-list">
-                {sortedPosts.length > 0 ? (
-                  sortedPosts.map((post) => (
-                    <PostPreview
-                      key={post.id}
-                      post={post}
-                      onClick={() => navigate(`/question/${post.id}`)}
-                    />
-                  ))
+              {sortedPosts.length > 0 ? (
+                  <>
+                    {sortedPosts.map((post) => (
+                      <PostPreview
+                        key={post.id}
+                        post={post}
+                        onClick={() => navigate(`/question/${post.id}`)}
+                      />
+                    ))}
+                    
+                    {/* Add pagination controls */}
+                    <div className="pagination-controls flex justify-center gap-2 mt-4 mb-8">
+                    <button 
+                      onClick={async () => {
+                        const prevPage = Math.max(currentPage - 1, 1);
+                        
+                        try {
+                          handleApplyFilters(prevPage)
+                        } catch (error) {
+                          console.error('Error fetching previous page:', error);
+                        }
+                      }}
+                      disabled={currentPage === 1}
+                      className="px-3 py-1 border rounded disabled:opacity-50"
+                    >
+                      Previous
+                    </button>
+                      
+                      <span className="flex items-center px-3">
+                        Page {currentPage} of {pageCount}
+                      </span>
+                      
+                      <button 
+                        onClick={async () => {
+                          const nextPage = Math.min(currentPage + 1, pageCount);
+                          try {
+                            handleApplyFilters(nextPage)
+                          } catch (error) {
+                            console.error('Error fetching next page:', error);
+                          }
+                        }}
+                        disabled={currentPage === pageCount}
+                        className="px-3 py-1 border rounded disabled:opacity-50"
+                      >
+                        Next
+                    </button>
+                    </div>
+                  </>
                 ) : (
                   <p className="empty-text">No questions found</p>
                 )}

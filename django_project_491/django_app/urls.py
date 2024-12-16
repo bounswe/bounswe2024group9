@@ -52,7 +52,7 @@ urlpatterns = [
     path('list_questions_by_tags/<str:tags>/<int:page_number>/', question_views.list_questions_by_tags, name='list_questions_by_tags'),
     path('list_questions_by_hotness/<int:page_number>', question_views.list_questions_by_hotness, name='list_questions_by_hotness'),
     path('random_questions/', question_views.random_questions, name='random_questions'),
-    path('get_questions_according_to_filter',question_views.get_questions_according_to_filter, name='get_questions_according_to_filter'),
+    path('get_questions_according_to_filter/<int:page_number>',question_views.get_questions_according_to_filter, name='get_questions_according_to_filter'),
 
 
     path('upvote_object/<str:object_type>/<int:object_id>/', utilization_views.upvote_object, name='upvote_object'),

@@ -85,7 +85,8 @@ def get_question_details(request: HttpRequest, question_id: int) -> HttpResponse
     """
     try:
         question : Question = Question.objects.prefetch_related('comments', 'reported_by', 'votes__user').get(_id=question_id)
-        annotations: List[Annotation] = get_annotations_by_language("question", question._id)
+        annotation_details: List[Annotation] = get_annotations_by_language("question", question._id)
+        annotation_codes: List[Annotation] = get_annotations_by_language("question_code", question._id)
 
         question_data = {
             'id': question._id,
@@ -103,7 +104,9 @@ def get_question_details(request: HttpRequest, question_id: int) -> HttpResponse
             'reported_by': [user.username for user in question.reported_by.all()],
             'upvoted_by': [vote.user.username for vote in question.votes.filter(vote_type=VoteType.UPVOTE.value)],
             'downvoted_by': [vote.user.username for vote in question.votes.filter(vote_type=VoteType.DOWNVOTE.value)],
-            'annotations': annotations
+            'annotations': annotation_details,
+            'annotation_codes': annotation_codes,
+            'post_type': question.type
         }
 
         return JsonResponse({'question': question_data}, status=200)
@@ -148,7 +151,8 @@ def get_question_comments(request, question_id):
             'upvoted_by': [vote.user.username for vote in comment.votes.filter(vote_type=VoteType.UPVOTE.value)],
             'downvoted_by': [vote.user.username for vote in comment.votes.filter(vote_type=VoteType.DOWNVOTE.value)],
             'answer_of_the_question': comment.answer_of_the_question,
-            'annotations': get_annotations_by_language("comment", comment._id)
+            'annotations': get_annotations_by_language("comment", comment._id),
+            'annotation_codes': get_annotations_by_language("comment_code", comment._id)
         } for comment in comments]
 
         return JsonResponse({'comments': comments_data}, status=200)
@@ -662,9 +666,9 @@ def list_questions_by_language_request(request, user_id, language: str, page_num
     if not language:
         return JsonResponse({'error': 'Language parameter is required'}, status=400)
 
-    questions_data = list_questions_by_language(user_id, language)
+    questions_data , page_count= list_questions_by_language(user_id, language, page_number)
 
-    return JsonResponse({'questions': questions_data}, safe=False, status=200)
+    return JsonResponse({'questions': questions_data, 'page_count': page_count}, safe=False, status=200)
 
 
 def list_questions_by_language(user_id: int, language: str, page_number = 1) -> List[Question]:
@@ -681,6 +685,8 @@ def list_questions_by_language(user_id: int, language: str, page_number = 1) -> 
     user = User.objects.get(pk=user_id)
     user_votes = Question_Vote.objects.filter(user_id=user_id).values('question_id', 'vote_type')
     user_votes_dict = {vote['question_id']: vote['vote_type'] for vote in user_votes}
+
+    page_count = (questions.count() + 9) // 10
 
     return [{   
         'id': question.pk,
@@ -699,7 +705,7 @@ def list_questions_by_language(user_id: int, language: str, page_number = 1) -> 
         'is_bookmarked': user.bookmarks.filter(pk=question.pk).exists(),
         'created_at' : question.created_at.strftime('%Y-%m-%d %H:%M:%S'),
         'post_type': question.type    
-    } for question in questions]
+    } for question in questions], page_count
 
 
 
@@ -1394,11 +1400,23 @@ def fetch_all_feed_at_once(request, user_id: int):
             )
             .distinct()[:10]
         )
+
+        # Get total count for preferred questions
+        total_preferred = questions.count()
+
         if len(questions) < 10:
             general_questions = Question.objects.exclude(
-            pk__in=[q.pk for q in questions]
-            ).order_by('-created_at')[:10 - len(questions)]
+                pk__in=[q.pk for q in questions]
+                ).order_by('-created_at')[:10 - len(questions)]
             questions = list(questions) + list(general_questions)
+            total_general = Question.objects.exclude(
+                    pk__in=Question.objects.filter(
+                        Q(language__in=user.known_languages) | Q(tags__overlap=user.interested_topics)
+                    )
+                ).count()
+            total_count = total_preferred + total_general
+        else:
+            total_count = total_preferred
 
         return [
             {
@@ -1420,7 +1438,7 @@ def fetch_all_feed_at_once(request, user_id: int):
                 'post_type': q.type
             }
             for q in questions
-        ]
+        ], (total_count + 9) // 10
 
     def get_question_of_the_day():
         today = timezone.now().date()
@@ -1458,7 +1476,7 @@ def fetch_all_feed_at_once(request, user_id: int):
         future_top_contributors = executor.submit(get_top_5_contributors)
         future_top_tags = executor.submit(get_most_popular_tags)
 
-        questions = future_questions.result()
+        questions, total_page = future_questions.result()
         question_of_the_day = future_question_of_the_day.result()
         top_contributors = future_top_contributors.result()
         top_tags = future_top_tags.result()
@@ -1469,6 +1487,7 @@ def fetch_all_feed_at_once(request, user_id: int):
         'question_of_the_day': question_of_the_day,
         'top_contributors': top_contributors,
         'top_tags': top_tags,
+        'page_count': total_page
     }
 
     # Cache the feed data for a specified amount of time
@@ -1645,15 +1664,15 @@ def fetch_search_results_at_once(request, wiki_id, language, page_number=1):
 
 
         information_result = info_future.result()
-        question_result = questions_future.result()
+        question_result, page_count = questions_future.result()
         annotation_result = annotations_future.result()
         top_contributors_result = top_contributors_future.result()
         top_tags_result = top_tags_future.result()
-    
 
     return JsonResponse({
         'information': information_result,
         'questions': question_result,
+        'page_count': page_count,
         'annotations': annotation_result,
         'top_contributors': top_contributors_result,
         'top_tags': top_tags_result
@@ -1746,7 +1765,7 @@ def fetch_search_results_at_once(request, wiki_id, language, page_number=1):
 @api_view(['POST'])
 @permission_classes([AllowAny])
 @csrf_exempt
-def get_questions_according_to_filter(request):
+def get_questions_according_to_filter(request, page_number):
     """
     Retrieve a list of questions based on various filters provided in the request.
     Args:
@@ -1777,7 +1796,6 @@ def get_questions_according_to_filter(request):
         tags = data.get('tags', [])
         start_date = data.get('startDate') 
         end_date = data.get('endDate')
-        
         # Start with all questions, ordered by creation date
         questions = Question.objects.all().order_by('-created_at')
         
@@ -1791,8 +1809,14 @@ def get_questions_according_to_filter(request):
             
         # Apply language filter
         if language != 'all':
-            questions = questions.filter(language__iexact=language)
-            
+            questions = questions.filter(language__istartswith=language)
+            if not questions.exists():
+                questions = Question.objects.filter(tags__contains=[language.title()])
+                if not questions.exists():
+                    questions = Question.objects.filter(tags__contains=[language.lower()])           
+                if not questions.exists():
+                    questions = Question.objects.filter(tags__contains=[language.upper()])
+
         # Apply tags filter 
         if tags:
             lowercase_tags = [tag.lower() for tag in tags]
@@ -1817,8 +1841,13 @@ def get_questions_according_to_filter(request):
                 print("Invalid date format for end_date")
                 pass 
 
-        # We need 10 of them in the frontend
-        questions = questions[:10]
+        offset = (page_number - 1) * 10
+
+        total_count = questions.count()
+        total_pages = (total_count + 9) // 10
+
+        # Apply pagination
+        questions = questions[offset:offset + 10]
 
         questions_data = [{
             'id': q.pk,
@@ -1839,7 +1868,7 @@ def get_questions_according_to_filter(request):
             'post_type': q.type
         } for q in questions]
         
-        return JsonResponse({'questions': questions_data}, safe=False)
+        return JsonResponse({'questions': questions_data, 'total_pages': total_pages}, safe=False)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 

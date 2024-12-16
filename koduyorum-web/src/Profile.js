@@ -39,7 +39,7 @@ const Profile = () => {
                           profilePicture: updatedProfilePictureUrl,
                       }));
                     }
-
+                    
                     // Check ownership
                     const loggedInUsername = localStorage.getItem('username');
                     setIsOwner(loggedInUsername === data.user.username);
@@ -210,13 +210,16 @@ const Profile = () => {
                 showNotification('A password update link has been sent to your email.');
             } else {
                 console.error('Failed to send password reset link');
+                showNotification('Failed to send password reset link. Please control your email address.');
             }
         } catch (error) {
             console.error('Error sending password reset link:', error);
         }
     };
 
-
+ const handleCommentClick = (questionId) => {
+        navigate(`/question/${questionId}`);
+    };
 
     return (
         <div>
@@ -317,19 +320,36 @@ const Profile = () => {
                                     {profileData.comments.length > 0 ? (
                                         profileData.comments.map((comment, index) => (
                                             <React.Fragment key={index}>
-                                              <Comment
-                                                question_id={comment.question_id}
-                                                number={index + 1}
-                                                explanation={comment.details}
-                                                code={comment.code_snippet}
-                                                author={comment.user}
-                                                questionAuthor={""}
-                                                initialVotes={comment.upvotes}
-                                                language = {comment.language_id}
-                                                comment_id={comment.comment_id}
-                                                answer_of_the_question={comment.answer_of_the_question}
-                                                fetchComments={""}
-                                              />
+                                               {activeTab === 'comments' && (
+                                                  <div className="content-list">
+                                                    {profileData.comments.length > 0 ? (
+                                                      profileData.comments.map((comment, index) => (
+                                                          <div key={index} style={{cursor: 'pointer'}}
+                                                            className="p-4 border border-gray-300 rounded shadow-md"
+                                                               onClick={() => handleCommentClick(comment.question_id)}>
+                                                              <h4 className="font-semibold text-gray-700">Answer</h4>
+
+
+                                                                <p className="mt-2 text-gray-600">{comment.details}</p>
+
+
+                                                                {comment.code_snippet && (
+                                                                <pre className="p-4 mt-4 rounded" style={{ backgroundColor: '#f4f2fc' }}>
+                                                                    {comment.code_snippet}
+                                                                </pre>
+                                                                )}
+
+                                                                <div className="flex items-center justify-between mt-4">
+                                                                <span className="text-gray-700 font-semibold">Votes: {comment.upvotes}</span>
+                                                                <span className="text-gray-700 font-semibold">Author: {comment.user}</span>
+                                                                </div>
+                                                                </div>
+                                                      ))
+                                                    ) : (
+                                                        <p>You do not have any comments.</p>
+                                                    )}
+                                                  </div>
+                                                )}
                                             </React.Fragment>
                                           ))
                                     ) : (
@@ -353,8 +373,14 @@ const Profile = () => {
                                                         <p className="annotation-text">{annotation.text}</p>
                                                         <div className="annotation-details">
                                                             <div className="annotation-meta">
-                                                                <span className="label">Language ID:</span>
-                                                                <span className="value">{annotation.language_qid}</span>
+                                                                <span className="label">Annotation Type:</span>
+                                                                <span className="value">
+                                                                    {annotation.annotation_type === 'question' && 'Question'}
+                                                                    {annotation.annotation_type === 'question_code' && 'Question Code'}
+                                                                    {annotation.annotation_type === 'comment' && 'Comment'}
+                                                                    {annotation.annotation_type === 'comment_code' && 'Comment Code'}
+                                                                    {annotation.annotation_type === 'wiki' && 'Wiki'}
+                                                                </span>
                                                             </div>
                                                             <div className="annotation-range">
                                                                 <span className="label">Range:</span>
@@ -363,8 +389,35 @@ const Profile = () => {
                                                                 </span>
                                                             </div>
                                                             <div className="annotation-author">
-                                                                <span className="label">Author:</span>
-                                                                <span className="value">{annotation.author}</span>
+                                                            {(annotation.annotation_type === 'question' || annotation.annotation_type === 'question_code') && (
+                                                                <button 
+                                                                    onClick={() => navigate(`/question/${annotation.language_qid}`)}
+                                                                    className="px-4 py-2 rounded-md bg-blue-500 hover:bg-blue-600 text-white font-medium transition-colors duration-200 shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                                                                >
+                                                                    Go to question {annotation.language_qid}
+                                                                </button>
+                                                            )}
+                                                            </div>
+                                                            <div className="annotation-delete">
+                                                            <button
+                                                                onClick={async () => {
+                                                                    try {
+                                                                    await fetch(`${process.env.REACT_APP_API_URL}/delete_annotation/${annotation.annotation_id}/`, {
+                                                                        method: 'DELETE',
+                                                                        headers: {
+                                                                            'User-ID': localStorage.getItem('user_id'),  
+                                                                        }
+                                                                    });
+                                                                      showNotification('Annotation deleted successfully!');
+                                                                    } catch (error) {
+                                                                        console.error('Error deleting annotation:', error);
+                                                                     showNotification('Error deleting annotation:', error);
+                                                                    }
+                                                                }}
+                                                                className="px-4 py-2 rounded-md bg-red-500 hover:bg-red-600 text-white font-medium transition-colors duration-200 shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+                                                                >
+                                                                Delete annotation
+                                                            </button>
                                                             </div>
                                                         </div>
                                                     </div>
