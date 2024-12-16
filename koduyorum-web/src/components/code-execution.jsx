@@ -366,14 +366,7 @@ export default function CodeExecution() {
                       answer_of_the_question={comment.answer_of_the_question}
                       fetchComments={fetchComments}
                     />
-                    {comment.code_snippet && (
-                      <button
-                        className="bg-blue-600 text-white px-4 py-2 mt-4"
-                        onClick={() => run_code('comment', comment.comment_id)}
-                      >
-                        Run Code
-                      </button>
-                    )}
+                    
                   </React.Fragment>
                 ))
               ) : (
