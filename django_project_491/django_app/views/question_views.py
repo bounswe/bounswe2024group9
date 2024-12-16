@@ -1809,8 +1809,14 @@ def get_questions_according_to_filter(request, page_number):
             
         # Apply language filter
         if language != 'all':
-            questions = questions.filter(language__iexact=language)
-            
+            questions = questions.filter(language__istartswith=language)
+            if not questions.exists():
+                questions = Question.objects.filter(tags__contains=[language.title()])
+                if not questions.exists():
+                    questions = Question.objects.filter(tags__contains=[language.lower()])           
+                if not questions.exists():
+                    questions = Question.objects.filter(tags__contains=[language.upper()])
+
         # Apply tags filter 
         if tags:
             lowercase_tags = [tag.lower() for tag in tags]

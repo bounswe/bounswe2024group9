@@ -38,6 +38,7 @@ const SearchResults = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const { wiki_id, wiki_name} = useParams(); // Get wiki_id from the URL
   const navigate = useNavigate();
+  const [language, setLanguage] = useState('')
   const [filters, setFilters] = useState({
     status: 'all',
     language: wiki_name == "" ? "all" : wiki_name,
@@ -45,11 +46,18 @@ const SearchResults = () => {
     startDate: '',
     endDate: ''
   });
+
   useEffect(() => {
     if (wiki_id) {
       fetchSearchData([wiki_id, wiki_name]);
     }
-  }, [wiki_id]);
+    setLanguage(wiki_name);
+    
+    setFilters(prev => ({
+      ...prev,
+      language: wiki_name || 'all'
+    }));
+  }, [wiki_id, wiki_name]);
 
   	// ------  NAVBAR FUNCTIONS ------ (copied from Feed.js)
   const handleEnter = () => {
@@ -76,41 +84,41 @@ const SearchResults = () => {
   };
 
 
-    const handleApplyFilters = async (page_number = 1) => {
-      if (filters.endDate && filters.startDate && filters.endDate < filters.startDate) {
-        showNotification('End date cannot be before start date');
-        return;
+  const handleApplyFilters = async (page_number = 1) => {
+    if (filters.endDate && filters.startDate && filters.endDate < filters.startDate) {
+      showNotification('End date cannot be before start date');
+      return;
+    }
+    try {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/get_questions_according_to_filter/${page_number}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'User-ID': localStorage.getItem('user_id'),
+        },
+        body: JSON.stringify({
+          status: filters.status,
+          language: filters.language,
+          tags: filters.tags,
+          date_range: {
+            start_date: filters.startDate,
+            end_date: filters.endDate
+          }
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Filtered questions:', data);
+        setQuestionData(data.questions);
+        setPageCount(data.total_pages)
+        setCurrentPage(page_number)
       }
-      try {
-        const response = await fetch(`${process.env.REACT_APP_API_URL}/get_questions_according_to_filter/${page_number}`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'User-ID': localStorage.getItem('user_id'),
-          },
-          body: JSON.stringify({
-            status: filters.status,
-            language: filters.language,
-            tags: filters.tags,
-            date_range: {
-              start_date: filters.startDate,
-              end_date: filters.endDate
-            }
-          })
-        });
-  
-        if (response.ok) {
-          const data = await response.json();
-          console.log('Filtered questions:', data);
-          setPosts(data.questions);
-          setPageCount(data.total_pages)
-          setCurrentPage(page_number)
-        }
-      } catch (error) {
-        console.error('Error fetching filtered questions:', error);
-      }
-    };
-  
+    } catch (error) {
+      console.error('Error fetching filtered questions:', error);
+    }
+  };
+
   
 
   const handleSearchResultClick = async (result) => {
@@ -170,20 +178,6 @@ const SearchResults = () => {
           navigate(`/result/${wikiId}/${encodeURIComponent(wikiName)}`);
       } else {
           console.error("No wiki ID found for tag:", tag);
-      }
-  };
-
-  const fetchPosts = async () => {
-      try {
-          const response = await fetch(`${process.env.REACT_APP_API_URL}/random_questions/`);
-          if (!response.ok) {
-              throw new Error(`HTTP error! Status: ${response.status}`);
-          }
-          const data = await response.json();
-          setPosts(data.questions);
-      } catch (error) {
-          console.error('Error fetching posts:', error.message);
-          setError('Failed to load posts. Please check your network or server configuration.');
       }
   };
 
@@ -554,13 +548,51 @@ const SearchResults = () => {
                     {questionData.length} Questions
                   </h2>
                   {questionData.length > 0 ? (
-                    questionData.map((question) => (
-                      <PostPreview 
-                        key={question.id} 
-                        post={question} 
-                        onClick={() => navigate(`/question/${question.id}`)} 
-                      />
-                    ))
+                    <>
+                      {questionData.map((question) => (
+                        <PostPreview 
+                          key={question.id} 
+                          post={question} 
+                          onClick={() => navigate(`/question/${question.id}`)} 
+                        />
+                      ))}
+                    <div className="pagination-controls flex justify-center gap-2 mt-4 mb-8">
+                      <button 
+                        onClick={async () => {
+                          const prevPage = Math.max(currentPage - 1, 1);
+                          
+                          try {
+                            handleApplyFilters(prevPage)
+                          } catch (error) {
+                            console.error('Error fetching previous page:', error);
+                          }
+                        }}
+                        disabled={currentPage === 1}
+                        className="px-3 py-1 border rounded disabled:opacity-50"
+                      >
+                        Previous
+                      </button>
+                        
+                        <span className="flex items-center px-3">
+                          Page {currentPage} of {pageCount}
+                        </span>
+                        
+                        <button 
+                          onClick={async () => {
+                            const nextPage = Math.min(currentPage + 1, pageCount);
+                            try {
+                              handleApplyFilters(nextPage)
+                            } catch (error) {
+                              console.error('Error fetching next page:', error);
+                            }
+                          }}
+                          disabled={currentPage === pageCount}
+                          className="px-3 py-1 border rounded disabled:opacity-50"
+                        >
+                          Next
+                      </button>
+                    </div>
+                    </>
                   ) : (
                     <p>No questions found</p>
                   )}
