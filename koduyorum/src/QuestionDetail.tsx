@@ -87,9 +87,16 @@ const QuestionDetail = ({ route }) => {
 
     const handleRunCode = async () => {
         try {
-            const response = await fetch(`http://10.0.2.2:8000/run_code/question/${post.id}/`);
+            const response = await fetch(`http://10.0.2.2:8000/run_code/question/${post.id}/`, {
+                method: 'POST', // Use POST instead of GET
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({}), // Add any required data here if necessary
+            });
+    
             const data = await response.json();
-
+    
             if (response.status === 200) {
                 setCodeOutput(data.output);
             } else {
@@ -99,6 +106,7 @@ const QuestionDetail = ({ route }) => {
             Alert.alert('Error', 'Failed to run code');
         }
     };
+    
 
     return (
         <ScrollView contentContainerStyle={styles.container}>
