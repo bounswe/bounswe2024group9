@@ -321,32 +321,36 @@ const Profile = () => {
                                         profileData.comments.map((comment, index) => (
                                             <React.Fragment key={index}>
                                                {activeTab === 'comments' && (
-                                  <div className="content-list">
-                                    {profileData.comments.length > 0 ? (
-                                      profileData.comments.map((comment, index) => (
-                                        <div key={index} className="p-4 border border-gray-300 rounded" onClick={() => handleCommentClick(comment.question_id)}>
-                                          <h4 className="font-semibold text-gray-700">Answer: {comment.answer_number}</h4>
-                                            <div className="text-gray-600">
-                                            {comment.details}
-                                          </div>
-                                          {comment.code_snippet && (
-                                            <pre className="text-gray-600">
-                                              {comment.code_snippet}
-                                            </pre>
-                                          )}
-                                          <div className="flex items-center justify-between mt-4">
-                                            <div className="flex items-center gap-2">
-                                              <span className="text-gray-700 font-semibold">Votes: {comment.upvotes}</span>
-                                              <span className="text-gray-700 font-semibold">Author: {comment.user}</span>
-                                            </div>
-                                          </div>
-                                        </div>
-                                      ))
-                                    ) : (
-                                      <p>You do not have any comments.</p>
-                                    )}
-                                  </div>
-                                )}
+                                                  <div className="content-list">
+                                                    {profileData.comments.length > 0 ? (
+                                                      profileData.comments.map((comment, index) => (
+                                                          <div key={index} style={{cursor: 'pointer'}}
+                                                               className="p-4 border border-gray-300 rounded"
+                                                               onClick={() => handleCommentClick(comment.question_id)}>
+                                                              <h4 className="font-semibold text-gray-700">Answer: {comment.answer_number}</h4>
+                                                              <div className="text-gray-600">
+                                                                  {comment.details}
+                                                              </div>
+                                                              {comment.code_snippet && (
+                                                                  <pre className="text-gray-600">
+                                                              {comment.code_snippet}
+                                                            </pre>
+                                                              )}
+                                                              <div className="flex items-center justify-between mt-4">
+                                                                  <div className="flex items-center gap-2">
+                                                                      <span
+                                                                          className="text-gray-700 font-semibold">Votes: {comment.upvotes}</span>
+                                                                      <span
+                                                                          className="text-gray-700 font-semibold">Author: {comment.user}</span>
+                                                                  </div>
+                                                              </div>
+                                                          </div>
+                                                      ))
+                                                    ) : (
+                                                        <p>You do not have any comments.</p>
+                                                    )}
+                                                  </div>
+                                                )}
                                             </React.Fragment>
                                           ))
                                     ) : (
