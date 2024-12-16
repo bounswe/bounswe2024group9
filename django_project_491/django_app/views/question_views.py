@@ -105,7 +105,8 @@ def get_question_details(request: HttpRequest, question_id: int) -> HttpResponse
             'upvoted_by': [vote.user.username for vote in question.votes.filter(vote_type=VoteType.UPVOTE.value)],
             'downvoted_by': [vote.user.username for vote in question.votes.filter(vote_type=VoteType.DOWNVOTE.value)],
             'annotations': annotation_details,
-            'annotation_codes': annotation_codes
+            'annotation_codes': annotation_codes,
+            'post_type': question.type
         }
 
         return JsonResponse({'question': question_data}, status=200)

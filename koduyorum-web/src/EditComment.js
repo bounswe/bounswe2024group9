@@ -51,7 +51,7 @@ function EditComment(props) {
         try {
             const user_id = localStorage.getItem('user_id');
             const response = await fetch(`${process.env.REACT_APP_API_URL}/edit_comment/${props.comment_id}`, {
-                method: 'POST',
+                method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                     'User-ID': user_id
