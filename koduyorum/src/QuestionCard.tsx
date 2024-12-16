@@ -17,6 +17,7 @@ const QuestionCard = ({ post, currentUser, onPress }) => {
         answered,
         upvoted_by = [],
         downvoted_by = [],
+        post_type,
     } = post;
 
     const [likes, setLikes] = useState(initialLikes);

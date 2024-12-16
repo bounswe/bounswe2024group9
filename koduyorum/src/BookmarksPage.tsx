@@ -78,6 +78,7 @@ const BookmarksPage = ({ route }) => {
                             codeSnippet: item.codeSnippet,
                             upvoted_by: item.is_upvoted ? [username] : [],
                             downvoted_by: item.is_downvoted ? [username] : [],
+                            post_type: item.post_type,
                         }}
                         currentUser={{ id: user_id, username }}
                         onPress={handlePostPress}
