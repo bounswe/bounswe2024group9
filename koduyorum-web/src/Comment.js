@@ -113,7 +113,7 @@ function Comment({ onClick, ...props }) {
     const token = localStorage.getItem('authToken');
     try {
       const response = await fetch(`${process.env.REACT_APP_API_URL}/mark_comment_as_answer/${props.comment_id}`, {
-        method: 'GET',
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'User-ID': localStorage.getItem('user_id'),
@@ -160,7 +160,7 @@ function Comment({ onClick, ...props }) {
       onClick={onClick}>
       {(isAnswer && !isDiscussion) && (
         <div className={`question-status-label answered`}>
-          Answer
+            Answer
         </div>
       )}
       <h3 className="font-semibold text-gray-700">Comment {props.number}</h3>
