@@ -529,6 +529,12 @@ const handleTextSelection = (e, type, id, original_text) => {
                   Run Code
                 </button>
               )}
+              <button
+                    className="comment-button"
+                    onClick={() => openPopup()}
+                  >
+                    Comment
+                  </button>
               
               <button
                 className="bg-green-600 text-white px-4 py-2 mt-4"
@@ -550,7 +556,7 @@ const handleTextSelection = (e, type, id, original_text) => {
               </div>)}
             <div className="container mx-auto p-4 max-w-4xl">
               <div className="space-y-6">
-                <h2 className="text-xl font-semibold text-gray-800">Answers</h2>
+                <h2 className="text-xl font-semibold text-gray-800">Comments</h2>
                 {commentData.length > 0 ? (
                   commentData.map((comment, index) => (
                     <React.Fragment key={index}>

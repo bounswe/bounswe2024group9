@@ -163,7 +163,7 @@ function Comment({ onClick, ...props }) {
           Answer
         </div>
       )}
-      <h3 className="font-semibold text-gray-700">Answer {props.number}</h3>
+      <h3 className="font-semibold text-gray-700">Comment {props.number}</h3>
       <div className="text-gray-600" onMouseUp={(e) => props.onTextSelection(e, 'comment')}>
   {props.addAnnotations(props.explanation, props.annotations_detail)}
 </div>
