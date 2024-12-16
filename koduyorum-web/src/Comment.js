@@ -1,6 +1,5 @@
 import React, { useState,useRef, useEffect } from "react";
 import { Navigate, useParams, useNavigate } from "react-router-dom";
-import { useNavigate } from 'react-router-dom';
 import * as PropTypes from "prop-types";
 import SyntaxHighlighter from "react-syntax-highlighter";
 import { docco } from "react-syntax-highlighter/dist/esm/styles/hljs";

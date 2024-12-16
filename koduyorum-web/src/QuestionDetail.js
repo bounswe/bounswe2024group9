@@ -278,6 +278,7 @@ function QuestionDetail(props) {
                     }
 
                 </div>
+                </div>
                 );
             }
 
