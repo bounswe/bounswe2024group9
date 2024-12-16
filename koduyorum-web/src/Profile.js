@@ -325,26 +325,25 @@ const Profile = () => {
                                                     {profileData.comments.length > 0 ? (
                                                       profileData.comments.map((comment, index) => (
                                                           <div key={index} style={{cursor: 'pointer'}}
-                                                               className="p-4 border border-gray-300 rounded"
+                                                            className="p-4 border border-gray-300 rounded shadow-md"
                                                                onClick={() => handleCommentClick(comment.question_id)}>
-                                                              <h4 className="font-semibold text-gray-700">Answer: {comment.answer_number}</h4>
-                                                              <div className="text-gray-600">
-                                                                  {comment.details}
-                                                              </div>
-                                                              {comment.code_snippet && (
-                                                                  <pre className="text-gray-600">
-                                                              {comment.code_snippet}
-                                                            </pre>
-                                                              )}
-                                                              <div className="flex items-center justify-between mt-4">
-                                                                  <div className="flex items-center gap-2">
-                                                                      <span
-                                                                          className="text-gray-700 font-semibold">Votes: {comment.upvotes}</span>
-                                                                      <span
-                                                                          className="text-gray-700 font-semibold">Author: {comment.user}</span>
-                                                                  </div>
-                                                              </div>
-                                                          </div>
+                                                              <h4 className="font-semibold text-gray-700">Answer</h4>
+
+
+                                                                <p className="mt-2 text-gray-600">{comment.details}</p>
+
+
+                                                                {comment.code_snippet && (
+                                                                <pre className="p-4 mt-4 rounded" style={{ backgroundColor: '#f4f2fc' }}>
+                                                                    {comment.code_snippet}
+                                                                </pre>
+                                                                )}
+
+                                                                <div className="flex items-center justify-between mt-4">
+                                                                <span className="text-gray-700 font-semibold">Votes: {comment.upvotes}</span>
+                                                                <span className="text-gray-700 font-semibold">Author: {comment.user}</span>
+                                                                </div>
+                                                                </div>
                                                       ))
                                                     ) : (
                                                         <p>You do not have any comments.</p>
