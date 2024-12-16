@@ -92,7 +92,7 @@ function Comment({ onClick, ...props }) {
     const token = localStorage.getItem('authToken');
     try {
       const response = await fetch(`${process.env.REACT_APP_API_URL}/delete_comment/${props.comment_id}`, {
-        method: 'POST',
+        method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
           'User-ID': localStorage.getItem('user_id'),
