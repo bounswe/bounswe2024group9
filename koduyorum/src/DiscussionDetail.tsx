@@ -269,13 +269,13 @@ const DiscussionDetail = ({ route }) => {
                         {/* Show Original Selected Text */}
                         {startIndex !== null && endIndex !== null && (
                             <Text style={styles.modalSelectedText}>
-                                Original Text: {post.description.slice(startIndex, endIndex + 1)}
+                               {post.description.slice(startIndex, endIndex + 1)}
                             </Text>
                         )}
 
                         <TextInput
                             style={styles.input}
-                            placeholder="Enter annotation..."
+                            placeholder="Enter annotation content..."
                             value={annotationText}
                             onChangeText={setAnnotationText}
                         />
@@ -297,20 +297,27 @@ const DiscussionDetail = ({ route }) => {
                 </View>
             </Modal>
 
+            {/* Reply Modal */}
             <Modal visible={replyModalVisible} animationType="slide" transparent>
                 <View style={styles.modalContainer}>
                     <View style={styles.modalContent}>
                         {selectedAnnotation && (
                             <>
-                                {/* Show Original Annotated Text */}
+                                {/* Display Annotated Text with Author */}
                                 <Text style={styles.modalSelectedText}>
                                     {post.description.slice(
                                         selectedAnnotation.annotation_starting_point,
                                         selectedAnnotation.annotation_ending_point + 1
-                                    )}
+                                    )}{' '}
+                                    <Text style={styles.authorName}>by {selectedAnnotation.author_name}</Text>
                                 </Text>
 
-                                {/* Show All Replies */}
+                                {/* Display Annotation Content */}
+                                <Text style={styles.modalAnnotationContent}>
+                                    {selectedAnnotation.text}
+                                </Text>
+
+                                {/* Display All Replies */}
                                 <View style={styles.repliesContainer}>
                                     <Text style={styles.replyHeader}>Replies:</Text>
                                     {selectedAnnotation.child_annotations &&
@@ -365,8 +372,6 @@ const DiscussionDetail = ({ route }) => {
                     </View>
                 </View>
             </Modal>
-
-
 
         </ScrollView>
     );
@@ -505,7 +510,10 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginBottom: 5,
     },
-    
+    authorName: {
+        fontStyle: 'italic',
+        color: '#555',
+    },    
 });
 
 export default DiscussionDetail;
