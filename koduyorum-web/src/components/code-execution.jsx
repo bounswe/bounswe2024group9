@@ -321,13 +321,17 @@ const handleDeleteAnnotation = async (annotationId) => {
         setAnnotationCodeData((prevAnnotations) =>
           prevAnnotations.filter((annotation) => annotation.annotation_id !== annotationId)
         );
-      } else if (comment_annotations_details.some(annotation => annotation.annotation_id === annotationId)) {
+      } else if (comment_annotations_details.flat().some(annotation => annotation.annotation_id === annotationId)) {
         setCommentAnnotationsDetails((prevAnnotations) =>
-          prevAnnotations.filter((annotation) => annotation.annotation_id !== annotationId)
+          prevAnnotations.map(commentAnnotations =>
+            commentAnnotations.filter(annotation => annotation.annotation_id !== annotationId)
+          )
         );
-      } else if (comment_annotations_code.some(annotation => annotation.annotation_id === annotationId)) {
+      } else if (comment_annotations_code.flat().some(annotation => annotation.annotation_id === annotationId)) {
         setCommentAnnotationsCode((prevAnnotations) =>
-          prevAnnotations.filter((annotation) => annotation.annotation_id !== annotationId)
+          prevAnnotations.map(commentAnnotations =>
+            commentAnnotations.filter(annotation => annotation.annotation_id !== annotationId)
+          )
         );
       }else {
         console.error("Annotation not found for deletion.");
