@@ -32,8 +32,9 @@ const WikiResultDetail = ({ route }) => {
 
     const fetchAnnotations = async () => {
         try {
+            // Extract the language QID (e.g., from "http://www.wikidata.org/entity/Q24582" get 24582)
             const languageId = mainInfo.language.value.split('/').pop().replace('Q', '');
-            const response = await fetch(`http://10.0.2.2:8000/get_annotations_by_language_id/${languageId}/`);
+            const response = await fetch(`http://10.0.2.2:8000/get_annotations/wiki/${languageId}/`);
             const data = await response.json();
     
             if (response.ok) {
@@ -47,26 +48,8 @@ const WikiResultDetail = ({ route }) => {
         }
     };
     
-
-    const fetchRepliesForAnnotation = async (annotationId) => {
-        try {
-            const response = await fetch(`http://10.0.2.2:8000/get_replies/${annotationId}/`);
-            const data = await response.json();
     
-            if (response.ok) {
-                return data.replies || [];
-            } else {
-                Alert.alert('Error', data.error || 'Failed to fetch replies.');
-                return [];
-            }
-        } catch (error) {
-            console.error('Error fetching replies:', error);
-            Alert.alert('Error', 'Failed to fetch replies.');
-            return [];
-        }
-    };
 
-    
     const handleWordPress = (index) => {
         const clickedAnnotation = annotations.find(
             (annotation) =>
@@ -90,43 +73,36 @@ const WikiResultDetail = ({ route }) => {
         }
     };
     
-    
 
     const handleAddAnnotation = async () => {
         if (startIndex === null || endIndex === null || !annotationText.trim()) {
             Alert.alert('Error', 'Please select text and add annotation text.');
             return;
         }
-
-        const selectedText = wikipedia.info
-            .split(' ')
-            .slice(startIndex, endIndex + 1)
-            .join(' ');
-
+    
         try {
+            const languageId = mainInfo.language.value.split('/').pop().replace('Q', '');
             const annotationData = {
                 text: annotationText,
-                language_qid: mainInfo.language.value.split('/').pop().replace('Q', ''),
+                annotation_type: 'wiki',
+                language_qid: languageId,
                 annotation_starting_point: startIndex,
                 annotation_ending_point: endIndex,
                 type: 'annotation',
             };
-
+    
             const response = await fetch('http://10.0.2.2:8000/create_annotation/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'User-ID': user_id
+                    'User-ID': user_id,
                 },
                 body: JSON.stringify(annotationData),
             });
-            fetchAnnotations();
+    
+            await fetchAnnotations(); // Refresh after create
             if (response.status === 201) {
                 Alert.alert('Success', 'Annotation added successfully');
-                setAnnotations([
-                    ...annotations,
-                    { startIndex, endIndex, text: annotationText },
-                ]);
                 setAnnotationModalVisible(false);
                 setAnnotationText('');
                 setStartIndex(null);
@@ -140,6 +116,7 @@ const WikiResultDetail = ({ route }) => {
             Alert.alert('Error', 'Failed to add annotation');
         }
     };
+    
 
     const handleReplyToAnnotation = async (parentId) => {
         if (!replyText.trim()) {
@@ -148,10 +125,12 @@ const WikiResultDetail = ({ route }) => {
         }
     
         try {
+            const languageId = mainInfo.language.value.split('/').pop().replace('Q', '');
             const replyData = {
                 parent_id: parentId,
                 text: replyText,
-                language_qid: mainInfo.language.value.split('/').pop().replace('Q', ''),
+                annotation_type: 'wiki',
+                language_qid: languageId,
                 type: 'annotation_child',
             };
     
@@ -178,42 +157,8 @@ const WikiResultDetail = ({ route }) => {
             Alert.alert('Error', 'Failed to reply to annotation');
         }
     };
-    
-
-    const renderAnnotatedText = (text) => {
-        if (!text) {
-            return <Text style={styles.wikiInfo}>No information available</Text>;
-        }
-    
-        const words = text.split(' ');
-        return (
-            <Text style={styles.wikiInfo}>
-                {words.map((word, index) => (
-                    <Text key={index} onPress={() => handleWordPress(index)}>
-                        <Text
-                            style={[
-                                styles.textWord,
-                                index >= startIndex &&
-                                    index <= endIndex &&
-                                    styles.selectedWord,
-                                annotations.some(
-                                    (annotation) =>
-                                        index >= annotation.annotation_starting_point &&
-                                        index <= annotation.annotation_ending_point
-                                ) && styles.annotatedWord,
-                            ]}
-                        >
-                            {word}
-                        </Text>{' '}
-                    </Text>
-                ))}
-            </Text>
-        );
-    };
-    
 
     const deleteAnnotation = async (annotationId) => {
-        console.log(user_id);
         try {
             const response = await fetch(`http://10.0.2.2:8000/delete_annotation/${annotationId}/`, {
                 method: 'DELETE',
@@ -237,137 +182,193 @@ const WikiResultDetail = ({ route }) => {
         }
     };
 
+    const renderAnnotatedText = (text) => {
+        if (!text) {
+            return <Text style={styles.wikiInfo}>No information available</Text>;
+        }
+    
+        let visibleIndex = -1; // Tracks visible characters only
+        const processedText = [];
+    
+        // Map visible characters and indices
+        text.split('').forEach((char, index) => {
+            if (char.trim() !== '' || char === ' ') {
+                visibleIndex += 1; // Increment for visible characters
+                processedText.push({ char, index: visibleIndex, rawIndex: index });
+            } else {
+                processedText.push({ char, index: null, rawIndex: index });
+            }
+        });
+    
+        return (
+            <Text style={styles.wikiInfo}>
+                {processedText.map(({ char, index, rawIndex }) => (
+                    <Text
+                        key={rawIndex}
+                        onPress={() => handleWordPress(index)}
+                        style={[
+                            styles.textWord,
+                            index !== null &&
+                                startIndex !== null &&
+                                index >= startIndex &&
+                                index <= endIndex &&
+                                styles.selectedWord,
+                            annotations.some(
+                                (annotation) =>
+                                    index !== null &&
+                                    index >= annotation.annotation_starting_point &&
+                                    index <= annotation.annotation_ending_point
+                            ) && styles.annotatedWord,
+                        ]}
+                    >
+                        {char}
+                    </Text>
+                ))}
+            </Text>
+        );
+    };
+    
+
     return (
-<ScrollView style={styles.container}>
-    {/* Main Information Section */}
-    {mainInfo && (
-        <View style={styles.section}>
-            <Text style={styles.title}>{mainInfo.languageLabel.value}</Text>
+        <ScrollView style={styles.container}>
+            {/* Main Information Section */}
+            {mainInfo && (
+                <View style={styles.section}>
+                    <Text style={styles.title}>{mainInfo.languageLabel.value}</Text>
 
-            {mainInfo.wikipediaLink && (
-                <Text
-                    style={styles.link}
-                    onPress={() => Linking.openURL(mainInfo.wikipediaLink.value)}
-                >
-                    Wikipedia: {mainInfo.wikipediaLink.value}
-                </Text>
-            )}
-        </View>
-    )}
-
-    {/* Wikipedia Information */}
-    {wikipedia.title && (
-        <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Wikipedia Summary:</Text>
-            <Text style={styles.wikiTitle}>{wikipedia.title}</Text>
-            {renderAnnotatedText(wikipedia.info)}
-        </View>
-    )}
-
-    {/* Annotation Modal */}
-    <Modal visible={annotationModalVisible} animationType="slide" transparent>
-        <View style={styles.modalContainer}>
-            <View style={styles.modalContent}>
-                <Text style={styles.modalTitle}>Add Annotation</Text>
-
-                {/* Display the selected text */}
-                {startIndex !== null && endIndex !== null && (
-                    <Text style={styles.modalSelectedText}>
-                        "{wikipedia.info.split(' ').slice(startIndex, endIndex + 1).join(' ')}"
-                    </Text>
-                )}
-
-                <TextInput
-                    style={styles.input}
-                    placeholder="Enter annotation text..."
-                    value={annotationText}
-                    onChangeText={setAnnotationText}
-                />
-
-                <View style={styles.modalButtonsContainer}>
-                    <TouchableOpacity style={styles.addButton} onPress={handleAddAnnotation}>
-                        <Text style={styles.addButtonText}>Submit</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        style={styles.cancelButton}
-                        onPress={() => {
-                            setAnnotationModalVisible(false);
-                            setStartIndex(null);
-                            setEndIndex(null);
-                            setAnnotationText('');
-                        }}
-                    >
-                        <Text style={styles.cancelButtonText}>Cancel</Text>
-                    </TouchableOpacity>
-                </View>
-            </View>
-        </View>
-    </Modal>
-
-    <Modal visible={replyModalVisible} animationType="slide" transparent>
-        <View style={styles.modalContainer}>
-            <View style={styles.modalContent}>
-                <Text style={styles.modalTitle}>Annotation Details</Text>
-
-                {/* Display the selected annotation text */}
-                {selectedAnnotation && (
-                    <Text style={styles.modalSelectedText}>
-                        "{wikipedia.info
-                            .split(' ')
-                            .slice(
-                                selectedAnnotation.annotation_starting_point,
-                                selectedAnnotation.annotation_ending_point + 1
-                            )
-                            .join(' ')}"
-                    </Text>
-                )}
-
-                <Text style={styles.selectedText}>{selectedAnnotation?.text}</Text>
-
-                {/* Replies Section */}
-                <Text style={styles.replySectionTitle}>Replies:</Text>
-                <ScrollView style={styles.repliesContainer}>
-                    {selectedAnnotation?.child_annotations?.length > 0 ? (
-                        selectedAnnotation.child_annotations.map((reply, index) => (
-                            <View key={index} style={styles.replyItem}>
-                                <Text style={styles.replyText}>{reply.text}</Text>
-                            </View>
-                        ))
-                    ) : (
-                        <Text style={styles.noRepliesText}>No replies yet.</Text>
+                    {mainInfo.wikipediaLink && (
+                        <Text
+                            style={styles.link}
+                            onPress={() => Linking.openURL(mainInfo.wikipediaLink.value)}
+                        >
+                            Wikipedia: {mainInfo.wikipediaLink.value}
+                        </Text>
                     )}
-                </ScrollView>
-
-                {/* Reply Input */}
-                <TextInput
-                    style={styles.input}
-                    placeholder="Reply to this annotation..."
-                    value={replyText}
-                    onChangeText={setReplyText}
-                />
-
-                <View style={styles.modalButtonsContainer}>
-                    <TouchableOpacity
-                        style={styles.addButton}
-                        onPress={() => handleReplyToAnnotation(selectedAnnotation?.annotation_id)}
-                    >
-                        <Text style={styles.addButtonText}>Reply</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        style={styles.cancelButton}
-                        onPress={() => setReplyModalVisible(false)}
-                    >
-                        <Text style={styles.cancelButtonText}>Close</Text>
-                    </TouchableOpacity>
                 </View>
-            </View>
-        </View>
-    </Modal>
+            )}
+
+            {/* Wikipedia Information */}
+            {wikipedia.title && (
+                <View style={styles.section}>
+                    <Text style={styles.sectionTitle}>Wikipedia Summary:</Text>
+                    <Text style={styles.wikiTitle}>{wikipedia.title}</Text>
+                    {renderAnnotatedText(wikipedia.info)}
+                </View>
+            )}
+
+            {/* Annotation Modal */}
+            <Modal visible={annotationModalVisible} animationType="slide" transparent>
+                <View style={styles.modalContainer}>
+                    <View style={styles.modalContent}>
+                        <Text style={styles.modalTitle}>Add Annotation</Text>
+
+                        {/* Display the selected text */}
+                        {startIndex !== null && endIndex !== null && (
+                            <Text style={styles.modalSelectedText}>
+                                "
+                                {wikipedia.info.slice(startIndex, endIndex + 1)}
+                                "
+                            </Text>
+                        )}
+
+                        <TextInput
+                            style={styles.input}
+                            placeholder="Enter annotation text..."
+                            value={annotationText}
+                            onChangeText={setAnnotationText}
+                        />
+
+                        <View style={styles.modalButtonsContainer}>
+                            <TouchableOpacity style={styles.addButton} onPress={handleAddAnnotation}>
+                                <Text style={styles.addButtonText}>Submit</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={styles.cancelButton}
+                                onPress={() => {
+                                    setAnnotationModalVisible(false);
+                                    setStartIndex(null);
+                                    setEndIndex(null);
+                                    setAnnotationText('');
+                                }}
+                            >
+                                <Text style={styles.cancelButtonText}>Cancel</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
+
+            {/* Reply Modal */}
+            <Modal visible={replyModalVisible} animationType="slide" transparent>
+                <View style={styles.modalContainer}>
+                    <View style={styles.modalContent}>
+                        <Text style={styles.modalTitle}>Annotation Details</Text>
+
+                        {selectedAnnotation && (
+                            <Text style={styles.modalSelectedText}>
+                                "
+                                {wikipedia.info.slice(
+                                    selectedAnnotation.annotation_starting_point,
+                                    selectedAnnotation.annotation_ending_point + 1
+                                )}
+                                "
+                            </Text>
+                        )}
 
 
 
-</ScrollView>
+                        <Text style={styles.selectedText}>{selectedAnnotation?.text}</Text>
 
+                        {/* Replies Section */}
+                        <Text style={styles.replySectionTitle}>Replies:</Text>
+                        <ScrollView style={styles.repliesContainer}>
+                            {selectedAnnotation?.child_annotations?.length > 0 ? (
+                                selectedAnnotation.child_annotations.map((reply, index) => (
+                                    <View key={index} style={styles.replyItem}>
+                                        <Text style={styles.replyText}>{reply.text}</Text>
+                                    </View>
+                                ))
+                            ) : (
+                                <Text style={styles.noRepliesText}>No replies yet.</Text>
+                            )}
+                        </ScrollView>
+
+                        {/* Reply Input */}
+                        <TextInput
+                            style={styles.input}
+                            placeholder="Reply to this annotation..."
+                            value={replyText}
+                            onChangeText={setReplyText}
+                        />
+
+                        <View style={styles.modalButtonsContainer}>
+                            <TouchableOpacity
+                                style={styles.addButton}
+                                onPress={() => handleReplyToAnnotation(selectedAnnotation?.annotation_id)}
+                            >
+                                <Text style={styles.addButtonText}>Reply</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={styles.cancelButton}
+                                onPress={() => setReplyModalVisible(false)}
+                            >
+                                <Text style={styles.cancelButtonText}>Close</Text>
+                            </TouchableOpacity>
+                        </View>
+
+                        {/* Only show delete button if the current user is the annotation's author */}
+                        {selectedAnnotation && selectedAnnotation.author_id === user_id && (
+                            <TouchableOpacity
+                                style={styles.deleteButton}
+                                onPress={() => deleteAnnotation(selectedAnnotation.annotation_id)}
+                            >
+                                <Text style={styles.deleteButtonText}>Delete Annotation</Text>
+                            </TouchableOpacity>
+                        )}
+                    </View>
+                </View>
+            </Modal>
+        </ScrollView>
     );
 };
 
@@ -400,9 +401,11 @@ const styles = StyleSheet.create({
     },
     selectedWord: {
         backgroundColor: 'yellow',
+        paddingHorizontal: 1, // Make highlighting tighter
     },
     annotatedWord: {
         backgroundColor: '#FFD700',
+        paddingHorizontal: 1,
     },
     modalContainer: {
         flex: 1,
@@ -422,6 +425,10 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         marginBottom: 10,
     },
+    modalSelectedText: {
+        fontStyle: 'italic',
+        marginBottom: 10,
+    },
     input: {
         borderWidth: 1,
         borderColor: '#ccc',
@@ -429,13 +436,13 @@ const styles = StyleSheet.create({
         padding: 10,
         marginVertical: 10,
         backgroundColor: '#fff',
+        width: '100%',
     },
     addButton: {
         backgroundColor: '#00BFFF',
         borderRadius: 5,
         paddingVertical: 10,
         paddingHorizontal: 20,
-
         marginTop: 10,
     },
     addButtonText: {
@@ -448,7 +455,6 @@ const styles = StyleSheet.create({
         borderRadius: 5,
         paddingVertical: 10,
         paddingHorizontal: 20,
-
         marginTop: 10,
     },
     cancelButtonText: {
@@ -461,7 +467,6 @@ const styles = StyleSheet.create({
         borderRadius: 5,
         paddingVertical: 10,
         paddingHorizontal: 20,
-
         marginTop: 10,
     },
     deleteButtonText: {
@@ -474,6 +479,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         marginTop: 15,
         marginBottom: 10,
+        width: '100%',
     },
     repliesContainer: {
         maxHeight: 150,
@@ -494,8 +500,6 @@ const styles = StyleSheet.create({
         color: '#888',
         textAlign: 'center',
     },
-    
-    
 });
 
 export default WikiResultDetail;

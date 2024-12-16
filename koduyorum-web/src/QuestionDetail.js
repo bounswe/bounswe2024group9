@@ -151,7 +151,7 @@ function QuestionDetail(props) {
     useEffect(() => {
         setAnswered(props.isAnswered);
     }, [props.isAnswered]);
-    
+
     return (
         <div className="question-post-card">
         <div className={`status-indicator ${isDiscussion ? 'discussion': isAnswered ? 'answered' : 'unanswered'}`}>
@@ -212,22 +212,91 @@ function QuestionDetail(props) {
                     <button onClick={handleDeleteQuestion} className="delete-button">Delete</button>
                 </div>
             )}
-            <button className="question-username" onClick={redirectToProfile}>@{props.author}</button>
-        </div>
-    </div>
-    );
-}
+            {
+                <>
+                    <div className="mt-2 text-gray-600" onMouseUp={(e) => props.onTextSelection(e, 'question')}>
+                        {props.addAnnotations(props.explanation, props.annotations_detail)}
+                    </div>
+                    {props.code &&
+                        <pre className="mt-2 text-gray-600" onMouseUp={(e) => props.onCodeSelection(e, 'question_code')}>
+                            {props.addAnnotations(props.code, props.annotations_code)}
+                        </pre>
+                    }
 
-QuestionDetail.propTypes = {
-    code: PropTypes.string,
-    language: PropTypes.string,
+                        <div className="flex items-center justify-between mt-4">
+                            <div className="flex items-center gap-2">
+                                <button
+                                    className="px-4 py-2 bg-green-500 text-white text-sm font-semibold rounded hover:bg-green-600"
+                                    onClick={handlePostUpvote}
+                                >
+                                    Upvote
+                                </button>
+                                <span className="text-gray-700 font-semibold">{votes}</span>
+                                <button
+                                    className="px-4 py-2 bg-red-500 text-white text-sm font-semibold rounded hover:bg-red-600"
+                                    onClick={handlePostDownvote}
+                                >
+                                    Downvote
+                                </button>
+                                {isOwner && (<>
+                                        <button
+                                            className="px-4 py-2 bg-yellow-500 text-white text-sm font-semibold rounded hover:bg-red-600"
+                                            onClick={handleEditQuestion}
+                                        >
+                                            Edit Question
+                                        </button>
+                                        <button
+                                            className="px-4 py-2 bg-red-500 text-white text-sm font-semibold rounded hover:bg-red-600"
+                                            onClick={handleDeleteQuestion}
+                                        >
+                                            Delete Question
+                                        </button>
+                                    </>
+                                )}
+                                {isPopupVisible && (
+                                    <div className="popup">
+                                        <div className="popup-content" ref={popupRef}>
+                                            <EditQuestion
+                                                question_id={Number(props.question_id)}
+                                                fetchQuestion={props.fetchQuestion}
+                                                closePopup={closePopup}
+                                                title={props.title}
+                                                code_snippet={props.code}
+                                                details={props.explanation}
+                                                language={props.language}
+                                                tags={props.tags.join(", ")}
+                                                showNotification={showNotification}
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                            <button className="question-username" onClick={redirectToProfile}>@{props.author}</button>
+                        </div>
+
+                    </>
+                    }
+
+                </div>
+                );
+            }
+
+            QuestionDetail.propTypes = {
+            code: PropTypes.string,
+            language: PropTypes.string,
     inputType: PropTypes.string.isRequired,
     explanation: PropTypes.string,
     number: PropTypes.number,
     initialVotes: PropTypes.number,
     comment_id: PropTypes.number,
     author: PropTypes.string,
-    answer_of_the_question: PropTypes.bool
+    answer_of_the_question: PropTypes.bool,
+    onTextSelection: PropTypes.func.isRequired,
+    onCodeSelection: PropTypes.func.isRequired,
+    addAnnotations: PropTypes.func.isRequired,
+    annotations_detail: PropTypes.array,
+    annotations_code: PropTypes.array,
+
 };
 
 export default QuestionDetail;

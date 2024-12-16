@@ -27,6 +27,7 @@ const QuestionList = () => {
     const [isPanelOpen, setIsPanelOpen] = useState(false);
     const [profilePic, setProfilePic] = useState(null); // Store profile picture
     const [questionCount, setQuestionCount] = useState(0); // Store number of questions shared
+    const [bookmarks, setBookmarks] = useState([]); // Store bookmarks
 
     const translateX = useRef(new Animated.Value(0)).current;
     const panelWidth = 200; // Width of the profile panel
@@ -84,13 +85,14 @@ const QuestionList = () => {
         }
     };
 
-    // Fetch user profile to get profile picture and question count
+    // Fetch user profile to get profile picture, question count, and bookmarks
     const fetchProfile = async () => {
         try {
             const response = await fetch(`http://10.0.2.2:8000/get_user_profile_by_id/${user_id}/`);
             const data = await response.json();
             setProfilePic(data.user.profile_pic || null);
             setQuestionCount(data.user.questions.length || 0);
+            setBookmarks(data.user.bookmarks || []);
         } catch (error) {
             console.error('Error fetching profile:', error);
         }
@@ -143,11 +145,11 @@ const QuestionList = () => {
                 Alert.alert('Error', 'Failed to search');
             }
         };
-    
+
         performSearch();
     }, [debouncedQuery]);
-    
-    const handlePostPress = (post: any) => {
+
+    const handlePostPress = (post) => {
         navigation.navigate('PostDetail', { post, user_id, username });
     };
 
@@ -155,20 +157,24 @@ const QuestionList = () => {
         navigation.navigate('CreateQuestion', { username, user_id });
     };
 
-    const renderFeedItem = ({ item }: any) => (
+    const handleBookmarksPress = () => {
+        navigation.navigate('BookmarksPage', { user_id, username, bookmarksData: bookmarks });
+    };
+
+    const renderFeedItem = ({ item }) => (
         <QuestionCard
             post={item}
             currentUser={{ id: user_id, username }} // Pass both id and username
             onPress={() => handlePostPress(item)}
         />
     );
-    
+
     const renderWikiResult = ({ item }) => {
         const handleWikiPress = async (wikiId) => {
             try {
                 const response = await fetch(`http://10.0.2.2:8000/result/${wikiId}`);
                 const data = await response.json();
-    
+
                 if (response.ok) {
                     console.log(user_id);
                     navigation.navigate('WikiResultDetail', { user_id, wikiDetails: data });
@@ -180,7 +186,7 @@ const QuestionList = () => {
                 Alert.alert('Error', 'Failed to fetch Wikidata details.');
             }
         };
-    
+
         return (
             <TouchableOpacity
                 style={styles.wikiItem}
@@ -190,9 +196,8 @@ const QuestionList = () => {
             </TouchableOpacity>
         );
     };
-    
-    
-    const renderSearchResult = ({ item }: any) => (
+
+    const renderSearchResult = ({ item }) => (
         <TouchableOpacity style={styles.resultItem} onPress={() => handlePostPress(item)}>
             <Text style={styles.resultTitle}>{item.title}</Text>
             <Text style={styles.resultDetails}>
@@ -200,7 +205,6 @@ const QuestionList = () => {
             </Text>
         </TouchableOpacity>
     );
-    
 
     return (
         <View style={styles.container}>
@@ -218,12 +222,12 @@ const QuestionList = () => {
                             onChangeText={(text) => setSearchQuery(text)}
                         />
                     </View>
-    
+
                     {isSearching ? (
                         <>
                             <FlatList
                                 data={filteredQuestions}
-                                keyExtractor={(item: any) => item.id.toString()}
+                                keyExtractor={(item) => item.id.toString()}
                                 renderItem={renderSearchResult}
                             />
                             <FlatList
@@ -235,19 +239,18 @@ const QuestionList = () => {
                     ) : (
                         <FlatList
                             data={feedQuestions}
-                            keyExtractor={(item: any) => item.id.toString()}
+                            keyExtractor={(item) => item.id.toString()}
                             renderItem={renderFeedItem}
                         />
                     )}
                 </View>
-    
+
                 {/* Floating Button for Question Creation */}
                 <TouchableOpacity style={styles.createButton} onPress={handleCreateQuestion}>
                     <Text style={styles.createButtonText}>+</Text>
                 </TouchableOpacity>
             </Animated.View>
-    
-            {/* Profile Panel */}
+
             <Animated.View
                 style={[
                     styles.profilePanel,
@@ -284,6 +287,12 @@ const QuestionList = () => {
                         onPress={() => navigation.navigate('TopContributors')}
                     >
                         <Text style={styles.contributorsText}>Top Contributors</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={styles.bookmarksButton}
+                        onPress={handleBookmarksPress}
+                    >
+                        <Text style={styles.bookmarksText}>Bookmarks</Text>
                     </TouchableOpacity>
                 </View>
             </Animated.View>
@@ -380,20 +389,6 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         fontSize: 16,
     },
-    exitButton: {
-        position: 'absolute',
-        bottom: 20,
-        width: '90%',
-        padding: 10,
-        backgroundColor: '#dc3545',
-        borderRadius: 8,
-        alignItems: 'center',
-    },
-    exitText: {
-        color: '#fff',
-        fontWeight: 'bold',
-        fontSize: 16,
-    },
     createButton: {
         position: 'absolute',
         bottom: 20,
@@ -423,7 +418,19 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         color: '#000',
     },
-    
+    bookmarksButton: {
+        width: '90%',
+        padding: 10,
+        backgroundColor: '#007bff',
+        borderRadius: 8,
+        alignItems: 'center',
+        marginBottom: 20,
+    },
+    bookmarksText: {
+        color: '#fff',
+        fontWeight: 'bold',
+        fontSize: 16,
+    },
 });
 
 export default QuestionList;
