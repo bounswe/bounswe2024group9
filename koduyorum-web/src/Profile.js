@@ -217,7 +217,9 @@ const Profile = () => {
         }
     };
 
-
+ const handleCommentClick = (questionId) => {
+        navigate(`/question/${questionId}`);
+    };
 
     return (
         <div>
@@ -318,20 +320,36 @@ const Profile = () => {
                                     {profileData.comments.length > 0 ? (
                                         profileData.comments.map((comment, index) => (
                                             <React.Fragment key={index}>
-                                              <Comment
-                                                question_id={comment.question_id}
-                                                number={index + 1}
-                                                explanation={comment.details}
-                                                code={comment.code_snippet}
-                                                author={comment.user}
-                                                questionAuthor={""}
-                                                initialVotes={comment.upvotes}
-                                                language = {comment.language_id}
-                                                comment_id={comment.comment_id}
-                                                answer_of_the_question={comment.answer_of_the_question}
-                                                fetchComments={""}
-                                                onClick={() => navigate(`/question/${comment.question_id}`)}
-                                              />
+                                               {activeTab === 'comments' && (
+                                                  <div className="content-list">
+                                                    {profileData.comments.length > 0 ? (
+                                                      profileData.comments.map((comment, index) => (
+                                                          <div key={index} style={{cursor: 'pointer'}}
+                                                            className="p-4 border border-gray-300 rounded shadow-md"
+                                                               onClick={() => handleCommentClick(comment.question_id)}>
+                                                              <h4 className="font-semibold text-gray-700">Answer</h4>
+
+
+                                                                <p className="mt-2 text-gray-600">{comment.details}</p>
+
+
+                                                                {comment.code_snippet && (
+                                                                <pre className="p-4 mt-4 rounded" style={{ backgroundColor: '#f4f2fc' }}>
+                                                                    {comment.code_snippet}
+                                                                </pre>
+                                                                )}
+
+                                                                <div className="flex items-center justify-between mt-4">
+                                                                <span className="text-gray-700 font-semibold">Votes: {comment.upvotes}</span>
+                                                                <span className="text-gray-700 font-semibold">Author: {comment.user}</span>
+                                                                </div>
+                                                                </div>
+                                                      ))
+                                                    ) : (
+                                                        <p>You do not have any comments.</p>
+                                                    )}
+                                                  </div>
+                                                )}
                                             </React.Fragment>
                                           ))
                                     ) : (
