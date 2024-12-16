@@ -853,369 +853,451 @@ class UserViewsTests(TestCase):
         self.assertEqual(users[3]['username'], 'user4') # 4 points
         self.assertEqual(users[4]['username'], 'user5') # 2 points
 
-# class QuestionViewTests(TestCase):
-#     def setUp(self):
-#         self.client = Client()
-#         self.user = get_user_model().objects.create_user(
-#             username='testuser',
-#             password='password',
-#             email="test@gmail.com",
-#         )
-#         self.question = Question.objects.create(
-#             title='Test Question',
-#             language='Python',
-#             language_id=71,
-#             tags=['tag1', 'tag2'],
-#             details='This is a test question.',
-#             code_snippet='print("Test")',
-#             author=self.user
-#         )
-#         self.comment = Comment.objects.create(
-#             details='This is a test comment.',
-#             author=self.user,
-#             question=self.question
-#         )
-#     # def test_get_question(self):
-#     #     response = self.client.get(reverse('get_question', args=[self.question._id]))
-#     #     self.assertEqual(response.status_code, 200)
-#     #     response_data = response.json()
-#     #     self.assertIn('question', response_data)
-#     #     self.assertEqual(response_data['question']['title'], self.question.title)
-#     #     self.assertEqual(response_data['question']['language'], self.question.language)
+class QuestionViewTests(TestCase):
+    databases = {'default', 'annotations'}  # Allow queries to 'annotations' database
 
-#     # def test_get_question_comments(self):
-#     #     response = self.client.get(reverse('get_question_comments', args=[self.question._id]))
-#     #     self.assertEqual(response.status_code, 200)
-#     #     response_data = response.json()
-#     #     self.assertIn('comments', response_data)
-#     #     self.assertEqual(len(response_data['comments']), 1)
-#     #     self.assertEqual(response_data['comments'][0]['details'], self.comment.details)
+    def setUp(self):
+        self.client = Client()
+        self.user = get_user_model().objects.create_user(
+            username='testuser',
+            password='password',
+            email="test@gmail.com",
+        )
+        self.question = Question.objects.create(
+            title='Test Question',
+            language='Python',
+            language_id=71,
+            tags=['tag1', 'tag2'],
+            details='This is a test question.',
+            code_snippet='print("Test")',
+            author=self.user
+        )
+        self.comment = Comment.objects.create(
+            details='This is a test comment.',
+            author=self.user,
+            question=self.question
+        )
 
-#     def test_create_question(self):
-#         data = {
-#             'title': 'New Question',
-#             'language': 'Python (3.12.5)',
-#             'language_id': 71,
-#             'details': 'This is a new question.',
-#             'code_snippet': 'print("Hello, world!");',
-#             'tags': ['tag3', 'tag4'],
-#         }
-#         response = self.client.post(
-#             reverse('create_question'),
-#             data=json.dumps(data),
-#             content_type='application/json',
-#             **{'HTTP_User-ID': self.user.user_id}
-#         )
-#         self.assertEqual(response.status_code, 201)
-#         response_data = response.json()
-#         self.assertIn('success', response_data)
-#         self.assertTrue(response_data['success'])
+    @patch('django_app.views.question_views.get_annotations_by_language')
+    def test_get_question(self, mock_get_annotations_by_language):
+        """Test retrieving a question's details."""
+        # Mock the annotations to avoid actual database calls to the annotations database
+        mock_get_annotations_by_language.return_value = [
+            {
+                '_id': 1,
+                'text': 'Sample annotation',
+                'language_qid': 71,
+                'annotation_starting_point': 0,
+                'annotation_ending_point': 10,
+                'annotation_date': '2024-01-01 12:00:00',
+                'annotation_type': 'highlight',
+                'author_id': self.user.user_id,
+            }
+        ]
 
-#     # def test_edit_question(self):
-#     #     data = {
-#     #         'title': 'Updated Question',
-#     #         'language': 'Python (3.12.5)',
-#     #         'language_id': 71,
-#     #         'details': 'This is an updated question.'
-#     #     }
-#     #     response = self.client.put(
-#     #         reverse('edit_question', args=[self.question._id]),
-#     #         data=json.dumps(data),
-#     #         content_type='application/json',
-#     #         **{'HTTP_User-ID': self.user.user_id}
-#     #     )
-#     #     self.assertEqual(response.status_code, 200)
-#     #     self.question.refresh_from_db()
-#     #     self.assertEqual(self.question.title, data['title'])
-#     #     self.assertEqual(self.question.details, data['details'])
+        # Perform the GET request
+        response = self.client.get(reverse('get_question', args=[self.question._id]))
 
-#     def test_delete_question(self):
-#         response = self.client.delete(
-#             reverse('delete_question', args=[self.question._id]),
-#             **{'HTTP_User-ID': self.user.user_id}
-#         )
-#         self.assertEqual(response.status_code, 200)
-#         self.assertFalse(Question.objects.filter(_id=self.question._id).exists())
+        # Assertions
+        self.assertEqual(response.status_code, 200)
+        response_data = response.json()
+        self.assertIn('question', response_data)
+        self.assertEqual(response_data['question']['title'], self.question.title)
+        self.assertEqual(response_data['question']['language'], self.question.language)
+        self.assertIn('annotations', response_data['question'])
+        self.assertIn('annotation_codes', response_data['question'])
 
-#     # def test_mark_as_answered(self):
-#     #     response = self.client.post(
-#     #         reverse('mark_as_answered', args=[self.question._id]),
-#     #         **{'HTTP_User-ID': self.user.user_id}
-#     #     )
-#     #     self.assertEqual(response.status_code, 200)
-#     #     self.question.refresh_from_db()
-#     #     self.assertTrue(self.question.answered)
+        # Verify mock was called
+        mock_get_annotations_by_language.assert_any_call("question", self.question._id)
+        mock_get_annotations_by_language.assert_any_call("question_code", self.question._id)
 
-#     def test_report_question(self):
-#         response = self.client.post(
-#             reverse('report_question', args=[self.question._id]),
-#             **{'HTTP_User-ID': self.user.user_id}
-#         )
-#         self.assertEqual(response.status_code, 200)
-#         self.question.refresh_from_db()
-#         self.assertTrue(self.user in self.question.reported_by.all())
+    def test_get_question_comments(self):
+        response = self.client.get(reverse('get_question_comments', args=[self.question._id]))
+        self.assertEqual(response.status_code, 200)
+        response_data = response.json()
+        self.assertIn('comments', response_data)
+        self.assertEqual(len(response_data['comments']), 1)
+        self.assertEqual(response_data['comments'][0]['details'], self.comment.details)
 
-#     # def test_list_questions_by_language(self):
-#     #     response = self.client.get(reverse('list_questions', args=['Python', 1]))
-#     #     self.assertEqual(response.status_code, 200)
-#     #     response_data = response.json()
-#     #     self.assertIn('questions', response_data)
-#     #     self.assertEqual(response_data['questions'][0]['title'], self.question.title)
+    def test_create_question(self):
+        data = {
+            'title': 'New Question',
+            'language': 'Python (3.12.5)',
+            'language_id': 71,
+            'details': 'This is a new question.',
+            'code_snippet': 'print("Hello, world!");',
+            'tags': ['tag3', 'tag4'],
+        }
+        response = self.client.post(
+            reverse('create_question'),
+            data=json.dumps(data),
+            content_type='application/json',
+            **{'HTTP_User-ID': self.user.user_id}
+        )
+        self.assertEqual(response.status_code, 201)
+        response_data = response.json()
+        self.assertIn('success', response_data)
+        self.assertTrue(response_data['success'])
 
-#     # def test_list_questions_by_tags(self):
-#     #     response = self.client.get(reverse('list_questions_by_tags', args=['tag1', 1]))
-#     #     self.assertEqual(response.status_code, 200)
-#     #     response_data = response.json()
-#     #     print("tagsssss", response_data)
-#     #     self.assertIn('questions', response_data)
-#     #     self.assertEqual(response_data['questions'][0]['tags'], self.question.tags)
+    def test_create_question_missing_fields(self):
+        data = {
+            'title': '',  # Missing title
+            'language': '',
+            'details': 'This is an incomplete question.',
+        }
+        response = self.client.post(
+            reverse('create_question'),
+            data=json.dumps(data),
+            content_type='application/json',
+            **{'HTTP_User-ID': self.user.user_id}
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('error', response.json())
 
-#     def test_list_questions_by_hotness(self):
-#         response = self.client.get(reverse('list_questions_by_hotness', args=[1]))
-#         self.assertEqual(response.status_code, 200)
+    def test_delete_question_unauthorized(self):
+        other_user = get_user_model().objects.create_user(
+            username='otheruser',
+            password='password',
+            email='otheruser@example.com'
+        )
+        response = self.client.delete(
+            reverse('delete_question', args=[self.question._id]),
+            **{'HTTP_User-ID': str(other_user.user_id)}
+        )
+        self.assertEqual(response.status_code, 403)
+        self.assertIn('error', response.json())
 
-#     def test_random_questions(self):
-#         response = self.client.get(reverse('random_questions'))
-#         self.assertEqual(response.status_code, 200)
+    def test_delete_question_owner(self):
+        response = self.client.delete(
+            reverse('delete_question', args=[self.question._id]),
+            **{'HTTP_User-ID': self.user.user_id}
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['success'], 'Question Deleted Successfully')
 
-#     def test_bookmark_question(self):
-#         response = self.client.post(
-#             reverse('bookmark_question', args=[self.question._id]),
-#             **{'HTTP_User-ID': self.user.user_id}
-#         )
-#         self.assertEqual(response.status_code, 200)
-#         self.question.refresh_from_db()
-#         self.assertTrue(self.user in self.question.bookmarked_by.all())
+    # def test_edit_question(self):
+    #     """Test authorized user editing a question."""
+    #     # Log in the user to simulate authentication
+    #     self.client.force_login(self.user)
 
-#     # def test_remove_bookmark(self):
-#     #     response = self.client.post(
-#     #         reverse('remove_bookmark', args=[self.question._id]),
-#     #         **{'HTTP_User-ID': self.user.user_id}
-#     #     )
-#     #     self.assertEqual(response.status_code, 200)
-#     #     self.question.refresh_from_db()
-#     #     self.assertFalse(self.user in self.question.bookmarked_by.all())
+    #     # Data for editing the question
+    #     data = {
+    #         'title': 'Updated Question',
+    #         'language': 'Python (3.12.5)',
+    #         'details': 'This is an updated question.'
+    #     }
 
-#     def test_fetch_random_reported_question(self):
-#         response = self.client.post(
-#             reverse('report_question', args=[self.question._id]),
-#             **{'HTTP_User-ID': self.user.user_id}
-#         )
-#         self.assertEqual(response.status_code, 200)
-#         response = self.client.get(reverse('get_random_reported_question'))
-#         self.assertEqual(response.status_code, 200)
-#         self.assertIn('question', response.json())
+    #     # Perform the PUT request
+    #     response = self.client.put(
+    #         reverse('edit_question', args=[self.question._id]),
+    #         data=json.dumps(data),
+    #         content_type='application/json',
+    #         **{'HTTP_User-ID': str(self.user.user_id)}  # Ensure User-ID header is passed
+    #     )
 
-#     def fetch_all_at_once(self):
-#         response = self.client.get(reverse('fetch_feed_at_once', args=[self.user._id]))
-#         self.assertEqual(response.status_code, 200)
-#         response_data = response.json()
-#         self.assertIn('questions', response_data)
+    #     # Assertions
+    #     self.assertEqual(response.status_code, 200, msg=f"Unexpected status code: {response.status_code}")
+    #     self.assertEqual(response.json().get('success'), 'Question edited successfully')
 
-# class CommentViewsTest(TestCase):
-#     def setUp(self):
-#         self.client = APIClient()
+    #     # Verify the updates in the database
+    #     self.question.refresh_from_db()
+    #     self.assertEqual(self.question.title, data['title'])
+    #     self.assertEqual(self.question.details, data['details'])
 
-#         # Create a test user
-#         self.user = User.objects.create_user(
-#             username='testuser',
-#             email='testuser@example.com',
-#             password='testpassword123',
-#         )
-#         self.user.userType = UserType.USER.value
-#         self.user.save()
+    # def test_mark_as_answered(self):
+    #     response = self.client.post(
+    #         reverse('mark_as_answered', args=[self.question._id]),
+    #         **{'HTTP_User-ID': self.user.user_id}
+    #     )
+    #     self.assertEqual(response.status_code, 200)
+    #     self.question.refresh_from_db()
+    #     self.assertTrue(self.question.answered)
 
-#         # Create an admin user
-#         self.admin = User.objects.create_superuser(
-#             username='admin',
-#             email='admin@example.com',
-#             password='adminpassword123',
-#         )
-#         self.admin.userType = UserType.ADMIN.value
-#         self.admin.save()
+    def test_report_question(self):
+        response = self.client.post(
+            reverse('report_question', args=[self.question._id]),
+            **{'HTTP_User-ID': self.user.user_id}
+        )
+        self.assertEqual(response.status_code, 200)
+        self.question.refresh_from_db()
+        self.assertTrue(self.user in self.question.reported_by.all())
 
-#         # Generate tokens
-#         self.user_token = str(AccessToken.for_user(self.user))
-#         self.admin_token = str(AccessToken.for_user(self.admin))
+    # def test_list_questions_by_language(self):
+    #     response = self.client.get(reverse('list_questions', args=['Python', 1]))
+    #     self.assertEqual(response.status_code, 200)
+    #     response_data = response.json()
+    #     self.assertIn('questions', response_data)
+    #     self.assertEqual(response_data['questions'][0]['title'], self.question.title)
 
-#         # Create a test question (Ensure that question is created before the comment)
-#         self.question = Question.objects.create(
-#             title='Test Question',
-#             language='Python',
-#             language_id=71,
-#             tags=['tag1', 'tag2'],
-#             details='This is a test question.',
-#             code_snippet='print("Test")',
-#             author=self.user
-#         )
+    # def test_list_questions_by_tags(self):
+    #     """Test retrieving questions filtered by tags."""
+    #     # Ensure the question in the database has the required tag
+    #     self.question.tags = ['tag1', 'tag2']
+    #     self.question.save()
 
-#     def test_create_comment(self):
-#         """Test creating a comment for a question."""
-#         data = {
-#             "details": "This is a test comment.",
-#             "code_snippet": "print('Hello World')",
-#             "language": "Python (3.12.5)"  # Lang2ID valid language
-#         }
+    #     # Perform the GET request with the correct tag
+    #     response = self.client.get(reverse('list_questions_by_tags', args=['tag1', 1]))
 
-#         response = self.client.post(
-#             reverse('create_comment', args=[self.question._id]),
-#             data=json.dumps(data),
-#             content_type='application/json',
-#             **{'HTTP_User-ID': str(self.user.user_id)}
-#         )
+    #     # Assert the response status code
+    #     self.assertEqual(response.status_code, 200)
 
-#         # Check the status code
-#         self.assertEqual(response.status_code, 201)
+    #     # Parse the response JSON
+    #     response_data = response.json()
+
+    #     # Assert the response contains 'questions'
+    #     self.assertIn('questions', response_data)
+
+    #     # Ensure the response is not empty
+    #     self.assertGreater(len(response_data['questions']), 0, "The questions list is empty")
+
+    #     # Assert the tags of the first question match
+    #     self.assertEqual(response_data['questions'][0]['tags'], self.question.tags)
+
+
+    def test_list_questions_by_hotness(self):
+        response = self.client.get(reverse('list_questions_by_hotness', args=[1]))
+        self.assertEqual(response.status_code, 200)
+
+    def test_random_questions(self):
+        response = self.client.get(reverse('random_questions'))
+        self.assertEqual(response.status_code, 200)
+
+    def test_bookmark_question(self):
+        response = self.client.post(
+            reverse('bookmark_question', args=[self.question._id]),
+            **{'HTTP_User-ID': self.user.user_id}
+        )
+        self.assertEqual(response.status_code, 200)
+        self.question.refresh_from_db()
+        self.assertTrue(self.user in self.question.bookmarked_by.all())
+
+    # def test_remove_bookmark(self):
+    #     response = self.client.post(
+    #         reverse('remove_bookmark', args=[self.question._id]),
+    #         **{'HTTP_User-ID': self.user.user_id}
+    #     )
+    #     self.assertEqual(response.status_code, 200)
+    #     self.question.refresh_from_db()
+    #     self.assertFalse(self.user in self.question.bookmarked_by.all())
+
+    def test_fetch_random_reported_question(self):
+        response = self.client.post(
+            reverse('report_question', args=[self.question._id]),
+            **{'HTTP_User-ID': self.user.user_id}
+        )
+        self.assertEqual(response.status_code, 200)
+        response = self.client.get(reverse('get_random_reported_question'))
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('question', response.json())
+
+    def fetch_all_at_once(self):
+        response = self.client.get(reverse('fetch_feed_at_once', args=[self.user._id]))
+        self.assertEqual(response.status_code, 200)
+        response_data = response.json()
+        self.assertIn('questions', response_data)
+
+class CommentViewsTest(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+
+        # Create a test user
+        self.user = User.objects.create_user(
+            username='testuser',
+            email='testuser@example.com',
+            password='testpassword123',
+        )
+        self.user.userType = UserType.USER.value
+        self.user.save()
+
+        # Create an admin user
+        self.admin = User.objects.create_superuser(
+            username='admin',
+            email='admin@example.com',
+            password='adminpassword123',
+        )
+        self.admin.userType = UserType.ADMIN.value
+        self.admin.save()
+
+        # Generate tokens
+        self.user_token = str(AccessToken.for_user(self.user))
+        self.admin_token = str(AccessToken.for_user(self.admin))
+
+        # Create a test question (Ensure that question is created before the comment)
+        self.question = Question.objects.create(
+            title='Test Question',
+            language='Python',
+            language_id=71,
+            tags=['tag1', 'tag2'],
+            details='This is a test question.',
+            code_snippet='print("Test")',
+            author=self.user
+        )
+
+    def test_create_comment(self):
+        """Test creating a comment for a question."""
+        data = {
+            "details": "This is a test comment.",
+            "code_snippet": "print('Hello World')",
+            "language": "Python (3.12.5)"  # Lang2ID valid language
+        }
+
+        response = self.client.post(
+            reverse('create_comment', args=[self.question._id]),
+            data=json.dumps(data),
+            content_type='application/json',
+            **{'HTTP_User-ID': str(self.user.user_id)}
+        )
+
+        # Check the status code
+        self.assertEqual(response.status_code, 201)
         
-#         # Parse the response JSON
-#         response_data = response.json()
+        # Parse the response JSON
+        response_data = response.json()
         
-#         # Check if the response contains 'success' and 'comment_id'
-#         self.assertIn('success', response_data)
-#         self.assertIn('comment_id', response_data)
+        # Check if the response contains 'success' and 'comment_id'
+        self.assertIn('success', response_data)
+        self.assertIn('comment_id', response_data)
 
-#     # def test_edit_comment(self):
-#     #     """Test editing a comment."""
-#     #     # Create a comment to edit
-#     #     comment = Comment.objects.create(
-#     #         details="Initial Comment",
-#     #         code_snippet="print('Hello')",
-#     #         language="Python",
-#     #         language_id=71,
-#     #         author=self.user,
-#     #         question=self.question,
-#     #     )
+    # def test_edit_comment(self):
+    #     """Test editing a comment."""
+    #     # Create a comment to edit
+    #     comment = Comment.objects.create(
+    #         details="Initial Comment",
+    #         code_snippet="print('Hello')",
+    #         language="Python",
+    #         language_id=71,
+    #         author=self.user,
+    #         question=self.question,
+    #     )
         
-#     #     # URL for the edit comment endpoint
-#     #     url = reverse('edit_comment', args=[comment._id])
+    #     # URL for the edit comment endpoint
+    #     url = reverse('edit_comment', args=[comment._id])
         
-#     #     # Prepare data to update the comment
-#     #     data = {
-#     #         "details": "Updated Comment",
-#     #         "code_snippet": "print('Updated Hello')",
-#     #         "language_id": 2,  # Assuming this is a valid language ID
-#     #     }
+    #     # Prepare data to update the comment
+    #     data = {
+    #         "details": "Updated Comment",
+    #         "code_snippet": "print('Updated Hello')",
+    #         "language_id": 2,  # Assuming this is a valid language ID
+    #     }
         
-#     #     # Set the correct user ID in headers
-#     #     headers = {'HTTP_User-ID': str(self.user.user_id)}
+    #     # Set the correct user ID in headers
+    #     headers = {'HTTP_User-ID': str(self.user.user_id)}
         
-#     #     # Authenticate using the user token
-#     #     self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {self.user_token}')
+    #     # Authenticate using the user token
+    #     self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {self.user_token}')
         
-#     #     # Perform the POST request
-#     #     response = self.client.post(url, data, format='json', **headers)
+    #     # Perform the POST request
+    #     response = self.client.post(url, data, format='json', **headers)
 
-#     #     # Check that the status code is 200 (success)
-#     #     self.assertEqual(response.status_code, 200)
+    #     # Check that the status code is 200 (success)
+    #     self.assertEqual(response.status_code, 200)
         
-#     #     # Retrieve the updated comment from the database
-#     #     updated_comment = Comment.objects.get(_id=comment._id)
+    #     # Retrieve the updated comment from the database
+    #     updated_comment = Comment.objects.get(_id=comment._id)
         
-#     #     # Check that the comment was actually updated
-#     #     self.assertEqual(updated_comment.details, "Updated Comment")
-#     #     self.assertEqual(updated_comment.code_snippet, "print('Updated Hello')")
-#     #     self.assertEqual(updated_comment.language_id, 2)
+    #     # Check that the comment was actually updated
+    #     self.assertEqual(updated_comment.details, "Updated Comment")
+    #     self.assertEqual(updated_comment.code_snippet, "print('Updated Hello')")
+    #     self.assertEqual(updated_comment.language_id, 2)
 
-#     def test_delete_comment(self):
-#         """Test deleting a comment."""
-#         # Create a comment to delete
-#         comment = Comment.objects.create(
-#             details="Comment to delete",
-#             code_snippet="",
-#             language="Python (3.12.5)",  # Valid language
-#             language_id=71,
-#             author=self.user,
-#             question=self.question,
-#         )
-#         url = reverse('delete_comment', args=[comment._id])
-#         headers = {'HTTP_User-ID': str(self.user.user_id)}
-#         self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {self.user_token}')
+    def test_delete_comment(self):
+        """Test deleting a comment."""
+        # Create a comment to delete
+        comment = Comment.objects.create(
+            details="Comment to delete",
+            code_snippet="",
+            language="Python (3.12.5)",  # Valid language
+            language_id=71,
+            author=self.user,
+            question=self.question,
+        )
+        url = reverse('delete_comment', args=[comment._id])
+        headers = {'HTTP_User-ID': str(self.user.user_id)}
+        self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {self.user_token}')
         
-#         # Perform the DELETE request instead of POST
-#         response = self.client.delete(url, **headers)
+        # Perform the DELETE request instead of POST
+        response = self.client.delete(url, **headers)
 
-#         # Check that the response status code is 200 (success)
-#         self.assertEqual(response.status_code, 200)
+        # Check that the response status code is 200 (success)
+        self.assertEqual(response.status_code, 200)
         
-#         # Ensure the comment no longer exists in the database
-#         self.assertFalse(Comment.objects.filter(_id=comment._id).exists())
+        # Ensure the comment no longer exists in the database
+        self.assertFalse(Comment.objects.filter(_id=comment._id).exists())
 
-#     def test_mark_comment_as_answer(self):
-#         """Test marking a comment as the answer."""
-#         # Create a comment to mark as an answer
-#         comment = Comment.objects.create(
-#             details="Answer to mark",
-#             code_snippet="",
-#             language="Python (3.12.5)",  # Valid language
-#             language_id=71,
-#             author=self.user,
-#             question=self.question,
-#         )
+    def test_mark_comment_as_answer(self):
+        """Test marking a comment as the answer."""
+        # Create a comment to mark as an answer
+        comment = Comment.objects.create(
+            details="Answer to mark",
+            code_snippet="",
+            language="Python (3.12.5)",  # Valid language
+            language_id=71,
+            author=self.user,
+            question=self.question,
+        )
         
-#         url = reverse('mark_comment_as_answer', args=[comment._id])
-#         headers = {'HTTP_User-ID': str(self.user.user_id)}  # Correct user ID header
-#         self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {self.user_token}')
+        url = reverse('mark_comment_as_answer', args=[comment._id])
+        headers = {'HTTP_User-ID': str(self.user.user_id)}  # Correct user ID header
+        self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {self.user_token}')
         
-#         # Perform the request to mark the comment as an answer
-#         response = self.client.post(url, format='json', **headers)
+        # Perform the request to mark the comment as an answer
+        response = self.client.post(url, format='json', **headers)
 
-#         # Check that the response status code is 200 (success)
-#         self.assertEqual(response.status_code, 200)
+        # Check that the response status code is 200 (success)
+        self.assertEqual(response.status_code, 200)
         
-#         # Refresh the comment object to check if it's marked as an answer
-#         comment.refresh_from_db()
-#         self.assertTrue(comment.answer_of_the_question)  # Ensure the comment is marked as the answer
+        # Refresh the comment object to check if it's marked as an answer
+        comment.refresh_from_db()
+        self.assertTrue(comment.answer_of_the_question)  # Ensure the comment is marked as the answer
 
+class UtilsViews(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username='testuser',
+            password='password',
+            email="test@gmail.com"
+        )
 
+        self.question = Question.objects.create(
+            title='Test Question',
+            language='Python (3.12.5)',
+            language_id=71,
+            tags=['tag1', 'tag2'],
+            details='This is a test question.',
+            code_snippet='print("Test")',
+            author=self.user
+        )
 
-# class UtilsViews(TestCase):
-#     def setUp(self):
-#         self.user = User.objects.create_user(
-#             username='testuser',
-#             password='password',
-#             email="test@gmail.com"
-#         )
+        self.comment = Comment.objects.create(
+            details='This is a test comment.',
+            author=self.user,
+            question=self.question,
+            language='Python (3.12.5)',
+            language_id=71,
+            code_snippet='print("Testfrom comment)'
+        )
 
-#         self.question = Question.objects.create(
-#             title='Test Question',
-#             language='Python (3.12.5)',
-#             language_id=71,
-#             tags=['tag1', 'tag2'],
-#             details='This is a test question.',
-#             code_snippet='print("Test")',
-#             author=self.user
-#         )
+    # def test_run_code_of_comment(self):
+    #     response = self.client.get(reverse('run_code', args=["comment", self.comment._id]))
+    #     self.assertEqual(response.status_code, 200)
+    #     response_data = response.json()
+    #     self.assertTrue(  'SyntaxError: EOL while scanning string literal' in response_data['output'][-1],)
 
-#         self.comment = Comment.objects.create(
-#             details='This is a test comment.',
-#             author=self.user,
-#             question=self.question,
-#             language='Python (3.12.5)',
-#             language_id=71,
-#             code_snippet='print("Testfrom comment)'
-#         )
+    # def test_run_code_of_question(self):
+    #     response = self.client.get(reverse('run_code', args=["question", self.question._id]))
+    #     self.assertEqual(response.status_code, 200)
+    #     response_data = response.json()
+    #     print(response_data)
+    #     self.assertEqual(response_data['output'][0],  'Test')
 
-#     # def test_run_code_of_comment(self):
-#     #     response = self.client.get(reverse('run_code', args=["comment", self.comment._id]))
-#     #     self.assertEqual(response.status_code, 200)
-#     #     response_data = response.json()
-#     #     self.assertTrue(  'SyntaxError: EOL while scanning string literal' in response_data['output'][-1],)
+    # def test_upvote_comment(self):
+    #     response = self.client.post(reverse('upvote_object', args=["question",self.question._id]), **{'HTTP_User-ID': self.user.user_id})
+    #     self.assertEqual(response.status_code, 200)
+    #     self.question.refresh_from_db()
+    #     self.assertEqual(self.question.upvotes, 1)
 
-#     # def test_run_code_of_question(self):
-#     #     response = self.client.get(reverse('run_code', args=["question", self.question._id]))
-#     #     self.assertEqual(response.status_code, 200)
-#     #     response_data = response.json()
-#     #     print(response_data)
-#     #     self.assertEqual(response_data['output'][0],  'Test')
-
-#     # def test_upvote_comment(self):
-#     #     response = self.client.post(reverse('upvote_object', args=["question",self.question._id]), **{'HTTP_User-ID': self.user.user_id})
-#     #     self.assertEqual(response.status_code, 200)
-#     #     self.question.refresh_from_db()
-#     #     self.assertEqual(self.question.upvotes, 1)
-
-#     # def test_downvote_comment(self):
-#     #     response = self.client.post(reverse('downvote_object', args=["comment", self.comment._id]), **{'HTTP_User-ID': self.user.user_id})
-#     #     self.assertEqual(response.status_code, 200)
-#     #     self.comment.refresh_from_db()
-#     #     self.assertEqual(self.comment.upvotes, -1)
+    # def test_downvote_comment(self):
+    #     response = self.client.post(reverse('downvote_object', args=["comment", self.comment._id]), **{'HTTP_User-ID': self.user.user_id})
+    #     self.assertEqual(response.status_code, 200)
+    #     self.comment.refresh_from_db()
+    #     self.assertEqual(self.comment.upvotes, -1)
