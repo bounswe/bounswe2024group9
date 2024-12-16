@@ -248,7 +248,7 @@ export default function CodeExecution() {
                 alert("Bookmark removed successfully");
                 setIsBookmarked(false);
             } else {
-                alert("Failed to remove bookmark");
+                alert("Failed to remove bookmark"); 
             }
         }
         ).catch(error => {
