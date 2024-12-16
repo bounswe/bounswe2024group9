@@ -34,7 +34,6 @@ const SearchResults = () => {
   const [originalText, setOriginalText] = useState(null);
   const [topTags, setTopTags] = useState([]); // Top Tags state
 
-
   const { wiki_id, wiki_name} = useParams(); // Get wiki_id from the URL
   const navigate = useNavigate();
 
@@ -285,6 +284,7 @@ const SearchResults = () => {
     console.log("Final annotated text:", annotatedText);
     return annotatedText;
   };
+
   
   const handleEditAnnotation = async (annotationId, startOffset, endOffset) => {
     // Fetch the annotation to get its text
@@ -431,6 +431,7 @@ const SearchResults = () => {
                     selectedText={selectedText}
                     startIndex={startIndex}
                     endIndex={endIndex}
+                    annotation_type={"wiki"}
                     language_id={wiki_id}
                     annotationId={annotationId}
                     onClose={() => setModalVisible(false)}

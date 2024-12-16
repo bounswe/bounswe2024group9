@@ -27,6 +27,8 @@ from django.db.models import Count
 from itertools import chain
 from collections import Counter
 
+from annotations_app.models import Annotation
+
 def invalidate_user_cache(cache_key_prefix='feed_user'):
     """
     A decorator to invalidate the cache for a given user_id.
@@ -83,6 +85,7 @@ def get_question_details(request: HttpRequest, question_id: int) -> HttpResponse
     """
     try:
         question : Question = Question.objects.prefetch_related('comments', 'reported_by', 'votes__user').get(_id=question_id)
+        annotations: List[Annotation] = get_annotations_by_language("question", question._id)
 
         question_data = {
             'id': question._id,
@@ -99,8 +102,9 @@ def get_question_details(request: HttpRequest, question_id: int) -> HttpResponse
             'answered': question.answered,
             'reported_by': [user.username for user in question.reported_by.all()],
             'upvoted_by': [vote.user.username for vote in question.votes.filter(vote_type=VoteType.UPVOTE.value)],
-            'downvoted_by': [vote.user.username for vote in question.votes.filter(vote_type=VoteType.DOWNVOTE.value)]
-        }            
+            'downvoted_by': [vote.user.username for vote in question.votes.filter(vote_type=VoteType.DOWNVOTE.value)],
+            'annotations': annotations
+        }
 
         return JsonResponse({'question': question_data}, status=200)
 
@@ -131,7 +135,7 @@ def get_question_comments(request, question_id):
     """
     try:
         question = Question.objects.get(_id=question_id)
-        comments: List[Comment] = question.comments.all().order_by('-upvotes') 
+        comments: List[Comment] = question.comments.all().order_by('-upvotes')
 
         comments_data = [{
             'comment_id': comment._id,
@@ -143,7 +147,8 @@ def get_question_comments(request, question_id):
             'creationDate': comment.created_at.strftime('%Y-%m-%d %H:%M:%S'),
             'upvoted_by': [vote.user.username for vote in comment.votes.filter(vote_type=VoteType.UPVOTE.value)],
             'downvoted_by': [vote.user.username for vote in comment.votes.filter(vote_type=VoteType.DOWNVOTE.value)],
-            'answer_of_the_question': comment.answer_of_the_question
+            'answer_of_the_question': comment.answer_of_the_question,
+            'annotations': get_annotations_by_language("comment", comment._id)
         } for comment in comments]
 
         return JsonResponse({'comments': comments_data}, status=200)
@@ -1628,7 +1633,7 @@ def fetch_search_results_at_once(request, wiki_id, language, page_number=1):
         return list_questions_by_language(user_id ,language, page_number)
     
     def get_annotations():
-        return get_annotations_by_language(wiki_id_numerical_part)
+        return get_annotations_by_language("wiki", wiki_id_numerical_part)
 
 
     with ThreadPoolExecutor(max_workers=4) as executor:

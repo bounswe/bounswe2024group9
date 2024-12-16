@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { showNotification } from './NotificationCenter';
 
-const CreateAnnotation = ({ visible, selectedText, startIndex, endIndex, language_id, annotationId, onClose }) => {
+const CreateAnnotation = ({ visible, selectedText, startIndex, endIndex, language_id, annotationId, onClose, annotation_type}) => {
   const [annotationText, setAnnotationText] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false); // Loading state for form submission
 
@@ -27,13 +27,16 @@ const CreateAnnotation = ({ visible, selectedText, startIndex, endIndex, languag
 
     try {
         const user_id = localStorage.getItem('user_id');
+        if (annotation_type==='wiki'){
+            language_id =language_id.replace('Q','');
+        }
 
         const annotationData = {
             text: annotationText,
-            language_qid: language_id.replace(/^Q/, ''), // Removes the 'Q' at the beginning
+            annotation_type: annotation_type,
+            language_qid : language_id, // Removes the 'Q' at the beginning
             annotation_starting_point:startIndex, 
             annotation_ending_point:endIndex,
-            type: 'annotation',
         };
 
         const response = await fetch(url, {
@@ -62,7 +65,7 @@ const CreateAnnotation = ({ visible, selectedText, startIndex, endIndex, languag
         showNotification('An error occurred while adding annotation', 'just now');
         console.error('Error adding annotation:', error);
     } finally {
-      setIsSubmitting(false); 
+      setIsSubmitting(false);
     }
   }
 
