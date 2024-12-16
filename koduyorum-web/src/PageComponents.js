@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import './Feed.css';
 import Select from 'react-select';
 import { predefinedTags } from './constants/tags';
-import { showNotification } from './NotificationCenter';
 import { languages } from './constants/tags';
 
 // LogoutButton Component
@@ -106,53 +105,13 @@ export const Navbar = ({
 };
 
 // LeftSidebar Component
-export const LeftSidebar = ({ tags, handleTagClick, setPosts, language, top_tags }) => {
-  const [filters, setFilters] = useState({
-    status: 'all',
-    language: language == "" ? "all" : language,
-    tags: [],
-    startDate: '',
-    endDate: ''
-  });
+export const LeftSidebar = ({ tags, handleTagClick, language, top_tags,filters, setFilters, handleApplyFilters }) => {
 
   const handleFilterChange = (filterType, value) => {
     setFilters(prev => ({
       ...prev,
       [filterType]: value
     }));
-  };
-
-  const handleApplyFilters = async () => {
-    if (filters.endDate && filters.startDate && filters.endDate < filters.startDate) {
-      showNotification('End date cannot be before start date');
-      return;
-    }
-    try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/get_questions_according_to_filter`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'User-ID': localStorage.getItem('user_id'),
-        },
-        body: JSON.stringify({
-          status: filters.status,
-          language: filters.language,
-          tags: filters.tags,
-          date_range: {
-            start_date: filters.startDate,
-            end_date: filters.endDate
-          }
-        })
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        console.log('Filtered questions:', data);
-        setPosts(data.questions);
-      }
-    } catch (error) {
-      console.error('Error fetching filtered questions:', error);
-    }
   };
 
   return (
@@ -242,7 +201,7 @@ export const LeftSidebar = ({ tags, handleTagClick, setPosts, language, top_tags
         </div>
 
         <button 
-          onClick={handleApplyFilters}
+          onClick={async () => handleApplyFilters(1)}
           className="apply-filters-btn "
         >
           Apply Filters
@@ -251,8 +210,6 @@ export const LeftSidebar = ({ tags, handleTagClick, setPosts, language, top_tags
     </div>
   );
 };
-
-
 
 // RightSidebar Component
 export const RightSidebar = ({ topContributors }) => {
