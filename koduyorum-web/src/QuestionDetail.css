@@ -279,3 +279,10 @@
   .bookmark-button .fa-icon {
     margin-right: 8px;
   }
+
+  .code-block {
+    background-color: #f4f2fc; 
+    border-radius: 5px; 
+    padding: 10px; 
+    font-family: monospace; 
+  }
