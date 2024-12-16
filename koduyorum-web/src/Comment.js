@@ -1,15 +1,13 @@
-import React, { useState, useRef, useEffect } from "react";
-import { Navigate, useParams } from "react-router-dom";
+import React, { useState,  useRef, useEffect } from "react";
 import { useNavigate } from 'react-router-dom';
 import * as PropTypes from "prop-types";
 import SyntaxHighlighter from "react-syntax-highlighter";
 import { docco } from "react-syntax-highlighter/dist/esm/styles/hljs";
-import { faThumbsUp, faCommentDots, faThumbsDown } from '@fortawesome/free-solid-svg-icons';
+import { faThumbsUp, faThumbsDown } from '@fortawesome/free-solid-svg-icons';
 import './QuestionDetail.css';
-import EditComment from "./EditComment"
+import EditComment from "./EditComment";
 
 function Comment({ onClick, ...props }) {
-
   const [votes, setVotes] = useState(props.initialVotes);
   const isQuestionOwner = localStorage.getItem("username") === props.questionAuthor;
   const isCommentOwner = localStorage.getItem("username") === props.author;
@@ -27,8 +25,23 @@ function Comment({ onClick, ...props }) {
   const popupRef = useRef(null);
 
   const redirectToProfile = () => navigate(`/profile/${props.author}`);
-  
-  // Vote handlers
+
+  useEffect(() => {
+    const handleClickOutside = event => {
+      if (popupRef.current && !popupRef.current.contains(event.target)) {
+        setIsPopupVisible(false);
+      }
+    };
+
+    if (isPopupVisible) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isPopupVisible]);
+
   const handleCommentUpvote = async () => {
     const token = localStorage.getItem('authToken');
     try {
@@ -42,7 +55,6 @@ function Comment({ onClick, ...props }) {
       });
 
       if (response.ok) {
-
         const data = await response.json();
         setVotes(data.success);
       }
@@ -64,17 +76,18 @@ function Comment({ onClick, ...props }) {
       });
 
       if (response.ok) {
-
         const data = await response.json();
         setVotes(data.success);
       }
     } catch (error) {
-      console.error('Error upvoting:', error);
+      console.error('Error downvoting:', error);
     }
   };
+
   const handleEditComment = async () => {
     openPopup();
   };
+
   const handleDeleteComment = async () => {
     const token = localStorage.getItem('authToken');
     try {
@@ -88,12 +101,11 @@ function Comment({ onClick, ...props }) {
       });
 
       if (response.ok) {
-
         const data = await response.json();
         props.fetchComments();
       }
     } catch (error) {
-      console.error('Error upvoting:', error);
+      console.error('Error deleting comment:', error);
     }
   };
 
@@ -110,13 +122,12 @@ function Comment({ onClick, ...props }) {
       });
 
       if (response.ok) {
-
         const data = await response.json();
         setAnswer(true);
         props.fetchComments();
       }
     } catch (error) {
-      console.error('Error upvoting:', error);
+      console.error('Error marking comment as answer:', error);
     }
   };
   const run_code = async (type, id) => {
@@ -152,42 +163,45 @@ function Comment({ onClick, ...props }) {
           Answer
         </div>
       )}
-      <h3 className="font-semibold text-gray-700">Comment {props.number}</h3>
-      <p className="text-gray-600">{props.explanation}</p>
+      <h3 className="font-semibold text-gray-700">Answer {props.number}</h3>
+      <div className="text-gray-600" onMouseUp={(e) => props.onTextSelection(e, 'comment')}>
+  {props.addAnnotations(props.explanation, props.annotations_detail)}
+</div>
       {props.code && (
-        <SyntaxHighlighter language="javascript" style={docco}>
-          {props.code}
-        </SyntaxHighlighter>
+        <pre className="text-gray-600" onMouseUp={(e) => props.onCodeSelection(e, 'comment_code')}>
+        {props.addAnnotations(props.code, props.annotations_code)}
+   </pre>
       )}
       <div className="flex items-center justify-between mt-4">
         <div className="flex items-center gap-2">
           <h3 className="font-semibold text-gray-700"> Votes: {votes} </h3>
           <button
-            className="px-4 py-2 bg-green-500 text-white text-sm font-semibold rounded hover:bg-green-600"
-            onClick={handleCommentUpvote}
+              className="px-4 py-2 bg-green-500 text-white text-sm font-semibold rounded hover:bg-green-600"
+              onClick={handleCommentUpvote}
           >
             Upvote
           </button>
           <button
-            className="px-4 py-2 bg-red-500 text-white text-sm font-semibold rounded hover:bg-red-600"
-            onClick={handleCommentDownvote}
+              className="px-4 py-2 bg-red-500 text-white text-sm font-semibold rounded hover:bg-red-600"
+              onClick={handleCommentDownvote}
           >
            Downvote
           </button>
-          {isCommentOwner && (<>
-            <button
-              className="px-4 py-2 bg-yellow-500 text-white text-sm font-semibold rounded hover:bg-yellow-600"
-              onClick={handleEditComment}
-            >
-              Edit Comment
-            </button>
-            <button
-              className="px-4 py-2 bg-red-500 text-white text-sm font-semibold rounded hover:bg-red-600"
-              onClick={handleDeleteComment}
-            >
-              Delete Comment
-            </button>
-          </>
+          {isCommentOwner && (
+              <>
+                <button
+                    className="px-4 py-2 bg-yellow-500 text-white text-sm font-semibold rounded hover:bg-yellow-600"
+                    onClick={handleEditComment}
+                >
+                  Edit Comment
+                </button>
+                <button
+                    className="px-4 py-2 bg-red-500 text-white text-sm font-semibold rounded hover:bg-red-600"
+                    onClick={handleDeleteComment}
+                >
+                  Delete Comment
+                </button>
+              </>
           )}
           {(isQuestionOwner && !isAnswer && !isDiscussion) && (
             <button
@@ -235,18 +249,25 @@ function Comment({ onClick, ...props }) {
         </div>
       )}
     </div>
-
-  );
+);
 }
 
-Comment.propTypes = {
-  language: PropTypes.string,
-  code: PropTypes.string,
-  explanation: PropTypes.string,
+      Comment.propTypes = {
+      language: PropTypes.string,
+      code: PropTypes.string,
+      explanation: PropTypes.string,
   number: PropTypes.number,
   initialVotes: PropTypes.number,
   comment_id: PropTypes.number,
   author: PropTypes.string,
   answer_of_the_question: PropTypes.bool,
+  onTextSelection: PropTypes.func.isRequired,
+  onCodeSelection: PropTypes.func.isRequired,
+  fetchComments: PropTypes.func.isRequired,
+  questionAuthor: PropTypes.string.isRequired,
+  addAnnotations: PropTypes.func.isRequired,
+    annotations_detail: PropTypes.array,
+    annotations_code: PropTypes.array,
 };
+
 export default Comment;

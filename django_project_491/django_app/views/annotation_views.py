@@ -84,6 +84,7 @@ def create_annotation(request):
             annotation : Annotation = Annotation.objects.create(
                 text=data.get('text'),
                 language_qid=data.get('language_qid', 0),
+                annotation_type=data.get('annotation_type', 'null'),
                 annotation_starting_point=data.get('annotation_starting_point', 0),
                 annotation_ending_point=data.get('annotation_ending_point', 0),
                 author_id=user_id,
@@ -504,11 +505,11 @@ def edit_annotation(request, annotation_id):
 @api_view(['GET'])
 @permission_classes([AllowAny])
 @csrf_exempt
-def get_annotations_by_language_request(request, language_qid):
+def get_annotations_by_component(request, annotation_type, language_qid):
     if request.method == 'GET':
         try:
             # Fetch all annotations with the given language_qid
-            annotations_data = get_annotations_by_language(language_qid)
+            annotations_data = get_annotations_by_language(annotation_type, language_qid)
 
             return JsonResponse({'success': 'Annotations retrieved', 'data': annotations_data}, status=200)
 
@@ -517,8 +518,11 @@ def get_annotations_by_language_request(request, language_qid):
     return JsonResponse({'error': 'Invalid request method'}, status=405)
 
 
-def get_annotations_by_language(language_qid):
-    annotations = Annotation.objects.filter(language_qid=language_qid)
+
+
+
+def get_annotations_by_language(annotation_type, language_qid):
+    annotations = Annotation.objects.filter(language_qid=language_qid, annotation_type=annotation_type)
 
     if not annotations.exists():
         return []
@@ -529,6 +533,7 @@ def get_annotations_by_language(language_qid):
         annotation_data = {
             'annotation_id': annotation._id,
             'text': annotation.text,
+            'annotation_type': annotation.annotation_type,
             'language_qid': annotation.language_qid,
             'annotation_starting_point': annotation.annotation_starting_point,
             'annotation_ending_point': annotation.annotation_ending_point,
@@ -540,6 +545,7 @@ def get_annotations_by_language(language_qid):
                 {
                     'annotation_id': child._id,
                     'text': child.text,
+                    'annotation_type': annotation.annotation_type,
                     'language_qid': child.language_qid,
                     'annotation_starting_point': child.annotation_starting_point,
                     'annotation_ending_point': child.annotation_ending_point,
@@ -704,3 +710,5 @@ def get_all_annotations(request):
             return JsonResponse({'error': str(e)}, status=400)
 
     return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+
