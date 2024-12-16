@@ -201,7 +201,7 @@ function Comment({ onClick, ...props }) {
       </div>
       {props.code && (
         <button
-          className="bg-blue-600 text-white px-4 py-2 mt-4"
+          className="bg-blue-600 text-white px-4 py-2 mt-4 rounded hover:bg-blue-800"
         onClick={() => run_code('comment', props.comment_id)}
         >
           Run Code
