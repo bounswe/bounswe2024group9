@@ -34,14 +34,30 @@ const SearchResults = () => {
   const [originalText, setOriginalText] = useState(null);
   const [topTags, setTopTags] = useState([]); // Top Tags state
 
+  const [pageCount, setPageCount] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1);
   const { wiki_id, wiki_name} = useParams(); // Get wiki_id from the URL
   const navigate = useNavigate();
+  const [language, setLanguage] = useState('')
+  const [filters, setFilters] = useState({
+    status: 'all',
+    language: wiki_name == "" ? "all" : wiki_name,
+    tags: [],
+    startDate: '',
+    endDate: ''
+  });
 
   useEffect(() => {
     if (wiki_id) {
       fetchSearchData([wiki_id, wiki_name]);
     }
-  }, [wiki_id]);
+    setLanguage(wiki_name);
+    
+    setFilters(prev => ({
+      ...prev,
+      language: wiki_name || 'all'
+    }));
+  }, [wiki_id, wiki_name]);
 
   	// ------  NAVBAR FUNCTIONS ------ (copied from Feed.js)
   const handleEnter = () => {
@@ -66,6 +82,44 @@ const SearchResults = () => {
           setSearched(false);
       }
   };
+
+
+  const handleApplyFilters = async (page_number = 1) => {
+    if (filters.endDate && filters.startDate && filters.endDate < filters.startDate) {
+      showNotification('End date cannot be before start date');
+      return;
+    }
+    try {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/get_questions_according_to_filter/${page_number}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'User-ID': localStorage.getItem('user_id'),
+        },
+        body: JSON.stringify({
+          status: filters.status,
+          language: filters.language,
+          tags: filters.tags,
+          date_range: {
+            start_date: filters.startDate,
+            end_date: filters.endDate
+          }
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Filtered questions:', data);
+        setQuestionData(data.questions);
+        setPageCount(data.total_pages)
+        setCurrentPage(page_number)
+      }
+    } catch (error) {
+      console.error('Error fetching filtered questions:', error);
+    }
+  };
+
+  
 
   const handleSearchResultClick = async (result) => {
       const wikiIdName = await fetchWikiIdAndName(result.languageLabel.value);
@@ -127,20 +181,6 @@ const SearchResults = () => {
       }
   };
 
-  const fetchPosts = async () => {
-      try {
-          const response = await fetch(`${process.env.REACT_APP_API_URL}/random_questions/`);
-          if (!response.ok) {
-              throw new Error(`HTTP error! Status: ${response.status}`);
-          }
-          const data = await response.json();
-          setPosts(data.questions);
-      } catch (error) {
-          console.error('Error fetching posts:', error.message);
-          setError('Failed to load posts. Please check your network or server configuration.');
-      }
-  };
-
   const fetchSearchResults = async (query) => {
       try {
           const response = await fetch(`${process.env.REACT_APP_API_URL}/search/${encodeURIComponent(query)}`);
@@ -161,10 +201,7 @@ const SearchResults = () => {
       setLoading(true);
       setError(null);
 
-      // const infoResponse = await fetch(`${process.env.REACT_APP_API_URL}/result/${encodeURIComponent(wikiId)}`);
-      // const questionResponse = await fetch(`${process.env.REACT_APP_API_URL}/list_questions_by_language/${encodeURIComponent(wikiName)}/1`);
-      // const annotationResponse = await fetch(`${process.env.REACT_APP_API_URL}/get_annotations_by_language_id/${wikiId.slice(1)}/`);
-      
+
       const userId = localStorage.getItem('user_id');
       const infoQuestionAnnotationResponse = await fetch(`${process.env.REACT_APP_API_URL}/fetch_search_results_at_once/${encodeURIComponent(wikiId)}/${encodeURIComponent(wikiName)}/${(1)}`, {
         headers: {
@@ -178,10 +215,6 @@ const SearchResults = () => {
       if (!infoQuestionAnnotationResponse.ok) {
         throw new Error('Failed to load data');
       }
-
-      // if (!infoResponse.ok || !questionResponse.ok) {
-      //   throw new Error('Failed to load data');
-      // }
 
       const infoQuestionAnnotationData = await infoQuestionAnnotationResponse.json();
       const infoData = infoQuestionAnnotationData.information;
@@ -406,8 +439,14 @@ const SearchResults = () => {
           />
           <NotificationCenter />
           <div className="feed-content">
-            <LeftSidebar handleTagClick={handleTagClick} setPosts={setQuestionData} language={wiki_name} top_tags={topTags}/>
-
+              <LeftSidebar 
+                handleTagClick={handleTagClick} 
+                language={wiki_name} 
+                top_tags={topTags}
+                filters={filters}
+                setFilters={setFilters}
+                handleApplyFilters={handleApplyFilters}
+              />
             <div className="info-container">
  
               <div className="tab-navigation">
@@ -509,13 +548,51 @@ const SearchResults = () => {
                     {questionData.length} Questions
                   </h2>
                   {questionData.length > 0 ? (
-                    questionData.map((question) => (
-                      <PostPreview 
-                        key={question.id} 
-                        post={question} 
-                        onClick={() => navigate(`/question/${question.id}`)} 
-                      />
-                    ))
+                    <>
+                      {questionData.map((question) => (
+                        <PostPreview 
+                          key={question.id} 
+                          post={question} 
+                          onClick={() => navigate(`/question/${question.id}`)} 
+                        />
+                      ))}
+                    <div className="pagination-controls flex justify-center gap-2 mt-4 mb-8">
+                      <button 
+                        onClick={async () => {
+                          const prevPage = Math.max(currentPage - 1, 1);
+                          
+                          try {
+                            handleApplyFilters(prevPage)
+                          } catch (error) {
+                            console.error('Error fetching previous page:', error);
+                          }
+                        }}
+                        disabled={currentPage === 1}
+                        className="px-3 py-1 border rounded disabled:opacity-50"
+                      >
+                        Previous
+                      </button>
+                        
+                        <span className="flex items-center px-3">
+                          Page {currentPage} of {pageCount}
+                        </span>
+                        
+                        <button 
+                          onClick={async () => {
+                            const nextPage = Math.min(currentPage + 1, pageCount);
+                            try {
+                              handleApplyFilters(nextPage)
+                            } catch (error) {
+                              console.error('Error fetching next page:', error);
+                            }
+                          }}
+                          disabled={currentPage === pageCount}
+                          className="px-3 py-1 border rounded disabled:opacity-50"
+                        >
+                          Next
+                      </button>
+                    </div>
+                    </>
                   ) : (
                     <p>No questions found</p>
                   )}
