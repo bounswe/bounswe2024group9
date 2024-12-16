@@ -11,7 +11,6 @@ import EditComment from "./EditComment"
 function Comment({ onClick, ...props }) {
 
   const [votes, setVotes] = useState(props.initialVotes);
-  const [downvotes, setDownvotes] = useState(props.initialDownvotes);
   const isQuestionOwner = localStorage.getItem("username") === props.questionAuthor;
   const isCommentOwner = localStorage.getItem("username") === props.author;
   const [isAnswer, setAnswer] = useState(props.answer_of_the_question);
@@ -66,7 +65,7 @@ function Comment({ onClick, ...props }) {
       if (response.ok) {
 
         const data = await response.json();
-        setDownvotes(data.success);
+        setVotes(data.success);
       }
     } catch (error) {
       console.error('Error upvoting:', error);
@@ -161,17 +160,18 @@ function Comment({ onClick, ...props }) {
       )}
       <div className="flex items-center justify-between mt-4">
         <div className="flex items-center gap-2">
+          <h3 className="font-semibold text-gray-700"> Votes: {votes} </h3>
           <button
             className="px-4 py-2 bg-green-500 text-white text-sm font-semibold rounded hover:bg-green-600"
             onClick={handleCommentUpvote}
           >
-             {votes} {votes === 1 ? "Upvote" : "Upvotes"}
+            Upvote
           </button>
           <button
             className="px-4 py-2 bg-red-500 text-white text-sm font-semibold rounded hover:bg-red-600"
             onClick={handleCommentDownvote}
           >
-            {downvotes} {downvotes === 1 ? "Downvote" : "Downvotes"}
+           Downvote
           </button>
           {isCommentOwner && (<>
             <button
