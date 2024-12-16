@@ -21,7 +21,7 @@ function Comment({ onClick, ...props }) {
   const [commentOutput, setCommentOutput] = useState([]);
 
   const [isPopupVisible, setIsPopupVisible] = useState(false);
-  
+
   const openPopup = () => setIsPopupVisible(true);
   const closePopup = () => setIsPopupVisible(false);
   const popupRef = useRef(null);
@@ -145,14 +145,14 @@ function Comment({ onClick, ...props }) {
         body: JSON.stringify({ source_code: props.code, language_id: props.languageId }),  // Send code and language ID as JSON
       });
       const data = await response.json();  // Parse the JSON response
-      
-      
-        setCommentOutput(data.output);
-      
+
+
+      setCommentOutput(data.output);
+
     } catch (error) {
-      
-        setCommentOutput(["Error: Could not execute the code."]);
-      
+
+      setCommentOutput(["Error: Could not execute the code."]);
+
     } finally {
       setLoading(false); // Turn off loading state after the request completes
     }
@@ -167,54 +167,54 @@ function Comment({ onClick, ...props }) {
       )}
       <h3 className="font-semibold text-gray-700">Answer {props.number}</h3>
       <div className="text-gray-600" onMouseUp={(e) => props.onTextSelection(e, 'comment_details')}>
-  {props.addAnnotations(props.explanation, props.annotations, 0)}
-</div>
-{props.code && (
-    <div className="text-gray-600" onMouseUp={(e) => props.onCodeSelection(e, 'comment_code')}>
-      {/*// <SyntaxHighlighter language="javascript" style={docco}*/}
-      {/*                      onMouseUp={(e) => props.onCodeSelection(e, 'comment_code')}>*/}
-      {props.addAnnotations(props.code, props.annotations, props.explanation.length)}
-    {/*</SyntaxHighlighter>*/}
-    </div>
+        {props.addAnnotations(props.explanation, props.annotations, 0)}
+      </div>
+      {props.code && (
+        <div className="text-gray-600" onMouseUp={(e) => props.onCodeSelection(e, 'comment_code')}>
+          {/*// <SyntaxHighlighter language="javascript" style={docco}*/}
+          {/*                      onMouseUp={(e) => props.onCodeSelection(e, 'comment_code')}>*/}
+          {props.addAnnotations(props.code, props.annotations, props.explanation.length)}
+          {/*</SyntaxHighlighter>*/}
+        </div>
       )}
       <div className="flex items-center justify-between mt-4">
         <div className="flex items-center gap-2">
           <h3 className="font-semibold text-gray-700"> Votes: {votes} </h3>
           <button
-              className="px-4 py-2 bg-green-500 text-white text-sm font-semibold rounded hover:bg-green-600"
-              onClick={handleCommentUpvote}
+            className="px-4 py-2 bg-green-500 text-white text-sm font-semibold rounded hover:bg-green-600"
+            onClick={handleCommentUpvote}
           >
             Upvote
           </button>
           <button
-              className="px-4 py-2 bg-red-500 text-white text-sm font-semibold rounded hover:bg-red-600"
-              onClick={handleCommentDownvote}
+            className="px-4 py-2 bg-red-500 text-white text-sm font-semibold rounded hover:bg-red-600"
+            onClick={handleCommentDownvote}
           >
-           Downvote
+            Downvote
           </button>
           {isCommentOwner && (
-              <>
-                <button
-                    className="px-4 py-2 bg-yellow-500 text-white text-sm font-semibold rounded hover:bg-yellow-600"
-                    onClick={handleEditComment}
-                >
-                  Edit Comment
-                </button>
-                <button
-                    className="px-4 py-2 bg-red-500 text-white text-sm font-semibold rounded hover:bg-red-600"
-                    onClick={handleDeleteComment}
-                >
-                  Delete Comment
-                </button>
-              </>
+            <>
+              <button
+                className="px-4 py-2 bg-yellow-500 text-white text-sm font-semibold rounded hover:bg-yellow-600"
+                onClick={handleEditComment}
+              >
+                Edit Comment
+              </button>
+              <button
+                className="px-4 py-2 bg-red-500 text-white text-sm font-semibold rounded hover:bg-red-600"
+                onClick={handleDeleteComment}
+              >
+                Delete Comment
+              </button>
+            </>
           )}
           {isQuestionOwner && !isAnswer && (
-              <button
-                  className="px-4 py-2 bg-green-500 text-white text-sm font-semibold rounded hover:bg-green-600"
-                  onClick={toggleAnswer}
-              >
-                Mark As Answer
-              </button>
+            <button
+              className="px-4 py-2 bg-green-500 text-white text-sm font-semibold rounded hover:bg-green-600"
+              onClick={toggleAnswer}
+            >
+              Mark As Answer
+            </button>
           )}
         </div>
         <p className="question-username" onClick={redirectToProfile}>@{props.author}</p>
@@ -222,22 +222,22 @@ function Comment({ onClick, ...props }) {
       {props.code && (
         <button
           className="bg-blue-600 text-white px-4 py-2 mt-4 rounded hover:bg-blue-800"
-        onClick={() => run_code('comment', props.comment_id)}
+          onClick={() => run_code('comment', props.comment_id)}
         >
           Run Code
         </button>
       )}
       {props.code && (
-      <div className="mt-6">
-        <h2 className="text-xl font-semibold mb-2">Output:</h2>
-        <pre className="w-full p-4 bg-gray-200 text-gray-800 whitespace-pre-wrap">
-          {loading ? "Waiting for output..." : (
-            commentOutput.length > 0 ? commentOutput.map((line, index) => (
-              <div key={index}>{line}</div>
-            )) : "No output yet."
-          )}
-        </pre>
-      </div>
+        <div className="mt-6">
+          <h2 className="text-xl font-semibold mb-2">Output:</h2>
+          <pre className="w-full p-4 bg-gray-200 text-gray-800 whitespace-pre-wrap">
+            {loading ? "Waiting for output..." : (
+              commentOutput.length > 0 ? commentOutput.map((line, index) => (
+                <div key={index}>{line}</div>
+              )) : "No output yet."
+            )}
+          </pre>
+        </div>
       )}
       {isPopupVisible && (
         <div className="popup" >
@@ -252,15 +252,16 @@ function Comment({ onClick, ...props }) {
             />
 
           </div>
+        </div>
       )}
     </div>
-);
+  );
 }
 
-      Comment.propTypes = {
-      language: PropTypes.string,
-      code: PropTypes.string,
-      explanation: PropTypes.string,
+Comment.propTypes = {
+  language: PropTypes.string,
+  code: PropTypes.string,
+  explanation: PropTypes.string,
   number: PropTypes.number,
   initialVotes: PropTypes.number,
   comment_id: PropTypes.number,
