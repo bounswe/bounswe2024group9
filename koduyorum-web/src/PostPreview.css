@@ -81,6 +81,11 @@
     font-size: 13px;
     color: #555;
     margin-bottom: 10px;
+    overflow: hidden; /* Hide overflowing content */
+    text-overflow: ellipsis; /* Add '...' at the end */
+    display: -webkit-box;
+    -webkit-line-clamp: 3; /* Limit to 3 lines */
+    -webkit-box-orient: vertical;
 }
 
 .post-footer {
@@ -101,12 +106,6 @@
 .footer-text {
     font-size: 12px;
     color: #888;
-}
-
-.vote-count {
-    font-size: 16px;  /* Bigger text for the counter */
-    color: #555;
-    margin: 0 8px;  /* Add some spacing around the number */
 }
 
 
