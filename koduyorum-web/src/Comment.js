@@ -135,16 +135,20 @@ function Comment(props) {
         </div>
       )}
       <h3 className="font-semibold text-gray-700">Answer {props.number}</h3>
-      <div className="text-gray-600" onMouseUp={(e) => props.onTextSelection(e, 'comment_details')}>
-  {props.addAnnotations(props.explanation, props.annotations, 0)}
+      <div className="text-gray-600" onMouseUp={(e) => props.onTextSelection(e, 'comment')}>
+  {props.addAnnotations(props.explanation, props.annotations_detail)}
 </div>
 {props.code && (
-    <div className="text-gray-600" onMouseUp={(e) => props.onCodeSelection(e, 'comment_code')}>
-      {/*// <SyntaxHighlighter language="javascript" style={docco}*/}
-      {/*                      onMouseUp={(e) => props.onCodeSelection(e, 'comment_code')}>*/}
-      {props.addAnnotations(props.code, props.annotations, props.explanation.length)}
-    {/*</SyntaxHighlighter>*/}
-    </div>
+    <pre className="text-gray-600" onMouseUp={(e) => props.onCodeSelection(e, 'comment_code')}>
+         {props.addAnnotations(props.code, props.annotations_code)}
+    </pre>
+
+    // <div className="text-gray-600" onMouseUp={(e) => props.onCodeSelection(e, 'comment_code')}>
+    //   {/*// <SyntaxHighlighter language="javascript" style={docco}*/}
+    //   {/*                      onMouseUp={(e) => props.onCodeSelection(e, 'comment_code')}>*/}
+    //   {props.addAnnotations(props.code, props.annotations, props.explanation.length)}
+    // {/*</SyntaxHighlighter>*/}
+    // </div>
       )}
       <div className="flex items-center justify-between mt-4">
         <div className="flex items-center gap-2">
@@ -220,7 +224,8 @@ function Comment(props) {
   fetchComments: PropTypes.func.isRequired,
   questionAuthor: PropTypes.string.isRequired,
   addAnnotations: PropTypes.func.isRequired,
-  annotations: PropTypes.array.isRequired,
+    annotations_detail: PropTypes.array,
+    annotations_code: PropTypes.array,
 };
 
 export default Comment;
