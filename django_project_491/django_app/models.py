@@ -277,6 +277,8 @@ class User(AbstractBaseUser):
             'annotation_ending_point': annotation.annotation_ending_point,
             'annotation_date': annotation.annotation_date.strftime('%Y-%m-%d %H:%M:%S'),
             'author': self.username,
+            'annotation_type': annotation.annotation_type,
+            'author_id': annotation.author_id,
         } for annotation in annotations]
 
     def calculate_total_points(self):

@@ -27,6 +27,8 @@ from django.db.models import Count
 from itertools import chain
 from collections import Counter
 
+from annotations_app.models import Annotation
+
 def invalidate_user_cache(cache_key_prefix='feed_user'):
     """
     A decorator to invalidate the cache for a given user_id.
@@ -83,6 +85,8 @@ def get_question_details(request: HttpRequest, question_id: int) -> HttpResponse
     """
     try:
         question : Question = Question.objects.prefetch_related('comments', 'reported_by', 'votes__user').get(_id=question_id)
+        annotation_details: List[Annotation] = get_annotations_by_language("question", question._id)
+        annotation_codes: List[Annotation] = get_annotations_by_language("question_code", question._id)
 
         question_data = {
             'id': question._id,
@@ -99,8 +103,10 @@ def get_question_details(request: HttpRequest, question_id: int) -> HttpResponse
             'answered': question.answered,
             'reported_by': [user.username for user in question.reported_by.all()],
             'upvoted_by': [vote.user.username for vote in question.votes.filter(vote_type=VoteType.UPVOTE.value)],
-            'downvoted_by': [vote.user.username for vote in question.votes.filter(vote_type=VoteType.DOWNVOTE.value)]
-        }            
+            'downvoted_by': [vote.user.username for vote in question.votes.filter(vote_type=VoteType.DOWNVOTE.value)],
+            'annotations': annotation_details,
+            'annotation_codes': annotation_codes
+        }
 
         return JsonResponse({'question': question_data}, status=200)
 
@@ -131,7 +137,7 @@ def get_question_comments(request, question_id):
     """
     try:
         question = Question.objects.get(_id=question_id)
-        comments: List[Comment] = question.comments.all().order_by('-upvotes') 
+        comments: List[Comment] = question.comments.all().order_by('-upvotes')
 
         comments_data = [{
             'comment_id': comment._id,
@@ -143,7 +149,9 @@ def get_question_comments(request, question_id):
             'creationDate': comment.created_at.strftime('%Y-%m-%d %H:%M:%S'),
             'upvoted_by': [vote.user.username for vote in comment.votes.filter(vote_type=VoteType.UPVOTE.value)],
             'downvoted_by': [vote.user.username for vote in comment.votes.filter(vote_type=VoteType.DOWNVOTE.value)],
-            'answer_of_the_question': comment.answer_of_the_question
+            'answer_of_the_question': comment.answer_of_the_question,
+            'annotations': get_annotations_by_language("comment", comment._id),
+            'annotation_codes': get_annotations_by_language("comment_code", comment._id)
         } for comment in comments]
 
         return JsonResponse({'comments': comments_data}, status=200)
@@ -949,18 +957,19 @@ def list_questions_according_to_the_user(request, user_id: int):
     4. If still fewer than 10 questions are found, fills the remaining slots with general questions.
     5. Constructs a list of question data dictionaries to be returned in the JSON response.
 
-    The question data dictionary includes:
+    Each question data dictionary includes:
         - id: The question's unique identifier.
         - title: The title of the question.
         - description: The details of the question.
         - user_id: The ID of the user who authored the question.
-        - likes: The number of upvotes the question has received.
+        - upvotes: The number of upvotes the question has received.
         - comments_count: The number of comments on the question.
         - programmingLanguage: The programming language associated with the question.
         - codeSnippet: The code snippet included in the question.
         - tags: The tags associated with the question.
         - answered: Whether the question has been answered.
-        - topic: The topic of the question.
+        - post_type: The type of the post (e.g., 'question', 'discussion').
+        - author: The username of the author.
     """
     unique_question_ids = set()
     personalized_questions = []
@@ -1007,10 +1016,12 @@ def list_questions_according_to_the_user(request, user_id: int):
         'codeSnippet': question.code_snippet,
         'tags': question.tags,
         'answered': question.answered,
+        'post_type': question.type,  # Include the post type
         'author': question.author.username,
         'upvoted_by': [vote.user.username for vote in question.votes.filter(vote_type=VoteType.UPVOTE.value)],
         'downvoted_by': [vote.user.username for vote in question.votes.filter(vote_type=VoteType.DOWNVOTE.value)],
     } for question in personalized_questions]
+
     return JsonResponse({'questions': questions_data}, safe=False)
 
 
@@ -1625,7 +1636,7 @@ def fetch_search_results_at_once(request, wiki_id, language, page_number=1):
         return list_questions_by_language(user_id ,language, page_number)
     
     def get_annotations():
-        return get_annotations_by_language(wiki_id_numerical_part)
+        return get_annotations_by_language("wiki", wiki_id_numerical_part)
 
 
     with ThreadPoolExecutor(max_workers=4) as executor:

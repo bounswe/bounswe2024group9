@@ -115,7 +115,7 @@ function QuestionDetail(props) {
     useEffect(() => {
         setAnswered(props.isAnswered);
     }, [props.isAnswered]);
-    
+
     return (
         <div className="question-post-card">
         <div className={`status-indicator ${isAnswered ? 'answered' : 'unanswered'}`}>
@@ -130,22 +130,35 @@ function QuestionDetail(props) {
         )}
     
         {props.tags && (
-            <div className="question-tags">
-                {props.tags.map((tag, index) => (
-                    <span key={index} className="label">{tag}</span>
-                ))}
-            </div>
-        )}
-    
+                <div className="mt-3">
+
+                    <div className="flex flex-wrap gap-2 mt-1">
+                        {props.tags.map((tag, index) => (
+                            <span
+                                key={index}
+                                className="bg-blue-100 text-blue-800 text-xs font-semibold px-2 py-1 rounded"
+                            >
+                                {tag}
+                            </span>
+                        ))}
+                    </div>
+                </div>
+            )}
+        
+        <>
         <h3 className="question-input-type">{props.inputType}:</h3>
-        <p className="question-description">{props.explanation}</p>
-    
-        {props.code?.trim() && ( // If code is not empty
-        <SyntaxHighlighter language="javascript" style={docco} showLineNumbers>
-            {props.code}
-        </SyntaxHighlighter>
-        )}
-    
+        <div className="question-description" onMouseUp={(e) => props.onTextSelection(e, 'question')}>
+                        {props.addAnnotations(props.explanation, props.annotations_detail)}
+                    </div>
+                    {props.code?.trim() &&
+                        <pre className="code-block" onMouseUp={(e) => props.onCodeSelection(e, 'question_code')}>
+                            {/* <SyntaxHighlighter language="javascript" style={docco} showLineNumbers> */}
+                            {props.addAnnotations(props.code, props.annotations_code)}
+                            {/* </SyntaxHighlighter> */}
+                        </pre>
+                    }
+        
+      </>
         <div className="question-footer">   
             <h3 className="question-footer-title">Votes: {votes}</h3>
             <div className="footer-item" onClick={handlePostUpvote}>
@@ -161,11 +174,29 @@ function QuestionDetail(props) {
                     <button onClick={handleDeleteQuestion} className="delete-button">Delete</button>
                 </div>
             )}
+            {isPopupVisible && (
+                                    <div className="popup">
+                                        <div className="popup-content" ref={popupRef}>
+                                            <EditQuestion
+                                                question_id={Number(props.question_id)}
+                                                fetchQuestion={props.fetchQuestion}
+                                                closePopup={closePopup}
+                                                title={props.title}
+                                                code_snippet={props.code}
+                                                details={props.explanation}
+                                                language={props.language}
+                                                tags={props.tags.join(", ")}
+                                                showNotification={showNotification}
+                                            />
+                                        </div>
+                                    </div>
+                                )}
             <button className="question-username" onClick={redirectToProfile}>@{props.author}</button>
         </div>
     </div>
     );
 }
+
 
 QuestionDetail.propTypes = {
     code: PropTypes.string,
@@ -176,7 +207,13 @@ QuestionDetail.propTypes = {
     initialVotes: PropTypes.number,
     comment_id: PropTypes.number,
     author: PropTypes.string,
-    answer_of_the_question: PropTypes.bool
+    answer_of_the_question: PropTypes.bool,
+    onTextSelection: PropTypes.func.isRequired,
+    onCodeSelection: PropTypes.func.isRequired,
+    addAnnotations: PropTypes.func.isRequired,
+    annotations_detail: PropTypes.array,
+    annotations_code: PropTypes.array,
+
 };
 
 export default QuestionDetail;
