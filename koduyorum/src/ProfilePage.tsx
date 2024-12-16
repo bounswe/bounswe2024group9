@@ -79,24 +79,24 @@ const ProfilePage = ({ route }) => {
                         data={profile.questions}
                         keyExtractor={(item) => item.id.toString()}
                         renderItem={({ item }) => (
-                        <QuestionCard
-                            post={{
-                                id: item.id,
-                                title: item.title,
-                                description: item.details,
-                                user_id: item.author,
-                                likes: item.upvotes,
-                                programmingLanguage: item.language,
-                                tags: item.tags,
-                                answered: item.answered,
-                                codeSnippet: item.code_snippet,
-                                upvoted_by: item.upvoted_by,
-                                downvoted_by: item.downvoted_by,
-                            }}
-                            currentUser={{ id: user_id, username: profile.username }} // Pass both id and username
-                            onPress={handlePostPress}
-                        />
-
+                            <QuestionCard
+                                post={{
+                                    id: item.id,
+                                    title: item.title,
+                                    description: item.description, // Ensure correct field mapping
+                                    user_id: item.user_id, // Ensure alignment with backend
+                                    likes: item.upvotes,
+                                    programmingLanguage: item.programmingLanguage, // Match naming convention
+                                    tags: item.tags,
+                                    answered: item.answered,
+                                    codeSnippet: item.codeSnippet, // Match naming convention
+                                    upvoted_by: item.is_upvoted ? [username] : [],
+                                    downvoted_by: item.is_downvoted ? [username] : [],
+                                    post_type: item.post_type,
+                                }}
+                                currentUser={{ id: user_id, username }}
+                                onPress={handlePostPress}
+                            />
                         )}
                     />
 

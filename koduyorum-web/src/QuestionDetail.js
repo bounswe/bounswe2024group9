@@ -115,7 +115,7 @@ function QuestionDetail(props) {
     useEffect(() => {
         setAnswered(props.isAnswered);
     }, [props.isAnswered]);
-    
+
     return (
         <div className="question-post-card">
         <div className={`status-indicator ${isAnswered ? 'answered' : 'unanswered'}`}>
@@ -167,16 +167,22 @@ function QuestionDetail(props) {
     );
 }
 
-QuestionDetail.propTypes = {
-    code: PropTypes.string,
-    language: PropTypes.string,
+
+            QuestionDetail.propTypes = {
+            code: PropTypes.string,
+            language: PropTypes.string,
     inputType: PropTypes.string.isRequired,
     explanation: PropTypes.string,
     number: PropTypes.number,
     initialVotes: PropTypes.number,
     comment_id: PropTypes.number,
     author: PropTypes.string,
-    answer_of_the_question: PropTypes.bool
+    answer_of_the_question: PropTypes.bool,
+    onTextSelection: PropTypes.func.isRequired,
+    onCodeSelection: PropTypes.func.isRequired,
+    annotations: PropTypes.array.isRequired,
+    addAnnotations: PropTypes.func.isRequired,
+
 };
 
 export default QuestionDetail;

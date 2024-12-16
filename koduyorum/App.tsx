@@ -11,6 +11,7 @@ import LabelDetailsScreen from './src/LabelDetailScreen.tsx';
 import InterestPage from './src/InterestPage.tsx';
 import ProfilePage from './src/ProfilePage.tsx';
 import TopContributorsPage from './src/TopContributorsPage.tsx';
+import BookmarksPage from './src/BookmarksPage.tsx';
 
 const Stack = createStackNavigator();
 
@@ -66,6 +67,10 @@ const App = () => {
         <Stack.Screen 
           name="TopContributors" 
           component={TopContributorsPage}
+          options={{ headerShown: false, gestureEnabled: false }}
+        />
+        <Stack.Screen name="BookmarksPage" 
+          component={BookmarksPage} 
           options={{ headerShown: false, gestureEnabled: false }}
         />
       </Stack.Navigator>
