@@ -14,7 +14,6 @@ import NotificationCenter from "./NotificationCenter";
 
 function QuestionDetail(props) {
   const [votes, setVotes] = useState(props.upvotes);
-  const [downvotes, setDownvotes] = useState(props.downvotes);
   const isOwner = localStorage.getItem("username") === props.author;
   const isDiscussion = "discussion" === props.postType;
   const [author] = useState(props.author);
@@ -117,7 +116,7 @@ function QuestionDetail(props) {
             if (response.ok) {
 
                 const data = await response.json();
-                setDownvotes(data.success);
+                setVotes(data.success);
             }
         } catch (error) {
             console.error('Error downvoting:', error);
@@ -194,16 +193,13 @@ function QuestionDetail(props) {
         </SyntaxHighlighter>
         )}
     
-        <div className="question-footer">
-            
+        <div className="question-footer">   
+            <h3 className="question-footer-title">Votes: {votes}</h3>
             <div className="footer-item" onClick={handlePostUpvote}>
-                <button className="vote-button bg-green-500"> {votes} {votes === 1 ? "Upvote" : "Upvotes"}</button>
+                <button className="vote-button bg-green-500"> Upvote </button>
             </div>
-           
             <div className="footer-item" onClick={handlePostDownvote}>
-                <button className="vote-button bg-red-500">
-                    {downvotes} {downvotes === 1 ? "Downvote" : "Downvotes"}
-                    </button>
+                <button className="vote-button bg-red-500">  Downvote       </button>
             </div>
            
             {isOwner && (

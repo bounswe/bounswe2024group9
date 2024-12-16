@@ -161,18 +161,18 @@ function Comment({ onClick, ...props }) {
       )}
       <div className="flex items-center justify-between mt-4">
         <div className="flex items-center gap-2">
+          <h3 className="font-semibold text-gray-700"> Votes: {votes} </h3>
           <button
             className="px-4 py-2 bg-green-500 text-white text-sm font-semibold rounded hover:bg-green-600"
             onClick={handleCommentUpvote}
           >
             Upvote
           </button>
-          <span className="text-gray-700 font-semibold">{votes}</span>
           <button
             className="px-4 py-2 bg-red-500 text-white text-sm font-semibold rounded hover:bg-red-600"
             onClick={handleCommentDownvote}
           >
-            Downvote
+           Downvote
           </button>
           {isCommentOwner && (<>
             <button
@@ -202,7 +202,7 @@ function Comment({ onClick, ...props }) {
       </div>
       {props.code && (
         <button
-          className="bg-blue-600 text-white px-4 py-2 mt-4"
+          className="bg-blue-600 text-white px-4 py-2 mt-4 rounded hover:bg-blue-800"
         onClick={() => run_code('comment', props.comment_id)}
         >
           Run Code

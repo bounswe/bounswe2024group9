@@ -126,18 +126,9 @@ export default function CodeExecution() {
         body: JSON.stringify({ source_code: code, language_id: languageId }),  // Send code and language ID as JSON
       });
       const data = await response.json();  // Parse the JSON response
-      
-      if (type === 'question') {
-        setQuestionOutput(data.output); // Update the question output
-      } else if (type === 'comment') {
-        setCommentOutput(data.output);
-      }
+      setQuestionOutput(data.output); // Update the question output
     } catch (error) {
-      if (type === 'question') {
         setQuestionOutput(["Error: Could not execute the code."]);
-      } else if (type === 'comment') {
-        setCommentOutput(["Error: Could not execute the code."]);
-      }
     } finally {
       setLoading(false); // Turn off loading state after the request completes
     }
@@ -213,6 +204,11 @@ export default function CodeExecution() {
     e.preventDefault(); // Prevent page reload on form submit
     setLoading(true); // Set loading state while fetching the output
 
+    if (!code) {
+      setLoading(false);
+      setCommentOutput(["Error: No code to execute."]); // Handle errors
+      return;
+    }
     try {
       const response = await fetch(`${process.env.REACT_APP_API_URL}/code_execute/`, {  // Call your backend API
         method: 'POST',
@@ -363,6 +359,7 @@ export default function CodeExecution() {
                       questionAuthor={questionData.author}
                       postType={questionData.post_type}
                       initialVotes={comment.upvotes}
+                      initialDownvotes={comment.downvoted_by.length}
                       language = {comment.language_id}
                       comment_id={comment.comment_id}
                       answer_of_the_question={comment.answer_of_the_question}
