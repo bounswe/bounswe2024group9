@@ -13,6 +13,7 @@ function Comment({ onClick, ...props }) {
   const [votes, setVotes] = useState(props.initialVotes);
   const isQuestionOwner = localStorage.getItem("username") === props.questionAuthor;
   const isCommentOwner = localStorage.getItem("username") === props.author;
+  const isDiscussion = "discussion" === props.postType;
   const [isAnswer, setAnswer] = useState(props.answer_of_the_question);
   const navigate = useNavigate();
 
@@ -146,12 +147,12 @@ function Comment({ onClick, ...props }) {
   return (
     <div className="p-4 border border-gray-300 rounded"
       onClick={onClick}>
-      {isAnswer && (
+      {(isAnswer && !isDiscussion) && (
         <div className={`question-status-label answered`}>
           Answer
         </div>
       )}
-      <h3 className="font-semibold text-gray-700">Answer {props.number}</h3>
+      <h3 className="font-semibold text-gray-700">Comment {props.number}</h3>
       <p className="text-gray-600">{props.explanation}</p>
       {props.code && (
         <SyntaxHighlighter language="javascript" style={docco}>
@@ -188,7 +189,7 @@ function Comment({ onClick, ...props }) {
             </button>
           </>
           )}
-          {(isQuestionOwner && !isAnswer) && (
+          {(isQuestionOwner && !isAnswer && !isDiscussion) && (
             <button
               className="px-4 py-2 bg-green-500 text-white text-sm font-semibold rounded hover:bg-green-600"
               onClick={toggleAnswer}

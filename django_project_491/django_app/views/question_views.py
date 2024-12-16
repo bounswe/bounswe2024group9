@@ -99,7 +99,8 @@ def get_question_details(request: HttpRequest, question_id: int) -> HttpResponse
             'answered': question.answered,
             'reported_by': [user.username for user in question.reported_by.all()],
             'upvoted_by': [vote.user.username for vote in question.votes.filter(vote_type=VoteType.UPVOTE.value)],
-            'downvoted_by': [vote.user.username for vote in question.votes.filter(vote_type=VoteType.DOWNVOTE.value)]
+            'downvoted_by': [vote.user.username for vote in question.votes.filter(vote_type=VoteType.DOWNVOTE.value)],
+            'post_type': question.type
         }            
 
         return JsonResponse({'question': question_data}, status=200)

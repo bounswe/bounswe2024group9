@@ -16,6 +16,7 @@ function QuestionDetail(props) {
   const [votes, setVotes] = useState(props.upvotes);
   const [downvotes, setDownvotes] = useState(props.downvotes);
   const isOwner = localStorage.getItem("username") === props.author;
+  const isDiscussion = "discussion" === props.postType;
   const [author] = useState(props.author);
   const navigate = useNavigate();
 
@@ -153,8 +154,8 @@ function QuestionDetail(props) {
     
     return (
         <div className="question-post-card">
-        <div className={`status-indicator ${isAnswered ? 'answered' : 'unanswered'}`}>
-            <span className="status-text">{isAnswered ? 'Answered' : 'Unanswered'}</span>
+        <div className={`status-indicator ${isDiscussion ? 'discussion': isAnswered ? 'answered' : 'unanswered'}`}>
+            <span className="status-text">{isDiscussion ? 'Discussion': isAnswered ? 'Answered' : 'Unanswered'}</span>
         </div>        
         <h1 className="question-title">{props.title}</h1>
     
@@ -184,7 +185,7 @@ function QuestionDetail(props) {
             </div>
         )}
     
-        <h3 className="question-input-type">{props.inputType}:</h3>
+        <h3 className="question-input-type">{isDiscussion ? '' : props.inputType+":"}</h3>
         <p className="question-description">{props.explanation}</p>
     
         {props.code?.trim() && ( // If code is not empty

@@ -301,6 +301,7 @@ export default function CodeExecution() {
                 tags={questionData.tags}
                 upvotes={questionData.upvote_count}
                 downvotes={questionData.downvoted_by.length}
+                postType={questionData.post_type}
                 question_id={question_id}
                 isAnswered={isAnswered}
                 title={questionData.title}
@@ -349,7 +350,7 @@ export default function CodeExecution() {
 
           <div className="container mx-auto p-4 max-w-4xl">
             <div className="space-y-6">
-              <h2 className="text-xl font-semibold text-gray-800">Answers</h2>
+              <h2 className="text-xl font-semibold text-gray-800">Comments</h2>
               {commentData.length > 0 ? (
                 commentData.map((comment, index) => (
                   <React.Fragment key={index}>
@@ -360,6 +361,7 @@ export default function CodeExecution() {
                       code={comment.code_snippet}
                       author={comment.user}
                       questionAuthor={questionData.author}
+                      postType={questionData.post_type}
                       initialVotes={comment.upvotes}
                       language = {comment.language_id}
                       comment_id={comment.comment_id}

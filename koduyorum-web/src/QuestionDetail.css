@@ -33,6 +33,9 @@
 .unanswered {
     background-color: #dc3545;
 }
+.discussion{
+    background-color: #007bff;
+}
 
 .question-title {
     font-size: 28px;
