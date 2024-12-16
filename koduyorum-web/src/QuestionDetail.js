@@ -149,27 +149,16 @@ function QuestionDetail(props) {
     
         <div className="question-footer">
             
-            {/* <div className="footer-item" onClick={handlePostUpvote}>
-                <button className="vote-button">Upvote</button>
-                <span className="footer-text">{votes} Upvotes</span>
-            </div> */}
-            <div
-                    className={`footer-item  ${props.isUpvoted ? 'upvoted' : ''}`}
-                    onClick={handlePostUpvote}
-                >
-                    <FontAwesomeIcon icon={faThumbsUp} size="lg"  />
-                    <span className="footer-text">{votes} Upvotes</span>
-                </div>
-            {/* <div className="footer-item" onClick={handlePostDownvote}>
-                <button className="vote-button">Downvote</button>
-            </div> */}
-            <div
-                    className={`footer-item`}
-                    onClick={handlePostDownvote}
-                >
-                    <FontAwesomeIcon icon={faThumbsDown} size="lg" />
-                    <span className="footer-text">{downvotes} Downvotes</span>
-                </div>
+            <div className="footer-item" onClick={handlePostUpvote}>
+                <button className="vote-button bg-green-500"> {votes} {votes === 1 ? "Upvote" : "Upvotes"}</button>
+            </div>
+           
+            <div className="footer-item" onClick={handlePostDownvote}>
+                <button className="vote-button bg-red-500">
+                    {downvotes} {downvotes === 1 ? "Downvote" : "Downvotes"}
+                    </button>
+            </div>
+           
             {isOwner && (
                 <div className="owner-actions">
                     <button onClick={handleEditQuestion} className="edit-button">Edit</button>

@@ -74,12 +74,12 @@
 }
 
 .vote-button {
-    background-color: #f0f0f0;
     border: none;
     padding: 10px 15px;
     border-radius: 5px;
     cursor: pointer;
     transition: background-color 0.2s;
+    color: #fff
 }
 
 .vote-button:hover {
@@ -125,73 +125,71 @@
 }
 
 .run-button {
-    background-color: #007bff; /* Use a consistent blue tone for the primary button */
-    color: #fff; /* White text for contrast */
-    font-size: 16px; /* Match the font size with other buttons */
-    font-weight: bold; /* Make the text consistent with other elements */
-    padding: 10px 20px; /* Adjust padding to align with other buttons */
-    border: none; /* Remove any border */
-    border-radius: 8px; /* Rounded corners for consistency */
-    cursor: pointer; /* Show a pointer cursor on hover */
-    transition: all 0.2s ease-in-out; /* Add a smooth transition */
-    display: inline-flex; /* Align the content */
-    align-items: center; /* Center the content vertically */
-    justify-content: center; /* Center the content horizontally */
-    gap: 8px; /* Add space between any icons and text */
-    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1); /* Add a subtle shadow */
+  background-color: #007bff;
+  color: #fff;
+  font-size: 16px;
+  font-weight: bold;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .run-button:hover {
-    background-color: #0056b3; /* Darker blue on hover */
-    transform: translateY(-2px); /* Slightly lift the button on hover */
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.15); /* Enhance the shadow on hover */
+  background-color: #0056b3;
+  transform: translateY(-2px);
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 .run-button:active {
-    background-color: #004085; /* Even darker blue when clicked */
-    transform: translateY(0); /* Reset the lift effect */
-    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow on click */
+  background-color: #004085;
+  transform: translateY(0);
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
 }
-.comment-button {
-    background-color: #28a745; /* Green background */
-    color: #fff; /* White text */
-    font-size: 16px; /* Match font size with Run Code button */
-    font-weight: bold;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 8px; /* Rounded corners */
-    cursor: pointer;
-    transition: all 0.2s ease-in-out;
-    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow */
-  }
-  
-  .comment-button:hover {
-    background-color: #218838; /* Darker green on hover */
-    transform: translateY(-2px); /* Lift on hover */
-  }
-  
-  .comment-button:active {
-    background-color: #1e7e34; /* Even darker green on click */
-    transform: translateY(0); /* Reset lift effect */
-  }
 
-  /* Container Box */
+.comment-button {
+  background-color: #28a745;
+  color: #fff;
+  font-size: 16px;
+  font-weight: bold;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.comment-button:hover {
+  background-color: #218838;
+  transform: translateY(-2px);
+}
+
+.comment-button:active {
+  background-color: #1e7e34;
+  transform: translateY(0);
+}
+
 .code-execution-box {
-    background-color: #fff; /* White background */
-    border-radius: 12px; /* Rounded corners */
-    padding: 30px; /* Inner padding */
-    margin: 20px 0; /* Spacing around */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow */
-  }
-  
-  /* Title */
-  .code-execution-title {
-    font-size: 22px; /* Font size */
-    font-weight: bold;
-    margin-bottom: 20px; /* Space below the title */
-    color: #333; /* Dark text */
-  }
-  
+  background-color: #fff;
+  border-radius: 12px;
+  padding: 30px;
+  margin: 20px 0;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.code-execution-title {
+  font-size: 22px;
+  font-weight: bold;
+  margin-bottom: 20px;
+  color: #333;
+}
   /* Labels */
   .code-execution-label {
     font-size: 16px;
