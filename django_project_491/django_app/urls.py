@@ -25,7 +25,6 @@ urlpatterns = [
     path('interested_languages/', user_views.add_interested_languages_for_a_user, name='interested_languages'),
     path('preferred_languages/', user_views.get_user_preferred_languages, name='preferred_languages'),
     path('get_top_five_contributors/', user_views.list_most_contributed_five_person, name='get_top_five_contributors'),
-    path('search_users/<str:query>/', user_views.search_users_by_custom_string, name='search_users_by_custom_string'),
     
     path('fetch_feed_at_once/<int:user_id>/', question_views.fetch_all_feed_at_once, name='get_user_profile'),
     path('fetch_search_results_at_once/<str:wiki_id>/<str:language>/<int:page_number>', question_views.fetch_search_results_at_once, name='fetch_search_results_at_once'),

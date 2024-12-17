@@ -114,12 +114,7 @@ def get_user_profile_by_username(request, username : str) -> JsonResponse:
     
     return JsonResponse({'user': user_data}, status=200)
 
-@csrf_exempt
-def search_users_by_custom_string(request, query: str) -> JsonResponse:
-    User = get_user_model()
-    usernames = User.objects.filter(username__istartswith=query)\
-                          .values_list('username', flat=True)[:10]  # Limit to 10 results
-    return JsonResponse({'usernames': list(usernames)})
+
 
 @csrf_exempt
 def get_user_profile_by_id(request, user_id : int) -> JsonResponse:

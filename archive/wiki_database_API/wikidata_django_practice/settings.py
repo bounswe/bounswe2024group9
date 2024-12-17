@@ -49,8 +49,11 @@ ALLOWED_HOSTS = [
 ]
 
 SWAGGER_SETTINGS = {
-    'SECURITY_DEFINITIONS': None,  
-    'USE_SESSION_AUTH': False,     
+    'SECURITY_DEFINITIONS': {
+        'Basic': {
+            'type': 'basic'
+        }
+    },
 }
 
 
