@@ -19,7 +19,6 @@ body {
     justify-content: space-between;
     align-items: center;
     height: auto;
-    overflow: hidden; 
     max-height: 80px;
   }
   
