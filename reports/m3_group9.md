@@ -1702,9 +1702,9 @@ npx react-native doctor
 
 **2.Install missing packages listed above including Android Studio and adb.**
 
-**3.Start Android Emulator from Android Studio. **
+**3.Start Android Emulator from Android Studio.**
 
-**4. Build the code and install on Android Emulator. **
+**4. Build the code and install on Android Emulator.**
 In the koduyorum folder project directory, run the following command:
 ```
 npm run android
