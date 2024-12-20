@@ -1510,13 +1510,75 @@ Even though there isn’t a specific issue related to these, I was responsible f
 ### Pull Requests:
 
 - [PR #359](https://github.com/bounswe/bounswe2024group9/pull/359)
+    
+### Unit Tests:
+    
+```mehme@DESKTOP-JONRJOU MINGW64 ~/Desktop/Workspace/cmpe451group9/bounswe2024group9/django_project_491 (unittests-integritytests)
+$ python manage.py test                                                                                                 
+Connection successful!
+Tables in the database:
+('auth_group',)
+('auth_group_permissions',)
+('auth_permission',)
+('django_admin_log',)
+('django_app_comment',)
+('django_app_comment_vote',)
+('django_app_question',)
+('django_app_question_reported_by',)
+('django_app_question_vote',)
+('django_app_user',)
+('django_app_user_bookmarks',)
+('django_content_type',)
+('django_migrations',)
+('django_session',)
+('token_blacklist_blacklistedtoken',)
+('token_blacklist_outstandingtoken',)
+Found 52 test(s).
+Creating test database for alias 'default'...
+Creating test database for alias 'annotations'...
+System check identified some issues:
+('token_blacklist_outstandingtoken',)
+Found 52 test(s).
+Creating test database for alias 'default'...
+Creating test database for alias 'annotations'...
+System check identified some issues:
+Found 52 test(s).
+Creating test database for alias 'default'...
+Creating test database for alias 'annotations'...
+System check identified some issues:
+Creating test database for alias 'default'...
+Creating test database for alias 'annotations'...
+System check identified some issues:
+Creating test database for alias 'annotations'...
+System check identified some issues:
+System check identified some issues:
+    
+System check identified 2 issues (0 silenced).
+Request successful.
+Submission created successfully. Token: 578d7733-fdde-4790-bc6f-e82ccec8b903
+{'stdout': 'Hello, World!\n', 'time': '0.009', 'memory': 3328, 'stderr': None, 'token': '578d7733-fdde-4790-bc6f-e82ccec8b903', 'compile_output': None, 'message': None, 'status': {'id': 4, 'description': 'Wrong Answer'}}
+....Request successful.
+.....Request successful.
+Submission created successfully. Token: 87a51891-163f-469d-902e-8f3662f90bbf
+............[{'id': 22, 'title': 'Test Question', 'description': 'This is a test question.', 'user_id': 26, 'upvotes': 0, 'comments_count': 1, 'programmingLanguage': 'Python', 'codeSnippet': 'print("Test")', 'tags': ['tag1', 'tag2'], 'answered': False}]
+...........................<JsonResponse status_code=200, "application/json">
+....
+----------------------------------------------------------------------
+Ran 52 tests in 305.535s
+
+OK
+Destroying test database for alias 'default'...
+Destroying test database for alias 'annotations'...
+(venv)
+```
+
 
 ### Additional Information:
 
 - I have spent most of my time with fixing the errors in frontend and debugging the functionality of newly added methods and fixing conflicts appeared due to other branches' merge to main.
 
 </details>
-        
+
 
 # Project Artifacts
 
