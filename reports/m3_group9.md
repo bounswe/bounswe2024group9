@@ -83,6 +83,8 @@ Note: More detailed information about the status of the project can be found in 
 |Mutti | Deployment and Database Changes | Completed | |
 |Mutti | Swagger Documenting | Completed | Due to django's API protection rules, remote cannot be opened, but you can access all of them by running them locally and going to the /swagger endpoint.|
 |Mutti | Filtering for Frontend and Backend | Completed ||
+| Fatih | Question Detail Page | Completed |Create layouts and connect endpoints for editing and deleting Questions, Comment creation, editing, marking answers etc. |
+| Fatih | Discussion Page | Completed | Integrating correct label structure and necessary endpoints. |
 | Ceylin | Login page in web | Completed | |
 | Ceylin | Signup page in web | Completed | |
 | Ceylin | Feed page in web | Completed | Created general structure of the feed page, implemented question of the day, navigation bar, top contributors and popular tags etc. |
