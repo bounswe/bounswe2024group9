@@ -1065,11 +1065,39 @@ GET /fetch_feed_at_once/1/
  
 - To enhance the user experience, a few PR's were dedicated to speed up the page loading processes such as [#292](https://github.com/bounswe/bounswe2024group9/issues/292)
 
+- Mobile UI:
+![WhatsApp Image 2024-12-20 at 17 45 43](https://github.com/user-attachments/assets/8256e824-3deb-4b41-b336-beb019725ab6)
+![WhatsApp Image 2024-12-20 at 17 47 53](https://github.com/user-attachments/assets/876b02f6-2c27-4e77-9c84-aa9f46ea3640)
+![WhatsApp Image 2024-12-20 at 17 45 42 (2)](https://github.com/user-attachments/assets/f7be7e1d-53df-49ed-8dbf-cf0f02a0e498)
+![WhatsApp Image 2024-12-20 at 17 45 42 (1)](https://github.com/user-attachments/assets/866edb13-9350-4979-9946-68d2df87d8a7)
+![WhatsApp Image 2024-12-20 at 17 45 42](https://github.com/user-attachments/assets/54f22ac4-a155-424f-865d-cd5b20bc8053)
+![WhatsApp Image 2024-12-20 at 17 45 41 (1)](https://github.com/user-attachments/assets/7fc85f4d-9b3e-4473-b31e-14829a928ca6)
+![WhatsApp Image 2024-12-20 at 17 45 41](https://github.com/user-attachments/assets/a7d55195-033e-4999-93a9-3932adcea03d)
+
+- Web UI:
+![image](https://github.com/user-attachments/assets/b8a0f9bb-d6ac-440d-b723-f68d304f0154)
+![image](https://github.com/user-attachments/assets/46c6d1fe-55c5-4301-a7e5-be06c2ad2088)
+![image](https://github.com/user-attachments/assets/1b4da88c-b2bd-4f97-aa48-a34b3d969236)
+![image](https://github.com/user-attachments/assets/884ae0ba-5eca-4b32-81c4-0a0c04436333)
+![image](https://github.com/user-attachments/assets/0bcf5aa9-2ad9-42cb-a10a-2ca110409379)
+![image](https://github.com/user-attachments/assets/1a62717a-2500-43ae-a045-dd4468b5cf8d)
+
 ## Standards
 Our team successfully implemented W3C standards by integrating annotations into both our web and mobile applications. We created an Annotation model in the database, both web and mobile apps use this class to create, edit and delete annotations on selected content. This ensures a standardized approach to storing and sharing annotation data, aligning with W3C’s specifications.  
 Users can highlight any text on Search Results page and Question Details page, including language information, question text, answers and code snippets. Users can also view other people’s annotations without the ability to edit or delete them. 
-By adhering to W3C standards, we have ensured interoperability, consistency, and scalability for our annotation features across platforms, enhancing collaboration and information accessibility for our users.
+By adhering to W3C standards, we have ensured interoperability, consistency, and scalability for our annotation features across platforms, enhancing collaboration and information
+ accessibility for our users.
 ## Scenarios
+    
+Ahmet is a freshman computer engineering student. He is truly a computer science enthusiast, so he would be excited to learn more about his field of interest and share experiences.
+
+Firstly, he signs up to Koduyorum through the web page. He enters a unique username ahmet123, his email ahmet123@gmail.com, and his password Ahmet1234. After clicking on sign up, he is redirected to a survey asking his topics of interest and known languages. He chooses C++ and Java. Then, he is redirected to the login page where he enters his username and password. 
+
+Once he successfully logs in, he is redirected to the feed page. He sees many different questions and discussions which catch his interest, especially the question of the day at the top of the feed talking about CUDA. However, he doesn't know what CUDA is so he searches for it in the bar at the top of the page. 
+
+Once he is redirected to the Wikidata Search Results page, he reads about CUDA's details and annotations other computer science enthusiasts have left. He decides to open a discussion on the benefits of learning CUDA. At the feed page, he clicks on the plus sign opening a prompt. He writes "Python simulation Vc CUDA?" in the title and "I am a beginner in this field and have just come across CUDA, I see that it is a parallel processing platform but do not understand what benefits it has compared to some libraries in python simulating the same behavior. Why would I use it and why should I learn it?". He also leaves a code snippet of python simulating parallel programming, and leaves an annotation at the imported library. 
+
+Finally, he searches for other CUDA questions and bookmarks them so he could access them easily through his profile. He also learns that all of these functions are available on a mobile app as well so he can use it on the go! Ahmet is a very happy first-time user and eagerly awaits answers and comments related to CUDA.
 
 # Individual Documentation
 
@@ -1510,75 +1538,13 @@ Even though there isn’t a specific issue related to these, I was responsible f
 ### Pull Requests:
 
 - [PR #359](https://github.com/bounswe/bounswe2024group9/pull/359)
-    
-### Unit Tests:
-    
-```mehme@DESKTOP-JONRJOU MINGW64 ~/Desktop/Workspace/cmpe451group9/bounswe2024group9/django_project_491 (unittests-integritytests)
-$ python manage.py test                                                                                                 
-Connection successful!
-Tables in the database:
-('auth_group',)
-('auth_group_permissions',)
-('auth_permission',)
-('django_admin_log',)
-('django_app_comment',)
-('django_app_comment_vote',)
-('django_app_question',)
-('django_app_question_reported_by',)
-('django_app_question_vote',)
-('django_app_user',)
-('django_app_user_bookmarks',)
-('django_content_type',)
-('django_migrations',)
-('django_session',)
-('token_blacklist_blacklistedtoken',)
-('token_blacklist_outstandingtoken',)
-Found 52 test(s).
-Creating test database for alias 'default'...
-Creating test database for alias 'annotations'...
-System check identified some issues:
-('token_blacklist_outstandingtoken',)
-Found 52 test(s).
-Creating test database for alias 'default'...
-Creating test database for alias 'annotations'...
-System check identified some issues:
-Found 52 test(s).
-Creating test database for alias 'default'...
-Creating test database for alias 'annotations'...
-System check identified some issues:
-Creating test database for alias 'default'...
-Creating test database for alias 'annotations'...
-System check identified some issues:
-Creating test database for alias 'annotations'...
-System check identified some issues:
-System check identified some issues:
-    
-System check identified 2 issues (0 silenced).
-Request successful.
-Submission created successfully. Token: 578d7733-fdde-4790-bc6f-e82ccec8b903
-{'stdout': 'Hello, World!\n', 'time': '0.009', 'memory': 3328, 'stderr': None, 'token': '578d7733-fdde-4790-bc6f-e82ccec8b903', 'compile_output': None, 'message': None, 'status': {'id': 4, 'description': 'Wrong Answer'}}
-....Request successful.
-.....Request successful.
-Submission created successfully. Token: 87a51891-163f-469d-902e-8f3662f90bbf
-............[{'id': 22, 'title': 'Test Question', 'description': 'This is a test question.', 'user_id': 26, 'upvotes': 0, 'comments_count': 1, 'programmingLanguage': 'Python', 'codeSnippet': 'print("Test")', 'tags': ['tag1', 'tag2'], 'answered': False}]
-...........................<JsonResponse status_code=200, "application/json">
-....
-----------------------------------------------------------------------
-Ran 52 tests in 305.535s
-
-OK
-Destroying test database for alias 'default'...
-Destroying test database for alias 'annotations'...
-(venv)
-```
-
 
 ### Additional Information:
 
 - I have spent most of my time with fixing the errors in frontend and debugging the functionality of newly added methods and fixing conflicts appeared due to other branches' merge to main.
 
 </details>
-
+        
 
 # Project Artifacts
 
@@ -1705,10 +1671,14 @@ Destroying test database for alias 'annotations'...
 -- Django (version 5.1.2)
 
 #### Mobile Application
-    !!! TO BE COMPLETED !!!
-    
+ - 8GB RAM
+ - 32 GB Storage 
+ - Android 12 or above
 
-### 2. How to Run the Web Application and Backend on Local (with Docker)
+ - Android – we recommend a minimum of 4 GB of RAM an­­d a screen size greater than 5 inches.  
+ - Stable internet connection    
+
+### 2. How to Run the Web Application on Local (with Docker)
 
 **1. Clone the Repository**: 
 ```bash
@@ -1743,7 +1713,7 @@ EMAIL_HOST_PASSWORD=XXXXXXXXXX
 GEMINI_AI_KEY_POOL=XXXXXXXXXX
 ```
 
-**3. Run the Docker Image:** In the outermost scope of the project directory, run the following command:**
+**3. Run the Docker Image:** In the outermost scope of the project directory, run the following command:
 ```bash
 docker compose up
 ```
@@ -1752,7 +1722,10 @@ docker compose up
 - Backend: http://localhost:8000
 - Web Application: http://localhost:3000
 
-
+    
+### 3. How to Run the Backend Server on Local (with Docker)
+    // after navigating to /django_project_491
+    python manage.py runserver
     
 ### 3. How to Run the Mobile Application
 **1. Check prerequisites.**
